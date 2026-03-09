@@ -37,6 +37,43 @@ def _get_teacher():
     return db.session.get(User, session.get("user_id"))
 
 
+
+def _build_progress_html(teacher_id):
+    """Build the progress data-table HTML for AJAX responses."""
+    from ..services.attendance import get_student_progress
+    from ..services.i18n import fmt_date, to_wib
+    progress = get_student_progress(teacher_id)
+    if not progress:
+        return ""
+    rows = ""
+    for sp in progress:
+        pct = min(int(sp["count"] / 8 * 100), 100)
+        dates_html = "".join(
+            f'<span class="date-badge-sm">{fmt_date(to_wib(d))}</span>'
+            for d in sp["dates"][:3]
+        )
+        if len(sp["dates"]) > 3:
+            dates_html += f'<span class="date-badge-sm muted">+{len(sp["dates"])-3} more</span>'
+        rows += (
+            f'<div class="dt-row prog-row" id="prog-{sp["student_id"]}" '
+            f'style="grid-template-columns:1fr 80px 120px 44px;cursor:pointer" '
+            f'data-id="{sp["student_id"]}" data-name="{sp["name"]}">' 
+            f'<div><div class="dt-name">{sp["name"]}</div>'
+            f'<div class="dt-meta progress-dates-inline">{dates_html}</div></div>'
+            f'<div style="font-weight:700;font-size:.92rem;color:var(--text)">{sp["count"]}/8</div>'
+            f'<div style="padding-right:8px"><div class="progress-bar" style="margin:0">'
+            f'<div class="progress-fill" style="width:{pct}%"></div></div></div>'
+            f'<button class="btn bg bsm view-attn-btn" data-id="{sp["student_id"]}" data-name="{sp["name"]}">📋</button>'
+            f'</div>'
+        )
+    return (
+        '<div class="data-table">'
+        '<div class="dt-head" style="grid-template-columns:1fr 80px 120px 44px">'
+        '<span>Student</span><span>Unbilled</span><span>Progress</span><span></span>'
+        '</div>' + rows + '</div>'
+    )
+
+
 @teacher_bp.route("/teacher/dashboard")
 @teacher_required
 def dashboard():
@@ -147,7 +184,7 @@ def manual_add_attendance():
 
     if _is_ajax():
         from ..services.attendance import get_student_progress
-        from ..services.i18n import fmt_date as _fmt_date, fmt_date
+        from ..services.i18n import fmt_date, to_wib
         from flask import current_app
         from .. import db as _db
 
@@ -157,7 +194,7 @@ def manual_add_attendance():
             f'<div class="attn-row" id="attn-{record.id}">'
             f'<div>'
             f'<div class="attn-name">{student.name()}</div>'
-            f'<div class="attn-date">{fmt_date(record.date)}</div>'
+            f'<div class="attn-date">{fmt_date(to_wib(record.date))}</div>'
             f'{note_html}'
             f'</div>'
             f'<form class="del-attn-form" method="POST" '
@@ -168,29 +205,17 @@ def manual_add_attendance():
             f'</div>'
         )
 
-        # Build updated progress HTML — match .progress-card CSS class
-        progress = get_student_progress(teacher.id)
-        progress_html = ""
-        for sp in progress:
-            pct = min(int(sp["count"] / 8 * 100), 100)
-            dates_html = "".join(
-                f'<span class="date-badge">{fmt_date(d)}</span>' for d in sp["dates"]
-            )
-            progress_html += (
-                f'<div class="progress-card" id="prog-{sp["student_id"]}">'
-                f'<div class="progress-head">'
-                f'<span class="progress-name">{sp["name"]}</span>'
-                f'<span class="progress-count">{sp["count"]} / 8</span>'
-                f'</div>'
-                f'<div class="progress-bar"><div class="progress-fill" style="width:{pct}%"></div></div>'
-                f'<div class="progress-dates">{dates_html}</div>'
-                f'</div>'
-            )
+        # Build updated progress HTML
+        progress_html = _build_progress_html(teacher.id)
 
         # Count remaining unbilled records
         unbilled_count = Attendance.query.filter_by(
             teacher_id=teacher.id, billed=False
         ).count()
+
+        # Updated counts for this student's row in the Students table
+        s_total    = Attendance.query.filter_by(student_id=student_id, teacher_id=teacher.id).count()
+        s_unbilled = Attendance.query.filter_by(student_id=student_id, teacher_id=teacher.id, billed=False).count()
 
         return jsonify(
             ok=True,
@@ -198,6 +223,9 @@ def manual_add_attendance():
             record_html=record_html,
             progress_html=progress_html,
             unbilled_count=unbilled_count,
+            student_id=student_id,
+            s_total=s_total,
+            s_unbilled=s_unbilled,
         )
 
     flash(tr("ok_attn"), "ok")
@@ -208,39 +236,28 @@ def manual_add_attendance():
 @teacher_required
 def remove_attendance(att_id):
     teacher = _get_teacher()
+    # Grab student_id before deleting
+    record = Attendance.query.get(att_id)
+    student_id_del = record.student_id if record else None
+
     if delete_attendance(att_id, teacher.id):
         if _is_ajax():
-            from ..services.attendance import get_student_progress
-            from ..services.i18n import fmt_date
-
-            # Rebuild progress HTML after deletion
-            progress = get_student_progress(teacher.id)
-            progress_html = ""
-            for sp in progress:
-                pct = min(int(sp["count"] / 8 * 100), 100)
-                dates_html = "".join(
-                    f'<span class="date-badge">{fmt_date(d)}</span>' for d in sp["dates"]
-                )
-                progress_html += (
-                    f'<div class="progress-card" id="prog-{sp["student_id"]}">'
-                    f'<div class="progress-head">'
-                    f'<span class="progress-name">{sp["name"]}</span>'
-                    f'<span class="progress-count">{sp["count"]} / 8</span>'
-                    f'</div>'
-                    f'<div class="progress-bar"><div class="progress-fill" style="width:{pct}%"></div></div>'
-                    f'<div class="progress-dates">{dates_html}</div>'
-                    f'</div>'
-                )
-
+            progress_html = _build_progress_html(teacher.id)
             unbilled_count = Attendance.query.filter_by(
                 teacher_id=teacher.id, billed=False
             ).count()
-
+            s_total = s_unbilled = 0
+            if student_id_del:
+                s_total    = Attendance.query.filter_by(student_id=student_id_del, teacher_id=teacher.id).count()
+                s_unbilled = Attendance.query.filter_by(student_id=student_id_del, teacher_id=teacher.id, billed=False).count()
             return jsonify(
                 ok=True,
                 msg=tr("ok_deleted"),
                 progress_html=progress_html,
                 unbilled_count=unbilled_count,
+                student_id=student_id_del,
+                s_total=s_total,
+                s_unbilled=s_unbilled,
             )
         flash(tr("ok_deleted"), "ok")
     else:
@@ -319,3 +336,57 @@ def reset_student_password(student_id):
     if _is_ajax(): return jsonify(ok=True, msg="Password reset successfully")
     flash("Password reset successfully.", "ok")
     return redirect(url_for("teacher.dashboard"))
+
+
+@teacher_bp.route("/teacher/student_records/<int:student_id>", methods=["GET"])
+@teacher_required
+def student_records(student_id):
+    """Return all attendance records for a specific student (AJAX)."""
+    from ..services.i18n import fmt_date, to_wib
+
+    teacher = _get_teacher()
+    student = db.session.get(User, student_id)
+    if not student:
+        return jsonify(ok=False, msg="Student not found")
+
+    records = (
+        Attendance.query
+        .filter_by(student_id=student_id, teacher_id=teacher.id)
+        .order_by(Attendance.date.desc())
+        .all()
+    )
+
+    total = len(records)
+    unbilled = sum(1 for r in records if not r.billed)
+
+    rows_html = ""
+    for a in records:
+        local = to_wib(a.date)
+        note_html = f'<div class="attn-note">{a.note}</div>' if a.note else ""
+        del_btn = (
+            f'<form class="del-attn-form" method="POST" '
+            f'action="/teacher/delete_attendance/{a.id}" '
+            f'data-id="{a.id}" style="margin:0;flex-shrink:0">'
+            f'<button class="btn bdel bsm" type="submit">{tr("delete_btn")}</button>'
+            f'</form>'
+        ) if not a.billed else '<span style="font-size:.75rem;color:var(--text3)">billed</span>'
+
+        rows_html += (
+            f'<div class="attn-row" id="attn-{a.id}">'
+            f'<div>'
+            f'<div class="attn-date">{fmt_date(local)}</div>'
+            f'{note_html}'
+            f'</div>'
+            f'{del_btn}'
+            f'</div>'
+        )
+
+    if not rows_html:
+        rows_html = '<div class="empty-inline">No attendance records yet.</div>'
+
+    return jsonify(
+        ok=True,
+        html=rows_html,
+        total=total,
+        unbilled=unbilled,
+    )

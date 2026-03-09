@@ -170,16 +170,15 @@ def mark_attendance():
         rem_txt = f'还需 {rem} 节课后生成收据' if lang == 'zh' \
                   else f"{rem} more {'class' if rem==1 else 'classes'} until next receipt"
 
-        # Apply user's local timezone offset — read from the form value directly
-        # (session.get would return the OLD value since session isn't flushed yet)
-        tz_off = timedelta(minutes=tz_offset)
+        # Apply WIB (UTC+7) for all time display
+        from ..services.i18n import to_wib as _to_wib
 
-        # Build cycle-grid HTML with LOCAL time applied
+        # Build cycle-grid HTML with WIB time applied
         cells = ""
         for i in range(8):
             if i < len(unbilled):
                 a    = unbilled[i]
-                ldt  = a.date + tz_off   # convert UTC → local
+                ldt  = _to_wib(a.date)
                 cells += (
                     f'<div class="cycle-cell done">'
                     f'<div class="cell-num">#{i+1}</div>'

@@ -116,17 +116,15 @@ def _configure_logging(flask_app):
 
 
 def _register_template_globals(flask_app):
-    from .services.i18n import tr, fmt_date, fmt_idr, get_lang, parse_raw_dates, random_quote
+    from .services.i18n import tr, fmt_date, fmt_idr, get_lang, parse_raw_dates, random_quote, to_wib
     from datetime import timedelta as _td
 
     def now_dt():
         return datetime.utcnow()
 
     def local_dt(utc_dt):
-        """Shift a UTC datetime to local time using tz_offset stored in session."""
-        from flask import session as _sess
-        offset = _sess.get("tz_offset", 0)
-        return utc_dt + _td(minutes=offset)
+        """Convert UTC to WIB (UTC+7) for display in templates."""
+        return to_wib(utc_dt)
 
     flask_app.jinja_env.globals.update(
         tr=tr,
@@ -136,5 +134,6 @@ def _register_template_globals(flask_app):
         parse_raw_dates=parse_raw_dates,
         now_dt=now_dt,
         local_dt=local_dt,
+        to_wib=to_wib,
         random_quote=random_quote,
     )

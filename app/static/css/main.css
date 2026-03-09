@@ -629,6 +629,53 @@ select {
   border-radius: 100px;
   font-weight: 500;
 }
+.progress-dates-inline { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.date-badge-sm {
+  font-size: .65rem;
+  background: var(--gold-soft);
+  color: var(--gold);
+  border: 1px solid rgba(176,125,46,.15);
+  padding: 1px 6px;
+  border-radius: 100px;
+  font-weight: 500;
+}
+.date-badge-sm.muted {
+  background: var(--surface2);
+  color: var(--text3);
+  border-color: var(--border);
+}
+.prog-row:hover { background: var(--surface2); }
+
+/* ── Attendance Drawer ── */
+.attn-drawer {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-top: 0;
+  box-shadow: var(--shadow-md);
+}
+.attn-drawer.hidden { display: none; }
+.attn-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.attn-drawer-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  display: block;
+}
+.attn-drawer-sub {
+  font-size: .78rem;
+  color: var(--text3);
+  display: block;
+  margin-top: 2px;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    STUDENTS TABLE
