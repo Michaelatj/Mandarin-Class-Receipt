@@ -23,8 +23,26 @@ def create_app(config_name=None):
     cfg = config_map.get(config_name, config_map["default"])
     flask_app.config.from_object(cfg)
 
-    # Skip on Vercel/production — filesystem is read-only there
-    if not os.environ.get("DATABASE_URL"):
+    # ── Set database URI at runtime (AFTER env vars are available) ──
+    db_url = os.environ.get("DATABASE_URL", "")
+    if db_url:
+        # Neon/Heroku use 'postgres://' but SQLAlchemy needs 'postgresql://'
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql://", 1)
+        flask_app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+        flask_app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+            "pool_pre_ping": True,
+            "pool_recycle": 300,
+        }
+    else:
+        # Local dev: use SQLite
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+        flask_app.config["SQLALCHEMY_DATABASE_URI"] = (
+            "sqlite:///" + os.path.join(base_dir, "instance", "attendance.db")
+        )
+        flask_app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+            "connect_args": {"check_same_thread": False}
+        }
         try:
             os.makedirs(flask_app.instance_path, exist_ok=True)
         except OSError:
