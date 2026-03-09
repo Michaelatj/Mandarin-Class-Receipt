@@ -133,12 +133,12 @@ def mark_attendance():
     tz_offset = request.form.get("tz_offset", type=int, default=0)
     session["tz_offset"] = tz_offset
 
-    # 90-minute cooldown — only check records the student submitted themselves.
-    # Teacher-manually-added records may use arbitrary dates (e.g. local time),
-    # so we filter by source='student' to avoid wrong elapsed calculations.
+    # 90-minute cooldown — block if student already submitted or joined a class recently.
+    # Only check source='student' or source='join' records (not teacher manual adds).
     COOLDOWN_SECONDS = 90 * 60
     last_att = (Attendance.query
-                .filter_by(student_id=user.id, source='student')
+                .filter(Attendance.student_id==user.id,
+                        Attendance.source.in_(['student','join']))
                 .order_by(Attendance.date.desc())
                 .first())
     if last_att:

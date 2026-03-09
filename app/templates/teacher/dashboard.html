@@ -154,9 +154,8 @@
                    data-id="{{ sp.student_id }}" data-name="{{ sp.name }}">
                 <div>
                   <div class="dt-name">{{ sp.name }}</div>
-                  <div class="dt-meta progress-dates-inline">
-                    {% for dt in sp.dates[:3] %}<span class="date-badge-sm">{{ fmt_date(to_wib(dt)) }}</span>{% endfor %}
-                    {% if sp.dates|length > 3 %}<span class="date-badge-sm muted">+{{ sp.dates|length - 3 }} more</span>{% endif %}
+                  <div class="dt-meta">
+                    {% if sp.dates %}Last: {{ fmt_date(to_wib(sp.dates[-1])) }}{% endif %}
                   </div>
                 </div>
                 <div style="font-weight:700;font-size:.92rem;color:var(--text)">{{ sp.count }}/8</div>
@@ -351,6 +350,10 @@
       <div class="bnav-icon">⚙️</div>
       <span>Settings</span>
     </button>
+    <a class="bnav-btn" href="{{ url_for('auth.logout') }}" style="text-decoration:none;color:inherit">
+      <div class="bnav-icon" style="color:var(--red)">🚪</div>
+      <span style="color:var(--red)">Logout</span>
+    </a>
   </nav>
 
 </div>{# /app-shell #}
@@ -386,7 +389,33 @@
       <input type="url" name="meet_link" id="editLink" placeholder="https://meet.google.com/…">
       <label>Description</label>
       <input type="text" name="description" id="editDesc">
+      <label>Invite Students <span class="lbl-opt">(leave empty = all students)</span></label>
+      {% if all_students %}
+      <div class="invite-list" id="editInviteList">
+        {% for s in all_students %}
+        <label class="invite-item">
+          <input type="checkbox" class="edit-invite-cb" name="invited_students" value="{{ s.id }}">
+          <span class="invite-name">{{ s.name() }}</span>
+          <span class="invite-user">@{{ s.username }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      {% endif %}
       <button class="btn bg" type="submit">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+{# ── Edit Attendance Time Modal ── #}
+<div class="modal-overlay hidden" id="editAttnModal">
+  <div class="modal-box">
+    <button class="modal-close" id="editAttnClose">✕</button>
+    <h3>✏️ Edit Attendance Time</h3>
+    <p style="font-size:.85rem;color:var(--text3);margin:4px 0 16px" id="editAttnSub"></p>
+    <form id="editAttnForm" method="POST" action="">
+      <label>Date &amp; Time (WIB)</label>
+      <input type="datetime-local" name="new_date" id="editAttnDate" required>
+      <button class="btn bg" type="submit" id="editAttnSubmit">Save</button>
     </form>
   </div>
 </div>
@@ -560,11 +589,17 @@ function attachScBtns() {
   });
   document.querySelectorAll('.edit-sc-btn').forEach(btn => {
     if (btn._ok) return; btn._ok = true;
-    btn.addEventListener('click', function(){
+    btn.addEventListener('click', async function(){
       ['editTitle','editAt','editLink','editDesc'].forEach((id,i) => {
         document.getElementById(id).value = [this.dataset.title,this.dataset.at,this.dataset.link,this.dataset.desc][i] || '';
       });
       document.getElementById('editScheduleForm').action = '/teacher/schedule/edit/'+this.dataset.id;
+      // Load current invites and pre-check
+      const sid = this.dataset.id;
+      const r = await fetch('/teacher/schedule/invites/'+sid, {headers:{'X-Requested-With':'XMLHttpRequest'}}).then(r=>r.json()).catch(()=>null);
+      document.querySelectorAll('.edit-invite-cb').forEach(cb => {
+        cb.checked = r && r.invited_ids && r.invited_ids.includes(parseInt(cb.value));
+      });
       document.getElementById('editModal').classList.remove('hidden');
     });
   });
@@ -760,6 +795,46 @@ attnDrawerClose.addEventListener('click', () => {
   if (attnPageCols) attnPageCols.style.display = '';
 });
 
+/* ── Edit Attendance Time ── */
+(function(){
+  const modal    = document.getElementById('editAttnModal');
+  const closeBtn = document.getElementById('editAttnClose');
+  const form     = document.getElementById('editAttnForm');
+  const dateInp  = document.getElementById('editAttnDate');
+  const sub      = document.getElementById('editAttnSub');
+  const submitBtn= document.getElementById('editAttnSubmit');
+
+  closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+  modal.addEventListener('click', e => { if (e.target===modal) modal.classList.add('hidden'); });
+
+  window.openEditAttn = function(id, dateWib, label) {
+    form.action = '/teacher/edit_attendance/'+id;
+    // dateWib is "YYYY-MM-DDTHH:MM" already in WIB
+    dateInp.value = dateWib;
+    sub.textContent = label || '';
+    modal.classList.remove('hidden');
+  };
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
+    const r = await apiFetch(form.action, new FormData(form));
+    submitBtn.disabled = false; submitBtn.textContent = 'Save';
+    if (r) {
+      modal.classList.add('hidden');
+      showToast('✓ Attendance updated');
+      // Update date display in drawer row
+      const row = document.getElementById('attn-'+r.att_id);
+      if (row) row.querySelector('.attn-date').textContent = r.new_date_fmt;
+      // Refresh progress table
+      if (r.progress_html) {
+        const pl = document.getElementById('progressList');
+        if (pl) { pl.innerHTML = r.progress_html; pl.querySelectorAll('.view-attn-btn').forEach(attachViewAttn); }
+      }
+    }
+  });
+})();
+
 /* ════════════════════════════════════════════════════
    STUDENTS — DELETE
    ════════════════════════════════════════════════════ */
@@ -905,10 +980,15 @@ async function apiFetch(url, body, ct) {
   if (ct) headers['Content-Type'] = ct;
   try {
     const res  = await fetch(url, { method:'POST', body: body||null, headers });
+    if (!res.ok) {
+      let msg = 'Server error ('+res.status+')';
+      try { const d = await res.json(); msg = d.msg||msg; } catch{}
+      showToast(msg,'err'); return null;
+    }
     const data = await res.json();
     if (data.ok) return data;
     showToast(data.msg||'Error','err'); return null;
-  } catch { showToast('Network error','err'); return null; }
+  } catch(err) { showToast('Network error — please try again','err'); return null; }
 }
 
 function confirm2(title, msg, okLabel, type) {

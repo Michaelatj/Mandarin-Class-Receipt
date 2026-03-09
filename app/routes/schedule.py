@@ -136,6 +136,14 @@ def edit(sid):
     except ValueError:
         pass
 
+    # Update invited students
+    ScheduleInvite.query.filter_by(schedule_id=sid).delete()
+    for sid_str in request.form.getlist("invited_students"):
+        try:
+            db.session.add(ScheduleInvite(schedule_id=sid, student_id=int(sid_str)))
+        except (ValueError, TypeError):
+            pass
+
     db.session.commit()
     if _is_ajax(): return jsonify(ok=True, msg=tr("ok_saved"))
     flash(tr("ok_saved"), "ok")
@@ -201,11 +209,12 @@ def join(sid):
                            msg="You already joined this class")
         return redirect(s.meet_link or url_for("student.dashboard"))
 
-    # Auto-mark attendance
+    # Auto-mark attendance — store UTC now, display as WIB later
     att = add_attendance(student_id=student.id,
                          teacher_id=s.teacher_id,
-                         date=s.scheduled_at,
-                         note=f"Joined: {s.title}")
+                         date=datetime.utcnow(),
+                         note=f"Joined: {s.title}",
+                         source='join')
 
     sj = ScheduleJoin(schedule_id=sid, student_id=student.id,
                       attendance_id=att.id if att else None)
@@ -276,3 +285,15 @@ def _render_schedule_card_teacher(s, teacher, invited_names=None):
         '</div>'
         '</div>'
     )
+
+
+@schedule_bp.route("/teacher/schedule/invites/<int:sid>", methods=["GET"])
+@teacher_required
+def get_invites(sid):
+    """Return current invited student IDs for a schedule (for edit modal)."""
+    teacher = _user()
+    s = Schedule.query.filter_by(id=sid, teacher_id=teacher.id).first()
+    if not s:
+        return jsonify(ok=False, msg="Not found")
+    invites = ScheduleInvite.query.filter_by(schedule_id=sid).all()
+    return jsonify(ok=True, invited_ids=[inv.student_id for inv in invites])

@@ -48,18 +48,14 @@ def _build_progress_html(teacher_id):
     rows = ""
     for sp in progress:
         pct = min(int(sp["count"] / 8 * 100), 100)
-        dates_html = "".join(
-            f'<span class="date-badge-sm">{fmt_date(to_wib(d))}</span>'
-            for d in sp["dates"][:3]
-        )
-        if len(sp["dates"]) > 3:
-            dates_html += f'<span class="date-badge-sm muted">+{len(sp["dates"])-3} more</span>'
+        last_date = fmt_date(to_wib(sp["dates"][-1])) if sp["dates"] else ""
+        last_html = f'<div class="dt-meta">Last: {last_date}</div>' if last_date else ""
         rows += (
             f'<div class="dt-row prog-row" id="prog-{sp["student_id"]}" '
             f'style="grid-template-columns:1fr 80px 120px 44px;cursor:pointer" '
             f'data-id="{sp["student_id"]}" data-name="{sp["name"]}">' 
             f'<div><div class="dt-name">{sp["name"]}</div>'
-            f'<div class="dt-meta progress-dates-inline">{dates_html}</div></div>'
+            f'{last_html}</div>'
             f'<div style="font-weight:700;font-size:.92rem;color:var(--text)">{sp["count"]}/8</div>'
             f'<div style="padding-right:8px"><div class="progress-bar" style="margin:0">'
             f'<div class="progress-fill" style="width:{pct}%"></div></div></div>'
@@ -362,22 +358,32 @@ def student_records(student_id):
     rows_html = ""
     for a in records:
         local = to_wib(a.date)
+        wib_iso = local.strftime("%Y-%m-%dT%H:%M")
+        date_fmt = fmt_date(local)
         note_html = f'<div class="attn-note">{a.note}</div>' if a.note else ""
-        del_btn = (
-            f'<form class="del-attn-form" method="POST" '
-            f'action="/teacher/delete_attendance/{a.id}" '
-            f'data-id="{a.id}" style="margin:0;flex-shrink:0">'
-            f'<button class="btn bdel bsm" type="submit">{tr("delete_btn")}</button>'
-            f'</form>'
-        ) if not a.billed else '<span style="font-size:.75rem;color:var(--text3)">billed</span>'
+        if not a.billed:
+            del_btn = (
+                f'<form class="del-attn-form" method="POST" '
+                f'action="/teacher/delete_attendance/{a.id}" '
+                f'data-id="{a.id}" style="margin:0">'
+                f'<button class="btn bdel bsm" type="submit">{tr("delete_btn")}</button>'
+                f'</form>'
+            )
+            edit_btn = (
+                f'<button class="btn bgh bsm" style="flex-shrink:0" '
+                f'onclick="openEditAttn({a.id}, \'{wib_iso}\', \'{date_fmt}\')">✏️</button>'
+            )
+            action_html = f'<div style="display:flex;gap:6px;flex-shrink:0">{edit_btn}{del_btn}</div>'
+        else:
+            action_html = '<span style="font-size:.75rem;color:var(--text3);flex-shrink:0">billed</span>'
 
         rows_html += (
             f'<div class="attn-row" id="attn-{a.id}">'
             f'<div>'
-            f'<div class="attn-date">{fmt_date(local)}</div>'
+            f'<div class="attn-date">{date_fmt}</div>'
             f'{note_html}'
             f'</div>'
-            f'{del_btn}'
+            f'{action_html}'
             f'</div>'
         )
 
@@ -389,4 +395,37 @@ def student_records(student_id):
         html=rows_html,
         total=total,
         unbilled=unbilled,
+    )
+
+
+@teacher_bp.route("/teacher/edit_attendance/<int:att_id>", methods=["POST"])
+@teacher_required
+def edit_attendance(att_id):
+    """Teacher edits the datetime of an attendance record (input is WIB, stored as UTC)."""
+    from ..services.i18n import fmt_date, to_wib
+    from datetime import timedelta as _td
+    teacher = _get_teacher()
+    record  = db.session.get(Attendance, att_id)
+    if not record or record.teacher_id != teacher.id or record.billed:
+        return jsonify(ok=False, msg="Not found, wrong owner, or already billed")
+
+    date_str = request.form.get("new_date", "").strip()
+    try:
+        # Input is WIB → convert to UTC for storage
+        wib_dt  = datetime.strptime(date_str, "%Y-%m-%dT%H:%M")
+        utc_dt  = wib_dt - _td(hours=7)
+    except ValueError:
+        return jsonify(ok=False, msg="Invalid date format")
+
+    record.date = utc_dt
+    db.session.commit()
+    logger.info("Teacher %s edited attendance %d to %s", teacher.name(), att_id, utc_dt)
+
+    new_wib = to_wib(record.date)
+    progress_html = _build_progress_html(teacher.id)
+    return jsonify(
+        ok=True,
+        att_id=att_id,
+        new_date_fmt=fmt_date(new_wib),
+        progress_html=progress_html,
     )
