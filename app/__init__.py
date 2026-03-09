@@ -23,7 +23,12 @@ def create_app(config_name=None):
     cfg = config_map.get(config_name, config_map["default"])
     flask_app.config.from_object(cfg)
 
-    os.makedirs(flask_app.instance_path, exist_ok=True)
+    # Skip on Vercel/production — filesystem is read-only there
+    if not os.environ.get("DATABASE_URL"):
+        try:
+            os.makedirs(flask_app.instance_path, exist_ok=True)
+        except OSError:
+            pass
 
     db.init_app(flask_app)
 
