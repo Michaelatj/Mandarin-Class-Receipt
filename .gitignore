@@ -1,13 +1,27 @@
-instance/
+# Python
 __pycache__/
 *.pyc
 *.pyo
-.env
-.venv/
-.venv-1/
-venv/
-.vscode/
+*.pyd
+.Python
 *.egg-info/
 dist/
-.pytest_cache/
+build/
+
+# Database (local only — production uses Neon PostgreSQL)
+instance/
 *.db
+*.sqlite
+
+# Environment
+.env
+.env.local
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/

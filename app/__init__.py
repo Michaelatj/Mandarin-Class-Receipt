@@ -23,10 +23,7 @@ def create_app(config_name=None):
     cfg = config_map.get(config_name, config_map["default"])
     flask_app.config.from_object(cfg)
 
-    try:
-        os.makedirs(flask_app.instance_path, exist_ok=True)
-    except OSError:
-        pass
+    os.makedirs(flask_app.instance_path, exist_ok=True)
 
     db.init_app(flask_app)
 
@@ -57,14 +54,9 @@ def create_app(config_name=None):
 def _auto_migrate(flask_app):
     """
     Safely add any missing columns to existing tables.
-    Runs every startup — skips columns that already exist.
-    Uses raw SQLite so it works even before SQLAlchemy maps the new columns.
+    Works with both SQLite (local) and PostgreSQL (production).
     """
-    import sqlite3 as _sql
     db_url = flask_app.config.get("SQLALCHEMY_DATABASE_URI", "")
-    if not db_url.startswith("sqlite:///"):
-        return  # only handle SQLite here
-    db_path = db_url.replace("sqlite:///", "")
 
     migrations = [
         # (table, column, sql_type_and_default)
@@ -73,18 +65,35 @@ def _auto_migrate(flask_app):
     ]
 
     try:
-        conn = _sql.connect(db_path)
-        cur  = conn.cursor()
-        for table, col, defn in migrations:
-            cur.execute(f"PRAGMA table_info({table})")
-            existing = {row[1] for row in cur.fetchall()}
-            if col not in existing:
-                cur.execute(f"ALTER TABLE {table} ADD COLUMN {col} {defn}")
-                logger.info("Auto-migration: added column '%s' to table '%s'", col, table)
+        if db_url.startswith("sqlite:///"):
+            # ── SQLite ──
+            import sqlite3 as _sql
+            db_path = db_url.replace("sqlite:///", "")
+            conn = _sql.connect(db_path)
+            cur  = conn.cursor()
+            for table, col, defn in migrations:
+                cur.execute(f"PRAGMA table_info({table})")
+                existing = {row[1] for row in cur.fetchall()}
+                if col not in existing:
+                    cur.execute(f"ALTER TABLE {table} ADD COLUMN {col} {defn}")
+                    logger.info("Auto-migration: added column '%s' to '%s'", col, table)
+            conn.commit()
+            conn.close()
 
+        elif db_url.startswith("postgresql"):
+            # ── PostgreSQL ──
+            from sqlalchemy import text
+            with db.engine.connect() as conn:
+                for table, col, defn in migrations:
+                    result = conn.execute(text(
+                        "SELECT column_name FROM information_schema.columns "
+                        "WHERE table_name=:t AND column_name=:c"
+                    ), {"t": table, "c": col})
+                    if result.fetchone() is None:
+                        conn.execute(text(f'ALTER TABLE "{table}" ADD COLUMN IF NOT EXISTS {col} {defn}'))
+                        logger.info("Auto-migration: added column '%s' to '%s'", col, table)
+                conn.commit()
 
-        conn.commit()
-        conn.close()
     except Exception as e:
         logger.warning("Auto-migration warning: %s", e)
 
