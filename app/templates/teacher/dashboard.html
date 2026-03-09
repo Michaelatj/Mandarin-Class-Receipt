@@ -17,12 +17,12 @@
         <span class="snav-icon">📆</span>
         <span class="snav-label">Classes</span>
         {% set up_count = schedules | selectattr('cancelled','equalto',false) | list | length %}
-        {% if up_count > 0 %}<span class="snav-pip gold">{{ up_count }}</span>{% endif %}
+        {% if show_classes_pip %}<span class="snav-pip gold" data-tab="classes" data-count="{{ up_count }}">{{ up_count }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="attendance">
         <span class="snav-icon">✅</span>
         <span class="snav-label">Attendance</span>
-        {% if unbilled_records %}<span class="snav-pip">{{ unbilled_records|length }}</span>{% endif %}
+        {% if show_attn_pip %}<span class="snav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="students">
         <span class="snav-icon">👥</span>
@@ -31,7 +31,7 @@
       <button class="snav-btn" data-page="receipts">
         <span class="snav-icon">🧾</span>
         <span class="snav-label">Receipts</span>
-        {% if unpaid_cnt > 0 %}<span class="snav-pip">{{ unpaid_cnt }}</span>{% endif %}
+        {% if show_receipts_pip %}<span class="snav-pip" data-tab="receipts" data-count="{{ unpaid_cnt }}">{{ unpaid_cnt }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="settings">
         <span class="snav-icon">⚙️</span>
@@ -325,14 +325,13 @@
   <nav class="app-bottom-nav" id="bottomNav">
     <button class="bnav-btn" data-page="classes">
       <div class="bnav-icon">📆
-        {% set up_count = schedules | selectattr('cancelled','equalto',false) | list | length %}
-        {% if up_count > 0 %}<span class="bnav-pip">{{ up_count }}</span>{% endif %}
+        {% if show_classes_pip %}<span class="bnav-pip" data-tab="classes" data-count="{{ up_count }}">{{ up_count }}</span>{% endif %}
       </div>
       <span>Classes</span>
     </button>
     <button class="bnav-btn" data-page="attendance">
       <div class="bnav-icon">✅
-        {% if unbilled_records %}<span class="bnav-pip">{{ unbilled_records|length }}</span>{% endif %}
+        {% if show_attn_pip %}<span class="bnav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
       </div>
       <span>Attend</span>
     </button>
@@ -342,7 +341,7 @@
     </button>
     <button class="bnav-btn" data-page="receipts">
       <div class="bnav-icon">🧾
-        {% if unpaid_cnt > 0 %}<span class="bnav-pip">{{ unpaid_cnt }}</span>{% endif %}
+        {% if show_receipts_pip %}<span class="bnav-pip" data-tab="receipts" data-count="{{ unpaid_cnt }}">{{ unpaid_cnt }}</span>{% endif %}
       </div>
       <span>Receipts</span>
     </button>
@@ -467,24 +466,27 @@ const NAV = (function(){
   const pages   = Array.from(document.querySelectorAll('.app-page'));
   const visited = new Set();
 
-  function clearPip(btn) {
-    btn.querySelectorAll('.snav-pip, .bnav-pip').forEach(pip => pip.remove());
+  function clearPip(id) {
+    // Remove pip from both sidebar and bottom nav buttons for this tab
+    [...sideBtn, ...botBtn].forEach(b => {
+      if (b.dataset.page === id) b.querySelectorAll('.snav-pip,.bnav-pip').forEach(p => p.remove());
+    });
+    // Tell server this tab has been seen — get count from pip if present
+    const pip = document.querySelector(`[data-tab="${id}"]`);
+    const count = pip ? parseInt(pip.dataset.count || '0') : 0;
+    fetch('/teacher/mark_seen', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+      body: JSON.stringify({tab: id, count: count})
+    }).catch(()=>{});
   }
 
   function show(id) {
     if (!document.getElementById('page-' + id)) id = DEFAULT;
-    sideBtn.forEach(b => {
-      const active = b.dataset.page === id;
-      b.classList.toggle('active', active);
-      if (active && !visited.has(id)) clearPip(b);
-    });
-    botBtn.forEach(b => {
-      const active = b.dataset.page === id;
-      b.classList.toggle('active', active);
-      if (active && !visited.has(id)) clearPip(b);
-    });
+    sideBtn.forEach(b => b.classList.toggle('active', b.dataset.page === id));
+    botBtn.forEach(b  => b.classList.toggle('active', b.dataset.page === id));
     pages.forEach(p => p.style.display = p.id === 'page-' + id ? 'block' : 'none');
-    visited.add(id);
+    if (!visited.has(id)) { clearPip(id); visited.add(id); }
     try { sessionStorage.setItem(KEY, id); } catch(e){}
   }
 
@@ -538,7 +540,6 @@ const NAV = (function(){
   });
 })();
 ajaxForm(document.getElementById('changePwForm'), null);
-document.querySelectorAll('.fee-form').forEach(f => ajaxForm(f, null));
 
 /* ════════════════════════════════════════════════════
    SCHEDULE — CREATE
@@ -687,6 +688,54 @@ attachScBtns();
           pip.textContent = data.unbilled_count;
         } else { pip?.remove(); }
       });
+    }
+
+    /* Inject newly generated receipts in real-time */
+    if (data.new_receipts && data.new_receipts.length > 0) {
+      const receiptList = document.getElementById('receiptList');
+      data.new_receipts.forEach(nr => {
+        const html = `<div class="rc-card" id="rc-${nr.id}"
+          data-rid="${nr.id}" data-paid="0"
+          data-student="${nr.student_name}" data-teacher="${nr.teacher_name}"
+          data-fee="${nr.total_fee}" data-issue="${nr.issue_date}"
+          data-dates="${nr.raw_dates.replace(/"/g,'&quot;')}"
+          data-bank-account="${nr.bank_account}" data-bank-name="${nr.bank_name}"
+          data-show-paid="1" data-paid-url="${nr.paid_url}"
+          tabindex="0" role="button">
+          <div class="rc-mid">
+            <div class="rc-top">
+              <span class="rc-id">#${nr.id}</span>
+              <span class="rc-name">${nr.student_name}</span>
+            </div>
+            <div class="rc-bottom">
+              <span class="rc-date">${nr.issue_date}</span>
+              <span class="rc-sessions">${nr.sessions} sessions</span>
+            </div>
+          </div>
+          <div class="rc-right">
+            <div class="rc-fee">Rp ${nr.fee_fmt}</div>
+            <span class="bup">Unpaid</span>
+          </div>
+          <div class="rc-arrow">›</div>
+        </div>`;
+        receiptList.insertAdjacentHTML('afterbegin', html);
+        // Attach click handler for the new card
+        const card = document.getElementById('rc-'+nr.id);
+        if (card) attachReceiptCard(card);
+      });
+      // Update receipts pip
+      const curUnpaid = document.querySelectorAll('#receiptList .rc-card[data-paid="0"]').length;
+      ['#sideNav','#bottomNav'].forEach(sel => {
+        const nav = document.querySelector(sel+' [data-page="receipts"]');
+        if (!nav) return;
+        let pip = nav.querySelector('.snav-pip,.bnav-pip');
+        const cls = sel.includes('side') ? 'snav-pip' : 'bnav-pip';
+        if (curUnpaid > 0) {
+          if (!pip) { pip = document.createElement('span'); pip.className = cls; nav.appendChild(pip); }
+          pip.textContent = curUnpaid;
+        } else { pip?.remove(); }
+      });
+      showToast(`🧾 Receipt generated for ${data.new_receipts.map(r=>r.student_name).join(', ')}!`);
     }
   });
 })();
@@ -959,10 +1008,13 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
   overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
   document.getElementById('receiptModalClose').onclick = close;
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
-  document.querySelectorAll('#receiptList .rc-card').forEach(c=>{
+
+  window.attachReceiptCard = function(c) {
+    if (c._rcOk) return; c._rcOk = true;
     c.addEventListener('click', ()=>open(c));
     c.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ')open(c); });
-  });
+  };
+  document.querySelectorAll('#receiptList .rc-card').forEach(attachReceiptCard);
 
   const smb = document.getElementById('showMoreReceipts');
   if (smb) {
@@ -971,6 +1023,29 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
     smb.addEventListener('click', function(){ cards.forEach(c=>c.classList.remove('rc-hidden')); this.remove(); });
   }
 })();
+
+/* ── Fee form real-time update ── */
+document.querySelectorAll('.fee-form').forEach(f => {
+  f.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = f.querySelector('[type=submit]');
+    if (btn) { btn.disabled=true; btn.classList.add('loading'); }
+    try {
+      const res  = await fetch(f.action, {method:'POST', body:new FormData(f), headers:{'X-Requested-With':'XMLHttpRequest'}});
+      const data = await res.json();
+      if (data.ok) {
+        showToast('✓ Fee saved');
+        // Update displayed fee next to student name if element exists
+        const sid = f.querySelector('[name=student_id]')?.value;
+        if (sid) {
+          const display = document.querySelector(`.fee-display[data-sid="${sid}"]`);
+          if (display) display.textContent = `Rp ${data.fee_fmt}`;
+        }
+      } else { showToast(data.msg||'Error saving fee','err'); }
+    } catch { showToast('Network error','err'); }
+    finally { if (btn) { btn.disabled=false; btn.classList.remove('loading'); } }
+  });
+});
 
 /* ════════════════════════════════════════════════════
    HELPERS

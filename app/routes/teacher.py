@@ -112,6 +112,15 @@ def dashboard():
 
     from flask import make_response
     fresh = session.pop("fresh_login", False)
+
+    # Pip persistence — only show pip if count changed since last viewed
+    seen       = session.get("teacher_seen_pips", {})
+    up_count   = sum(1 for s in schedules if not s.cancelled)
+    attn_count = len(unbilled_records)
+    show_classes_pip  = up_count   > 0 and up_count   != seen.get("classes",  -1)
+    show_attn_pip     = attn_count > 0 and attn_count != seen.get("attendance",-1)
+    show_receipts_pip = unpaid_cnt > 0 and unpaid_cnt != seen.get("receipts",  -1)
+
     resp = make_response(render_template("teacher/dashboard.html",
         user=teacher, receipts=receipts, all_students=all_students,
         progress=progress, custom_fees=custom_fees,
@@ -121,7 +130,12 @@ def dashboard():
         now=_dt.now().strftime("%Y-%m-%dT%H:%M"),
         schedules=schedules,
         fresh_login=fresh,
-        quote=random_quote()))
+        quote=random_quote(),
+        show_classes_pip=show_classes_pip,
+        show_attn_pip=show_attn_pip,
+        show_receipts_pip=show_receipts_pip,
+        up_count=up_count, attn_count=attn_count,
+        ))
     resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     resp.headers['Pragma'] = 'no-cache'
     resp.headers['Expires'] = '0'
@@ -145,16 +159,34 @@ def update_settings():
     return redirect(url_for("teacher.dashboard"))
 
 
+@teacher_bp.route("/teacher/mark_seen", methods=["POST"])
+@teacher_required
+def mark_seen():
+    """Store how many items teacher has seen per tab — prevents stale pips on refresh."""
+    tab   = request.json.get("tab") if request.is_json else request.form.get("tab")
+    count = request.json.get("count") if request.is_json else request.form.get("count", type=int)
+    if tab is not None and count is not None:
+        seen = session.get("teacher_seen_pips", {})
+        seen[tab] = int(count)
+        session["teacher_seen_pips"] = seen
+    return jsonify(ok=True)
+
+
 @teacher_bp.route("/teacher/set_fee", methods=["POST"])
 @teacher_required
 def set_fee():
+    from ..services.i18n import fmt_idr
     teacher    = _get_teacher()
     student_id = request.form.get("student_id", type=int)
     fee_str    = request.form.get("fee", "").strip()
     if student_id and fee_str and db.session.get(User, student_id):
-        set_custom_fee(teacher.id, student_id, int(fee_str))
+        fee = int(fee_str)
+        set_custom_fee(teacher.id, student_id, fee)
         if _is_ajax():
-            return jsonify(ok=True, msg=tr("ok_saved"))
+            return jsonify(ok=True, msg=tr("ok_saved"),
+                           student_id=student_id,
+                           fee=fee,
+                           fee_fmt=fmt_idr(fee))
         flash(tr("ok_saved"), "ok")
     return redirect(url_for("teacher.dashboard"))
 
@@ -176,7 +208,10 @@ def manual_add_attendance():
     except ValueError:
         dt = datetime.utcnow()
 
-    record = add_attendance(student_id=student_id, teacher_id=teacher.id, date=dt, note=note)
+    # Snapshot receipts before adding — so we can detect newly generated ones
+    receipt_ids_before = {r.id for r in Receipt.query.filter_by(teacher_id=teacher.id).all()}
+
+    record = add_attendance(student_id=student_id, teacher_id=teacher.id, date=dt, note=note, source='teacher')
 
     if _is_ajax():
         from ..services.attendance import get_student_progress
@@ -184,7 +219,7 @@ def manual_add_attendance():
         from flask import current_app
         from .. import db as _db
 
-        # Build HTML for the new attendance row — match .attn-row CSS class
+        # Build HTML for the new attendance row
         note_html = f'<div class="attn-note">{note}</div>' if note else ''
         record_html = (
             f'<div class="attn-row" id="attn-{record.id}">'
@@ -200,6 +235,29 @@ def manual_add_attendance():
             f'</form>'
             f'</div>'
         )
+
+        # Check if a new receipt was generated
+        new_receipts = Receipt.query.filter_by(teacher_id=teacher.id).filter(
+            ~Receipt.id.in_(receipt_ids_before)
+        ).all()
+        new_receipt_data = []
+        for nr in new_receipts:
+            from ..services.i18n import fmt_idr, parse_raw_dates
+            dates = parse_raw_dates(nr.raw_dates) if nr.raw_dates else []
+            new_receipt_data.append({
+                "id":           nr.id,
+                "student_name": nr.student_name,
+                "total_fee":    nr.total_fee,
+                "fee_fmt":      fmt_idr(nr.total_fee),
+                "issue_date":   fmt_date(nr.issue_date),
+                "sessions":     len(dates),
+                "paid":         nr.paid,
+                "paid_url":     f"/teacher/paid/{nr.id}",
+                "raw_dates":    nr.raw_dates or "",
+                "teacher_name": nr.teacher_name,
+                "bank_account": nr.bank_account or "",
+                "bank_name":    nr.bank_name or "",
+            })
 
         # Build updated progress HTML
         progress_html = _build_progress_html(teacher.id)
@@ -222,6 +280,7 @@ def manual_add_attendance():
             student_id=student_id,
             s_total=s_total,
             s_unbilled=s_unbilled,
+            new_receipts=new_receipt_data,
         )
 
     flash(tr("ok_attn"), "ok")
