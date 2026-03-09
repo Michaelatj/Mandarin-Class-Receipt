@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Enter OTP Code{% endblock %}
+
+{% block body %}
+<div class="form-title">Check Your Email</div>
+<p style="font-size:.83rem;color:var(--text3);margin-bottom:18px;line-height:1.5">
+  We sent a 6-digit code to the email linked to <strong style="color:var(--text)">{{ username }}</strong>.
+  Enter it below — the code expires in <strong style="color:var(--text)">10 minutes</strong>.
+</p>
+<form method="POST" action="{{ url_for('auth.verify_otp') }}">
+  <label>6-Digit Code</label>
+  <input type="text" name="otp_code" placeholder="e.g. 482916"
+         required maxlength="6" pattern="[0-9]{6}"
+         inputmode="numeric" autocomplete="one-time-code"
+         style="font-size:1.4rem;letter-spacing:8px;text-align:center;font-weight:700">
+  <button class="btn br">Verify Code →</button>
+</form>
+<div class="dvd"></div>
+<form method="POST" action="{{ url_for('auth.resend_otp') }}" style="margin:0">
+  <button class="btn bgh" type="submit" style="width:100%;margin-bottom:8px">🔄 Resend Code</button>
+</form>
+<a href="{{ url_for('auth.forgot_password') }}" class="btn bgh" style="display:block;text-align:center">
+  ← Use Different Username
+</a>
+{% endblock %}

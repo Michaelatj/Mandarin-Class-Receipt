@@ -1,0 +1,89 @@
+{# ── Schedule card macros ── #}
+
+{% macro teacher_card(s) %}
+{% set now = now_dt() %}
+{% set is_past = s.scheduled_at < now %}
+{% set status = 'cancelled' if s.cancelled else ('past' if is_past else 'upcoming') %}
+<div class="sc-card {{ status }}" id="sc-{{ s.id }}">
+  <div class="sc-head">
+    <div style="min-width:0;flex:1">
+      <div class="sc-title">{{ s.title }}</div>
+      <div class="sc-time">{{ s.scheduled_at.strftime('%a, %d %b %Y · %H:%M') }}</div>
+    </div>
+    <span class="sc-badge {{ status }}">
+      {% if s.cancelled %}Cancelled{% elif is_past %}Ended{% else %}Upcoming{% endif %}
+    </span>
+  </div>
+  {% if s.description %}<div class="sc-desc">{{ s.description }}</div>{% endif %}
+  {% if s.meet_link %}
+  <div class="sc-link">🔗 <a href="{{ s.meet_link }}" target="_blank" rel="noopener">{{ s.meet_link }}</a></div>
+  {% endif %}
+  <div class="sc-foot">
+    <div class="sc-foot-left">
+      <span class="sc-joined">👥 {{ s.join_count }} {{ 'student' if s.join_count==1 else 'students' }} joined</span>
+      {% if s.invited_ids is defined and s.invited_ids %}
+        <span class="sc-invites specific">Specific students</span>
+      {% else %}
+        <span class="sc-invites open">All students</span>
+      {% endif %}
+    </div>
+    <div class="sc-foot-right">
+      {% if not s.cancelled and not is_past %}
+      <button class="btn bgh bsm edit-sc-btn"
+              data-id="{{ s.id }}"
+              data-title="{{ s.title }}"
+              data-desc="{{ s.description or '' }}"
+              data-link="{{ s.meet_link or '' }}"
+              data-at="{{ s.scheduled_at.strftime('%Y-%m-%dT%H:%M') }}">✏️ Edit</button>
+      <button class="btn bdel-outline bsm cancel-sc-btn" data-id="{{ s.id }}">✕ Cancel</button>
+      {% endif %}
+      <button class="btn bdel bsm delete-sc-btn" data-id="{{ s.id }}">🗑</button>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro student_card(s, student_id) %}
+{% set now = now_dt() %}
+{% set is_past = s.scheduled_at < now %}
+{% set joined = student_id in s.joined_by %}
+{% set status = 'cancelled' if s.cancelled else ('past' if is_past else 'upcoming') %}
+<div class="sc-card {{ status }}" id="sc-{{ s.id }}">
+  <div class="sc-head">
+    <div style="min-width:0;flex:1">
+      <div class="sc-title">{{ s.title }}</div>
+      <div class="sc-time">{{ s.scheduled_at.strftime('%a, %d %b %Y · %H:%M') }}</div>
+      <div class="sc-teacher">{{ s.teacher_name }}</div>
+    </div>
+    <span class="sc-badge {{ status }}">
+      {% if s.cancelled %}Cancelled
+      {% elif joined %}<span style="color:var(--green)">✓ Joined</span>
+      {% elif is_past %}Ended
+      {% else %}Upcoming{% endif %}
+    </span>
+  </div>
+  {% if s.description %}<div class="sc-desc">{{ s.description }}</div>{% endif %}
+  <div class="sc-foot">
+    {% if not s.cancelled %}
+      {% if joined %}
+        {% if s.meet_link %}
+        <a href="{{ s.meet_link }}" target="_blank" rel="noopener" class="btn bg bsm" style="width:auto">🎥 Rejoin Meet</a>
+        {% else %}
+        <span style="font-size:.8rem;color:var(--text3);font-style:italic">✓ Attendance recorded</span>
+        {% endif %}
+      {% elif is_past %}
+        <span style="font-size:.8rem;color:var(--text3);font-style:italic">Class has ended</span>
+      {% else %}
+        <button class="btn br bsm join-btn" style="width:auto"
+                data-id="{{ s.id }}"
+                data-link="{{ s.meet_link or '' }}"
+                data-title="{{ s.title }}">
+          🎥 Join Class
+        </button>
+      {% endif %}
+    {% else %}
+      <span style="font-size:.8rem;color:var(--red);font-style:italic">Cancelled by teacher</span>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}

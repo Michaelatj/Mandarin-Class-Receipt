@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="{{ get_lang() }}" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+
+{# Lang + theme controls — shown on auth pages, hidden on dashboards via JS #}
+<div class="lang-bar" id="langBar">
+  <a href="{{ url_for('auth.set_lang', code='en') }}" class="lb {% if get_lang()=='en' %}on{% endif %}">EN</a>
+  <a href="{{ url_for('auth.set_lang', code='zh') }}" class="lb {% if get_lang()=='zh' %}on{% endif %}">中文</a>
+</div>
+<button class="theme-btn" id="dmToggle" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+
+<div id="toast"></div>
+
+{% block page_content %}
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-head">
+      <div class="auth-logo">
+        <span class="auth-logo-dot"></span>
+        <span style="font-family:var(--font-zh)">中文课堂</span>
+      </div>
+      <div class="auth-sub">Attendance &amp; Billing System</div>
+    </div>
+    <div class="auth-flashes">{% include 'partials/flashes.html' %}</div>
+    <div class="auth-body">
+      {% block header %}{% endblock %}
+      {% block body %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+<script>
+/* ── Theme ── */
+const _html = document.documentElement;
+const _btn  = document.getElementById('dmToggle');
+function applyTheme(t) {
+  _html.setAttribute('data-theme', t);
+  _btn.textContent = t === 'dark' ? '☀️' : '🌙';
+  try { localStorage.setItem('theme', t); } catch(e){}
+}
+const _saved = (function(){ try { return localStorage.getItem('theme'); } catch(e){ return null; } })()
+  || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+applyTheme(_saved);
+_btn.addEventListener('click', () => applyTheme(_html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+/* ── Toast ── */
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.childNodes.forEach(n => { if (n.nodeType === 3) n.remove(); });
+  t.appendChild(document.createTextNode(msg));
+  t.className = type === 'err' ? 'err show' : 'show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = type === 'err' ? 'err' : ''; }, 3200);
+}
+
+/* ── AJAX form helper ── */
+function ajaxForm(form, onSuccess) {
+  if (!form) return;
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = form.querySelector('[type=submit]');
+    if (btn) { btn.disabled = true; btn.classList.add('loading'); }
+    try {
+      const res  = await fetch(form.action, {
+        method: form.method || 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        showToast(data.msg || '✓ Saved');
+        if (onSuccess) onSuccess(data);
+        form.reset();
+      } else {
+        showToast(data.msg || 'Something went wrong', 'err');
+      }
+    } catch {
+      showToast('Network error — please try again', 'err');
+    } finally {
+      if (btn) { btn.disabled = false; btn.classList.remove('loading'); }
+    }
+  });
+}
+
+history.replaceState(null, '', location.href);
+</script>
+{% block page_scripts %}{% endblock %}
+</body>
+</html>

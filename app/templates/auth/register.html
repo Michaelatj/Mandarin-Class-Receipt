@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ tr('register_title') }}{% endblock %}
+
+{% block body %}
+<div class="form-title">{{ tr('register_title') }}</div>
+<form method="POST" action="{{ url_for('auth.register') }}" autocomplete="on">
+  <label>{{ tr('username_lbl') }}</label>
+  <input type="text" name="username" placeholder="{{ tr('username_ph') }}"
+         required pattern="[A-Za-z0-9_.+\-]{3,40}"
+         title="3–40 characters: letters, numbers, _ . + -"
+         autocomplete="username">
+  <label>{{ tr('password_lbl') }}</label>
+  <input type="password" name="password" placeholder="{{ tr('password_ph') }}"
+         required minlength="6" autocomplete="new-password">
+  <label>{{ tr('display_name_lbl') }}</label>
+  <input type="text" name="display_name"
+         placeholder="{{ tr('display_name_ph') }}" autocomplete="name">
+  <label>{{ tr('phone_lbl') }}</label>
+  <input type="text" name="phone"
+         placeholder="{{ tr('phone_ph') }}" autocomplete="tel">
+  <label>{{ tr('role_lbl') }}</label>
+  <select name="role">
+    <option value="student">🎓 {{ tr('role_student') }}</option>
+    <option value="teacher">📖 {{ tr('role_teacher') }}</option>
+  </select>
+  <button class="btn bg">{{ tr('register_btn') }}</button>
+</form>
+<div class="dvd"></div>
+<a href="{{ url_for('auth.login') }}" class="btn bgh" style="display:block;text-align:center">
+  {{ tr('back_login') }}
+</a>
+{% endblock %}

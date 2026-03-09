@@ -1,0 +1,170 @@
+"""
+services/attendance.py — Business logic for attendance and receipt generation.
+
+All database-touching logic that isn't a simple query lives here,
+keeping routes thin and this layer independently testable.
+"""
+import logging
+from datetime import datetime
+from .. import db
+from ..models import Attendance, Receipt, StudentFee, User
+
+logger = logging.getLogger(__name__)
+
+
+def get_custom_fee(teacher_id: int, student_id: int, default_fee: int) -> int:
+    """
+    Return the teacher's custom fee for this student, or the default if none set.
+    """
+    override = StudentFee.query.filter_by(
+        teacher_id=teacher_id, student_id=student_id
+    ).first()
+    return override.fee_idr if override else default_fee
+
+
+def set_custom_fee(teacher_id: int, student_id: int, fee: int) -> None:
+    """Create or update a per-student fee override."""
+    existing = StudentFee.query.filter_by(
+        teacher_id=teacher_id, student_id=student_id
+    ).first()
+    if existing:
+        existing.fee_idr = fee
+    else:
+        db.session.add(StudentFee(
+            teacher_id=teacher_id, student_id=student_id, fee_idr=fee
+        ))
+    db.session.commit()
+    logger.info("Custom fee set: teacher=%d student=%d fee=%d", teacher_id, student_id, fee)
+
+
+def add_attendance(student_id: int, teacher_id: int,
+                   date: datetime | None = None, note: str = "") -> Attendance:
+    """
+    Add one attendance record and check whether a receipt should be generated.
+    Returns the new Attendance object.
+    """
+    record = Attendance(
+        student_id=student_id,
+        teacher_id=teacher_id,
+        date=date or datetime.utcnow(),
+        note=note[:200],
+    )
+    db.session.add(record)
+    db.session.commit()
+    logger.info("Attendance added: student=%d teacher=%d date=%s",
+                student_id, teacher_id, record.date.isoformat())
+
+    student = db.session.get(User, student_id)
+    teacher = db.session.get(User, teacher_id)
+    _maybe_generate_receipt(student, teacher)
+    return record
+
+
+def delete_attendance(attendance_id: int, teacher_id: int) -> bool:
+    """
+    Delete an unbilled attendance record that belongs to teacher_id.
+    Returns True if deleted, False if not found / already billed / wrong owner.
+    """
+    record = db.session.get(Attendance, attendance_id)
+    if not record:
+        return False
+    if record.teacher_id != teacher_id:
+        logger.warning("Teacher %d tried to delete attendance %d owned by teacher %d",
+                       teacher_id, attendance_id, record.teacher_id)
+        return False
+    if record.billed:
+        logger.warning("Attempted to delete already-billed attendance %d", attendance_id)
+        return False
+    db.session.delete(record)
+    db.session.commit()
+    logger.info("Attendance %d deleted by teacher %d", attendance_id, teacher_id)
+    return True
+
+
+def mark_receipt_paid(receipt_id: int, teacher_id: int) -> bool:
+    """
+    Mark a receipt as paid. Only the owning teacher may do this.
+    Returns True on success.
+    """
+    receipt = db.session.get(Receipt, receipt_id)
+    if not receipt or receipt.teacher_id != teacher_id:
+        return False
+    receipt.paid = True
+    db.session.commit()
+    logger.info("Receipt %d marked paid by teacher %d", receipt_id, teacher_id)
+    return True
+
+
+def get_student_progress(teacher_id: int) -> list[dict]:
+    """
+    Return a list of dicts summarising each student's current unbilled progress
+    under this teacher:  [{name, count, dates, student_id}, ...]
+    """
+    active = (
+        Attendance.query
+        .filter_by(teacher_id=teacher_id, billed=False)
+        .order_by(Attendance.date.asc())
+        .all()
+    )
+    progress: dict[int, dict] = {}
+    for record in active:
+        if record.student_id not in progress:
+            student = db.session.get(User, record.student_id)
+            progress[record.student_id] = {
+                "student_id": record.student_id,
+                "name": student.name() if student else "?",
+                "count": 0,
+                "dates": [],
+            }
+        progress[record.student_id]["count"] += 1
+        progress[record.student_id]["dates"].append(record.date)
+    return list(progress.values())
+
+
+# ── Internal ──────────────────────────────────────────────────────────────────
+
+def _maybe_generate_receipt(student: User | None, teacher: User | None) -> None:
+    """
+    Check if student has reached CLASSES_PER_CYCLE unbilled sessions with this
+    teacher. If so, create a Receipt and mark those sessions as billed.
+    """
+    if not student or not teacher:
+        return
+
+    from flask import current_app
+    cycle_size = current_app.config.get("CLASSES_PER_CYCLE", 8)
+
+    unbilled = (
+        Attendance.query
+        .filter_by(student_id=student.id, teacher_id=teacher.id, billed=False)
+        .order_by(Attendance.date.asc())
+        .all()
+    )
+
+    if len(unbilled) < cycle_size:
+        return
+
+    batch     = unbilled[:cycle_size]
+    raw_dates = "|".join(a.date.strftime("%Y-%m-%dT%H:%M:%S") for a in batch)
+    fee       = get_custom_fee(teacher.id, student.id, teacher.fee_idr)
+
+    receipt = Receipt(
+        student_id   = student.id,
+        student_name = student.name(),
+        teacher_id   = teacher.id,
+        teacher_name = teacher.name(),
+        bank_account = teacher.bank_account,
+        bank_name    = teacher.bank_name,
+        total_fee    = fee,
+        raw_dates    = raw_dates,
+    )
+    db.session.add(receipt)
+
+    for record in batch:
+        record.billed = True
+
+    db.session.commit()
+    logger.info(
+        "Receipt generated: student=%s teacher=%s fee=%d",
+        student.name(), teacher.name(), fee,
+    )

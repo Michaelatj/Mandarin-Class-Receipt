@@ -1,0 +1,32 @@
+{% macro receipt_card(r, show_paid_btn=False) %}
+{% set dates = parse_raw_dates(r.raw_dates) %}
+<div class="rc-card"
+     data-rid="{{ r.id }}"
+     data-paid="{{ '1' if r.paid else '0' }}"
+     data-date="{{ r.issue_date.strftime('%Y%m%d%H%M%S') }}"
+     data-student="{{ r.student_name }}"
+     data-teacher="{{ r.teacher_name }}"
+     data-fee="{{ r.total_fee }}"
+     data-issue="{{ fmt_date(r.issue_date) }}"
+     data-dates="{{ r.raw_dates | replace('"', '&quot;') }}"
+     data-show-paid="{{ '1' if show_paid_btn else '0' }}"
+     data-paid-url="{{ url_for('teacher.paid', receipt_id=r.id) if show_paid_btn else '' }}"
+     tabindex="0" role="button" aria-label="View receipt #{{ r.id }}">
+  <div class="rc-mid">
+    <div class="rc-top">
+      <span class="rc-id">#{{ r.id }}</span>
+      {% if r.student_name %}<span class="rc-name">{{ r.student_name }}</span>{% endif %}
+      {% if r.teacher_name and not r.student_name %}<span class="rc-name">{{ r.teacher_name }}</span>{% endif %}
+    </div>
+    <div class="rc-bottom">
+      <span class="rc-date">{{ fmt_date(r.issue_date) }}</span>
+      <span class="rc-sessions">{{ dates|length }} sessions</span>
+    </div>
+  </div>
+  <div class="rc-right">
+    <div class="rc-fee">Rp {{ fmt_idr(r.total_fee) }}</div>
+    <span class="{{ 'bpd' if r.paid else 'bup' }}">{{ tr('paid_lbl') if r.paid else tr('unpaid_lbl') }}</span>
+  </div>
+  <div class="rc-arrow">›</div>
+</div>
+{% endmacro %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ tr('login') }}{% endblock %}
+
+{% block body %}
+{% include 'partials/quote.html' %}
+<div class="form-title">{{ tr('login') }}</div>
+<form method="POST" action="{{ url_for('auth.login') }}" autocomplete="on">
+  <label>{{ tr('username_lbl') }}</label>
+  <input type="text" name="username" placeholder="{{ tr('username_ph') }}"
+         required autocomplete="username">
+  <label>{{ tr('password_lbl') }}</label>
+  <input type="password" name="password" placeholder="{{ tr('password_ph') }}"
+         required autocomplete="current-password">
+  <button class="btn br">{{ tr('login') }} →</button>
+</form>
+<div class="dvd"></div>
+<p style="text-align:center;font-size:.8rem;color:var(--text3);margin-bottom:10px">{{ tr('no_account') }}</p>
+<a href="{{ url_for('auth.register') }}" class="btn bgh" style="display:block;text-align:center">
+  {{ tr('create_account') }}
+</a>
+{% endblock %}

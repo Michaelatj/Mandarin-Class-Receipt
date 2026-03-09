@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+{% from 'partials/receipt_card.html' import receipt_card %}
+{% from 'partials/schedule_cards.html' import student_card %}
+{% block title %}{{ tr('student_dash') }}{% endblock %}
+
+{% block page_content %}
+<div class="app-shell">
+
+  {# ══ SIDEBAR (desktop) ══ #}
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-zh">中文课堂</span>
+      <span class="sidebar-brand-tag">Student Dashboard</span>
+    </div>
+    <nav class="sidebar-nav" id="sideNav">
+      <button class="snav-btn" data-page="classes" data-count="{{ new_count }}">
+        <span class="snav-icon">📆</span>
+        <span class="snav-label">Classes</span>
+        {% if show_classes_pip %}<span class="snav-pip gold">{{ new_count }}</span>{% endif %}
+      </button>
+      <button class="snav-btn" data-page="progress" data-count="{{ unbilled_count }}">
+        <span class="snav-icon">📊</span>
+        <span class="snav-label">Progress</span>
+        {% if show_progress_pip %}<span class="snav-pip gold">{{ unbilled_count }}/8</span>{% endif %}
+      </button>
+      <button class="snav-btn" data-page="receipts" data-count="{{ unpaid_count }}">
+        <span class="snav-icon">🧾</span>
+        <span class="snav-label">Receipts</span>
+        {% if show_receipts_pip %}<span class="snav-pip">{{ unpaid_count }}</span>{% endif %}
+      </button>
+      <button class="snav-btn" data-page="settings" data-count="0">
+        <span class="snav-icon">⚙️</span>
+        <span class="snav-label">Settings</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ user.name()[0] }}</div>
+        <span class="sidebar-name">{{ user.name() }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-logout">{{ tr('logout') }}</a>
+      </div>
+    </div>
+  </aside>
+
+  {# ══ MAIN ══ #}
+  <div class="app-main">
+    <div class="app-content">
+
+      {% include 'partials/flashes.html' %}
+
+      {# ═══ CLASSES ═══ #}
+      <div class="app-page" id="page-classes">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Classes</h1>
+            <p class="page-sub">Upcoming sessions scheduled by your teacher</p>
+          </div>
+          {% if teachers %}
+          <div class="page-action">
+            <form id="attnForm" method="POST" action="{{ url_for('student.mark_attendance') }}"
+                  style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+              <input type="hidden" name="tz_offset" id="tzOffset" value="0">
+              <div>
+                <label style="margin-bottom:4px">{{ tr('select_teacher') }}</label>
+                <select name="teacher_id" required style="margin-bottom:0;min-width:150px">
+                  {% for t in teachers %}<option value="{{ t.id }}">{{ t.name() }}</option>{% endfor %}
+                </select>
+              </div>
+              <button class="btn br bsm" type="submit" style="white-space:nowrap;width:auto">✅ {{ tr('submit_attn') }}</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-num">{{ unbilled|length }}</div>
+            <div class="stat-lbl">{{ tr('this_cycle') }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">{{ total_sessions }}</div>
+            <div class="stat-lbl">{{ tr('total_sessions') }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">{{ receipts|length }}</div>
+            <div class="stat-lbl">{{ tr('receipts_lbl') }}</div>
+          </div>
+        </div>
+
+        {% set upcoming = schedules | selectattr('cancelled','equalto',false) | list %}
+        {% if upcoming %}
+        <div id="scheduleList">
+          {% for s in upcoming %}{{ student_card(s, user.id) }}{% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div class="empty-title">No upcoming classes</div>
+          <div class="empty-sub">Your teacher hasn't scheduled any classes yet. Check back soon.</div>
+        </div>
+        {% endif %}
+      </div>
+
+      {# ═══ PROGRESS ═══ #}
+      <div class="app-page" id="page-progress">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">{{ tr('current_progress') }}</h1>
+            <p class="page-sub">Your current billing cycle — 8 classes per receipt</p>
+          </div>
+        </div>
+        <div id="progressArea">
+        {% if unbilled %}
+          {% set pct = [((unbilled|length)/8*100)|int, 100]|min %}
+          {% set rem = 8 - unbilled|length %}
+          <div class="cycle-card">
+            <div class="cycle-header">
+              <div>
+                <div class="cycle-title">{{ unbilled|length }} / 8 {{ tr('classes_done') }}</div>
+                <div class="cycle-sub">{{ tr('with_teacher') }} {{ unbilled[0].teacher_name }}
+                  · {{ rem }} more {{ 'class' if rem==1 else 'classes' }} until next receipt
+                </div>
+              </div>
+              <div class="cycle-pct">{{ pct }}%</div>
+            </div>
+            <div class="cycle-bar"><div class="cycle-fill" style="width:{{ pct }}%"></div></div>
+            <div class="cycle-grid">
+              {% for i in range(8) %}
+                {% set a = unbilled[i] if i < unbilled|length else none %}
+                <div class="cycle-cell {{ 'done' if a else 'empty-cell' }}">
+                  <div class="cell-num">#{{ i+1 }}</div>
+                  {% if a %}
+                    {% set ld = local_dt(a.date) %}
+                    <div class="cell-day">{{ ld.strftime('%a') }}</div>
+                    <div class="cell-date">{{ ld.strftime('%d %b') }}</div>
+                    <div class="cell-time">{{ ld.strftime('%H:%M') }}</div>
+                  {% else %}
+                    <div class="cell-empty">—</div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <div class="empty-title">{{ tr('no_progress') }}</div>
+            <div class="empty-sub">Submit your first attendance to start tracking your progress.</div>
+          </div>
+        {% endif %}
+        </div>
+      </div>
+
+      {# ═══ RECEIPTS ═══ #}
+      <div class="app-page" id="page-receipts">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">{{ tr('your_receipts') }}</h1>
+            <p class="page-sub">{{ receipts|length }} total receipts</p>
+          </div>
+        </div>
+        <div id="receiptSection">
+        {% if receipts %}
+        <div id="receiptList">
+          {% for r in receipts %}{{ receipt_card(r) }}{% endfor %}
+        </div>
+        {% if receipts|length > 5 %}
+        <button class="show-more-btn" id="showMoreReceipts">Show all {{ receipts|length }} receipts ↓</button>
+        {% endif %}
+        {% else %}
+        <div class="empty-state" id="noReceiptsMsg">
+          <div class="empty-icon">🧾</div>
+          <div class="empty-title">{{ tr('no_receipts') }}</div>
+          <div class="empty-sub">Your first receipt will appear here after completing 8 classes.</div>
+        </div>
+        {% endif %}
+        </div>
+      </div>
+
+      {# ═══ SETTINGS ═══ #}
+      <div class="app-page" id="page-settings">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Settings</h1>
+            <p class="page-sub">Manage your account</p>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <div class="card">
+            <div class="card-title"><span class="card-title-icon">👤</span> Profile</div>
+            <form id="profileForm" method="POST" action="{{ url_for('student.update_profile') }}">
+              <label>Display Name</label>
+              <input type="text" name="display_name" value="{{ user.display_name }}" placeholder="Your name">
+              <label>Email <span class="lbl-opt">(untuk reset password)</span></label>
+              <input type="email" name="email" value="{{ user.email }}" placeholder="contoh@gmail.com">
+              <button class="btn bg" type="submit">Save Profile</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="card-title-icon">🔒</span> Change Password</div>
+            <form id="changePwForm" method="POST" action="{{ url_for('auth.change_password') }}">
+              <label>Current Password</label>
+              <input type="password" name="current_password" required placeholder="Current password">
+              <label>New Password</label>
+              <input type="password" name="new_password" required placeholder="At least 6 characters">
+              <label>Confirm Password</label>
+              <input type="password" name="confirm_password" required placeholder="Repeat new password">
+              <button class="btn br" type="submit">Change Password</button>
+            </form>
+          </div>
+          <div class="card danger-card">
+            <div class="card-title" style="color:var(--red)"><span class="card-title-icon">⚠️</span> {{ tr('danger_zone') }}</div>
+            <p style="font-size:.84rem;color:var(--text3);margin-bottom:14px">{{ tr('delete_account_warn') }}</p>
+            <form method="POST" action="{{ url_for('auth.delete_account') }}">
+              <label>{{ tr('confirm_pw_lbl') }}</label>
+              <input type="password" name="confirm_password" required placeholder="{{ tr('password_ph') }}">
+              <button class="btn bdel bsm">🗑 {{ tr('delete_account') }}</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {# ══ BOTTOM NAV (mobile) ══ #}
+  <nav class="app-bottom-nav" id="bottomNav">
+    <button class="bnav-btn" data-page="classes" data-count="{{ new_count }}">
+      <div class="bnav-icon">📆
+        {% if show_classes_pip %}<span class="bnav-pip">{{ new_count }}</span>{% endif %}
+      </div>
+      <span>Classes</span>
+    </button>
+    <button class="bnav-btn" data-page="progress" data-count="{{ unbilled_count }}">
+      <div class="bnav-icon">📊
+        {% if show_progress_pip %}<span class="bnav-pip">{{ unbilled_count }}</span>{% endif %}
+      </div>
+      <span>Progress</span>
+    </button>
+    <button class="bnav-btn" data-page="receipts" data-count="{{ unpaid_count }}">
+      <div class="bnav-icon">🧾
+        {% if show_receipts_pip %}<span class="bnav-pip">{{ unpaid_count }}</span>{% endif %}
+      </div>
+      <span>Receipts</span>
+    </button>
+    <button class="bnav-btn" data-page="settings" data-count="0">
+      <div class="bnav-icon">⚙️</div>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+</div>
+
+{# ═══ RECEIPT MODAL ═══ #}
+<div class="rm-overlay hidden" id="receiptModal">
+  <div class="rm-box">
+    <button class="rm-close" id="receiptModalClose" aria-label="Close">✕</button>
+    <div id="receiptModalBox"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.getElementById('langBar').style.display  = 'none';
+document.getElementById('dmToggle').style.display = 'none';
+
+// Set timezone immediately and keep it fresh
+const _TZ = -(new Date().getTimezoneOffset());
+document.getElementById('tzOffset').value = _TZ;
+fetch('/set_tz', {
+  method:'POST',
+  headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+  body: JSON.stringify({ tz_offset: _TZ })
+});
+
+// Refresh tz_offset every time attnForm is about to submit
+const _attnForm = document.getElementById('attnForm');
+if (_attnForm) {
+  _attnForm.addEventListener('submit', function() {
+    document.getElementById('tzOffset').value = -(new Date().getTimezoneOffset());
+  }, true); // capture phase — runs before ajaxForm's listener
+}
+
+/* ── Navigation ── */
+(function(){
+  const KEY='student_page', DEF='classes';
+  const sB=Array.from(document.querySelectorAll('#sideNav .snav-btn'));
+  const bB=Array.from(document.querySelectorAll('#bottomNav .bnav-btn'));
+  const pg=Array.from(document.querySelectorAll('.app-page'));
+  const visited = new Set();
+
+  function clearPip(btn) {
+    btn.querySelectorAll('.snav-pip, .bnav-pip').forEach(pip => pip.remove());
+  }
+
+  function markSeen(page, count) {
+    // Persist to server so pip stays hidden after logout/login
+    fetch('/mark_seen', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+      body: JSON.stringify({tab: page, count: count})
+    }).catch(()=>{});
+    // Clear matching pips in both navbars
+    document.querySelectorAll('[data-page="'+page+'"] .snav-pip, [data-page="'+page+'"] .bnav-pip')
+      .forEach(p => p.remove());
+  }
+
+  function show(id){
+    if(!document.getElementById('page-'+id)) id=DEF;
+    const isNew = !visited.has(id);
+    sB.forEach(b=>{
+      const active = b.dataset.page===id;
+      b.classList.toggle('active', active);
+      if(active && isNew) { clearPip(b); markSeen(id, parseInt(b.dataset.count||'0')); }
+    });
+    bB.forEach(b=>{
+      const active = b.dataset.page===id;
+      b.classList.toggle('active', active);
+      if(active && isNew) clearPip(b);
+    });
+    pg.forEach(p=>p.style.display=p.id==='page-'+id?'block':'none');
+    visited.add(id);
+    try{sessionStorage.setItem(KEY,id);}catch(e){}
+  }
+  sB.forEach(b=>b.addEventListener('click',()=>show(b.dataset.page)));
+  bB.forEach(b=>b.addEventListener('click',()=>show(b.dataset.page)));
+
+  let initPage = DEF;
+  try {
+    {% if fresh_login %}
+    sessionStorage.removeItem(KEY);
+    initPage = DEF;
+    {% else %}
+    initPage = sessionStorage.getItem(KEY) || DEF;
+    {% endif %}
+  } catch(e){}
+  show(initPage);
+})();
+
+ajaxForm(document.getElementById('changePwForm'), null);
+// Profile form: update sidebar display name instantly after save
+(function(){
+  const form = document.getElementById('profileForm');
+  if (!form) return;
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST', body: new FormData(form),
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+      });
+      const data = await res.json();
+      if (data.ok) {
+        showToast('✓ Profile saved');
+        // Update sidebar name display immediately
+        const newName = form.querySelector('[name="display_name"]').value.trim();
+        if (newName) {
+          document.querySelectorAll('.sidebar-name').forEach(el => el.textContent = newName);
+        document.querySelectorAll('.sidebar-avatar').forEach(el => el.textContent = newName.charAt(0).toUpperCase());
+        }
+      } else {
+        showToast(data.msg || 'Error saving profile', 'err');
+      }
+    } catch { showToast('Network error', 'err'); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = 'Save Profile'; } }
+  });
+})();
+
+/* ── Update sidebar/bottom nav pips ── */
+function updatePip(navSel, page, count, label) {
+  [navSel + ' [data-page="' + page + '"]'].forEach(sel => {
+    const btn = document.querySelector(sel);
+    if (!btn) return;
+    const pipCls = navSel.includes('side') ? 'snav-pip' : 'bnav-pip';
+    let pip = btn.querySelector('.' + pipCls);
+    if (count > 0) {
+      if (!pip) { pip = document.createElement('span'); pip.className = pipCls; btn.appendChild(pip); }
+      pip.textContent = label || count;
+    } else {
+      pip?.remove();
+    }
+  });
+}
+function updateAllPips(data) {
+  // Progress pip: cycle_count/8
+  if (typeof data.cycle_count === 'number') {
+    const lbl = data.cycle_count > 0 ? data.cycle_count + '/8' : null;
+    ['#sideNav', '#bottomNav'].forEach(s => updatePip(s, 'progress', data.cycle_count, lbl));
+  }
+  // Receipts pip: unpaid count
+  if (typeof data.receipt_count === 'number') {
+    // After a new receipt is created cycle resets, the new receipt is unpaid
+    const newUnpaid = (data.cycle_count === 0 && data.new_receipt_html) ? 1 : 0;
+    ['#sideNav', '#bottomNav'].forEach(s => updatePip(s, 'receipts', newUnpaid, newUnpaid || null));
+  }
+}
+
+/* ── Submit attendance (AJAX) ── */
+{% if teachers %}
+ajaxForm(document.getElementById('attnForm'), function(data){
+  if (data.progress_html) {
+    document.getElementById('progressArea').innerHTML = data.progress_html;
+  }
+  updateAllPips(data);
+
+  if (data.new_receipt_html) {
+    const section = document.getElementById('receiptSection');
+    document.getElementById('noReceiptsMsg')?.remove();
+    let listEl = document.getElementById('receiptList');
+    if (!listEl) {
+      section.innerHTML = '<div id="receiptList"></div>';
+      listEl = document.getElementById('receiptList');
+    }
+    listEl.insertAdjacentHTML('afterbegin', data.new_receipt_html);
+    const newCard = listEl.querySelector('.rc-card');
+    if (newCard) {
+      newCard.style.animation = 'receipt-pop .5s ease';
+      attachCardClick(newCard);
+    }
+    showToast('🎉 Receipt generated!');
+    setTimeout(() => {
+      document.querySelector('#sideNav [data-page="receipts"]')?.click() ||
+      document.querySelector('#bottomNav [data-page="receipts"]')?.click();
+    }, 900);
+  }
+});
+{% endif %}
+
+/* ── Join class ── */
+document.querySelectorAll('.join-btn').forEach(btn => {
+  btn.addEventListener('click', async function(){
+    this.textContent = '⏳'; this.disabled = true;
+    try {
+      const res  = await fetch('/schedule/join/'+this.dataset.id, {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'}});
+      const data = await res.json();
+      if (data.ok) {
+        showToast(data.msg || '✓ Attendance marked!');
+        const foot = this.closest('.sc-foot');
+        if (data.meet_link) {
+          foot.innerHTML = `<a href="${data.meet_link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.8rem;color:var(--text3);margin-left:8px">✓ Recorded</span>`;
+          setTimeout(() => window.open(data.meet_link,'_blank'), 400);
+        } else {
+          foot.innerHTML = `<span style="font-size:.84rem;color:var(--text3);font-style:italic">✓ Attendance marked</span>`;
+        }
+        const badge = this.closest('.sc-card')?.querySelector('.sc-badge');
+        if (badge) { badge.style.color='var(--green)'; badge.textContent='✓ Joined'; }
+      } else {
+        showToast(data.msg||'Error','err');
+        this.textContent='🎥 Join'; this.disabled=false;
+      }
+    } catch { showToast('Network error','err'); this.textContent='🎥 Join'; this.disabled=false; }
+  });
+});
+
+/* ── Show more receipts ── */
+const smb = document.getElementById('showMoreReceipts');
+if (smb) {
+  const cards = Array.from(document.querySelectorAll('#receiptList .rc-card'));
+  cards.forEach((c,i)=>{ if(i>=5) c.classList.add('rc-hidden'); });
+  smb.addEventListener('click', function(){ cards.forEach(c=>c.classList.remove('rc-hidden')); this.remove(); });
+}
+
+/* ── Receipt modal ── */
+const rcOverlay = document.getElementById('receiptModal');
+const rcBox     = document.getElementById('receiptModalBox');
+const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DA=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const MZ=['一','二','三','四','五','六','七','八','九','十','十一','十二'];
+const DZ=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
+
+function buildRcModal(card) {
+  const lang = document.documentElement.lang||'en';
+  const paid = card.dataset.paid==='1';
+  const fee  = 'Rp '+parseInt(card.dataset.fee||0).toLocaleString('id-ID');
+  const dates = (card.dataset.dates||'').split('|').filter(Boolean).map((raw,i)=>{
+    const dt  = new Date(raw.endsWith('Z')?raw:raw+'Z');
+    const dow = dt.getDay()===0?6:dt.getDay()-1;
+    const t   = String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
+    const day  = lang==='zh'?DZ[dow]:DA[dow];
+    const date = lang==='zh'?`${dt.getFullYear()}年${MZ[dt.getMonth()]}月${dt.getDate()}日`:`${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}`;
+    return `<div class="rm-date-item"><span class="rc-date-num">#${i+1}</span><span class="rc-date-day">${day}</span><span class="rc-date-main">${date}</span><span class="rc-date-time">${t}</span></div>`;
+  }).join('');
+  return `
+    <div class="rm-header">
+      <div><div class="rm-lbl">Receipt</div><div class="rm-id">#${card.dataset.rid}</div></div>
+      <div class="rm-header-right"><div class="rm-issue">${card.dataset.issue}</div><span class="${paid?'bpd':'bup'}">${paid?'Paid':'Unpaid'}</span></div>
+    </div>
+    <div class="rm-body">
+      ${card.dataset.student?`<div class="rr"><span class="rl">Student</span><span class="rv">${card.dataset.student}</span></div>`:''}
+      ${card.dataset.teacher?`<div class="rr"><span class="rl">Teacher</span><span class="rv">${card.dataset.teacher}</span></div>`:''}
+      <div class="rr"><span class="rl">Total Fee</span><span class="rv money">${fee}</span></div>
+    </div>
+    ${dates?`<div class="rc-dates-label">📅 Sessions attended</div><div class="rm-dates">${dates}</div>`:''}`;
+}
+
+function openRcModal(card) {
+  rcBox.innerHTML = buildRcModal(card);
+  rcOverlay.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeRcModal() { rcOverlay.classList.add('hidden'); document.body.style.overflow=''; }
+rcOverlay.addEventListener('click', e=>{ if(e.target===rcOverlay) closeRcModal(); });
+document.getElementById('receiptModalClose').onclick = closeRcModal;
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeRcModal(); });
+
+function attachCardClick(card) {
+  if (card._rc) return; card._rc = true;
+  card.addEventListener('click', ()=>openRcModal(card));
+  card.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ')openRcModal(card); });
+}
+document.querySelectorAll('#receiptList .rc-card').forEach(attachCardClick);
+</script>
+{% endblock %}
