@@ -638,13 +638,11 @@ attachScBtns();
 
     showToast(data.msg||'✓ Attendance added');
     form.reset();
-
-    /* Inject row */
-    if (data.record_html) {
-      const list  = document.getElementById('attnList');
-      document.getElementById('attnEmpty')?.remove();
-      list.insertAdjacentHTML('afterbegin', data.record_html);
-      attachDelAttn(list.querySelector('.del-attn-form'));
+    // Reset date field to current time
+    const dateInput = form.querySelector('[name=date]');
+    if (dateInput) {
+      const now = new Date();
+      dateInput.value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+'T'+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
     }
 
     /* Update progress */
@@ -655,23 +653,40 @@ attachScBtns();
       pl.querySelectorAll('.view-attn-btn').forEach(attachViewAttn);
     }
 
+    /* If drawer is open for this student, inject new row at top */
+    const drawer = document.getElementById('attnDrawer');
+    const drawerIsOpen = drawer && !drawer.classList.contains('hidden');
+    const openStudentId = drawer?.dataset.openSid;
+    if (drawerIsOpen && openStudentId && openStudentId === String(data.student_id) && data.record_html) {
+      const list = document.getElementById('attnList');
+      list.querySelector('.empty-inline')?.remove();
+      list.insertAdjacentHTML('afterbegin', data.record_html);
+      list.querySelectorAll('.del-attn-form').forEach(attachDelAttn);
+      // Update drawer subtitle
+      const sub = document.getElementById('attnDrawerSub');
+      if (sub) sub.textContent = data.s_total + ' total · ' + data.s_unbilled + ' unbilled';
+    }
+
     /* Update Students table row */
     if (data.student_id) {
       const row = document.getElementById('srow-'+data.student_id);
       if (row) {
         const sessEl = row.querySelector('.dt-sessions');
-        if (sessEl) sessEl.textContent = data.s_total;
-        // Update or create pending badge
-        let pendingEl = row.querySelector('.dt-pending');
-        if (data.s_unbilled > 0) {
-          if (!pendingEl) {
-            pendingEl = document.createElement('div');
-            pendingEl.className = 'dt-pending';
-            sessEl?.parentElement?.appendChild(pendingEl);
+        if (sessEl) {
+          sessEl.textContent = data.s_total;
+          // Handle pending badge — it's a sibling of sessEl inside same div
+          const sessWrap = sessEl.parentElement;
+          let pendingEl = sessWrap.querySelector('.dt-pending');
+          if (data.s_unbilled > 0) {
+            if (!pendingEl) {
+              pendingEl = document.createElement('div');
+              pendingEl.className = 'dt-pending';
+              sessWrap.appendChild(pendingEl);
+            }
+            pendingEl.textContent = data.s_unbilled + ' pending';
+          } else {
+            pendingEl?.remove();
           }
-          pendingEl.textContent = data.s_unbilled + ' pending';
-        } else {
-          pendingEl?.remove();
         }
       }
     }
@@ -783,17 +798,20 @@ function attachDelAttn(form) {
         const row = document.getElementById('srow-'+r.student_id);
         if (row) {
           const sessEl = row.querySelector('.dt-sessions');
-          if (sessEl) sessEl.textContent = r.s_total;
-          let pendingEl = row.querySelector('.dt-pending');
-          if (r.s_unbilled > 0) {
-            if (!pendingEl) {
-              pendingEl = document.createElement('div');
-              pendingEl.className = 'dt-pending';
-              sessEl?.parentElement?.appendChild(pendingEl);
+          if (sessEl) {
+            sessEl.textContent = r.s_total;
+            const sessWrap = sessEl.parentElement;
+            let pendingEl = sessWrap.querySelector('.dt-pending');
+            if (r.s_unbilled > 0) {
+              if (!pendingEl) {
+                pendingEl = document.createElement('div');
+                pendingEl.className = 'dt-pending';
+                sessWrap.appendChild(pendingEl);
+              }
+              pendingEl.textContent = r.s_unbilled + ' pending';
+            } else {
+              pendingEl?.remove();
             }
-            pendingEl.textContent = r.s_unbilled + ' pending';
-          } else {
-            pendingEl?.remove();
           }
         }
       }
@@ -824,6 +842,7 @@ function attachViewAttn(btn) {
     attnList.innerHTML = '<div class="empty-inline">Loading records…</div>';
     if (attnPageCols) attnPageCols.style.display = 'none';
     attnDrawer.classList.remove('hidden');
+    attnDrawer.dataset.openSid = id;
 
     const r = await fetch('/teacher/student_records/'+id, {
       headers: {'X-Requested-With': 'XMLHttpRequest'}
