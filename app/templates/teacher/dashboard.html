@@ -741,7 +741,9 @@ function attachViewAttn(btn) {
     if (attnPageCols) attnPageCols.style.display = 'none';
     attnDrawer.classList.remove('hidden');
 
-    const r = await apiFetch('/teacher/student_records/'+id, null, 'application/json');
+    const r = await fetch('/teacher/student_records/'+id, {
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).then(res => res.json()).catch(() => null);
     if (r && r.ok) {
       attnDrawerSub.textContent = `${r.total} total · ${r.unbilled} unbilled`;
       attnList.innerHTML = r.html;

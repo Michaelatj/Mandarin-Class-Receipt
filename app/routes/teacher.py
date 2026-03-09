@@ -237,7 +237,7 @@ def manual_add_attendance():
 def remove_attendance(att_id):
     teacher = _get_teacher()
     # Grab student_id before deleting
-    record = Attendance.query.get(att_id)
+    record = db.session.get(Attendance, att_id)
     student_id_del = record.student_id if record else None
 
     if delete_attendance(att_id, teacher.id):
@@ -338,7 +338,7 @@ def reset_student_password(student_id):
     return redirect(url_for("teacher.dashboard"))
 
 
-@teacher_bp.route("/teacher/student_records/<int:student_id>", methods=["GET"])
+@teacher_bp.route("/teacher/student_records/<int:student_id>", methods=["GET", "POST"])
 @teacher_required
 def student_records(student_id):
     """Return all attendance records for a specific student (AJAX)."""
