@@ -13,6 +13,8 @@ from datetime import timedelta
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(32))
+    WTF_CSRF_SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(32))
+    WTF_CSRF_TIME_LIMIT = 3600   # 1 hour token validity
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"

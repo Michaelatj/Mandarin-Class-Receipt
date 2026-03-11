@@ -265,12 +265,15 @@
 document.getElementById('langBar').style.display  = 'none';
 document.getElementById('dmToggle').style.display = 'none';
 
+// CSRF token for all POST requests
+const _CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
 // Set timezone immediately and keep it fresh
 const _TZ = -(new Date().getTimezoneOffset());
 document.getElementById('tzOffset').value = _TZ;
 fetch('/set_tz', {
   method:'POST',
-  headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+  headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':_CSRF},
   body: JSON.stringify({ tz_offset: _TZ })
 });
 
@@ -298,7 +301,7 @@ if (_attnForm) {
     // Persist to server so pip stays hidden after logout/login
     fetch('/mark_seen', {
       method: 'POST',
-      headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+      headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':_CSRF},
       body: JSON.stringify({tab: page, count: count})
     }).catch(()=>{});
     // Clear matching pips in both navbars
@@ -350,7 +353,7 @@ ajaxForm(document.getElementById('changePwForm'), null);
     try {
       const res = await fetch(form.action, {
         method: 'POST', body: new FormData(form),
-        headers: {'X-Requested-With': 'XMLHttpRequest'}
+        headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': _CSRF}
       });
       const data = await res.json();
       if (data.ok) {
@@ -442,7 +445,7 @@ document.querySelectorAll('.join-btn').forEach(btn => {
   btn.addEventListener('click', async function(){
     this.textContent = '⏳'; this.disabled = true;
     try {
-      const res  = await fetch('/schedule/join/'+this.dataset.id, {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'}});
+      const res  = await fetch('/schedule/join/'+this.dataset.id, {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':_CSRF}});
       const data = await res.json();
       if (data.ok) {
         showToast(data.msg || '✓ Attendance marked!');

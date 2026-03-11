@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=18" }}">
+<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=19" }}">
 </head>
 <body>
 
@@ -60,6 +61,9 @@ function showToast(msg, type) {
   t._timer = setTimeout(() => { t.className = type === 'err' ? 'err' : ''; }, 3200);
 }
 
+/* ── CSRF token (auto-injected in all POST requests) ── */
+const _CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
 /* ── AJAX form helper ── */
 function ajaxForm(form, onSuccess) {
   if (!form) return;
@@ -68,10 +72,11 @@ function ajaxForm(form, onSuccess) {
     const btn = form.querySelector('[type=submit]');
     if (btn) { btn.disabled = true; btn.classList.add('loading'); }
     try {
+      const fd = new FormData(form);
       const res  = await fetch(form.action, {
         method: form.method || 'POST',
-        body: new FormData(form),
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        body: fd,
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': _CSRF }
       });
       const data = await res.json();
       if (res.ok && data.ok) {

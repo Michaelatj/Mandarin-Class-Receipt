@@ -468,7 +468,7 @@ def student_records(student_id):
             action_html = '<span style="font-size:.75rem;color:var(--text3);flex-shrink:0">billed</span>'
 
         rows_html += (
-            f'<div class="attn-row" id="attn-{a.id}">'
+            f'<div class="attn-row" id="attn-{a.id}" data-billed="{"1" if a.billed else "0"}">'
             f'<div>'
             f'<div class="attn-date">{date_fmt}</div>'
             f'{note_html}'

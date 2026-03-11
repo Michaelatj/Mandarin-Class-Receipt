@@ -7,11 +7,13 @@ from datetime import datetime
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from config import config_map
 
 logger = logging.getLogger(__name__)
 
 db = SQLAlchemy()
+csrf = CSRFProtect()
 
 
 def create_app(config_name=None):
@@ -49,6 +51,9 @@ def create_app(config_name=None):
             pass
 
     db.init_app(flask_app)
+    csrf.init_app(flask_app)
+    # Accept CSRF token from header (for AJAX requests that can't easily use form fields)
+    flask_app.config['WTF_CSRF_HEADERS'] = ['X-CSRFToken']
 
     _configure_logging(flask_app)
 

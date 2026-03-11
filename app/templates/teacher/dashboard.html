@@ -186,6 +186,14 @@
             </div>
             <button class="btn bgh bsm" id="attnDrawerClose">← Back</button>
           </div>
+          <div class="attn-search-bar">
+            <input type="search" id="attnSearch" placeholder="🔍 Filter by date or note…" autocomplete="off">
+            <div class="attn-filter-row">
+              <button class="afb active" data-filter="all">All</button>
+              <button class="afb" data-filter="unbilled">Unbilled</button>
+              <button class="afb" data-filter="billed">Billed</button>
+            </div>
+          </div>
           <div class="attn-list" id="attnList">
             <div class="empty-inline" id="attnEmpty">Select a student to view records.</div>
           </div>
@@ -858,6 +866,48 @@ const attnDrawerSub   = document.getElementById('attnDrawerSub');
 const attnDrawerClose = document.getElementById('attnDrawerClose');
 const attnList        = document.getElementById('attnList');
 const attnPageCols    = document.querySelector('#page-attendance .page-cols');
+const attnSearch      = document.getElementById('attnSearch');
+
+function applyAttnFilter() {
+  const q      = (attnSearch?.value || '').toLowerCase().trim();
+  const active = document.querySelector('.afb.active')?.dataset.filter || 'all';
+  const rows   = attnList.querySelectorAll('.attn-row');
+  let visible  = 0;
+  rows.forEach(row => {
+    const text   = row.textContent.toLowerCase();
+    const billed = row.dataset.billed === '1';
+    const matchQ = !q || text.includes(q);
+    const matchF = active === 'all' || (active === 'billed' && billed) || (active === 'unbilled' && !billed);
+    const show   = matchQ && matchF;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  // Show/hide empty state
+  let noRes = attnList.querySelector('.attn-no-results');
+  if (visible === 0 && rows.length > 0) {
+    if (!noRes) {
+      noRes = document.createElement('div');
+      noRes.className = 'empty-inline attn-no-results';
+      noRes.textContent = 'No records match your filter.';
+      attnList.appendChild(noRes);
+    }
+    noRes.style.display = '';
+  } else if (noRes) {
+    noRes.style.display = 'none';
+  }
+}
+
+// Wire search input
+attnSearch?.addEventListener('input', applyAttnFilter);
+
+// Wire filter buttons
+document.querySelectorAll('.afb').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.afb').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    applyAttnFilter();
+  });
+});
 
 function attachViewAttn(btn) {
   if (btn._ok) return; btn._ok = true;
@@ -865,6 +915,9 @@ function attachViewAttn(btn) {
     e.stopPropagation();
     const id   = this.dataset.id;
     const name = this.dataset.name;
+    // Reset search/filter
+    if (attnSearch) attnSearch.value = '';
+    document.querySelectorAll('.afb').forEach(b => b.classList.toggle('active', b.dataset.filter==='all'));
     // Show drawer, hide form+progress cols
     attnDrawerTitle.textContent = name;
     attnDrawerSub.textContent   = 'Loading…';
@@ -1013,28 +1066,59 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
   const DA=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   function build(card) {
-    const paid = card.dataset.paid==='1';
-    const fee  = 'Rp '+parseInt(card.dataset.fee||0).toLocaleString('id-ID');
-    const dates = (card.dataset.dates||'').split('|').filter(Boolean).map((raw,i)=>{
+    const paid    = card.dataset.paid === '1';
+    const total   = parseInt(card.dataset.fee || 0);
+    const feeStr  = 'Rp ' + total.toLocaleString('id-ID');
+    const rawDates = (card.dataset.dates||'').split('|').filter(Boolean);
+    const perSess = rawDates.length;
+    const perSessAmt = perSess > 0 ? Math.round(total / perSess) : 0;
+    const dates = rawDates.map((raw,i)=>{
       const dt  = new Date(raw.endsWith('Z')?raw:raw+'Z');
       const dow = dt.getDay()===0?6:dt.getDay()-1;
       const t   = String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
-      return `<div class="rm-date-item"><span class="rc-date-num">#${i+1}</span><span class="rc-date-day">${DA[dow]}</span><span class="rc-date-main">${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}</span><span class="rc-date-time">${t}</span></div>`;
+      return `<div class="rm-date-item">
+        <span class="rc-date-num">#${i+1}</span>
+        <span class="rc-date-day">${DA[dow]}</span>
+        <span class="rc-date-main">${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}</span>
+        <span class="rc-date-time">${t} WIB</span>
+      </div>`;
     }).join('');
     return `
-      <div class="rm-header">
-        <div><div class="rm-lbl">Receipt</div><div class="rm-id">#${card.dataset.rid}</div></div>
-        <div class="rm-header-right"><div class="rm-issue">${card.dataset.issue}</div><span class="${paid?'bpd':'bup'}">${paid?'Paid':'Unpaid'}</span></div>
+      <div class="inv-watermark ${paid?'paid':'unpaid'}">${paid ? 'PAID' : 'UNPAID'}</div>
+      <div class="inv-header">
+        <div class="inv-brand">
+          <div class="inv-brand-zh">中文课堂</div>
+          <div class="inv-brand-sub">Mandarin Class · Invoice</div>
+        </div>
+        <div class="inv-meta">
+          <div class="inv-num">Receipt <span>#${card.dataset.rid}</span></div>
+          <div class="inv-date">Issued ${card.dataset.issue}</div>
+          <span class="inv-status ${paid?'bpd':'bup'}">${paid?'✓ Paid':'⏳ Unpaid'}</span>
+        </div>
       </div>
-      <div class="rm-body">
-        ${card.dataset.student?`<div class="rr"><span class="rl">Student</span><span class="rv">${card.dataset.student}</span></div>`:''}
-        ${card.dataset.teacher?`<div class="rr"><span class="rl">Teacher</span><span class="rv">${card.dataset.teacher}</span></div>`:''}
-        <div class="rr"><span class="rl">Total Fee</span><span class="rv money">${fee}</span></div>
+      <div class="inv-divider"></div>
+      <div class="inv-parties">
+        ${card.dataset.student?`<div class="inv-party"><div class="inv-party-lbl">Bill To</div><div class="inv-party-name">${card.dataset.student}</div><div class="inv-party-role">Student</div></div>`:''}
+        ${card.dataset.teacher?`<div class="inv-party"><div class="inv-party-lbl">From</div><div class="inv-party-name">${card.dataset.teacher}</div><div class="inv-party-role">Teacher</div></div>`:''}
       </div>
-      ${dates?`<div class="rc-dates-label">📅 Sessions attended</div><div class="rm-dates">${dates}</div>`:''}
-      <div class="rm-foot" style="display:flex;gap:8px;flex-wrap:wrap">
-        ${card.dataset.showPaid==='1'&&!paid?`<form class="mark-paid-form" method="POST" action="${card.dataset.paidUrl}" style="margin:0"><button class="btn bg bsm" type="submit">✓ Mark Paid</button></form>`:''}
-        ${paid?`<button class="btn bdel bsm del-receipt-btn" data-rid="${card.dataset.rid}">🗑 Delete Receipt</button>`:''}
+      <div class="inv-divider"></div>
+      <div class="inv-line-header">
+        <span>Description</span><span>Qty</span><span>Rate</span><span>Amount</span>
+      </div>
+      <div class="inv-line-item">
+        <span class="inv-desc"><strong>Mandarin Lessons</strong><small>${perSess} sessions</small></span>
+        <span class="inv-qty">${perSess}</span>
+        <span class="inv-rate">Rp ${perSessAmt.toLocaleString('id-ID')}</span>
+        <span class="inv-amount">${feeStr}</span>
+      </div>
+      <div class="inv-total-row">
+        <div class="inv-total-label">Total Due</div>
+        <div class="inv-total-amount">${feeStr}</div>
+      </div>
+      ${dates?`<div class="inv-sessions-header"><span>📅 Sessions Breakdown</span><span class="inv-sess-count">${perSess} classes</span></div><div class="rm-dates inv-dates">${dates}</div>`:''}
+      <div class="rm-foot" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+        ${card.dataset.showPaid==='1'&&!paid?`<form class="mark-paid-form" method="POST" action="${card.dataset.paidUrl}" style="margin:0"><button class="btn bg bsm" type="submit">✓ Mark as Paid</button></form>`:''}
+        ${paid?`<button class="btn bdel bsm del-receipt-btn" data-rid="${card.dataset.rid}">🗑 Delete</button>`:''}
       </div>`;
   }
 
@@ -1122,7 +1206,7 @@ document.querySelectorAll('.fee-form').forEach(f => {
    HELPERS
    ════════════════════════════════════════════════════ */
 async function apiFetch(url, body, ct) {
-  const headers = {'X-Requested-With':'XMLHttpRequest'};
+  const headers = {'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': _CSRF};
   if (ct) headers['Content-Type'] = ct;
   try {
     const res  = await fetch(url, { method:'POST', body: body||null, headers });
