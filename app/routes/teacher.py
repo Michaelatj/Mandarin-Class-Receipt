@@ -114,16 +114,44 @@ def dashboard():
     import json as _json
     fresh = session.pop("fresh_login", False)
 
-    # Pip persistence — read from DB so it survives logout/login
+    # Pip logic:
+    # - seen[tab] = None → tab belum pernah dibuka, JANGAN tampilkan pip
+    #   (data lama bukan "hal baru")
+    # - seen[tab] = N   → terakhir lihat ada N items; tampilkan pip hanya kalau count NAIK
+    seen      = {}
     try:
+        import json as _json
         seen = _json.loads(teacher.seen_pips or "{}")
     except Exception:
-        seen = {}
+        pass
+
     up_count   = sum(1 for s in schedules if not s.cancelled)
     attn_count = len(unbilled_records)
-    show_classes_pip  = up_count   > 0 and seen.get("classes",   -1) != up_count
-    show_attn_pip     = attn_count > 0 and seen.get("attendance", -1) != attn_count
-    show_receipts_pip = unpaid_cnt > 0 and seen.get("receipts",   -1) != unpaid_cnt
+
+    # Pertama kali login (seen kosong) → simpan semua count sekarang sebagai baseline
+    # supaya data lama tidak dianggap "hal baru"
+    if not seen:
+        seen = {
+            "classes":    up_count,
+            "attendance": attn_count,
+            "receipts":   unpaid_cnt,
+        }
+        try:
+            teacher.seen_pips = _json.dumps(seen)
+            db.session.commit()
+        except Exception:
+            pass
+
+    def _should_pip(tab, current):
+        last = seen.get(tab, None)
+        if last is None:
+            # Tab ini belum pernah tersimpan — simpan sebagai baseline, jangan pip
+            return False
+        return current > int(last)  # pip hanya kalau ada PENAMBAHAN
+
+    show_classes_pip  = up_count   > 0 and _should_pip("classes",   up_count)
+    show_attn_pip     = attn_count > 0 and _should_pip("attendance", attn_count)
+    show_receipts_pip = unpaid_cnt > 0 and _should_pip("receipts",   unpaid_cnt)
 
     resp = make_response(render_template("teacher/dashboard.html",
         user=teacher, receipts=receipts, all_students=all_students,

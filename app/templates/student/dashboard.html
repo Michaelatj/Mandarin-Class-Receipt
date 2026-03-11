@@ -293,12 +293,14 @@ if (_attnForm) {
   const pg=Array.from(document.querySelectorAll('.app-page'));
   const visited = new Set();
 
-  function clearPip(btn) {
-    btn.querySelectorAll('.snav-pip, .bnav-pip').forEach(pip => pip.remove());
-  }
-
-  function markSeen(page, count) {
-    // Persist to server so pip stays hidden after logout/login
+  function markSeen(page) {
+    // Use actual server-rendered counts — not DOM pip (which may not exist if no pip)
+    const countMap = {
+      classes:  parseInt('{{ new_count }}'),
+      progress: parseInt('{{ unbilled_count }}'),
+      receipts: parseInt('{{ unpaid_count }}'),
+    };
+    const count = countMap[page] ?? 0;
     fetch('/mark_seen', {
       method: 'POST',
       headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':_CSRF},
@@ -313,16 +315,13 @@ if (_attnForm) {
     if(!document.getElementById('page-'+id)) id=DEF;
     const isNew = !visited.has(id);
     sB.forEach(b=>{
-      const active = b.dataset.page===id;
-      b.classList.toggle('active', active);
-      if(active && isNew) { clearPip(b); markSeen(id, parseInt(b.dataset.count||'0')); }
+      b.classList.toggle('active', b.dataset.page===id);
     });
     bB.forEach(b=>{
-      const active = b.dataset.page===id;
-      b.classList.toggle('active', active);
-      if(active && isNew) clearPip(b);
+      b.classList.toggle('active', b.dataset.page===id);
     });
     pg.forEach(p=>p.style.display=p.id==='page-'+id?'block':'none');
+    if (isNew) markSeen(id); // always mark seen with real count, removes pip too
     visited.add(id);
     try{sessionStorage.setItem(KEY,id);}catch(e){}
   }

@@ -77,15 +77,35 @@ def dashboard():
     unpaid_count = sum(1 for r in receipts if not r.paid)
     unbilled_count = len(unbilled)
 
-    # ── Pip visibility: only show if count changed since user last saw it ──
+    # ── Pip visibility: hanya tampilkan kalau ada PENAMBAHAN sejak terakhir dilihat ──
     import json as _json
     try:
         seen = _json.loads(user.seen_pips or "{}")
     except Exception:
         seen = {}
-    show_classes_pip  = new_count      > 0 and new_count      != seen.get("classes",  -1)
-    show_progress_pip = unbilled_count > 0 and unbilled_count != seen.get("progress", -1)
-    show_receipts_pip = unpaid_count   > 0 and unpaid_count   != seen.get("receipts", -1)
+
+    # Pertama kali login — simpan baseline agar data lama tidak dianggap baru
+    if not seen:
+        seen = {
+            "classes":  new_count,
+            "progress": unbilled_count,
+            "receipts": unpaid_count,
+        }
+        try:
+            user.seen_pips = _json.dumps(seen)
+            db.session.commit()
+        except Exception:
+            pass
+
+    def _pip(tab, current):
+        last = seen.get(tab, None)
+        if last is None:
+            return False
+        return current > int(last)
+
+    show_classes_pip  = new_count      > 0 and _pip("classes",  new_count)
+    show_progress_pip = unbilled_count > 0 and _pip("progress", unbilled_count)
+    show_receipts_pip = unpaid_count   > 0 and _pip("receipts", unpaid_count)
 
     from flask import make_response
     fresh = session.pop("fresh_login", False)

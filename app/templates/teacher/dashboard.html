@@ -476,20 +476,43 @@ const NAV = (function(){
 
   function clearPip(id) {
     // Get count FIRST before removing pip elements
-    let count = -1;  // -1 means "seen with no items" — prevents pip showing again
+    let count = -1;
     const pip = document.querySelector(`[data-tab="${id}"]`);
     if (pip) count = parseInt(pip.dataset.count || '0');
 
-    // Remove pip from both sidebar and bottom nav buttons for this tab
+    // Remove pip visually from both navbars
     [...sideBtn, ...botBtn].forEach(b => {
       if (b.dataset.page === id) b.querySelectorAll('.snav-pip,.bnav-pip').forEach(p => p.remove());
     });
 
-    // Tell server: "I have seen this tab, and the count was `count`"
-    // Server will only show pip again if count changes from this value
+    // Persist to DB — MUST include CSRF token or Flask will reject with 400
     fetch('/teacher/mark_seen', {
       method: 'POST',
-      headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': _CSRF
+      },
+      body: JSON.stringify({tab: id, count: count})
+    }).catch(()=>{});
+  }
+
+  function markSeenCurrent(id) {
+    // Always tell server the current count for this tab, even when no pip exists
+    // This keeps the baseline up-to-date so future pips are accurate
+    const countMap = {
+      classes:    parseInt('{{ up_count }}'),
+      attendance: parseInt('{{ attn_count }}'),
+      receipts:   parseInt('{{ unpaid_cnt }}'),
+    };
+    const count = countMap[id] ?? 0;
+    fetch('/teacher/mark_seen', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': _CSRF
+      },
       body: JSON.stringify({tab: id, count: count})
     }).catch(()=>{});
   }
@@ -499,7 +522,11 @@ const NAV = (function(){
     sideBtn.forEach(b => b.classList.toggle('active', b.dataset.page === id));
     botBtn.forEach(b  => b.classList.toggle('active', b.dataset.page === id));
     pages.forEach(p => p.style.display = p.id === 'page-' + id ? 'block' : 'none');
-    if (!visited.has(id)) { clearPip(id); visited.add(id); }
+    if (!visited.has(id)) {
+      clearPip(id);        // removes pip visually + saves count if pip existed
+      markSeenCurrent(id); // always update baseline so server knows current count
+      visited.add(id);
+    }
     try { sessionStorage.setItem(KEY, id); } catch(e){}
   }
 
