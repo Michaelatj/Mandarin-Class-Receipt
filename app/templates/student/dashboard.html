@@ -265,9 +265,6 @@
 document.getElementById('langBar').style.display  = 'none';
 document.getElementById('dmToggle').style.display = 'none';
 
-// CSRF token for all POST requests
-const _CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
-
 // Set timezone immediately and keep it fresh
 const _TZ = -(new Date().getTimezoneOffset());
 document.getElementById('tzOffset').value = _TZ;
