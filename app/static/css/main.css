@@ -1096,3 +1096,307 @@ select {
 .info-row:last-child { border-bottom: none; }
 .info-label { color: var(--text3); font-size: .75rem; text-transform: uppercase; letter-spacing: .3px; font-weight: 600; }
 .info-value { font-weight: 600; color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════════════
+   GOOGLE-STYLE ANIMATIONS & INTERACTIONS
+   Spring physics · Ripple · Stagger · Skeleton · Polish
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Page load stagger reveal ── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: scale(.7); }
+  60%  { opacity: 1; transform: scale(1.05); }
+  80%  { transform: scale(.97); }
+  100% { transform: scale(1); }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
+}
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes toastSlide {
+  from { opacity: 0; transform: translateX(110%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(110%); }
+}
+@keyframes pipBounce {
+  0%   { transform: scale(0); }
+  60%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+@keyframes drawerSlide {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(.92) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes receiptPop {
+  0%   { opacity: 0; transform: scaleY(0) translateY(-10px); transform-origin: top; }
+  70%  { transform: scaleY(1.03) translateY(0); transform-origin: top; }
+  100% { opacity: 1; transform: scaleY(1); }
+}
+@keyframes successCheck {
+  0%   { stroke-dashoffset: 50; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* ── App shell page load ── */
+.app-shell { animation: fadeIn .3s ease both; }
+
+.app-sidebar { animation: slideInLeft .35s cubic-bezier(.2,.8,.4,1) both; }
+
+.app-page { animation: none; }
+.app-page.page-active-enter {
+  animation: fadeSlideUp .3s cubic-bezier(.2,.8,.4,1) both;
+}
+
+/* ── Cards stagger on load ── */
+.card { animation: fadeSlideUp .35s cubic-bezier(.2,.8,.4,1) both; }
+.sc-card { animation: fadeSlideUp .3s cubic-bezier(.2,.8,.4,1) both; }
+.rc-card { animation: fadeSlideUp .3s cubic-bezier(.2,.8,.4,1) both; }
+.dt-row  { animation: fadeSlideUp .25s cubic-bezier(.2,.8,.4,1) both; }
+
+/* Stagger children */
+.card:nth-child(1), .sc-card:nth-child(1), .rc-card:nth-child(1), .dt-row:nth-child(1) { animation-delay: .04s; }
+.card:nth-child(2), .sc-card:nth-child(2), .rc-card:nth-child(2), .dt-row:nth-child(2) { animation-delay: .08s; }
+.card:nth-child(3), .sc-card:nth-child(3), .rc-card:nth-child(3), .dt-row:nth-child(3) { animation-delay: .12s; }
+.card:nth-child(4), .sc-card:nth-child(4), .rc-card:nth-child(4), .dt-row:nth-child(4) { animation-delay: .16s; }
+.card:nth-child(5), .sc-card:nth-child(5), .rc-card:nth-child(5), .dt-row:nth-child(5) { animation-delay: .20s; }
+
+/* ── Ripple effect on buttons ── */
+.btn { position: relative; overflow: hidden; }
+.btn .ripple-el {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  background: rgba(255,255,255,.35);
+  pointer-events: none;
+  animation: ripple .55s linear;
+}
+.btn.bdel .ripple-el, .btn.bdel-outline .ripple-el { background: rgba(255,255,255,.4); }
+.btn.bgh .ripple-el { background: rgba(0,0,0,.08); }
+
+/* ── Hover lift on cards ── */
+.sc-card {
+  transition: transform .2s cubic-bezier(.2,.8,.4,1), box-shadow .2s cubic-bezier(.2,.8,.4,1);
+  will-change: transform;
+}
+.sc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,.12);
+}
+.rc-card {
+  transition: transform .18s cubic-bezier(.2,.8,.4,1), box-shadow .18s ease;
+  will-change: transform;
+  cursor: pointer;
+}
+.rc-card:hover {
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 0 6px 28px rgba(0,0,0,.10);
+}
+
+/* ── New item injection animation ── */
+.item-injected {
+  animation: receiptPop .4s cubic-bezier(.2,.8,.4,1) both;
+}
+
+/* ── Pip bounce on creation ── */
+.snav-pip, .bnav-pip {
+  animation: pipBounce .4s cubic-bezier(.2,.8,.4,1) both;
+  transition: transform .15s cubic-bezier(.2,.8,.4,1);
+}
+
+/* ── Nav button active state spring ── */
+.snav-btn, .bnav-btn {
+  transition: background .15s, color .15s, transform .12s cubic-bezier(.2,.8,.4,1);
+}
+.snav-btn:active, .bnav-btn:active { transform: scale(.95); }
+
+/* ── Toast upgrade ── */
+#toast {
+  animation: toastSlide .35s cubic-bezier(.2,.8,.4,1) both;
+}
+#toast.toast-out {
+  animation: toastOut .25s cubic-bezier(.4,.0,1,1) both;
+}
+
+/* ── Modal pop ── */
+.modal-box, .rm-box {
+  animation: modalPop .3s cubic-bezier(.2,.8,.4,1) both;
+}
+
+/* ── Drawer slide ── */
+.attn-drawer:not(.hidden) {
+  animation: drawerSlide .3s cubic-bezier(.2,.8,.4,1) both;
+}
+
+/* ── Skeleton loader ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+.skeleton-line { height: 14px; margin: 8px 0; border-radius: 4px; }
+.skeleton-line.w-80 { width: 80%; }
+.skeleton-line.w-60 { width: 60%; }
+.skeleton-line.w-40 { width: 40%; }
+
+/* ── Progress bar smooth fill ── */
+.progress-fill, .cycle-fill {
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Input focus glow ── */
+input, select, textarea {
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(176,125,46,.15) !important;
+  outline: none;
+}
+
+/* ── Button loading spinner upgrade ── */
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  right: 12px; top: 50%;
+  width: 14px; height: 14px;
+  margin-top: -7px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+}
+.btn.loading { padding-right: 32px; pointer-events: none; }
+
+/* ── Success flash on save ── */
+.save-success {
+  animation: pulse .4s ease both;
+}
+
+/* ── Sidebar nav hover glow ── */
+.snav-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0);
+  border-radius: 8px;
+  transition: background .15s;
+  pointer-events: none;
+}
+.snav-btn:hover::before { background: rgba(255,255,255,.06); }
+.snav-btn.active::before { background: rgba(176,125,46,.15); }
+
+/* ── Data table row hover ── */
+.dt-row {
+  transition: background .12s;
+}
+.dt-row:hover { background: var(--surface2); }
+
+/* ── Attendance row entrance ── */
+.attn-row {
+  animation: fadeSlideUp .25s cubic-bezier(.2,.8,.4,1) both;
+}
+
+/* ── Schedule card status badge pulse (upcoming) ── */
+.sc-badge.upcoming {
+  animation: none;
+}
+.sc-card.upcoming:hover .sc-badge.upcoming {
+  animation: pulse 1.5s ease infinite;
+}
+
+/* ── Bottom nav active indicator ── */
+.bnav-btn.active .bnav-icon {
+  transform: translateY(-2px) scale(1.1);
+  transition: transform .2s cubic-bezier(.2,.8,.4,1);
+}
+.bnav-btn .bnav-icon {
+  transition: transform .2s cubic-bezier(.2,.8,.4,1);
+}
+
+/* ── Fee row save confirmation ── */
+.fee-row .btn.bg {
+  transition: background .15s, transform .12s cubic-bezier(.2,.8,.4,1);
+}
+.fee-row .btn.bg:active { transform: scale(.94); }
+
+/* ── Smooth page tab switching ── */
+.app-page {
+  transition: opacity .15s ease;
+}
+
+/* ── Confirm modal overlay fade ── */
+.rm-overlay:not(.hidden), .modal-overlay:not(.hidden), .cm-overlay:not(.hidden) {
+  animation: fadeIn .2s ease both;
+}
+
+/* ── Cycle grid cell entrance ── */
+.cycle-cell {
+  transition: transform .15s cubic-bezier(.2,.8,.4,1), box-shadow .15s;
+}
+.cycle-cell.done:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 16px rgba(0,0,0,.1);
+}
+.cycle-cell.done {
+  animation: bounceIn .4s cubic-bezier(.2,.8,.4,1) both;
+}
+
+/* ── Inject new receipt ── */
+@keyframes receipt-pop {
+  0%   { opacity: 0; transform: scale(.9) translateY(-8px); }
+  70%  { transform: scale(1.02) translateY(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.rc-card { animation: receipt-pop .35s cubic-bezier(.2,.8,.4,1) both; }
+
+/* ── Join class button pulse ── */
+.join-btn {
+  transition: transform .15s cubic-bezier(.2,.8,.4,1), box-shadow .15s;
+}
+.join-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px rgba(176,125,46,.3);
+}
+.join-btn:active { transform: scale(.96); }
+
+/* ── Settings form field animate in ── */
+.settings-section label {
+  display: block;
+  animation: fadeSlideUp .3s cubic-bezier(.2,.8,.4,1) both;
+}

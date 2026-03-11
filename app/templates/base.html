@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=16" }}">
+<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=17" }}">
 </head>
 <body>
 
@@ -90,6 +90,37 @@ function ajaxForm(form, onSuccess) {
 }
 
 history.replaceState(null, '', location.href);
+
+/* ── Ripple effect on all .btn clicks ── */
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.btn');
+  if (!btn || btn.disabled) return;
+  const r = btn.getBoundingClientRect();
+  const size = Math.max(r.width, r.height) * 2;
+  const el = document.createElement('span');
+  el.className = 'ripple-el';
+  el.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px`;
+  btn.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+}, true);
+
+/* ── Enhanced toast with slide-out ── */
+(function(){
+  const t = document.getElementById('toast');
+  if (!t) return;
+  const _orig = window.showToast;
+  window.showToast = function(msg, type) {
+    t.classList.remove('toast-out');
+    t.childNodes.forEach(n => { if (n.nodeType === 3) n.remove(); });
+    t.appendChild(document.createTextNode(msg));
+    t.className = (type === 'err' ? 'err' : '') + ' show';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => {
+      t.classList.add('toast-out');
+      setTimeout(() => { t.className = type === 'err' ? 'err' : ''; }, 250);
+    }, 3000);
+  };
+})();
 </script>
 {% block page_scripts %}{% endblock %}
 </body>

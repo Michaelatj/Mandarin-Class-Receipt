@@ -145,7 +145,20 @@ def edit(sid):
             pass
 
     db.session.commit()
-    if _is_ajax(): return jsonify(ok=True, msg=tr("ok_saved"))
+    if _is_ajax():
+        # Return updated card fields so JS can update DOM without reload
+        dt_fmt = s.scheduled_at.strftime("%a, %d %b %Y · %H:%M")
+        at_iso = s.scheduled_at.strftime("%Y-%m-%dT%H:%M")
+        invites = ScheduleInvite.query.filter_by(schedule_id=sid).all()
+        invite_all = len(invites) == 0
+        return jsonify(ok=True, msg=tr("ok_saved"),
+                       schedule_id=sid,
+                       title=s.title,
+                       description=s.description or '',
+                       meet_link=s.meet_link or '',
+                       dt_fmt=dt_fmt,
+                       at_iso=at_iso,
+                       invite_all=invite_all)
     flash(tr("ok_saved"), "ok")
     return redirect(url_for("teacher.dashboard"))
 

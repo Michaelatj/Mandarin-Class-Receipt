@@ -563,9 +563,33 @@ ajaxForm(document.getElementById('scheduleForm'), function(data){
 /* ── Edit modal ── */
 document.getElementById('modalClose').onclick = () =>
   document.getElementById('editModal').classList.add('hidden');
-ajaxForm(document.getElementById('editScheduleForm'), function(){
+ajaxForm(document.getElementById('editScheduleForm'), function(data){
   document.getElementById('editModal').classList.add('hidden');
-  setTimeout(() => location.reload(), 500);
+  // Update card in-place — no reload needed
+  const card = document.getElementById('sc-'+data.schedule_id);
+  if (card) {
+    const titleEl = card.querySelector('.sc-title');
+    if (titleEl) titleEl.textContent = data.title;
+    const timeEl  = card.querySelector('.sc-time');
+    if (timeEl) timeEl.textContent = '📅 '+data.dt_fmt;
+    const descEl  = card.querySelector('.sc-desc');
+    if (data.description && descEl) descEl.textContent = data.description;
+    const linkEl  = card.querySelector('.sc-link a');
+    if (linkEl && data.meet_link) { linkEl.href = data.meet_link; linkEl.textContent = data.meet_link; }
+    const invEl   = card.querySelector('.sc-invites');
+    if (invEl) {
+      invEl.className = 'sc-invites' + (data.invite_all ? ' open' : '');
+      invEl.textContent = data.invite_all ? '🌐 All students' : '🎯 Specific students only';
+    }
+    // Update edit button data attributes for next edit
+    const editBtn = card.querySelector('.edit-sc-btn');
+    if (editBtn) {
+      editBtn.dataset.title = data.title;
+      editBtn.dataset.at    = data.at_iso;
+      editBtn.dataset.link  = data.meet_link;
+      editBtn.dataset.desc  = data.description;
+    }
+  }
 });
 
 /* ── Schedule buttons (cancel / delete / edit) ── */
