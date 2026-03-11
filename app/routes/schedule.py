@@ -223,9 +223,14 @@ def join(sid):
     logger.info("Student %s joined schedule #%d", student.name(), sid)
 
     if _is_ajax():
+        from ..models import Attendance as _Att
+        unbilled_cnt   = _Att.query.filter_by(student_id=student.id, billed=False).count()
+        total_sessions = _Att.query.filter_by(student_id=student.id).count()
         return jsonify(ok=True, already=False,
                        meet_link=s.meet_link,
-                       msg="Attendance marked! Opening Meet…")
+                       msg="Attendance marked! Opening Meet…",
+                       cycle_count=unbilled_cnt,
+                       total_sessions=total_sessions)
     if s.meet_link:
         return redirect(s.meet_link)
     flash("Attendance marked!", "ok")

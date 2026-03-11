@@ -113,13 +113,15 @@ def dashboard():
     from flask import make_response
     fresh = session.pop("fresh_login", False)
 
-    # Pip persistence — only show pip if count changed since last viewed
-    seen       = session.get("teacher_seen_pips", {})
-    up_count   = sum(1 for s in schedules if not s.cancelled)
+    # Pip persistence — show pip only if count changed since teacher last viewed that tab
+    # seen[tab] = last count teacher saw. -1 = never seen. -2 = seen with 0 items.
+    seen      = session.get("teacher_seen_pips", {})
+    up_count  = sum(1 for s in schedules if not s.cancelled)
     attn_count = len(unbilled_records)
-    show_classes_pip  = up_count   > 0 and up_count   != seen.get("classes",  -1)
-    show_attn_pip     = attn_count > 0 and attn_count != seen.get("attendance",-1)
-    show_receipts_pip = unpaid_cnt > 0 and unpaid_cnt != seen.get("receipts",  -1)
+    # Show pip only when count is > 0 AND different from last seen count
+    show_classes_pip  = up_count   > 0 and seen.get("classes",   -1) != up_count
+    show_attn_pip     = attn_count > 0 and seen.get("attendance", -1) != attn_count
+    show_receipts_pip = unpaid_cnt > 0 and seen.get("receipts",   -1) != unpaid_cnt
 
     resp = make_response(render_template("teacher/dashboard.html",
         user=teacher, receipts=receipts, all_students=all_students,
@@ -328,6 +330,27 @@ def paid(receipt_id):
         if _is_ajax():
             return jsonify(ok=True, msg=tr("ok_paid"), paid_label=tr("paid_lbl"))
         flash(tr("ok_paid"), "ok")
+    return redirect(url_for("teacher.dashboard"))
+
+
+@teacher_bp.route("/teacher/delete_receipt/<int:receipt_id>", methods=["POST"])
+@teacher_required
+def delete_receipt(receipt_id):
+    """Teacher can delete a receipt (only if already paid)."""
+    teacher = _get_teacher()
+    receipt = db.session.get(Receipt, receipt_id)
+    if not receipt or receipt.teacher_id != teacher.id:
+        if _is_ajax(): return jsonify(ok=False, msg="Receipt not found")
+        return redirect(url_for("teacher.dashboard"))
+    if not receipt.paid:
+        if _is_ajax(): return jsonify(ok=False, msg="Can only delete paid receipts")
+        flash("Can only delete paid receipts", "err")
+        return redirect(url_for("teacher.dashboard"))
+    db.session.delete(receipt)
+    db.session.commit()
+    if _is_ajax():
+        return jsonify(ok=True, msg="Receipt deleted")
+    flash("Receipt deleted", "ok")
     return redirect(url_for("teacher.dashboard"))
 
 

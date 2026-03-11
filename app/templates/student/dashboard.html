@@ -406,6 +406,14 @@ ajaxForm(document.getElementById('attnForm'), function(data){
   }
   updateAllPips(data);
 
+  // Update stat numbers on Classes page in real-time
+  if (typeof data.cycle_count === 'number') {
+    const statNums = document.querySelectorAll('.stat-num');
+    // First stat-num = unbilled count, second = total sessions
+    if (statNums[0]) statNums[0].textContent = data.cycle_count;
+    if (statNums[1] && typeof data.total_sessions === 'number') statNums[1].textContent = data.total_sessions;
+  }
+
   if (data.new_receipt_html) {
     const section = document.getElementById('receiptSection');
     document.getElementById('noReceiptsMsg')?.remove();
@@ -447,6 +455,13 @@ document.querySelectorAll('.join-btn').forEach(btn => {
         }
         const badge = this.closest('.sc-card')?.querySelector('.sc-badge');
         if (badge) { badge.style.color='var(--green)'; badge.textContent='✓ Joined'; }
+        // Update stat numbers real-time
+        if (typeof data.cycle_count === 'number') {
+          const statNums = document.querySelectorAll('.stat-num');
+          if (statNums[0]) statNums[0].textContent = data.cycle_count;
+          if (statNums[1] && typeof data.total_sessions === 'number') statNums[1].textContent = data.total_sessions;
+          updateAllPips(data);
+        }
       } else {
         showToast(data.msg||'Error','err');
         this.textContent='🎥 Join'; this.disabled=false;

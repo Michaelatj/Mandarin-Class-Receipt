@@ -467,13 +467,18 @@ const NAV = (function(){
   const visited = new Set();
 
   function clearPip(id) {
+    // Get count FIRST before removing pip elements
+    let count = -1;  // -1 means "seen with no items" — prevents pip showing again
+    const pip = document.querySelector(`[data-tab="${id}"]`);
+    if (pip) count = parseInt(pip.dataset.count || '0');
+
     // Remove pip from both sidebar and bottom nav buttons for this tab
     [...sideBtn, ...botBtn].forEach(b => {
       if (b.dataset.page === id) b.querySelectorAll('.snav-pip,.bnav-pip').forEach(p => p.remove());
     });
-    // Tell server this tab has been seen — get count from pip if present
-    const pip = document.querySelector(`[data-tab="${id}"]`);
-    const count = pip ? parseInt(pip.dataset.count || '0') : 0;
+
+    // Tell server: "I have seen this tab, and the count was `count`"
+    // Server will only show pip again if count changes from this value
     fetch('/teacher/mark_seen', {
       method: 'POST',
       headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
@@ -1003,7 +1008,10 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
         <div class="rr"><span class="rl">Total Fee</span><span class="rv money">${fee}</span></div>
       </div>
       ${dates?`<div class="rc-dates-label">📅 Sessions attended</div><div class="rm-dates">${dates}</div>`:''}
-      ${card.dataset.showPaid==='1'&&!paid?`<div class="rm-foot"><form class="mark-paid-form" method="POST" action="${card.dataset.paidUrl}"><button class="btn bg bsm" type="submit">✓ Mark Paid</button></form></div>`:''}`;
+      <div class="rm-foot" style="display:flex;gap:8px;flex-wrap:wrap">
+        ${card.dataset.showPaid==='1'&&!paid?`<form class="mark-paid-form" method="POST" action="${card.dataset.paidUrl}" style="margin:0"><button class="btn bg bsm" type="submit">✓ Mark Paid</button></form>`:''}
+        ${paid?`<button class="btn bdel bsm del-receipt-btn" data-rid="${card.dataset.rid}">🗑 Delete Receipt</button>`:''}
+      </div>`;
   }
 
   function open(card) {
@@ -1018,8 +1026,28 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
         if (r) {
           card.dataset.paid='1';
           const b=card.querySelector('.bup'); if(b){b.className='bpd';b.textContent='Paid';}
+          // Update pip — one less unpaid
+          ['#sideNav','#bottomNav'].forEach(sel=>{
+            const nav=document.querySelector(sel+' [data-page="receipts"]');
+            if(!nav)return;
+            const pip=nav.querySelector('.snav-pip,.bnav-pip');
+            if(pip){const n=parseInt(pip.textContent)-1; if(n>0)pip.textContent=n; else pip.remove();}
+          });
           showToast(r.msg||'✓ Marked paid'); close();
+          // Rebuild modal to show delete button
+          open(card);
         } else if(btn){btn.disabled=false;btn.classList.remove('loading');}
+      });
+    });
+    box.querySelectorAll('.del-receipt-btn').forEach(btn=>{
+      btn.addEventListener('click', async function(){
+        if (!await confirm2('Delete this receipt?','This cannot be undone.','🗑 Delete','danger')) return;
+        this.disabled=true; this.textContent='Deleting…';
+        const r = await apiFetch('/teacher/delete_receipt/'+this.dataset.rid, new FormData());
+        if (r) {
+          document.getElementById('rc-'+this.dataset.rid)?.remove();
+          showToast('Receipt deleted'); close();
+        } else { this.disabled=false; this.textContent='🗑 Delete Receipt'; }
       });
     });
   }
