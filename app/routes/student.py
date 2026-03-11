@@ -78,7 +78,11 @@ def dashboard():
     unbilled_count = len(unbilled)
 
     # ── Pip visibility: only show if count changed since user last saw it ──
-    seen = session.get("seen_pips", {})
+    import json as _json
+    try:
+        seen = _json.loads(user.seen_pips or "{}")
+    except Exception:
+        seen = {}
     show_classes_pip  = new_count      > 0 and new_count      != seen.get("classes",  -1)
     show_progress_pip = unbilled_count > 0 and unbilled_count != seen.get("progress", -1)
     show_receipts_pip = unpaid_count   > 0 and unpaid_count   != seen.get("receipts", -1)
@@ -290,13 +294,19 @@ def update_profile():
 @student_bp.route("/mark_seen", methods=["POST"])
 @login_required
 def mark_seen():
-    """Called when student clicks a nav tab — saves that they've seen the current count."""
+    """Called when student clicks a nav tab — saves to DB so it survives logout/login."""
+    import json as _json
     from flask import request as _req, jsonify as _j
-    data = _req.get_json(silent=True) or {}
-    tab  = data.get("tab", "")
+    data  = _req.get_json(silent=True) or {}
+    tab   = data.get("tab", "")
     count = data.get("count", 0)
     if tab in ("classes", "progress", "receipts"):
-        seen = session.get("seen_pips", {})
+        user = db.session.get(User, session["user_id"])
+        try:
+            seen = _json.loads(user.seen_pips or "{}")
+        except Exception:
+            seen = {}
         seen[tab] = count
-        session["seen_pips"] = seen
+        user.seen_pips = _json.dumps(seen)
+        db.session.commit()
     return _j(ok=True)

@@ -83,8 +83,9 @@ def _auto_migrate(flask_app):
 
     migrations = [
         # (table, column, sql_type_and_default)
-        ("user",       "email",  "VARCHAR(200) DEFAULT ''"),
-        ("attendance", "source", "VARCHAR(10)  DEFAULT 'teacher'"),
+        ("user",       "email",     "VARCHAR(200) DEFAULT ''"),
+        ("user",       "seen_pips", "VARCHAR(500) DEFAULT '{}'"),
+        ("attendance", "source",    "VARCHAR(10)  DEFAULT 'teacher'"),
     ]
 
     try:

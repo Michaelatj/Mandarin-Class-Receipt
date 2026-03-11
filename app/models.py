@@ -20,7 +20,8 @@ class User(db.Model):
     bank_name    = db.Column(db.String(100), default="")
     fee_idr      = db.Column(db.Integer, default=0)           # teacher default fee
     phone        = db.Column(db.String(30), default="")
-    email        = db.Column(db.String(200), default="")      # for forgot-password OTP
+    email        = db.Column(db.String(200), default="")
+    seen_pips    = db.Column(db.String(500), default="{}")    # JSON: {tab: last_seen_count}
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
 
     def name(self) -> str:

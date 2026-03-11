@@ -111,14 +111,16 @@ def dashboard():
         student_unbilled[s.id] = unbilled
 
     from flask import make_response
+    import json as _json
     fresh = session.pop("fresh_login", False)
 
-    # Pip persistence — show pip only if count changed since teacher last viewed that tab
-    # seen[tab] = last count teacher saw. -1 = never seen. -2 = seen with 0 items.
-    seen      = session.get("teacher_seen_pips", {})
-    up_count  = sum(1 for s in schedules if not s.cancelled)
+    # Pip persistence — read from DB so it survives logout/login
+    try:
+        seen = _json.loads(teacher.seen_pips or "{}")
+    except Exception:
+        seen = {}
+    up_count   = sum(1 for s in schedules if not s.cancelled)
     attn_count = len(unbilled_records)
-    # Show pip only when count is > 0 AND different from last seen count
     show_classes_pip  = up_count   > 0 and seen.get("classes",   -1) != up_count
     show_attn_pip     = attn_count > 0 and seen.get("attendance", -1) != attn_count
     show_receipts_pip = unpaid_cnt > 0 and seen.get("receipts",   -1) != unpaid_cnt
@@ -164,13 +166,19 @@ def update_settings():
 @teacher_bp.route("/teacher/mark_seen", methods=["POST"])
 @teacher_required
 def mark_seen():
-    """Store how many items teacher has seen per tab — prevents stale pips on refresh."""
+    """Persist which pip counts teacher has seen — survives logout/login."""
+    import json
     tab   = request.json.get("tab") if request.is_json else request.form.get("tab")
     count = request.json.get("count") if request.is_json else request.form.get("count", type=int)
     if tab is not None and count is not None:
-        seen = session.get("teacher_seen_pips", {})
+        teacher = _get_teacher()
+        try:
+            seen = json.loads(teacher.seen_pips or "{}")
+        except Exception:
+            seen = {}
         seen[tab] = int(count)
-        session["teacher_seen_pips"] = seen
+        teacher.seen_pips = json.dumps(seen)
+        db.session.commit()
     return jsonify(ok=True)
 
 
