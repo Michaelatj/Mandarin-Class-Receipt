@@ -213,7 +213,7 @@ def join(sid):
         if _is_ajax(): return jsonify(ok=False, msg="Class not found or cancelled")
         return redirect(url_for("student.dashboard"))
 
-    # Prevent double-join
+    # Prevent double-join per schedule
     existing = ScheduleJoin.query.filter_by(schedule_id=sid, student_id=student.id).first()
     if existing:
         if _is_ajax():
@@ -223,17 +223,23 @@ def join(sid):
         return redirect(s.meet_link or url_for("student.dashboard"))
 
     # Auto-mark attendance — store UTC now, display as WIB later
+    # add_attendance returns None if blocked by 90-min cooldown
     att = add_attendance(student_id=student.id,
                          teacher_id=s.teacher_id,
                          date=datetime.utcnow(),
                          note=f"Joined: {s.title}",
                          source='join')
 
+    # Even if cooldown blocked attendance, still record the join and open Meet
     sj = ScheduleJoin(schedule_id=sid, student_id=student.id,
                       attendance_id=att.id if att else None)
     db.session.add(sj)
     db.session.commit()
-    logger.info("Student %s joined schedule #%d", student.name(), sid)
+
+    cooldown_blocked = att is None
+    msg = "Opening Meet…" if not cooldown_blocked else "Joining Meet (attendance already recorded in last 90 min)"
+    logger.info("Student %s joined schedule #%d (attendance=%s)", student.name(), sid,
+                "blocked by cooldown" if cooldown_blocked else "recorded")
 
     if _is_ajax():
         from ..models import Attendance as _Att
@@ -241,7 +247,8 @@ def join(sid):
         total_sessions = _Att.query.filter_by(student_id=student.id).count()
         return jsonify(ok=True, already=False,
                        meet_link=s.meet_link,
-                       msg="Attendance marked! Opening Meet…",
+                       msg=msg,
+                       cooldown_blocked=cooldown_blocked,
                        cycle_count=unbilled_cnt,
                        total_sessions=total_sessions)
     if s.meet_link:

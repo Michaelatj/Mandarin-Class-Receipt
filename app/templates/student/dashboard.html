@@ -444,16 +444,36 @@ document.querySelectorAll('.join-btn').forEach(btn => {
       const res  = await fetch('/schedule/join/'+this.dataset.id, {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':_CSRF}});
       const data = await res.json();
       if (data.ok) {
-        showToast(data.msg || '✓ Attendance marked!');
-        const foot = this.closest('.sc-foot');
-        if (data.meet_link) {
-          foot.innerHTML = `<a href="${data.meet_link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.8rem;color:var(--text3);margin-left:8px">✓ Recorded</span>`;
-          setTimeout(() => window.open(data.meet_link,'_blank'), 400);
+        const foot  = this.closest('.sc-foot');
+        const badge = this.closest('.sc-card')?.querySelector('.sc-badge');
+        const link  = data.meet_link;
+
+        if (data.already) {
+          // Already joined this specific schedule
+          showToast('Already joined — reopening Meet…');
+          if (link) { foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Rejoin Meet</a>`; setTimeout(()=>window.open(link,'_blank'),300); }
+          return;
+        }
+
+        if (data.cooldown_blocked) {
+          // Attendance already recorded within 90 min — open meet but no new attendance
+          showToast('✓ Meet opened (attendance already recorded this session)');
+          if (link) { foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.78rem;color:var(--text3);margin-left:8px">attendance recorded earlier</span>`; setTimeout(()=>window.open(link,'_blank'),300); }
+          else { foot.innerHTML = `<span style="font-size:.84rem;color:var(--text3);font-style:italic">✓ Already recorded this session</span>`; }
+          if (badge) { badge.style.color='var(--green)'; badge.textContent='✓ Joined'; }
+          return;
+        }
+
+        // Normal join — attendance recorded
+        showToast('✓ Attendance recorded!');
+        if (link) {
+          foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.8rem;color:var(--text3);margin-left:8px">✓ Recorded</span>`;
+          setTimeout(() => window.open(link,'_blank'), 400);
         } else {
           foot.innerHTML = `<span style="font-size:.84rem;color:var(--text3);font-style:italic">✓ Attendance marked</span>`;
         }
-        const badge = this.closest('.sc-card')?.querySelector('.sc-badge');
         if (badge) { badge.style.color='var(--green)'; badge.textContent='✓ Joined'; }
+
         // Update stat numbers real-time
         if (typeof data.cycle_count === 'number') {
           const statNums = document.querySelectorAll('.stat-num');
@@ -463,9 +483,9 @@ document.querySelectorAll('.join-btn').forEach(btn => {
         }
       } else {
         showToast(data.msg||'Error','err');
-        this.textContent='🎥 Join'; this.disabled=false;
+        this.textContent='🎥 Join Class'; this.disabled=false;
       }
-    } catch { showToast('Network error','err'); this.textContent='🎥 Join'; this.disabled=false; }
+    } catch { showToast('Network error','err'); this.textContent='🎥 Join Class'; this.disabled=false; }
   });
 });
 

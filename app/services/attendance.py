@@ -39,22 +39,49 @@ def set_custom_fee(teacher_id: int, student_id: int, fee: int) -> None:
 
 def add_attendance(student_id: int, teacher_id: int,
                    date: datetime | None = None, note: str = "",
-                   source: str = "teacher") -> Attendance:
+                   source: str = "teacher") -> Attendance | None:
     """
     Add one attendance record and check whether a receipt should be generated.
-    Returns the new Attendance object.
+    Returns the new Attendance object, or None if blocked by 90-min cooldown.
+
+    Cooldown applies to student-initiated submissions (source='student' or 'join').
+    Teacher manual entries (source='teacher') bypass cooldown.
     """
+    from datetime import timedelta
+    now = date or datetime.utcnow()
+
+    # 90-minute cooldown — only for student/join sources, not teacher manual
+    if source in ("student", "join"):
+        cutoff = now - timedelta(minutes=90)
+        recent = (
+            Attendance.query
+            .filter(
+                Attendance.student_id == student_id,
+                Attendance.teacher_id == teacher_id,
+                Attendance.date >= cutoff,
+                Attendance.source.in_(["student", "join"]),
+            )
+            .first()
+        )
+        if recent:
+            logger.info(
+                "Cooldown blocked attendance: student=%d teacher=%d "
+                "(last was %s, within 90 min)",
+                student_id, teacher_id, recent.date.isoformat(),
+            )
+            return None
+
     record = Attendance(
         student_id=student_id,
         teacher_id=teacher_id,
-        date=date or datetime.utcnow(),
+        date=now,
         note=note[:200],
         source=source,
     )
     db.session.add(record)
     db.session.commit()
-    logger.info("Attendance added: student=%d teacher=%d date=%s",
-                student_id, teacher_id, record.date.isoformat())
+    logger.info("Attendance added: student=%d teacher=%d date=%s source=%s",
+                student_id, teacher_id, record.date.isoformat(), source)
 
     student = db.session.get(User, student_id)
     teacher = db.session.get(User, teacher_id)
