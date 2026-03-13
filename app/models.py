@@ -68,6 +68,7 @@ class Receipt(db.Model):
     __tablename__ = "receipt"
 
     id           = db.Column(db.Integer, primary_key=True)
+    receipt_no   = db.Column(db.Integer, nullable=False, default=0)  # sequential per teacher
     student_id   = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
     student_name = db.Column(db.String(100), nullable=False)
     teacher_id   = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)

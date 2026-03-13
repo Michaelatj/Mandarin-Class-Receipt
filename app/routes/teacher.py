@@ -47,16 +47,21 @@ def _build_progress_html(teacher_id):
         return ""
     rows = ""
     for sp in progress:
-        pct = min(int(sp["count"] / 8 * 100), 100)
+        pct      = min(int(sp["count"] / 8 * 100), 100)
+        is_zero  = sp["count"] == 0
         last_date = fmt_date(to_wib(sp["dates"][-1])) if sp["dates"] else ""
-        last_html = f'<div class="dt-meta">Last: {last_date}</div>' if last_date else ""
+        last_html = (f'<div class="dt-meta">Last: {last_date}</div>'
+                     if last_date else
+                     '<div class="dt-meta" style="color:var(--text3);font-style:italic">No unbilled sessions</div>')
+        count_color = "var(--text3)" if is_zero else "var(--text)"
+        row_style   = "opacity:.65;" if is_zero else ""
         rows += (
             f'<div class="dt-row prog-row" id="prog-{sp["student_id"]}" '
-            f'style="grid-template-columns:1fr 80px 120px 44px;cursor:pointer" '
-            f'data-id="{sp["student_id"]}" data-name="{sp["name"]}">' 
+            f'style="grid-template-columns:1fr 80px 120px 44px;cursor:pointer;{row_style}" '
+            f'data-id="{sp["student_id"]}" data-name="{sp["name"]}">'
             f'<div><div class="dt-name">{sp["name"]}</div>'
             f'{last_html}</div>'
-            f'<div style="font-weight:700;font-size:.92rem;color:var(--text)">{sp["count"]}/8</div>'
+            f'<div style="font-weight:700;font-size:.92rem;color:{count_color}">{sp["count"]}/8</div>'
             f'<div style="padding-right:8px"><div class="progress-bar" style="margin:0">'
             f'<div class="progress-fill" style="width:{pct}%"></div></div></div>'
             f'<button class="btn bg bsm view-attn-btn" data-id="{sp["student_id"]}" data-name="{sp["name"]}">📋</button>'
@@ -284,6 +289,7 @@ def manual_add_attendance():
             dates = parse_raw_dates(nr.raw_dates) if nr.raw_dates else []
             new_receipt_data.append({
                 "id":           nr.id,
+                "receipt_no":   nr.receipt_no or nr.id,
                 "student_name": nr.student_name,
                 "total_fee":    nr.total_fee,
                 "fee_fmt":      fmt_idr(nr.total_fee),

@@ -128,26 +128,43 @@ def get_student_progress(teacher_id: int) -> list[dict]:
     """
     Return a list of dicts summarising each student's current unbilled progress
     under this teacher:  [{name, count, dates, student_id}, ...]
+
+    Always includes ALL students who have ever had attendance with this teacher,
+    even if they currently have 0 unbilled (shows 0/8).
     """
-    active = (
+    # All students who ever had ANY attendance with this teacher
+    all_records = (
+        Attendance.query
+        .filter_by(teacher_id=teacher_id)
+        .order_by(Attendance.date.asc())
+        .all()
+    )
+
+    # Build set of all student_ids who have ever attended
+    seen_students: dict[int, dict] = {}
+    for record in all_records:
+        if record.student_id not in seen_students:
+            student = db.session.get(User, record.student_id)
+            seen_students[record.student_id] = {
+                "student_id": record.student_id,
+                "name": student.name() if student else "?",
+                "count": 0,        # unbilled count
+                "dates": [],       # unbilled dates only
+            }
+
+    # Now fill in unbilled counts
+    unbilled = (
         Attendance.query
         .filter_by(teacher_id=teacher_id, billed=False)
         .order_by(Attendance.date.asc())
         .all()
     )
-    progress: dict[int, dict] = {}
-    for record in active:
-        if record.student_id not in progress:
-            student = db.session.get(User, record.student_id)
-            progress[record.student_id] = {
-                "student_id": record.student_id,
-                "name": student.name() if student else "?",
-                "count": 0,
-                "dates": [],
-            }
-        progress[record.student_id]["count"] += 1
-        progress[record.student_id]["dates"].append(record.date)
-    return list(progress.values())
+    for record in unbilled:
+        if record.student_id in seen_students:
+            seen_students[record.student_id]["count"] += 1
+            seen_students[record.student_id]["dates"].append(record.date)
+
+    return list(seen_students.values())
 
 
 # ── Internal ──────────────────────────────────────────────────────────────────
@@ -177,7 +194,15 @@ def _maybe_generate_receipt(student: User | None, teacher: User | None) -> None:
     raw_dates = "|".join(a.date.strftime("%Y-%m-%dT%H:%M:%S") for a in batch)
     fee       = get_custom_fee(teacher.id, student.id, teacher.fee_idr)
 
+    # Sequential receipt number per teacher (survives deletions)
+    last = (Receipt.query
+            .filter_by(teacher_id=teacher.id)
+            .order_by(Receipt.receipt_no.desc())
+            .first())
+    next_no = (last.receipt_no or 0) + 1 if last else 1
+
     receipt = Receipt(
+        receipt_no   = next_no,
         student_id   = student.id,
         student_name = student.name(),
         teacher_id   = teacher.id,

@@ -149,16 +149,18 @@
                 <span>Student</span><span>Unbilled</span><span>Progress</span><span></span>
               </div>
               {% for sp in progress %}
+              {% set is_zero = sp.count == 0 %}
               <div class="dt-row prog-row" id="prog-{{ sp.student_id }}"
-                   style="grid-template-columns:1fr 80px 120px 44px;cursor:pointer"
+                   style="grid-template-columns:1fr 80px 120px 44px;cursor:pointer{% if is_zero %};opacity:.65{% endif %}"
                    data-id="{{ sp.student_id }}" data-name="{{ sp.name }}">
                 <div>
                   <div class="dt-name">{{ sp.name }}</div>
                   <div class="dt-meta">
-                    {% if sp.dates %}Last: {{ fmt_date(to_wib(sp.dates[-1])) }}{% endif %}
+                    {% if sp.dates %}Last: {{ fmt_date(to_wib(sp.dates[-1])) }}
+                    {% else %}<span style="color:var(--text3);font-style:italic">No unbilled sessions</span>{% endif %}
                   </div>
                 </div>
-                <div style="font-weight:700;font-size:.92rem;color:var(--text)">{{ sp.count }}/8</div>
+                <div style="font-weight:700;font-size:.92rem;color:{% if is_zero %}var(--text3){% else %}var(--text){% endif %}">{{ sp.count }}/8</div>
                 <div style="padding-right:8px">
                   <div class="progress-bar" style="margin:0">
                     <div class="progress-fill" style="width:{{ [sp.count/8*100|int,100]|min }}%"></div>
@@ -774,7 +776,7 @@ attachScBtns();
       const receiptList = document.getElementById('receiptList');
       data.new_receipts.forEach(nr => {
         const html = `<div class="rc-card" id="rc-${nr.id}"
-          data-rid="${nr.id}" data-paid="0"
+          data-rid="${nr.id}" data-displayno="${nr.receipt_no||nr.id}" data-paid="0"
           data-student="${nr.student_name}" data-teacher="${nr.teacher_name}"
           data-fee="${nr.total_fee}" data-issue="${nr.issue_date}"
           data-dates="${nr.raw_dates.replace(/"/g,'&quot;')}"
@@ -783,7 +785,7 @@ attachScBtns();
           tabindex="0" role="button">
           <div class="rc-mid">
             <div class="rc-top">
-              <span class="rc-id">#${nr.id}</span>
+              <span class="rc-id">#${nr.receipt_no||nr.id}</span>
               <span class="rc-name">${nr.student_name}</span>
             </div>
             <div class="rc-bottom">
@@ -1118,7 +1120,7 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
           <div class="inv-brand-sub">Mandarin Class · Invoice</div>
         </div>
         <div class="inv-meta">
-          <div class="inv-num">Receipt <span>#${card.dataset.rid}</span></div>
+          <div class="inv-num">Receipt <span>#${card.dataset.displayno||card.dataset.rid}</span></div>
           <div class="inv-date">Issued ${card.dataset.issue}</div>
           <span class="inv-status ${paid?'bpd':'bup'}">${paid?'✓ Paid':'⏳ Unpaid'}</span>
         </div>
