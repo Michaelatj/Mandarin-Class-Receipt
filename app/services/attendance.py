@@ -195,11 +195,14 @@ def _maybe_generate_receipt(student: User | None, teacher: User | None) -> None:
     fee       = get_custom_fee(teacher.id, student.id, teacher.fee_idr)
 
     # Sequential receipt number per teacher (survives deletions)
-    last = (Receipt.query
-            .filter_by(teacher_id=teacher.id)
-            .order_by(Receipt.receipt_no.desc())
-            .first())
-    next_no = (last.receipt_no or 0) + 1 if last else 1
+    last_receipt = (Receipt.query
+                    .filter_by(teacher_id=teacher.id)
+                    .order_by(Receipt.receipt_no.desc())
+                    .first())
+    next_no = (last_receipt.receipt_no or 0) + 1 if last_receipt else 1
+
+    # issue_date = tanggal attendance ke-8 (sesi terakhir), bukan waktu server generate
+    last_session_date = batch[-1].date  # batch sudah order by date asc
 
     receipt = Receipt(
         receipt_no   = next_no,
@@ -211,6 +214,7 @@ def _maybe_generate_receipt(student: User | None, teacher: User | None) -> None:
         bank_name    = teacher.bank_name,
         total_fee    = fee,
         raw_dates    = raw_dates,
+        issue_date   = last_session_date,
     )
     db.session.add(receipt)
 
