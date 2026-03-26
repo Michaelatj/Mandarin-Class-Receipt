@@ -13,22 +13,23 @@
       <span class="sidebar-brand-tag">Student Dashboard</span>
     </div>
     <nav class="sidebar-nav" id="sideNav">
-      <button class="snav-btn" data-page="classes" data-count="{{ new_count }}">
+      <button class="snav-btn" data-page="classes">
         <span class="snav-icon">📆</span>
         <span class="snav-label">Classes</span>
-        {% if show_classes_pip %}<span class="snav-pip gold">{{ new_count }}</span>{% endif %}
+        {% if new_count > 0 %}<span class="snav-pip gold">{{ new_count }}</span>{% endif %}
       </button>
-      <button class="snav-btn" data-page="progress" data-count="{{ unbilled_count }}">
+      <button class="snav-btn" data-page="progress">
         <span class="snav-icon">📊</span>
         <span class="snav-label">Progress</span>
-        {% if show_progress_pip %}<span class="snav-pip gold">{{ unbilled_count }}/8</span>{% endif %}
+        {% if unbilled %}<span class="snav-pip gold">{{ unbilled|length }}/8</span>{% endif %}
       </button>
-      <button class="snav-btn" data-page="receipts" data-count="{{ unpaid_count }}">
+      <button class="snav-btn" data-page="receipts">
         <span class="snav-icon">🧾</span>
         <span class="snav-label">Receipts</span>
-        {% if show_receipts_pip %}<span class="snav-pip">{{ unpaid_count }}</span>{% endif %}
+        {% set unpaid_r = receipts | selectattr('paid','equalto',false) | list %}
+        {% if unpaid_r %}<span class="snav-pip">{{ unpaid_r|length }}</span>{% endif %}
       </button>
-      <button class="snav-btn" data-page="settings" data-count="0">
+      <button class="snav-btn" data-page="settings">
         <span class="snav-icon">⚙️</span>
         <span class="snav-label">Settings</span>
       </button>
@@ -187,16 +188,6 @@
         </div>
         <div class="settings-grid">
           <div class="card">
-            <div class="card-title"><span class="card-title-icon">👤</span> Profile</div>
-            <form id="profileForm" method="POST" action="{{ url_for('student.update_profile') }}">
-              <label>Display Name</label>
-              <input type="text" name="display_name" value="{{ user.display_name }}" placeholder="Your name">
-              <label>Email <span class="lbl-opt">(untuk reset password)</span></label>
-              <input type="email" name="email" value="{{ user.email }}" placeholder="contoh@gmail.com">
-              <button class="btn bg" type="submit">Save Profile</button>
-            </form>
-          </div>
-          <div class="card">
             <div class="card-title"><span class="card-title-icon">🔒</span> Change Password</div>
             <form id="changePwForm" method="POST" action="{{ url_for('auth.change_password') }}">
               <label>Current Password</label>
@@ -225,25 +216,26 @@
 
   {# ══ BOTTOM NAV (mobile) ══ #}
   <nav class="app-bottom-nav" id="bottomNav">
-    <button class="bnav-btn" data-page="classes" data-count="{{ new_count }}">
+    <button class="bnav-btn" data-page="classes">
       <div class="bnav-icon">📆
-        {% if show_classes_pip %}<span class="bnav-pip">{{ new_count }}</span>{% endif %}
+        {% if new_count > 0 %}<span class="bnav-pip">{{ new_count }}</span>{% endif %}
       </div>
       <span>Classes</span>
     </button>
-    <button class="bnav-btn" data-page="progress" data-count="{{ unbilled_count }}">
+    <button class="bnav-btn" data-page="progress">
       <div class="bnav-icon">📊
-        {% if show_progress_pip %}<span class="bnav-pip">{{ unbilled_count }}</span>{% endif %}
+        {% if unbilled %}<span class="bnav-pip">{{ unbilled|length }}</span>{% endif %}
       </div>
       <span>Progress</span>
     </button>
-    <button class="bnav-btn" data-page="receipts" data-count="{{ unpaid_count }}">
+    <button class="bnav-btn" data-page="receipts">
       <div class="bnav-icon">🧾
-        {% if show_receipts_pip %}<span class="bnav-pip">{{ unpaid_count }}</span>{% endif %}
+        {% set unpaid_r = receipts | selectattr('paid','equalto',false) | list %}
+        {% if unpaid_r %}<span class="bnav-pip">{{ unpaid_r|length }}</span>{% endif %}
       </div>
       <span>Receipts</span>
     </button>
-    <button class="bnav-btn" data-page="settings" data-count="0">
+    <button class="bnav-btn" data-page="settings">
       <div class="bnav-icon">⚙️</div>
       <span>Settings</span>
     </button>
@@ -265,22 +257,12 @@
 document.getElementById('langBar').style.display  = 'none';
 document.getElementById('dmToggle').style.display = 'none';
 
-// Set timezone immediately and keep it fresh
-const _TZ = -(new Date().getTimezoneOffset());
-document.getElementById('tzOffset').value = _TZ;
+document.getElementById('tzOffset').value = -(new Date().getTimezoneOffset());
 fetch('/set_tz', {
   method:'POST',
-  headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':_CSRF},
-  body: JSON.stringify({ tz_offset: _TZ })
+  headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+  body: JSON.stringify({ tz_offset: -(new Date().getTimezoneOffset()) })
 });
-
-// Refresh tz_offset every time attnForm is about to submit
-const _attnForm = document.getElementById('attnForm');
-if (_attnForm) {
-  _attnForm.addEventListener('submit', function() {
-    document.getElementById('tzOffset').value = -(new Date().getTimezoneOffset());
-  }, true); // capture phase — runs before ajaxForm's listener
-}
 
 /* ── Navigation ── */
 (function(){
@@ -288,114 +270,20 @@ if (_attnForm) {
   const sB=Array.from(document.querySelectorAll('#sideNav .snav-btn'));
   const bB=Array.from(document.querySelectorAll('#bottomNav .bnav-btn'));
   const pg=Array.from(document.querySelectorAll('.app-page'));
-  const visited = new Set();
-
-  function markSeen(page) {
-    // Use actual server-rendered counts — not DOM pip (which may not exist if no pip)
-    const countMap = {
-      classes:  parseInt('{{ new_count }}'),
-      progress: parseInt('{{ unbilled_count }}'),
-      receipts: parseInt('{{ unpaid_count }}'),
-    };
-    const count = countMap[page] ?? 0;
-    fetch('/mark_seen', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':_CSRF},
-      body: JSON.stringify({tab: page, count: count})
-    }).catch(()=>{});
-    // Clear matching pips in both navbars
-    document.querySelectorAll('[data-page="'+page+'"] .snav-pip, [data-page="'+page+'"] .bnav-pip')
-      .forEach(p => p.remove());
-  }
-
   function show(id){
     if(!document.getElementById('page-'+id)) id=DEF;
-    const isNew = !visited.has(id);
-    sB.forEach(b=>{
-      b.classList.toggle('active', b.dataset.page===id);
-    });
-    bB.forEach(b=>{
-      b.classList.toggle('active', b.dataset.page===id);
-    });
+    sB.forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+    bB.forEach(b=>b.classList.toggle('active',b.dataset.page===id));
     pg.forEach(p=>p.style.display=p.id==='page-'+id?'block':'none');
-    if (isNew) markSeen(id); // always mark seen with real count, removes pip too
-    visited.add(id);
     try{sessionStorage.setItem(KEY,id);}catch(e){}
   }
   sB.forEach(b=>b.addEventListener('click',()=>show(b.dataset.page)));
   bB.forEach(b=>b.addEventListener('click',()=>show(b.dataset.page)));
-
-  let initPage = DEF;
-  try {
-    {% if fresh_login %}
-    sessionStorage.removeItem(KEY);
-    initPage = DEF;
-    {% else %}
-    initPage = sessionStorage.getItem(KEY) || DEF;
-    {% endif %}
-  } catch(e){}
-  show(initPage);
+  let s=DEF; try{s=sessionStorage.getItem(KEY)||DEF;}catch(e){}
+  show(s);
 })();
 
 ajaxForm(document.getElementById('changePwForm'), null);
-// Profile form: update sidebar display name instantly after save
-(function(){
-  const form = document.getElementById('profileForm');
-  if (!form) return;
-  form.addEventListener('submit', async function(e){
-    e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-    try {
-      const res = await fetch(form.action, {
-        method: 'POST', body: new FormData(form),
-        headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': _CSRF}
-      });
-      const data = await res.json();
-      if (data.ok) {
-        showToast('✓ Profile saved');
-        // Update sidebar name display immediately
-        const newName = form.querySelector('[name="display_name"]').value.trim();
-        if (newName) {
-          document.querySelectorAll('.sidebar-name').forEach(el => el.textContent = newName);
-        document.querySelectorAll('.sidebar-avatar').forEach(el => el.textContent = newName.charAt(0).toUpperCase());
-        }
-      } else {
-        showToast(data.msg || 'Error saving profile', 'err');
-      }
-    } catch { showToast('Network error', 'err'); }
-    finally { if (btn) { btn.disabled = false; btn.textContent = 'Save Profile'; } }
-  });
-})();
-
-/* ── Update sidebar/bottom nav pips ── */
-function updatePip(navSel, page, count, label) {
-  [navSel + ' [data-page="' + page + '"]'].forEach(sel => {
-    const btn = document.querySelector(sel);
-    if (!btn) return;
-    const pipCls = navSel.includes('side') ? 'snav-pip' : 'bnav-pip';
-    let pip = btn.querySelector('.' + pipCls);
-    if (count > 0) {
-      if (!pip) { pip = document.createElement('span'); pip.className = pipCls; btn.appendChild(pip); }
-      pip.textContent = label || count;
-    } else {
-      pip?.remove();
-    }
-  });
-}
-function updateAllPips(data) {
-  // Progress pip: cycle_count/8
-  if (typeof data.cycle_count === 'number') {
-    const lbl = data.cycle_count > 0 ? data.cycle_count + '/8' : null;
-    ['#sideNav', '#bottomNav'].forEach(s => updatePip(s, 'progress', data.cycle_count, lbl));
-  }
-  // Receipts pip: unpaid count
-  if (typeof data.receipt_count === 'number') {
-    // After a new receipt is created cycle resets, the new receipt is unpaid
-    const newUnpaid = (data.cycle_count === 0 && data.new_receipt_html) ? 1 : 0;
-    ['#sideNav', '#bottomNav'].forEach(s => updatePip(s, 'receipts', newUnpaid, newUnpaid || null));
-  }
-}
 
 /* ── Submit attendance (AJAX) ── */
 {% if teachers %}
@@ -403,16 +291,12 @@ ajaxForm(document.getElementById('attnForm'), function(data){
   if (data.progress_html) {
     document.getElementById('progressArea').innerHTML = data.progress_html;
   }
-  updateAllPips(data);
-
-  // Update stat numbers on Classes page in real-time
+  // Update stat cards
   if (typeof data.cycle_count === 'number') {
-    const statNums = document.querySelectorAll('.stat-num');
-    // First stat-num = unbilled count, second = total sessions
-    if (statNums[0]) statNums[0].textContent = data.cycle_count;
-    if (statNums[1] && typeof data.total_sessions === 'number') statNums[1].textContent = data.total_sessions;
+    const nums = document.querySelectorAll('.stat-num');
+    if (nums[0]) nums[0].textContent = data.cycle_count;
+    if (nums[1] && typeof data.total_sessions === 'number') nums[1].textContent = data.total_sessions;
   }
-
   if (data.new_receipt_html) {
     const section = document.getElementById('receiptSection');
     document.getElementById('noReceiptsMsg')?.remove();
@@ -427,11 +311,21 @@ ajaxForm(document.getElementById('attnForm'), function(data){
       newCard.style.animation = 'receipt-pop .5s ease';
       attachCardClick(newCard);
     }
+    // Update receipt count stat
+    const nums = document.querySelectorAll('.stat-num');
+    if (nums[2] && typeof data.receipt_count === 'number') nums[2].textContent = data.receipt_count;
     showToast('🎉 Receipt generated!');
     setTimeout(() => {
       document.querySelector('#sideNav [data-page="receipts"]')?.click() ||
       document.querySelector('#bottomNav [data-page="receipts"]')?.click();
     }, 900);
+  }
+  // Switch to progress tab to show update
+  if (data.progress_html && !data.new_receipt_html) {
+    setTimeout(() => {
+      document.querySelector('#sideNav [data-page="progress"]')?.click() ||
+      document.querySelector('#bottomNav [data-page="progress"]')?.click();
+    }, 600);
   }
 });
 {% endif %}
@@ -441,46 +335,41 @@ document.querySelectorAll('.join-btn').forEach(btn => {
   btn.addEventListener('click', async function(){
     this.textContent = '⏳'; this.disabled = true;
     try {
-      const res  = await fetch('/schedule/join/'+this.dataset.id, {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':_CSRF}});
+      const res  = await fetch('/schedule/join/'+this.dataset.id, {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'}});
       const data = await res.json();
       if (data.ok) {
-        const foot  = this.closest('.sc-foot');
-        const badge = this.closest('.sc-card')?.querySelector('.sc-badge');
-        const link  = data.meet_link;
-
         if (data.already) {
-          // Already joined this specific schedule
           showToast('Already joined — reopening Meet…');
-          if (link) { foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Rejoin Meet</a>`; setTimeout(()=>window.open(link,'_blank'),300); }
+          if (data.meet_link) { setTimeout(()=>window.open(data.meet_link,'_blank'),300); }
+          this.textContent='🎥 Join Class'; this.disabled=false;
           return;
         }
-
-        if (data.cooldown_blocked) {
-          // Attendance already recorded within 90 min — open meet but no new attendance
-          showToast('✓ Meet opened (attendance already recorded this session)');
-          if (link) { foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.78rem;color:var(--text3);margin-left:8px">attendance recorded earlier</span>`; setTimeout(()=>window.open(link,'_blank'),300); }
-          else { foot.innerHTML = `<span style="font-size:.84rem;color:var(--text3);font-style:italic">✓ Already recorded this session</span>`; }
-          if (badge) { badge.style.color='var(--green)'; badge.textContent='✓ Joined'; }
-          return;
-        }
-
-        // Normal join — attendance recorded
-        showToast('✓ Attendance recorded!');
-        if (link) {
-          foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.8rem;color:var(--text3);margin-left:8px">✓ Recorded</span>`;
-          setTimeout(() => window.open(link,'_blank'), 400);
+        showToast(data.msg || '✓ Attendance marked!');
+        const foot = this.closest('.sc-foot');
+        if (data.meet_link) {
+          foot.innerHTML = `<a href="${data.meet_link}" target="_blank" rel="noopener" class="btn bg bsm" style="width:auto">🎥 Open Meet</a><span style="font-size:.8rem;color:var(--text3);margin-left:8px">✓ Recorded</span>`;
+          setTimeout(() => window.open(data.meet_link,'_blank'), 400);
         } else {
           foot.innerHTML = `<span style="font-size:.84rem;color:var(--text3);font-style:italic">✓ Attendance marked</span>`;
         }
-        if (badge) { badge.style.color='var(--green)'; badge.textContent='✓ Joined'; }
+        const badge = this.closest('.sc-card')?.querySelector('.sc-badge');
+        if (badge) { badge.style.color='var(--green)'; badge.innerHTML='<span style="color:var(--green)">✓ Joined</span>'; }
 
-        // Update stat numbers real-time
-        if (typeof data.cycle_count === 'number') {
-          const statNums = document.querySelectorAll('.stat-num');
-          if (statNums[0]) statNums[0].textContent = data.cycle_count;
-          if (statNums[1] && typeof data.total_sessions === 'number') statNums[1].textContent = data.total_sessions;
-          updateAllPips(data);
+        // ── Dynamic progress update ──
+        if (data.progress_html) {
+          document.getElementById('progressArea').innerHTML = data.progress_html;
         }
+        // Update stat cards
+        if (typeof data.cycle_count === 'number') {
+          const nums = document.querySelectorAll('.stat-num');
+          if (nums[0]) nums[0].textContent = data.cycle_count;
+          if (nums[1] && typeof data.total_sessions === 'number') nums[1].textContent = data.total_sessions;
+        }
+        // Switch to progress tab so user sees the update
+        setTimeout(() => {
+          document.querySelector('#sideNav [data-page="progress"]')?.click() ||
+          document.querySelector('#bottomNav [data-page="progress"]')?.click();
+        }, 800);
       } else {
         showToast(data.msg||'Error','err');
         this.textContent='🎥 Join Class'; this.disabled=false;

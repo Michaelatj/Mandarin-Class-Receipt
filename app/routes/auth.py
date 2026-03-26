@@ -56,7 +56,6 @@ def login():
             db.session.commit()
             session.permanent = True
             session["user_id"] = user.id
-            session["fresh_login"] = True
             clear_attempts(ip)
             logger.info("User %s logged in (legacy hash migrated)", uname)
             return redirect(url_for("student.dashboard"))
@@ -67,7 +66,6 @@ def login():
         else:
             session.permanent = True
             session["user_id"] = user.id
-            session["fresh_login"] = True
             clear_attempts(ip)
             logger.info("User %s logged in successfully", uname)
             return redirect(url_for("student.dashboard"))
@@ -201,4 +199,3 @@ def change_password():
     flash(msg, "ok")
     redir = url_for("teacher.dashboard") if user.role == "teacher" else url_for("student.dashboard")
     return redirect(redir)
-

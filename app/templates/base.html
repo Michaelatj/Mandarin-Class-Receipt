@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=24" }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
 
@@ -61,9 +60,6 @@ function showToast(msg, type) {
   t._timer = setTimeout(() => { t.className = type === 'err' ? 'err' : ''; }, 3200);
 }
 
-/* ── CSRF token (auto-injected in all POST requests) ── */
-const _CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
-
 /* ── AJAX form helper ── */
 function ajaxForm(form, onSuccess) {
   if (!form) return;
@@ -72,11 +68,10 @@ function ajaxForm(form, onSuccess) {
     const btn = form.querySelector('[type=submit]');
     if (btn) { btn.disabled = true; btn.classList.add('loading'); }
     try {
-      const fd = new FormData(form);
       const res  = await fetch(form.action, {
         method: form.method || 'POST',
-        body: fd,
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': _CSRF }
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
       const data = await res.json();
       if (res.ok && data.ok) {
@@ -95,37 +90,6 @@ function ajaxForm(form, onSuccess) {
 }
 
 history.replaceState(null, '', location.href);
-
-/* ── Ripple effect on all .btn clicks ── */
-document.addEventListener('click', function(e) {
-  const btn = e.target.closest('.btn');
-  if (!btn || btn.disabled) return;
-  const r = btn.getBoundingClientRect();
-  const size = Math.max(r.width, r.height) * 2;
-  const el = document.createElement('span');
-  el.className = 'ripple-el';
-  el.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px`;
-  btn.appendChild(el);
-  el.addEventListener('animationend', () => el.remove());
-}, true);
-
-/* ── Enhanced toast with slide-out ── */
-(function(){
-  const t = document.getElementById('toast');
-  if (!t) return;
-  const _orig = window.showToast;
-  window.showToast = function(msg, type) {
-    t.classList.remove('toast-out');
-    t.childNodes.forEach(n => { if (n.nodeType === 3) n.remove(); });
-    t.appendChild(document.createTextNode(msg));
-    t.className = (type === 'err' ? 'err' : '') + ' show';
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => {
-      t.classList.add('toast-out');
-      setTimeout(() => { t.className = type === 'err' ? 'err' : ''; }, 250);
-    }, 3000);
-  };
-})();
 </script>
 {% block page_scripts %}{% endblock %}
 </body>

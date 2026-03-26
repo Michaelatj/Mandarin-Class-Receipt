@@ -4,7 +4,6 @@
 {% block body %}
 <div class="form-title">{{ tr('register_title') }}</div>
 <form method="POST" action="{{ url_for('auth.register') }}" autocomplete="on">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label>{{ tr('username_lbl') }}</label>
   <input type="text" name="username" placeholder="{{ tr('username_ph') }}"
          required pattern="[A-Za-z0-9_.+\-]{3,40}"

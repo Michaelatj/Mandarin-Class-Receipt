@@ -196,12 +196,6 @@ def tr(key: str) -> str:
     return TRANSLATIONS[lang].get(key, TRANSLATIONS["en"].get(key, key))
 
 
-def to_wib(dt: datetime) -> datetime:
-    """Convert a UTC datetime to WIB (UTC+7). All display should go through this."""
-    from datetime import timedelta
-    return dt + timedelta(hours=7)
-
-
 def fmt_date(dt: datetime, lang: str | None = None) -> str:
     """
     Format a datetime with localised day name, e.g.:

@@ -1,29 +1,25 @@
 {% macro receipt_card(r, show_paid_btn=False) %}
 {% set dates = parse_raw_dates(r.raw_dates) %}
-{% set display_no = r.receipt_no if r.receipt_no else r.id %}
-{% set issue_wib = to_wib(r.issue_date) %}
 <div class="rc-card"
-     id="rc-{{ r.id }}"
      data-rid="{{ r.id }}"
-     data-displayno="{{ display_no }}"
      data-paid="{{ '1' if r.paid else '0' }}"
-     data-date="{{ issue_wib.strftime('%Y%m%d%H%M%S') }}"
+     data-date="{{ r.issue_date.strftime('%Y%m%d%H%M%S') }}"
      data-student="{{ r.student_name }}"
      data-teacher="{{ r.teacher_name }}"
      data-fee="{{ r.total_fee }}"
-     data-issue="{{ fmt_date(issue_wib) }}"
+     data-issue="{{ fmt_date(r.issue_date) }}"
      data-dates="{{ r.raw_dates | replace('"', '&quot;') }}"
      data-show-paid="{{ '1' if show_paid_btn else '0' }}"
      data-paid-url="{{ url_for('teacher.paid', receipt_id=r.id) if show_paid_btn else '' }}"
-     tabindex="0" role="button" aria-label="View receipt #{{ display_no }}">
+     tabindex="0" role="button" aria-label="View receipt #{{ r.id }}">
   <div class="rc-mid">
     <div class="rc-top">
-      <span class="rc-id">#{{ display_no }}</span>
+      <span class="rc-id">#{{ r.id }}</span>
       {% if r.student_name %}<span class="rc-name">{{ r.student_name }}</span>{% endif %}
       {% if r.teacher_name and not r.student_name %}<span class="rc-name">{{ r.teacher_name }}</span>{% endif %}
     </div>
     <div class="rc-bottom">
-      <span class="rc-date">{{ fmt_date(issue_wib) }}</span>
+      <span class="rc-date">{{ fmt_date(r.issue_date) }}</span>
       <span class="rc-sessions">{{ dates|length }} sessions</span>
     </div>
   </div>

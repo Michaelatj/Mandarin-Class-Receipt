@@ -17,12 +17,12 @@
         <span class="snav-icon">📆</span>
         <span class="snav-label">Classes</span>
         {% set up_count = schedules | selectattr('cancelled','equalto',false) | list | length %}
-        {% if show_classes_pip %}<span class="snav-pip gold" data-tab="classes" data-count="{{ up_count }}">{{ up_count }}</span>{% endif %}
+        {% if up_count > 0 %}<span class="snav-pip gold">{{ up_count }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="attendance">
         <span class="snav-icon">✅</span>
         <span class="snav-label">Attendance</span>
-        {% if show_attn_pip %}<span class="snav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
+        {% if unbilled_records %}<span class="snav-pip">{{ unbilled_records|length }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="students">
         <span class="snav-icon">👥</span>
@@ -31,7 +31,7 @@
       <button class="snav-btn" data-page="receipts">
         <span class="snav-icon">🧾</span>
         <span class="snav-label">Receipts</span>
-        {% if show_receipts_pip %}<span class="snav-pip" data-tab="receipts" data-count="{{ unpaid_cnt }}">{{ unpaid_cnt }}</span>{% endif %}
+        {% if unpaid_cnt > 0 %}<span class="snav-pip">{{ unpaid_cnt }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="settings">
         <span class="snav-icon">⚙️</span>
@@ -69,7 +69,44 @@
                 <label>Title</label>
                 <input type="text" name="title" placeholder="e.g. HSK 2 Chapter 5" required>
                 <label>Date &amp; Time</label>
-                <input type="datetime-local" name="scheduled_at" value="{{ now }}" required>
+                <div class="dt-picker-wrap" id="createPickerWrap">
+                  <div class="dt-picker-display" id="createPickerDisplay" tabindex="0">
+                    <span class="dt-icon">📅</span>
+                    <span class="dt-text" id="createPickerText">Pick date &amp; time…</span>
+                    <span class="dt-caret">▼</span>
+                  </div>
+                  <div class="dt-picker-panel hidden" id="createPickerPanel">
+                    <div class="dt-picker-row">
+                      <div class="dt-picker-group" style="flex:2">
+                        <label>Day</label>
+                        <select id="cpDay"></select>
+                      </div>
+                      <div class="dt-picker-group" style="flex:3">
+                        <label>Month</label>
+                        <select id="cpMonth"></select>
+                      </div>
+                      <div class="dt-picker-group" style="flex:1.2">
+                        <label>Year</label>
+                        <input type="number" id="cpYear" min="2020" max="2035">
+                      </div>
+                    </div>
+                    <div class="dt-picker-row">
+                      <div class="dt-picker-group">
+                        <label>Hour (0–23)</label>
+                        <input type="number" id="cpHour" min="0" max="23">
+                      </div>
+                      <div class="dt-picker-group">
+                        <label>Minute</label>
+                        <input type="number" id="cpMin" min="0" max="59" step="5">
+                      </div>
+                    </div>
+                    <div class="dt-picker-actions">
+                      <button type="button" class="btn bgh bsm" id="createPickerCancel">Cancel</button>
+                      <button type="button" class="btn br bsm" id="createPickerOk">✓ Set Time</button>
+                    </div>
+                  </div>
+                  <input type="hidden" name="scheduled_at" id="createPickerVal" required>
+                </div>
                 <label>Google Meet Link <span class="lbl-opt">(optional)</span></label>
                 <input type="url" name="meet_link" placeholder="https://meet.google.com/…">
                 <label>Description <span class="lbl-opt">(optional)</span></label>
@@ -127,7 +164,44 @@
                   {% for s in all_students %}<option value="{{ s.id }}">{{ s.name() }}</option>{% endfor %}
                 </select>
                 <label>{{ tr('manual_date') }}</label>
-                <input type="datetime-local" name="date" value="{{ now }}" required>
+                <div class="dt-picker-wrap" id="attnPickerWrap">
+                  <div class="dt-picker-display" id="attnPickerDisplay" tabindex="0">
+                    <span class="dt-icon">📅</span>
+                    <span class="dt-text" id="attnPickerText">Pick date &amp; time…</span>
+                    <span class="dt-caret">▼</span>
+                  </div>
+                  <div class="dt-picker-panel hidden" id="attnPickerPanel">
+                    <div class="dt-picker-row">
+                      <div class="dt-picker-group" style="flex:2">
+                        <label>Day</label>
+                        <select id="apDay"></select>
+                      </div>
+                      <div class="dt-picker-group" style="flex:3">
+                        <label>Month</label>
+                        <select id="apMonth"></select>
+                      </div>
+                      <div class="dt-picker-group" style="flex:1.2">
+                        <label>Year</label>
+                        <input type="number" id="apYear" min="2020" max="2035">
+                      </div>
+                    </div>
+                    <div class="dt-picker-row">
+                      <div class="dt-picker-group">
+                        <label>Hour (0–23)</label>
+                        <input type="number" id="apHour" min="0" max="23">
+                      </div>
+                      <div class="dt-picker-group">
+                        <label>Minute</label>
+                        <input type="number" id="apMin" min="0" max="59" step="5">
+                      </div>
+                    </div>
+                    <div class="dt-picker-actions">
+                      <button type="button" class="btn bgh bsm" id="attnPickerCancel">Cancel</button>
+                      <button type="button" class="btn br bsm" id="attnPickerOk">✓ Set Time</button>
+                    </div>
+                  </div>
+                  <input type="hidden" name="date" id="attnPickerVal" required>
+                </div>
                 <label>{{ tr('manual_note') }}</label>
                 <input type="text" name="note" placeholder="{{ tr('manual_note_ph') }}">
                 <button class="btn br" type="submit" id="addAttnBtn">{{ tr('add_btn') }}</button>
@@ -137,70 +211,50 @@
               {% endif %}
             </div>
           </div>
-
           <div class="page-col-main">
-
-            {# ── Progress Table ── #}
             <p class="section-title">{{ tr('student_progress') }}</p>
             <div id="progressList">
             {% if progress %}
-            <div class="data-table">
-              <div class="dt-head" style="grid-template-columns:1fr 80px 120px 44px">
-                <span>Student</span><span>Unbilled</span><span>Progress</span><span></span>
-              </div>
               {% for sp in progress %}
-              {% set is_zero = sp.count == 0 %}
-              <div class="dt-row prog-row" id="prog-{{ sp.student_id }}"
-                   style="grid-template-columns:1fr 80px 120px 44px;cursor:pointer{% if is_zero %};opacity:.65{% endif %}"
-                   data-id="{{ sp.student_id }}" data-name="{{ sp.name }}">
-                <div>
-                  <div class="dt-name">{{ sp.name }}</div>
-                  <div class="dt-meta">
-                    {% if sp.dates %}Last: {{ fmt_date(to_wib(sp.dates[-1])) }}
-                    {% else %}<span style="color:var(--text3);font-style:italic">No unbilled sessions</span>{% endif %}
-                  </div>
+              <div class="progress-card" id="prog-{{ sp.student_id }}">
+                <div class="progress-head">
+                  <span class="progress-name">{{ sp.name }}</span>
+                  <span class="progress-count">{{ sp.count }} / 8</span>
                 </div>
-                <div style="font-weight:700;font-size:.92rem;color:{% if is_zero %}var(--text3){% else %}var(--text){% endif %}">{{ sp.count }}/8</div>
-                <div style="padding-right:8px">
-                  <div class="progress-bar" style="margin:0">
-                    <div class="progress-fill" style="width:{{ [sp.count/8*100|int,100]|min }}%"></div>
-                  </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:{{ [sp.count/8*100|int,100]|min }}%"></div></div>
+                <div class="progress-dates">
+                  {% for dt in sp.dates %}<span class="date-badge">{{ fmt_date(dt) }}</span>{% endfor %}
                 </div>
-                <button class="btn bg bsm view-attn-btn"
-                        data-id="{{ sp.student_id }}" data-name="{{ sp.name }}">📋</button>
               </div>
               {% endfor %}
-            </div>
             {% else %}
               <div class="empty-inline" id="progressEmpty">{{ tr('no_students') }}</div>
             {% endif %}
             </div>
 
+            <p class="section-title" style="margin-top:24px">{{ tr('edit_attn') }}</p>
+            <div class="attn-list" id="attnList">
+            {% if unbilled_records %}
+              {% for a in unbilled_records %}
+              <div class="attn-row" id="attn-{{ a.id }}">
+                <div>
+                  <div class="attn-name">{{ a.student_name }}</div>
+                  <div class="attn-date">{{ fmt_date(local_dt(a.date)) }}</div>
+                  {% if a.note %}<div class="attn-note">{{ a.note }}</div>{% endif %}
+                </div>
+                <form class="del-attn-form" method="POST"
+                      action="{{ url_for('teacher.remove_attendance', att_id=a.id) }}"
+                      data-id="{{ a.id }}" style="margin:0;flex-shrink:0">
+                  <button class="btn bdel bsm" type="submit">{{ tr('delete_btn') }}</button>
+                </form>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-inline" id="attnEmpty">{{ tr('no_students') }}</div>
+            {% endif %}
+            </div>
           </div>
         </div>
-
-        {# ── Per-student attendance drawer ── #}
-        <div class="attn-drawer hidden" id="attnDrawer">
-          <div class="attn-drawer-header">
-            <div>
-              <span class="attn-drawer-title" id="attnDrawerTitle">Records</span>
-              <span class="attn-drawer-sub" id="attnDrawerSub"></span>
-            </div>
-            <button class="btn bgh bsm" id="attnDrawerClose">← Back</button>
-          </div>
-          <div class="attn-search-bar">
-            <input type="search" id="attnSearch" placeholder="🔍 Filter by date or note…" autocomplete="off">
-            <div class="attn-filter-row">
-              <button class="afb active" data-filter="all">All</button>
-              <button class="afb" data-filter="unbilled">Unbilled</button>
-              <button class="afb" data-filter="billed">Billed</button>
-            </div>
-          </div>
-          <div class="attn-list" id="attnList">
-            <div class="empty-inline" id="attnEmpty">Select a student to view records.</div>
-          </div>
-        </div>
-
       </div>
 
       {# ═══ STUDENTS ═══ #}
@@ -214,7 +268,7 @@
         {% if all_students %}
         <div class="data-table" style="margin-bottom:24px">
           <div class="dt-head">
-            <span>Student</span><span>Joined</span><span>Sessions</span><span>Password</span><span></span>
+            <span>Student</span><span>Joined</span><span>Sessions</span><span></span>
           </div>
           {% for s in all_students %}
           {% set ss = student_sessions.get(s.id, 0) %}
@@ -229,8 +283,6 @@
               <div class="dt-sessions">{{ ss }}</div>
               {% if su > 0 %}<div class="dt-pending">{{ su }} pending</div>{% endif %}
             </div>
-            <button class="btn bg bsm reset-pw-btn"
-                    data-id="{{ s.id }}" data-name="{{ s.name() }}">🔑 Reset</button>
             <button class="btn bdel-outline bsm del-student-btn"
                     data-id="{{ s.id }}" data-name="{{ s.name() }}">🗑</button>
           </div>
@@ -297,8 +349,6 @@
             <form id="settingsForm" method="POST" action="{{ url_for('teacher.update_settings') }}">
               <label>{{ tr('default_fee_lbl') }}</label>
               <input type="number" name="fee" value="{{ user.fee_idr }}" placeholder="500000">
-              <label>Email <span class="lbl-opt">(untuk reset password)</span></label>
-              <input type="email" name="email" value="{{ user.email }}" placeholder="contoh@gmail.com">
               <label>{{ tr('display_name_t') }}</label>
               <input type="text" name="display_name" value="{{ user.display_name }}" placeholder="{{ tr('display_name_ph') }}">
               <button class="btn bg" type="submit">{{ tr('save_settings') }}</button>
@@ -335,13 +385,14 @@
   <nav class="app-bottom-nav" id="bottomNav">
     <button class="bnav-btn" data-page="classes">
       <div class="bnav-icon">📆
-        {% if show_classes_pip %}<span class="bnav-pip" data-tab="classes" data-count="{{ up_count }}">{{ up_count }}</span>{% endif %}
+        {% set up_count = schedules | selectattr('cancelled','equalto',false) | list | length %}
+        {% if up_count > 0 %}<span class="bnav-pip">{{ up_count }}</span>{% endif %}
       </div>
       <span>Classes</span>
     </button>
     <button class="bnav-btn" data-page="attendance">
       <div class="bnav-icon">✅
-        {% if show_attn_pip %}<span class="bnav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
+        {% if unbilled_records %}<span class="bnav-pip">{{ unbilled_records|length }}</span>{% endif %}
       </div>
       <span>Attend</span>
     </button>
@@ -351,7 +402,7 @@
     </button>
     <button class="bnav-btn" data-page="receipts">
       <div class="bnav-icon">🧾
-        {% if show_receipts_pip %}<span class="bnav-pip" data-tab="receipts" data-count="{{ unpaid_cnt }}">{{ unpaid_cnt }}</span>{% endif %}
+        {% if unpaid_cnt > 0 %}<span class="bnav-pip">{{ unpaid_cnt }}</span>{% endif %}
       </div>
       <span>Receipts</span>
     </button>
@@ -359,10 +410,6 @@
       <div class="bnav-icon">⚙️</div>
       <span>Settings</span>
     </button>
-    <a class="bnav-btn" href="{{ url_for('auth.logout') }}" style="text-decoration:none;color:inherit">
-      <div class="bnav-icon" style="color:var(--red)">🚪</div>
-      <span style="color:var(--red)">Logout</span>
-    </a>
   </nav>
 
 </div>{# /app-shell #}
@@ -386,66 +433,72 @@
   </div>
 </div>
 <div class="modal-overlay hidden" id="editModal">
-  <div class="modal-box">
+  <div class="modal-box" style="max-width:460px;width:92vw">
     <button class="modal-close" id="modalClose">✕</button>
-    <h3>Edit Class</h3>
+    <h3 style="margin-bottom:16px">✏️ Edit Class</h3>
     <form id="editScheduleForm" method="POST" action="">
+      <input type="hidden" name="update_invites" value="1">
       <label>Title</label>
       <input type="text" name="title" id="editTitle" required>
-      <label>Date &amp; Time</label>
-      <input type="datetime-local" name="scheduled_at" id="editAt" required>
-      <label>Google Meet Link</label>
+      <label style="margin-top:10px">Date &amp; Time</label>
+      <div class="dt-picker-wrap" id="editPickerWrap">
+        <div class="dt-picker-display" id="editPickerDisplay" tabindex="0">
+          <span class="dt-icon">📅</span>
+          <span class="dt-text" id="editPickerText">Pick date &amp; time…</span>
+          <span class="dt-caret">▼</span>
+        </div>
+        <div class="dt-picker-panel hidden" id="editPickerPanel">
+          <div class="dt-picker-row">
+            <div class="dt-picker-group" style="flex:2">
+              <label>Day</label>
+              <select id="epDay"></select>
+            </div>
+            <div class="dt-picker-group" style="flex:3">
+              <label>Month</label>
+              <select id="epMonth"></select>
+            </div>
+            <div class="dt-picker-group" style="flex:1.2">
+              <label>Year</label>
+              <input type="number" id="epYear" min="2020" max="2035">
+            </div>
+          </div>
+          <div class="dt-picker-row">
+            <div class="dt-picker-group">
+              <label>Hour (0–23)</label>
+              <input type="number" id="epHour" min="0" max="23">
+            </div>
+            <div class="dt-picker-group">
+              <label>Minute</label>
+              <input type="number" id="epMin" min="0" max="59" step="5">
+            </div>
+          </div>
+          <div class="dt-picker-actions">
+            <button type="button" class="btn bgh bsm" id="editPickerCancel">Cancel</button>
+            <button type="button" class="btn br bsm" id="editPickerOk">✓ Set Time</button>
+          </div>
+        </div>
+        <input type="hidden" name="scheduled_at" id="editPickerVal" required>
+      </div>
+      <label style="margin-top:10px">Google Meet Link</label>
       <input type="url" name="meet_link" id="editLink" placeholder="https://meet.google.com/…">
-      <label>Description</label>
+      <label style="margin-top:10px">Description</label>
       <input type="text" name="description" id="editDesc">
-      <label>Invite Students <span class="lbl-opt">(leave empty = all students)</span></label>
       {% if all_students %}
-      <div class="invite-list" id="editInviteList">
+      <label style="margin-top:10px">Invite Students <span class="lbl-opt">(leave empty = all)</span></label>
+      <div class="edit-invite-list">
         {% for s in all_students %}
-        <label class="invite-item">
+        <label class="edit-invite-item">
           <input type="checkbox" class="edit-invite-cb" name="invited_students" value="{{ s.id }}">
-          <span class="invite-name">{{ s.name() }}</span>
-          <span class="invite-user">@{{ s.username }}</span>
+          <span>{{ s.name() }}</span>
+          <span style="color:var(--text3);font-size:.8rem">@{{ s.username }}</span>
         </label>
         {% endfor %}
       </div>
       {% endif %}
-      <button class="btn bg" type="submit">Save Changes</button>
-    </form>
-  </div>
-</div>
-
-{# ── Edit Attendance Time Modal ── #}
-<div class="modal-overlay hidden" id="editAttnModal">
-  <div class="modal-box">
-    <button class="modal-close" id="editAttnClose">✕</button>
-    <h3>✏️ Edit Attendance Time</h3>
-    <p style="font-size:.85rem;color:var(--text3);margin:4px 0 16px" id="editAttnSub"></p>
-    <form id="editAttnForm" method="POST" action="">
-      <label>Date &amp; Time (WIB)</label>
-      <input type="datetime-local" name="new_date" id="editAttnDate" required>
-      <button class="btn bg" type="submit" id="editAttnSubmit">Save</button>
-    </form>
-  </div>
-</div>
-
-{# ── Reset Password Modal ── #}
-<div class="modal-overlay hidden" id="resetPwModal">
-  <div class="modal-box">
-    <button class="modal-close" id="resetPwClose">✕</button>
-    <h3>🔑 Reset Student Password</h3>
-    <p style="font-size:.85rem;color:var(--text3);margin:6px 0 16px" id="resetPwSubtitle"></p>
-    <form id="resetPwForm" method="POST" action="">
-      <label>New Password</label>
-      <input type="text" name="new_password" id="resetPwInput"
-             placeholder="Enter new password" required minlength="6"
-             autocomplete="off"
-             style="font-family:monospace;letter-spacing:1px">
-      <div style="display:flex;gap:8px;margin-top:4px;margin-bottom:12px">
-        <button type="button" class="btn bgh bsm" id="resetPwGenerate">🎲 Generate</button>
-        <span style="font-size:.78rem;color:var(--text3);align-self:center">Auto-generate a random password</span>
+      <div class="edit-modal-actions">
+        <button type="button" class="btn bgh" id="editModalCancel">Cancel</button>
+        <button type="submit" class="btn bg">Save Changes ✓</button>
       </div>
-      <button class="btn bg" type="submit" id="resetPwSubmit">Set New Password</button>
     </form>
   </div>
 </div>
@@ -470,118 +523,33 @@ fetch('/set_tz', {
 const NAV = (function(){
   const KEY     = 'teacher_page';
   const DEFAULT = 'classes';
-
   const sideBtn = Array.from(document.querySelectorAll('#sideNav .snav-btn'));
   const botBtn  = Array.from(document.querySelectorAll('#bottomNav .bnav-btn'));
   const pages   = Array.from(document.querySelectorAll('.app-page'));
-  const visited = new Set();
-
-  function clearPip(id) {
-    // Get count FIRST before removing pip elements
-    let count = -1;
-    const pip = document.querySelector(`[data-tab="${id}"]`);
-    if (pip) count = parseInt(pip.dataset.count || '0');
-
-    // Remove pip visually from both navbars
-    [...sideBtn, ...botBtn].forEach(b => {
-      if (b.dataset.page === id) b.querySelectorAll('.snav-pip,.bnav-pip').forEach(p => p.remove());
-    });
-
-    // Persist to DB — MUST include CSRF token or Flask will reject with 400
-    fetch('/teacher/mark_seen', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRFToken': _CSRF
-      },
-      body: JSON.stringify({tab: id, count: count})
-    }).catch(()=>{});
-  }
-
-  function markSeenCurrent(id) {
-    // Always tell server the current count for this tab, even when no pip exists
-    // This keeps the baseline up-to-date so future pips are accurate
-    const countMap = {
-      classes:    parseInt('{{ up_count }}'),
-      attendance: parseInt('{{ attn_count }}'),
-      receipts:   parseInt('{{ unpaid_cnt }}'),
-    };
-    const count = countMap[id] ?? 0;
-    fetch('/teacher/mark_seen', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRFToken': _CSRF
-      },
-      body: JSON.stringify({tab: id, count: count})
-    }).catch(()=>{});
-  }
 
   function show(id) {
     if (!document.getElementById('page-' + id)) id = DEFAULT;
     sideBtn.forEach(b => b.classList.toggle('active', b.dataset.page === id));
     botBtn.forEach(b  => b.classList.toggle('active', b.dataset.page === id));
-    pages.forEach(p => p.style.display = p.id === 'page-' + id ? 'block' : 'none');
-    if (!visited.has(id)) {
-      clearPip(id);        // removes pip visually + saves count if pip existed
-      markSeenCurrent(id); // always update baseline so server knows current count
-      visited.add(id);
-    }
+    pages.forEach(p   => p.style.display = p.id === 'page-' + id ? 'block' : 'none');
     try { sessionStorage.setItem(KEY, id); } catch(e){}
   }
 
   sideBtn.forEach(b => b.addEventListener('click', () => show(b.dataset.page)));
   botBtn.forEach(b  => b.addEventListener('click', () => show(b.dataset.page)));
 
-  // Fresh login → classes. Page refresh → restore last page.
-  let initPage = DEFAULT;
-  try {
-    {% if fresh_login %}
-    sessionStorage.removeItem(KEY);
-    initPage = DEFAULT;
-    {% else %}
-    initPage = sessionStorage.getItem(KEY) || DEFAULT;
-    {% endif %}
-  } catch(e){}
-  show(initPage);
+  let init = DEFAULT;
+  try { init = sessionStorage.getItem(KEY) || DEFAULT; } catch(e){}
+  show(init);
   return { show };
 })();
 
 /* ════════════════════════════════════════════════════
    SETTINGS
    ════════════════════════════════════════════════════ */
-// Settings form: update sidebar display name instantly after save
-(function(){
-  const form = document.getElementById('settingsForm');
-  if (!form) return;
-  form.addEventListener('submit', async function(e){
-    e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-    try {
-      const res = await fetch(form.action, {
-        method: 'POST', body: new FormData(form),
-        headers: {'X-Requested-With': 'XMLHttpRequest'}
-      });
-      const data = await res.json();
-      if (data.ok) {
-        showToast('✓ ' + (data.msg || 'Settings saved'));
-        // Update sidebar name display immediately
-        const newName = form.querySelector('[name="display_name"]').value.trim();
-        if (newName) {
-          document.querySelectorAll('.sidebar-name').forEach(el => el.textContent = newName);
-        document.querySelectorAll('.sidebar-avatar').forEach(el => el.textContent = newName.charAt(0).toUpperCase());
-        }
-      } else {
-        showToast(data.msg || 'Error saving', 'err');
-      }
-    } catch { showToast('Network error', 'err'); }
-    finally { if (btn) { btn.disabled = false; btn.textContent = 'Save Settings'; } }
-  });
-})();
+ajaxForm(document.getElementById('settingsForm'), null);
 ajaxForm(document.getElementById('changePwForm'), null);
+document.querySelectorAll('.fee-form').forEach(f => ajaxForm(f, null));
 
 /* ════════════════════════════════════════════════════
    SCHEDULE — CREATE
@@ -597,40 +565,179 @@ ajaxForm(document.getElementById('scheduleForm'), function(data){
   attachScBtns();
 });
 
-/* ── Edit modal ── */
-document.getElementById('modalClose').onclick = () =>
-  document.getElementById('editModal').classList.add('hidden');
-ajaxForm(document.getElementById('editScheduleForm'), function(data){
-  document.getElementById('editModal').classList.add('hidden');
-  // Update card in-place — no reload needed
-  const card = document.getElementById('sc-'+data.schedule_id);
-  if (card) {
-    const titleEl = card.querySelector('.sc-title');
-    if (titleEl) titleEl.textContent = data.title;
-    const timeEl  = card.querySelector('.sc-time');
-    if (timeEl) timeEl.textContent = '📅 '+data.dt_fmt;
-    const descEl  = card.querySelector('.sc-desc');
-    if (data.description && descEl) descEl.textContent = data.description;
-    const linkEl  = card.querySelector('.sc-link a');
-    if (linkEl && data.meet_link) { linkEl.href = data.meet_link; linkEl.textContent = data.meet_link; }
-    const invEl   = card.querySelector('.sc-invites');
-    if (invEl) {
-      invEl.className = 'sc-invites' + (data.invite_all ? ' open' : '');
-      invEl.textContent = data.invite_all ? '🌐 All students' : '🎯 Specific students only';
-    }
-    // Update edit button data attributes for next edit
-    const editBtn = card.querySelector('.edit-sc-btn');
-    if (editBtn) {
-      editBtn.dataset.title = data.title;
-      editBtn.dataset.at    = data.at_iso;
-      editBtn.dataset.link  = data.meet_link;
-      editBtn.dataset.desc  = data.description;
-    }
+/* ════════════════════════════════════════════════════
+   CUSTOM DATETIME PICKER — factory function
+   ════════════════════════════════════════════════════ */
+function makePicker(cfg) {
+  // cfg: { wrapId, displayId, textId, panelId,
+  //        dayId, monthId, yearId, hourId, minId,
+  //        valId, okId, cancelId, onSet }
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  const display = document.getElementById(cfg.displayId);
+  const panel   = document.getElementById(cfg.panelId);
+  const valEl   = document.getElementById(cfg.valId);
+  const textEl  = document.getElementById(cfg.textId);
+  const dayEl   = document.getElementById(cfg.dayId);
+  const monEl   = document.getElementById(cfg.monthId);
+  const yrEl    = document.getElementById(cfg.yearId);
+  const hrEl    = document.getElementById(cfg.hourId);
+  const minEl   = document.getElementById(cfg.minId);
+
+  // Populate months
+  MONTHS.forEach((m,i) => { const o=document.createElement('option'); o.value=i+1; o.textContent=m; monEl.appendChild(o); });
+
+  function updateDays() {
+    const yr = parseInt(yrEl.value)||2026, mo = parseInt(monEl.value)||1;
+    const max = new Date(yr, mo, 0).getDate();
+    const cur = parseInt(dayEl.value)||1;
+    dayEl.innerHTML = '';
+    for (let d=1; d<=max; d++) { const o=document.createElement('option'); o.value=d; o.textContent=d; dayEl.appendChild(o); }
+    dayEl.value = Math.min(cur, max);
   }
+
+  function setFromISO(iso) {
+    if (!iso) return;
+    const d = new Date(iso.includes('T') ? iso : iso + 'T00:00');
+    yrEl.value  = d.getFullYear();
+    monEl.value = d.getMonth()+1;
+    updateDays();
+    dayEl.value = d.getDate();
+    hrEl.value  = d.getHours();
+    minEl.value = d.getMinutes();
+    commitVal();
+  }
+
+  function commitVal() {
+    const yr=String(yrEl.value||2026).padStart(4,'0');
+    const mo=String(monEl.value||1).padStart(2,'0');
+    const dy=String(dayEl.value||1).padStart(2,'0');
+    const hr=String(Math.max(0,Math.min(23,parseInt(hrEl.value)||0))).padStart(2,'0');
+    const mn=String(Math.max(0,Math.min(59,parseInt(minEl.value)||0))).padStart(2,'0');
+    const iso = `${yr}-${mo}-${dy}T${hr}:${mn}`;
+    valEl.value = iso;
+    const dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(iso).getDay()];
+    textEl.textContent = `${dow}, ${parseInt(dy)} ${MONTHS[parseInt(mo)-1]} ${yr}  ${hr}:${mn}`;
+    if (cfg.onSet) cfg.onSet(iso);
+  }
+
+  // Now init with today
+  const now = new Date();
+  yrEl.value = now.getFullYear(); monEl.value = now.getMonth()+1;
+  updateDays(); dayEl.value = now.getDate();
+  hrEl.value = now.getHours(); minEl.value = Math.round(now.getMinutes()/5)*5;
+  commitVal();
+
+  monEl.addEventListener('change', updateDays);
+  yrEl.addEventListener('change', updateDays);
+
+  display.addEventListener('click', () => panel.classList.toggle('hidden'));
+  display.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') panel.classList.toggle('hidden'); });
+
+  document.getElementById(cfg.okId).addEventListener('click', () => {
+    commitVal(); panel.classList.add('hidden');
+  });
+  document.getElementById(cfg.cancelId).addEventListener('click', () => {
+    panel.classList.add('hidden');
+  });
+  // Close on outside click
+  document.addEventListener('click', e => {
+    const wrap = document.getElementById(cfg.wrapId);
+    if (wrap && !wrap.contains(e.target)) panel.classList.add('hidden');
+  }, true);
+
+  return { setFromISO, commitVal };
+}
+
+// Init all three pickers
+const createPicker = makePicker({
+  wrapId:'createPickerWrap', displayId:'createPickerDisplay', textId:'createPickerText',
+  panelId:'createPickerPanel', valId:'createPickerVal',
+  dayId:'cpDay', monthId:'cpMonth', yearId:'cpYear', hourId:'cpHour', minId:'cpMin',
+  okId:'createPickerOk', cancelId:'createPickerCancel'
+});
+const attnPicker = makePicker({
+  wrapId:'attnPickerWrap', displayId:'attnPickerDisplay', textId:'attnPickerText',
+  panelId:'attnPickerPanel', valId:'attnPickerVal',
+  dayId:'apDay', monthId:'apMonth', yearId:'apYear', hourId:'apHour', minId:'apMin',
+  okId:'attnPickerOk', cancelId:'attnPickerCancel'
+});
+const editPicker = makePicker({
+  wrapId:'editPickerWrap', displayId:'editPickerDisplay', textId:'editPickerText',
+  panelId:'editPickerPanel', valId:'editPickerVal',
+  dayId:'epDay', monthId:'epMonth', yearId:'epYear', hourId:'epHour', minId:'epMin',
+  okId:'editPickerOk', cancelId:'editPickerCancel'
 });
 
-/* ── Schedule buttons (cancel / delete / edit) ── */
+/* ════════════════════════════════════════════════════
+   EDIT MODAL — fully dynamic, no page reload
+   ════════════════════════════════════════════════════ */
+function closeEditModal() {
+  document.getElementById('editModal').classList.add('hidden');
+  document.getElementById('editPickerPanel').classList.add('hidden');
+}
+document.getElementById('modalClose').onclick    = closeEditModal;
+document.getElementById('editModalCancel').onclick = closeEditModal;
+document.getElementById('editModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('editModal')) closeEditModal();
+});
+
+document.getElementById('editScheduleForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('button[type=submit]');
+  if (btn) { btn.disabled=true; btn.classList.add('loading'); }
+  try {
+    const res = await fetch(this.action, {
+      method:'POST', body: new FormData(this),
+      headers:{'X-Requested-With':'XMLHttpRequest'}
+    });
+    const data = await res.json();
+    if (!data.ok) { showToast(data.msg||'Error','err'); return; }
+
+    // Replace the entire card DOM with updated version
+    const sid = data.schedule_id;
+    const oldCard = document.getElementById('sc-'+sid);
+    if (oldCard && data.card_html) {
+      oldCard.outerHTML = data.card_html;
+      attachScBtns();
+      attachStudentToggles();
+    }
+    closeEditModal();
+    showToast('✓ Class updated');
+  } catch { showToast('Network error','err'); }
+  finally { if (btn) { btn.disabled=false; btn.classList.remove('loading'); } }
+});
+
+/* ── Edit btn — pre-fill modal ── */
+function attachEditBtns() {
+  document.querySelectorAll('.edit-sc-btn').forEach(btn => {
+    if (btn._ok) return; btn._ok = true;
+    btn.addEventListener('click', async function(){
+      document.getElementById('editTitle').value = this.dataset.title||'';
+      document.getElementById('editLink').value  = this.dataset.link||'';
+      document.getElementById('editDesc').value  = this.dataset.desc||'';
+      editPicker.setFromISO(this.dataset.at);
+      document.getElementById('editScheduleForm').action = '/teacher/schedule/edit/'+this.dataset.id;
+
+      // Fetch current invite list and pre-check
+      try {
+        const r = await fetch('/teacher/schedule/invites/'+this.dataset.id,
+                              {headers:{'X-Requested-With':'XMLHttpRequest'}}).then(r=>r.json());
+        document.querySelectorAll('.edit-invite-cb').forEach(cb => {
+          cb.checked = r.invited_ids && r.invited_ids.includes(parseInt(cb.value));
+        });
+      } catch {}
+
+      document.getElementById('editModal').classList.remove('hidden');
+    });
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   SCHEDULE BUTTONS (cancel / delete)
+   ════════════════════════════════════════════════════ */
 function attachScBtns() {
+  attachEditBtns();
   document.querySelectorAll('.cancel-sc-btn').forEach(btn => {
     if (btn._ok) return; btn._ok = true;
     btn.addEventListener('click', async function(){
@@ -641,7 +748,9 @@ function attachScBtns() {
       if (card) {
         card.className = card.className.replace('upcoming','cancelled');
         const b = card.querySelector('.sc-badge');
-        if (b) { b.className='sc-badge cancelled'; b.textContent='CANCELLED'; }
+        if (b) { b.className='sc-badge cancelled'; b.textContent='Cancelled'; }
+        // Remove edit/cancel buttons
+        card.querySelectorAll('.edit-sc-btn,.cancel-sc-btn').forEach(b=>b.remove());
       }
       this.remove(); showToast('Class cancelled');
     });
@@ -654,24 +763,47 @@ function attachScBtns() {
       if (r) { document.getElementById('sc-'+this.dataset.id)?.remove(); showToast('Deleted'); }
     });
   });
-  document.querySelectorAll('.edit-sc-btn').forEach(btn => {
+}
+attachScBtns();
+
+/* ════════════════════════════════════════════════════
+   STUDENT TOGGLE — See who's invited / joined
+   ════════════════════════════════════════════════════ */
+function attachStudentToggles() {
+  document.querySelectorAll('.sc-toggle-students').forEach(btn => {
     if (btn._ok) return; btn._ok = true;
     btn.addEventListener('click', async function(){
-      ['editTitle','editAt','editLink','editDesc'].forEach((id,i) => {
-        document.getElementById(id).value = [this.dataset.title,this.dataset.at,this.dataset.link,this.dataset.desc][i] || '';
-      });
-      document.getElementById('editScheduleForm').action = '/teacher/schedule/edit/'+this.dataset.id;
-      // Load current invites and pre-check
-      const sid = this.dataset.id;
-      const r = await fetch('/teacher/schedule/invites/'+sid, {headers:{'X-Requested-With':'XMLHttpRequest'}}).then(r=>r.json()).catch(()=>null);
-      document.querySelectorAll('.edit-invite-cb').forEach(cb => {
-        cb.checked = r && r.invited_ids && r.invited_ids.includes(parseInt(cb.value));
-      });
-      document.getElementById('editModal').classList.remove('hidden');
+      const sid    = this.dataset.sc;
+      const panel  = document.getElementById('ssp-'+sid);
+      const list   = document.getElementById('ssl-'+sid);
+      const isOpen = !panel.classList.contains('hidden');
+      if (isOpen) { panel.classList.add('hidden'); this.textContent='👁 See students'; return; }
+
+      panel.classList.remove('hidden');
+      this.textContent = '👁 Hide students';
+
+      if (list.dataset.loaded) return; // already fetched
+      list.innerHTML = '<span class="sc-students-empty">Loading…</span>';
+      try {
+        const data = await fetch('/teacher/schedule/students/'+sid,
+                                 {headers:{'X-Requested-With':'XMLHttpRequest'}}).then(r=>r.json());
+        if (!data.ok || !data.students.length) {
+          list.innerHTML = '<span class="sc-students-empty">No students invited yet</span>';
+          return;
+        }
+        list.innerHTML = data.students.map(s =>
+          `<span class="sc-student-chip ${s.joined?'joined':''}">
+            <span class="chip-dot"></span>${s.name}${s.joined?' ✓':''}
+          </span>`
+        ).join('');
+        list.dataset.loaded = '1';
+      } catch {
+        list.innerHTML = '<span class="sc-students-empty">Failed to load</span>';
+      }
     });
   });
 }
-attachScBtns();
+attachStudentToggles();
 
 /* ════════════════════════════════════════════════════
    ATTENDANCE — ADD  (dedicated handler for full control)
@@ -704,11 +836,13 @@ attachScBtns();
 
     showToast(data.msg||'✓ Attendance added');
     form.reset();
-    // Reset date field to current time
-    const dateInput = form.querySelector('[name=date]');
-    if (dateInput) {
-      const now = new Date();
-      dateInput.value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+'T'+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+
+    /* Inject row */
+    if (data.record_html) {
+      const list  = document.getElementById('attnList');
+      document.getElementById('attnEmpty')?.remove();
+      list.insertAdjacentHTML('afterbegin', data.record_html);
+      attachDelAttn(list.querySelector('.del-attn-form'));
     }
 
     /* Update progress */
@@ -716,45 +850,6 @@ attachScBtns();
       const pl = document.getElementById('progressList');
       document.getElementById('progressEmpty')?.remove();
       pl.innerHTML = data.progress_html;
-      pl.querySelectorAll('.view-attn-btn').forEach(attachViewAttn);
-    }
-
-    /* If drawer is open for this student, inject new row at top */
-    const drawer = document.getElementById('attnDrawer');
-    const drawerIsOpen = drawer && !drawer.classList.contains('hidden');
-    const openStudentId = drawer?.dataset.openSid;
-    if (drawerIsOpen && openStudentId && openStudentId === String(data.student_id) && data.record_html) {
-      const list = document.getElementById('attnList');
-      list.querySelector('.empty-inline')?.remove();
-      list.insertAdjacentHTML('afterbegin', data.record_html);
-      list.querySelectorAll('.del-attn-form').forEach(attachDelAttn);
-      // Update drawer subtitle
-      const sub = document.getElementById('attnDrawerSub');
-      if (sub) sub.textContent = data.s_total + ' total · ' + data.s_unbilled + ' unbilled';
-    }
-
-    /* Update Students table row */
-    if (data.student_id) {
-      const row = document.getElementById('srow-'+data.student_id);
-      if (row) {
-        const sessEl = row.querySelector('.dt-sessions');
-        if (sessEl) {
-          sessEl.textContent = data.s_total;
-          // Handle pending badge — it's a sibling of sessEl inside same div
-          const sessWrap = sessEl.parentElement;
-          let pendingEl = sessWrap.querySelector('.dt-pending');
-          if (data.s_unbilled > 0) {
-            if (!pendingEl) {
-              pendingEl = document.createElement('div');
-              pendingEl.className = 'dt-pending';
-              sessWrap.appendChild(pendingEl);
-            }
-            pendingEl.textContent = data.s_unbilled + ' pending';
-          } else {
-            pendingEl?.remove();
-          }
-        }
-      }
     }
 
     /* Update nav pip counts */
@@ -770,54 +865,6 @@ attachScBtns();
         } else { pip?.remove(); }
       });
     }
-
-    /* Inject newly generated receipts in real-time */
-    if (data.new_receipts && data.new_receipts.length > 0) {
-      const receiptList = document.getElementById('receiptList');
-      data.new_receipts.forEach(nr => {
-        const html = `<div class="rc-card" id="rc-${nr.id}"
-          data-rid="${nr.id}" data-displayno="${nr.receipt_no||nr.id}" data-paid="0"
-          data-student="${nr.student_name}" data-teacher="${nr.teacher_name}"
-          data-fee="${nr.total_fee}" data-issue="${nr.issue_date}"
-          data-dates="${nr.raw_dates.replace(/"/g,'&quot;')}"
-          data-bank-account="${nr.bank_account}" data-bank-name="${nr.bank_name}"
-          data-show-paid="1" data-paid-url="${nr.paid_url}"
-          tabindex="0" role="button">
-          <div class="rc-mid">
-            <div class="rc-top">
-              <span class="rc-id">#${nr.receipt_no||nr.id}</span>
-              <span class="rc-name">${nr.student_name}</span>
-            </div>
-            <div class="rc-bottom">
-              <span class="rc-date">${nr.issue_date}</span>
-              <span class="rc-sessions">${nr.sessions} sessions</span>
-            </div>
-          </div>
-          <div class="rc-right">
-            <div class="rc-fee">Rp ${nr.fee_fmt}</div>
-            <span class="bup">Unpaid</span>
-          </div>
-          <div class="rc-arrow">›</div>
-        </div>`;
-        receiptList.insertAdjacentHTML('afterbegin', html);
-        // Attach click handler for the new card
-        const card = document.getElementById('rc-'+nr.id);
-        if (card) attachReceiptCard(card);
-      });
-      // Update receipts pip
-      const curUnpaid = document.querySelectorAll('#receiptList .rc-card[data-paid="0"]').length;
-      ['#sideNav','#bottomNav'].forEach(sel => {
-        const nav = document.querySelector(sel+' [data-page="receipts"]');
-        if (!nav) return;
-        let pip = nav.querySelector('.snav-pip,.bnav-pip');
-        const cls = sel.includes('side') ? 'snav-pip' : 'bnav-pip';
-        if (curUnpaid > 0) {
-          if (!pip) { pip = document.createElement('span'); pip.className = cls; nav.appendChild(pip); }
-          pip.textContent = curUnpaid;
-        } else { pip?.remove(); }
-      });
-      showToast(`🧾 Receipt generated for ${data.new_receipts.map(r=>r.student_name).join(', ')}!`);
-    }
   });
 })();
 {% endif %}
@@ -831,188 +878,11 @@ function attachDelAttn(form) {
     const btn = this.querySelector('button');
     if (btn) { btn.disabled=true; btn.classList.add('loading'); }
     const r = await apiFetch(this.action, new FormData(this));
-    if (r) {
-      // Remove the row from the list
-      document.getElementById('attn-'+id)?.remove();
-      showToast(r.msg||'✓ Deleted');
-
-      // Show empty state if no more records in drawer
-      const list = document.getElementById('attnList');
-      if (list && list.querySelectorAll('.attn-row').length === 0) {
-        list.innerHTML = '<div class="empty-inline" id="attnEmpty">No attendance records yet.</div>';
-        // Update subtitle too
-        const sub = document.getElementById('attnDrawerSub');
-        if (sub) sub.textContent = '0 total · 0 unbilled';
-      }
-
-      // Update progress table
-      if (r.progress_html !== undefined) {
-        const pl = document.getElementById('progressList');
-        if (pl) {
-          if (r.progress_html) {
-            pl.innerHTML = r.progress_html;
-            // Re-attach view-attn-btn handlers on updated table
-            pl.querySelectorAll('.view-attn-btn').forEach(attachViewAttn);
-          } else {
-            pl.innerHTML = '<div class="empty-inline" id="progressEmpty">No active students yet.</div>';
-          }
-        }
-      }
-
-      // Update Students table row
-      if (r.student_id) {
-        const row = document.getElementById('srow-'+r.student_id);
-        if (row) {
-          const sessEl = row.querySelector('.dt-sessions');
-          if (sessEl) {
-            sessEl.textContent = r.s_total;
-            const sessWrap = sessEl.parentElement;
-            let pendingEl = sessWrap.querySelector('.dt-pending');
-            if (r.s_unbilled > 0) {
-              if (!pendingEl) {
-                pendingEl = document.createElement('div');
-                pendingEl.className = 'dt-pending';
-                sessWrap.appendChild(pendingEl);
-              }
-              pendingEl.textContent = r.s_unbilled + ' pending';
-            } else {
-              pendingEl?.remove();
-            }
-          }
-        }
-      }
-    } else if (btn) { btn.disabled=false; btn.classList.remove('loading'); }
+    if (r) { document.getElementById('attn-'+id)?.remove(); showToast(r.msg||'✓ Deleted'); }
+    else if (btn) { btn.disabled=false; btn.classList.remove('loading'); }
   });
 }
 document.querySelectorAll('.del-attn-form').forEach(attachDelAttn);
-
-/* ════════════════════════════════════════════════════
-   ATTENDANCE — VIEW PER STUDENT
-   ════════════════════════════════════════════════════ */
-const attnDrawer = document.getElementById('attnDrawer');
-const attnDrawerTitle = document.getElementById('attnDrawerTitle');
-const attnDrawerSub   = document.getElementById('attnDrawerSub');
-const attnDrawerClose = document.getElementById('attnDrawerClose');
-const attnList        = document.getElementById('attnList');
-const attnPageCols    = document.querySelector('#page-attendance .page-cols');
-const attnSearch      = document.getElementById('attnSearch');
-
-function applyAttnFilter() {
-  const q      = (attnSearch?.value || '').toLowerCase().trim();
-  const active = document.querySelector('.afb.active')?.dataset.filter || 'all';
-  const rows   = attnList.querySelectorAll('.attn-row');
-  let visible  = 0;
-  rows.forEach(row => {
-    const text   = row.textContent.toLowerCase();
-    const billed = row.dataset.billed === '1';
-    const matchQ = !q || text.includes(q);
-    const matchF = active === 'all' || (active === 'billed' && billed) || (active === 'unbilled' && !billed);
-    const show   = matchQ && matchF;
-    row.style.display = show ? '' : 'none';
-    if (show) visible++;
-  });
-  // Show/hide empty state
-  let noRes = attnList.querySelector('.attn-no-results');
-  if (visible === 0 && rows.length > 0) {
-    if (!noRes) {
-      noRes = document.createElement('div');
-      noRes.className = 'empty-inline attn-no-results';
-      noRes.textContent = 'No records match your filter.';
-      attnList.appendChild(noRes);
-    }
-    noRes.style.display = '';
-  } else if (noRes) {
-    noRes.style.display = 'none';
-  }
-}
-
-// Wire search input
-attnSearch?.addEventListener('input', applyAttnFilter);
-
-// Wire filter buttons
-document.querySelectorAll('.afb').forEach(btn => {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.afb').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    applyAttnFilter();
-  });
-});
-
-function attachViewAttn(btn) {
-  if (btn._ok) return; btn._ok = true;
-  btn.addEventListener('click', async function(e) {
-    e.stopPropagation();
-    const id   = this.dataset.id;
-    const name = this.dataset.name;
-    // Reset search/filter
-    if (attnSearch) attnSearch.value = '';
-    document.querySelectorAll('.afb').forEach(b => b.classList.toggle('active', b.dataset.filter==='all'));
-    // Show drawer, hide form+progress cols
-    attnDrawerTitle.textContent = name;
-    attnDrawerSub.textContent   = 'Loading…';
-    attnList.innerHTML = '<div class="empty-inline">Loading records…</div>';
-    if (attnPageCols) attnPageCols.style.display = 'none';
-    attnDrawer.classList.remove('hidden');
-    attnDrawer.dataset.openSid = id;
-
-    const r = await fetch('/teacher/student_records/'+id, {
-      headers: {'X-Requested-With': 'XMLHttpRequest'}
-    }).then(res => res.json()).catch(() => null);
-    if (r && r.ok) {
-      attnDrawerSub.textContent = `${r.total} total · ${r.unbilled} unbilled`;
-      attnList.innerHTML = r.html;
-      attnList.querySelectorAll('.del-attn-form').forEach(attachDelAttn);
-    } else {
-      attnList.innerHTML = '<div class="empty-inline">Failed to load records.</div>';
-    }
-  });
-}
-document.querySelectorAll('.view-attn-btn').forEach(attachViewAttn);
-
-attnDrawerClose.addEventListener('click', () => {
-  attnDrawer.classList.add('hidden');
-  if (attnPageCols) attnPageCols.style.display = '';
-});
-
-/* ── Edit Attendance Time ── */
-(function(){
-  const modal    = document.getElementById('editAttnModal');
-  const closeBtn = document.getElementById('editAttnClose');
-  const form     = document.getElementById('editAttnForm');
-  const dateInp  = document.getElementById('editAttnDate');
-  const sub      = document.getElementById('editAttnSub');
-  const submitBtn= document.getElementById('editAttnSubmit');
-
-  closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
-  modal.addEventListener('click', e => { if (e.target===modal) modal.classList.add('hidden'); });
-
-  window.openEditAttn = function(id, dateWib, label) {
-    form.action = '/teacher/edit_attendance/'+id;
-    // dateWib is "YYYY-MM-DDTHH:MM" already in WIB
-    dateInp.value = dateWib;
-    sub.textContent = label || '';
-    modal.classList.remove('hidden');
-  };
-
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
-    const r = await apiFetch(form.action, new FormData(form));
-    submitBtn.disabled = false; submitBtn.textContent = 'Save';
-    if (r) {
-      modal.classList.add('hidden');
-      showToast('✓ Attendance updated');
-      // Update date display in drawer row
-      const row = document.getElementById('attn-'+r.att_id);
-      if (row) row.querySelector('.attn-date').textContent = r.new_date_fmt;
-      // Refresh progress table
-      if (r.progress_html) {
-        const pl = document.getElementById('progressList');
-        if (pl) { pl.innerHTML = r.progress_html; pl.querySelectorAll('.view-attn-btn').forEach(attachViewAttn); }
-      }
-    }
-  });
-})();
 
 /* ════════════════════════════════════════════════════
    STUDENTS — DELETE
@@ -1029,63 +899,6 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
 });
 
 /* ════════════════════════════════════════════════════
-   STUDENTS — RESET PASSWORD
-   ════════════════════════════════════════════════════ */
-(function(){
-  const modal    = document.getElementById('resetPwModal');
-  const closeBtn = document.getElementById('resetPwClose');
-  const form     = document.getElementById('resetPwForm');
-  const input    = document.getElementById('resetPwInput');
-  const subtitle = document.getElementById('resetPwSubtitle');
-  const genBtn   = document.getElementById('resetPwGenerate');
-  const submitBtn= document.getElementById('resetPwSubmit');
-
-  function openModal(id, name) {
-    form.action = '/teacher/reset_student_password/' + id;
-    subtitle.textContent = 'Setting new password for: ' + name;
-    input.value = '';
-    modal.classList.remove('hidden');
-    input.focus();
-  }
-  function closeModal() { modal.classList.add('hidden'); }
-
-  closeBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-
-  // Generate a readable random password: word + numbers
-  genBtn.addEventListener('click', () => {
-    const words = ['Tiger','Panda','Lotus','River','Cloud','Stone','Wind','Fire','Moon','Star'];
-    const word = words[Math.floor(Math.random() * words.length)];
-    const num  = Math.floor(100 + Math.random() * 900);
-    input.value = word + num;
-    input.focus();
-  });
-
-  document.querySelectorAll('.reset-pw-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      openModal(this.dataset.id, this.dataset.name);
-    });
-  });
-
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const pw = input.value.trim();
-    if (pw.length < 6) { showToast('Password must be at least 6 characters', 'err'); return; }
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Saving…';
-    const fd = new FormData();
-    fd.append('new_password', pw);
-    const r = await apiFetch(form.action, fd);
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Set New Password';
-    if (r && r.ok) {
-      showToast('✓ Password reset for ' + subtitle.textContent.replace('Setting new password for: ',''));
-      closeModal();
-    }
-  });
-})();
-
-/* ════════════════════════════════════════════════════
    RECEIPTS — MODAL
    ════════════════════════════════════════════════════ */
 (function(){
@@ -1095,60 +908,26 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
   const DA=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   function build(card) {
-    const paid    = card.dataset.paid === '1';
-    const total   = parseInt(card.dataset.fee || 0);
-    const feeStr  = 'Rp ' + total.toLocaleString('id-ID');
-    const rawDates = (card.dataset.dates||'').split('|').filter(Boolean);
-    const perSess = rawDates.length;
-    const perSessAmt = perSess > 0 ? Math.round(total / perSess) : 0;
-    const dates = rawDates.map((raw,i)=>{
+    const paid = card.dataset.paid==='1';
+    const fee  = 'Rp '+parseInt(card.dataset.fee||0).toLocaleString('id-ID');
+    const dates = (card.dataset.dates||'').split('|').filter(Boolean).map((raw,i)=>{
       const dt  = new Date(raw.endsWith('Z')?raw:raw+'Z');
       const dow = dt.getDay()===0?6:dt.getDay()-1;
       const t   = String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
-      return `<div class="rm-date-item">
-        <span class="rc-date-num">#${i+1}</span>
-        <span class="rc-date-day">${DA[dow]}</span>
-        <span class="rc-date-main">${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}</span>
-        <span class="rc-date-time">${t} WIB</span>
-      </div>`;
+      return `<div class="rm-date-item"><span class="rc-date-num">#${i+1}</span><span class="rc-date-day">${DA[dow]}</span><span class="rc-date-main">${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}</span><span class="rc-date-time">${t}</span></div>`;
     }).join('');
     return `
-      <div class="inv-watermark ${paid?'paid':'unpaid'}">${paid ? 'PAID' : 'UNPAID'}</div>
-      <div class="inv-header">
-        <div class="inv-brand">
-          <div class="inv-brand-zh">中文课堂</div>
-          <div class="inv-brand-sub">Mandarin Class · Invoice</div>
-        </div>
-        <div class="inv-meta">
-          <div class="inv-num">Receipt <span>#${card.dataset.displayno||card.dataset.rid}</span></div>
-          <div class="inv-date">Issued ${card.dataset.issue}</div>
-          <span class="inv-status ${paid?'bpd':'bup'}">${paid?'✓ Paid':'⏳ Unpaid'}</span>
-        </div>
+      <div class="rm-header">
+        <div><div class="rm-lbl">Receipt</div><div class="rm-id">#${card.dataset.rid}</div></div>
+        <div class="rm-header-right"><div class="rm-issue">${card.dataset.issue}</div><span class="${paid?'bpd':'bup'}">${paid?'Paid':'Unpaid'}</span></div>
       </div>
-      <div class="inv-divider"></div>
-      <div class="inv-parties">
-        ${card.dataset.student?`<div class="inv-party"><div class="inv-party-lbl">Bill To</div><div class="inv-party-name">${card.dataset.student}</div><div class="inv-party-role">Student</div></div>`:''}
-        ${card.dataset.teacher?`<div class="inv-party"><div class="inv-party-lbl">From</div><div class="inv-party-name">${card.dataset.teacher}</div><div class="inv-party-role">Teacher</div></div>`:''}
+      <div class="rm-body">
+        ${card.dataset.student?`<div class="rr"><span class="rl">Student</span><span class="rv">${card.dataset.student}</span></div>`:''}
+        ${card.dataset.teacher?`<div class="rr"><span class="rl">Teacher</span><span class="rv">${card.dataset.teacher}</span></div>`:''}
+        <div class="rr"><span class="rl">Total Fee</span><span class="rv money">${fee}</span></div>
       </div>
-      <div class="inv-divider"></div>
-      <div class="inv-line-header">
-        <span>Description</span><span>Qty</span><span>Rate</span><span>Amount</span>
-      </div>
-      <div class="inv-line-item">
-        <span class="inv-desc"><strong>Mandarin Lessons</strong><small>${perSess} sessions</small></span>
-        <span class="inv-qty">${perSess}</span>
-        <span class="inv-rate">Rp ${perSessAmt.toLocaleString('id-ID')}</span>
-        <span class="inv-amount">${feeStr}</span>
-      </div>
-      <div class="inv-total-row">
-        <div class="inv-total-label">Total Due</div>
-        <div class="inv-total-amount">${feeStr}</div>
-      </div>
-      ${dates?`<div class="inv-sessions-header"><span>📅 Sessions Breakdown</span><span class="inv-sess-count">${perSess} classes</span></div><div class="rm-dates inv-dates">${dates}</div>`:''}
-      <div class="rm-foot" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-        ${card.dataset.showPaid==='1'&&!paid?`<form class="mark-paid-form" method="POST" action="${card.dataset.paidUrl}" style="margin:0"><button class="btn bg bsm" type="submit">✓ Mark as Paid</button></form>`:''}
-        ${paid?`<button class="btn bdel bsm del-receipt-btn" data-rid="${card.dataset.rid}">🗑 Delete</button>`:''}
-      </div>`;
+      ${dates?`<div class="rc-dates-label">📅 Sessions attended</div><div class="rm-dates">${dates}</div>`:''}
+      ${card.dataset.showPaid==='1'&&!paid?`<div class="rm-foot"><form class="mark-paid-form" method="POST" action="${card.dataset.paidUrl}"><button class="btn bg bsm" type="submit">✓ Mark Paid</button></form></div>`:''}`;
   }
 
   function open(card) {
@@ -1163,28 +942,8 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
         if (r) {
           card.dataset.paid='1';
           const b=card.querySelector('.bup'); if(b){b.className='bpd';b.textContent='Paid';}
-          // Update pip — one less unpaid
-          ['#sideNav','#bottomNav'].forEach(sel=>{
-            const nav=document.querySelector(sel+' [data-page="receipts"]');
-            if(!nav)return;
-            const pip=nav.querySelector('.snav-pip,.bnav-pip');
-            if(pip){const n=parseInt(pip.textContent)-1; if(n>0)pip.textContent=n; else pip.remove();}
-          });
           showToast(r.msg||'✓ Marked paid'); close();
-          // Rebuild modal to show delete button
-          open(card);
         } else if(btn){btn.disabled=false;btn.classList.remove('loading');}
-      });
-    });
-    box.querySelectorAll('.del-receipt-btn').forEach(btn=>{
-      btn.addEventListener('click', async function(){
-        if (!await confirm2('Delete this receipt?','This cannot be undone.','🗑 Delete','danger')) return;
-        this.disabled=true; this.textContent='Deleting…';
-        const r = await apiFetch('/teacher/delete_receipt/'+this.dataset.rid, new FormData());
-        if (r) {
-          document.getElementById('rc-'+this.dataset.rid)?.remove();
-          showToast('Receipt deleted'); close();
-        } else { this.disabled=false; this.textContent='🗑 Delete Receipt'; }
       });
     });
   }
@@ -1192,13 +951,10 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
   overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
   document.getElementById('receiptModalClose').onclick = close;
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
-
-  window.attachReceiptCard = function(c) {
-    if (c._rcOk) return; c._rcOk = true;
+  document.querySelectorAll('#receiptList .rc-card').forEach(c=>{
     c.addEventListener('click', ()=>open(c));
     c.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ')open(c); });
-  };
-  document.querySelectorAll('#receiptList .rc-card').forEach(attachReceiptCard);
+  });
 
   const smb = document.getElementById('showMoreReceipts');
   if (smb) {
@@ -1208,46 +964,18 @@ document.querySelectorAll('.del-student-btn').forEach(btn => {
   }
 })();
 
-/* ── Fee form real-time update ── */
-document.querySelectorAll('.fee-form').forEach(f => {
-  f.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const btn = f.querySelector('[type=submit]');
-    if (btn) { btn.disabled=true; btn.classList.add('loading'); }
-    try {
-      const res  = await fetch(f.action, {method:'POST', body:new FormData(f), headers:{'X-Requested-With':'XMLHttpRequest'}});
-      const data = await res.json();
-      if (data.ok) {
-        showToast('✓ Fee saved');
-        // Update displayed fee next to student name if element exists
-        const sid = f.querySelector('[name=student_id]')?.value;
-        if (sid) {
-          const display = document.querySelector(`.fee-display[data-sid="${sid}"]`);
-          if (display) display.textContent = `Rp ${data.fee_fmt}`;
-        }
-      } else { showToast(data.msg||'Error saving fee','err'); }
-    } catch { showToast('Network error','err'); }
-    finally { if (btn) { btn.disabled=false; btn.classList.remove('loading'); } }
-  });
-});
-
 /* ════════════════════════════════════════════════════
    HELPERS
    ════════════════════════════════════════════════════ */
 async function apiFetch(url, body, ct) {
-  const headers = {'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': _CSRF};
+  const headers = {'X-Requested-With':'XMLHttpRequest'};
   if (ct) headers['Content-Type'] = ct;
   try {
     const res  = await fetch(url, { method:'POST', body: body||null, headers });
-    if (!res.ok) {
-      let msg = 'Server error ('+res.status+')';
-      try { const d = await res.json(); msg = d.msg||msg; } catch{}
-      showToast(msg,'err'); return null;
-    }
     const data = await res.json();
     if (data.ok) return data;
     showToast(data.msg||'Error','err'); return null;
-  } catch(err) { showToast('Network error — please try again','err'); return null; }
+  } catch { showToast('Network error','err'); return null; }
 }
 
 function confirm2(title, msg, okLabel, type) {
