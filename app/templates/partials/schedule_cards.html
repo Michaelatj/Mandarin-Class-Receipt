@@ -4,13 +4,6 @@
 {% set now = now_dt() %}
 {% set is_past = s.scheduled_at < now %}
 {% set status = 'cancelled' if s.cancelled else ('past' if is_past else 'upcoming') %}
-{% set invited_names = [] %}
-{% if s.invited_ids is defined %}
-  {% for sid in s.invited_ids %}
-    {% set st = students_by_id.get(sid) if students_by_id is defined else none %}
-    {% if st %}{% set _ = invited_names.append(st.name()) %}{% endif %}
-  {% endfor %}
-{% endif %}
 <div class="sc-card {{ status }}" id="sc-{{ s.id }}">
   <div class="sc-head">
     <div style="min-width:0;flex:1">
@@ -29,13 +22,10 @@
     <div class="sc-foot-left">
       <span class="sc-joined">👥 {{ s.join_count }} {{ 'student' if s.join_count==1 else 'students' }} joined</span>
       {% if s.invited_ids is defined and s.invited_ids %}
-        <span class="sc-invites specific">🎯 Specific students</span>
+        <span class="sc-invites specific">Specific students</span>
       {% else %}
-        <span class="sc-invites open">🌐 All students</span>
+        <span class="sc-invites open">All students</span>
       {% endif %}
-      <button class="sc-toggle-students" data-sc="{{ s.id }}" type="button">
-        👁 See students
-      </button>
     </div>
     <div class="sc-foot-right">
       {% if not s.cancelled and not is_past %}
@@ -48,12 +38,6 @@
       <button class="btn bdel-outline bsm cancel-sc-btn" data-id="{{ s.id }}">✕ Cancel</button>
       {% endif %}
       <button class="btn bdel bsm delete-sc-btn" data-id="{{ s.id }}">🗑</button>
-    </div>
-  </div>
-  <div class="sc-students-panel hidden" id="ssp-{{ s.id }}">
-    <div class="sp-title">Students</div>
-    <div class="sc-students-list" id="ssl-{{ s.id }}">
-      <span class="sc-students-empty">Loading…</span>
     </div>
   </div>
 </div>

@@ -20,6 +20,8 @@ class User(db.Model):
     bank_name    = db.Column(db.String(100), default="")
     fee_idr      = db.Column(db.Integer, default=0)           # teacher default fee
     phone        = db.Column(db.String(30), default="")
+    email        = db.Column(db.String(200), default="")
+    seen_pips    = db.Column(db.String(500), default="{}")    # JSON: {tab: last_seen_count}
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
 
     def name(self) -> str:
@@ -56,6 +58,7 @@ class Attendance(db.Model):
     date       = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     billed     = db.Column(db.Boolean, default=False, nullable=False)
     note       = db.Column(db.String(200), default="")
+    source     = db.Column(db.String(10), default="teacher")  # 'student' | 'teacher'
 
     def __repr__(self) -> str:
         return f"<Attendance student={self.student_id} date={self.date:%Y-%m-%d}>"
@@ -65,6 +68,7 @@ class Receipt(db.Model):
     __tablename__ = "receipt"
 
     id           = db.Column(db.Integer, primary_key=True)
+    receipt_no   = db.Column(db.Integer, nullable=False, default=0)  # sequential per teacher
     student_id   = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
     student_name = db.Column(db.String(100), nullable=False)
     teacher_id   = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
@@ -130,3 +134,4 @@ class ScheduleInvite(db.Model):
     __table_args__ = (
         db.UniqueConstraint("schedule_id", "student_id", name="uq_schedule_invite"),
     )
+

@@ -38,21 +38,50 @@ def set_custom_fee(teacher_id: int, student_id: int, fee: int) -> None:
 
 
 def add_attendance(student_id: int, teacher_id: int,
-                   date: datetime | None = None, note: str = "") -> Attendance:
+                   date: datetime | None = None, note: str = "",
+                   source: str = "teacher") -> Attendance | None:
     """
     Add one attendance record and check whether a receipt should be generated.
-    Returns the new Attendance object.
+    Returns the new Attendance object, or None if blocked by 90-min cooldown.
+
+    Cooldown applies to student-initiated submissions (source='student' or 'join').
+    Teacher manual entries (source='teacher') bypass cooldown.
     """
+    from datetime import timedelta
+    now = date or datetime.utcnow()
+
+    # 90-minute cooldown — only for student/join sources, not teacher manual
+    if source in ("student", "join"):
+        cutoff = now - timedelta(minutes=90)
+        recent = (
+            Attendance.query
+            .filter(
+                Attendance.student_id == student_id,
+                Attendance.teacher_id == teacher_id,
+                Attendance.date >= cutoff,
+                Attendance.source.in_(["student", "join"]),
+            )
+            .first()
+        )
+        if recent:
+            logger.info(
+                "Cooldown blocked attendance: student=%d teacher=%d "
+                "(last was %s, within 90 min)",
+                student_id, teacher_id, recent.date.isoformat(),
+            )
+            return None
+
     record = Attendance(
         student_id=student_id,
         teacher_id=teacher_id,
-        date=date or datetime.utcnow(),
+        date=now,
         note=note[:200],
+        source=source,
     )
     db.session.add(record)
     db.session.commit()
-    logger.info("Attendance added: student=%d teacher=%d date=%s",
-                student_id, teacher_id, record.date.isoformat())
+    logger.info("Attendance added: student=%d teacher=%d date=%s source=%s",
+                student_id, teacher_id, record.date.isoformat(), source)
 
     student = db.session.get(User, student_id)
     teacher = db.session.get(User, teacher_id)
@@ -99,26 +128,43 @@ def get_student_progress(teacher_id: int) -> list[dict]:
     """
     Return a list of dicts summarising each student's current unbilled progress
     under this teacher:  [{name, count, dates, student_id}, ...]
+
+    Always includes ALL students who have ever had attendance with this teacher,
+    even if they currently have 0 unbilled (shows 0/8).
     """
-    active = (
+    # All students who ever had ANY attendance with this teacher
+    all_records = (
+        Attendance.query
+        .filter_by(teacher_id=teacher_id)
+        .order_by(Attendance.date.asc())
+        .all()
+    )
+
+    # Build set of all student_ids who have ever attended
+    seen_students: dict[int, dict] = {}
+    for record in all_records:
+        if record.student_id not in seen_students:
+            student = db.session.get(User, record.student_id)
+            seen_students[record.student_id] = {
+                "student_id": record.student_id,
+                "name": student.name() if student else "?",
+                "count": 0,        # unbilled count
+                "dates": [],       # unbilled dates only
+            }
+
+    # Now fill in unbilled counts
+    unbilled = (
         Attendance.query
         .filter_by(teacher_id=teacher_id, billed=False)
         .order_by(Attendance.date.asc())
         .all()
     )
-    progress: dict[int, dict] = {}
-    for record in active:
-        if record.student_id not in progress:
-            student = db.session.get(User, record.student_id)
-            progress[record.student_id] = {
-                "student_id": record.student_id,
-                "name": student.name() if student else "?",
-                "count": 0,
-                "dates": [],
-            }
-        progress[record.student_id]["count"] += 1
-        progress[record.student_id]["dates"].append(record.date)
-    return list(progress.values())
+    for record in unbilled:
+        if record.student_id in seen_students:
+            seen_students[record.student_id]["count"] += 1
+            seen_students[record.student_id]["dates"].append(record.date)
+
+    return list(seen_students.values())
 
 
 # ── Internal ──────────────────────────────────────────────────────────────────
@@ -148,7 +194,18 @@ def _maybe_generate_receipt(student: User | None, teacher: User | None) -> None:
     raw_dates = "|".join(a.date.strftime("%Y-%m-%dT%H:%M:%S") for a in batch)
     fee       = get_custom_fee(teacher.id, student.id, teacher.fee_idr)
 
+    # Sequential receipt number per teacher (survives deletions)
+    last_receipt = (Receipt.query
+                    .filter_by(teacher_id=teacher.id)
+                    .order_by(Receipt.receipt_no.desc())
+                    .first())
+    next_no = (last_receipt.receipt_no or 0) + 1 if last_receipt else 1
+
+    # issue_date = tanggal attendance ke-8 (sesi terakhir), bukan waktu server generate
+    last_session_date = batch[-1].date  # batch sudah order by date asc
+
     receipt = Receipt(
+        receipt_no   = next_no,
         student_id   = student.id,
         student_name = student.name(),
         teacher_id   = teacher.id,
@@ -157,6 +214,7 @@ def _maybe_generate_receipt(student: User | None, teacher: User | None) -> None:
         bank_name    = teacher.bank_name,
         total_fee    = fee,
         raw_dates    = raw_dates,
+        issue_date   = last_session_date,
     )
     db.session.add(receipt)
 

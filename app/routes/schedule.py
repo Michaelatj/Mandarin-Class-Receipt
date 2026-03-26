@@ -125,78 +125,42 @@ def edit(sid):
         return redirect(url_for("teacher.dashboard"))
 
     s.title       = request.form.get("title", s.title).strip()[:200]
-    s.description = request.form.get("description", s.description or "").strip()[:500]
-    link          = request.form.get("meet_link", s.meet_link or "").strip()[:500]
+    s.description = request.form.get("description", s.description).strip()[:500]
+    link          = request.form.get("meet_link", s.meet_link).strip()[:500]
     if link and not link.startswith("http"):
         link = "https://" + link
     s.meet_link   = link
-
-    dt_str = request.form.get("scheduled_at", "")
+    dt_str        = request.form.get("scheduled_at", "")
     try:
         s.scheduled_at = datetime.strptime(dt_str, "%Y-%m-%dT%H:%M")
     except ValueError:
         pass
 
-    # Update invites if provided
-    if "update_invites" in request.form:
-        ScheduleInvite.query.filter_by(schedule_id=sid).delete()
-        for sid_str in request.form.getlist("invited_students"):
-            try:
-                db.session.add(ScheduleInvite(schedule_id=sid, student_id=int(sid_str)))
-            except (ValueError, TypeError):
-                pass
+    # Update invited students
+    ScheduleInvite.query.filter_by(schedule_id=sid).delete()
+    for sid_str in request.form.getlist("invited_students"):
+        try:
+            db.session.add(ScheduleInvite(schedule_id=sid, student_id=int(sid_str)))
+        except (ValueError, TypeError):
+            pass
 
     db.session.commit()
-
     if _is_ajax():
-        invited_names = [db.session.get(User, inv.student_id).name()
-                         for inv in ScheduleInvite.query.filter_by(schedule_id=sid).all()
-                         if db.session.get(User, inv.student_id)]
-        card_html = _render_schedule_card_teacher(s, teacher, invited_names)
+        # Return updated card fields so JS can update DOM without reload
+        dt_fmt = s.scheduled_at.strftime("%a, %d %b %Y · %H:%M")
+        at_iso = s.scheduled_at.strftime("%Y-%m-%dT%H:%M")
+        invites = ScheduleInvite.query.filter_by(schedule_id=sid).all()
+        invite_all = len(invites) == 0
         return jsonify(ok=True, msg=tr("ok_saved"),
                        schedule_id=sid,
-                       card_html=card_html,
                        title=s.title,
                        description=s.description or '',
                        meet_link=s.meet_link or '',
-                       dt_fmt=s.scheduled_at.strftime("%a, %d %b %Y · %H:%M"),
-                       at_iso=s.scheduled_at.strftime("%Y-%m-%dT%H:%M"))
+                       dt_fmt=dt_fmt,
+                       at_iso=at_iso,
+                       invite_all=invite_all)
     flash(tr("ok_saved"), "ok")
     return redirect(url_for("teacher.dashboard"))
-
-
-@schedule_bp.route("/teacher/schedule/invites/<int:sid>")
-@teacher_required
-def get_invites(sid):
-    """Return invited student IDs for a schedule (used by edit modal)."""
-    invites = ScheduleInvite.query.filter_by(schedule_id=sid).all()
-    return jsonify(invited_ids=[inv.student_id for inv in invites])
-
-
-@schedule_bp.route("/teacher/schedule/students/<int:sid>")
-@teacher_required
-def get_students(sid):
-    """Return all students with join status for a schedule card."""
-    s = Schedule.query.get(sid)
-    if not s:
-        return jsonify(ok=False, msg="Not found")
-
-    all_students = User.query.filter_by(role="student").all()
-    joins = {j.student_id for j in ScheduleJoin.query.filter_by(schedule_id=sid).all()}
-    invites = {i.student_id for i in ScheduleInvite.query.filter_by(schedule_id=sid).all()}
-    invite_all = len(invites) == 0
-
-    students = []
-    for st in all_students:
-        # Only include if invited (or open to all)
-        if invite_all or st.id in invites:
-            students.append({
-                "id":     st.id,
-                "name":   st.name(),
-                "joined": st.id in joins,
-            })
-
-    return jsonify(ok=True, students=students, invite_all=invite_all)
 
 
 @schedule_bp.route("/teacher/schedule/cancel/<int:sid>", methods=["POST"])
@@ -249,7 +213,7 @@ def join(sid):
         if _is_ajax(): return jsonify(ok=False, msg="Class not found or cancelled")
         return redirect(url_for("student.dashboard"))
 
-    # Prevent double-join
+    # Prevent double-join per schedule
     existing = ScheduleJoin.query.filter_by(schedule_id=sid, student_id=student.id).first()
     if existing:
         if _is_ajax():
@@ -258,67 +222,34 @@ def join(sid):
                            msg="You already joined this class")
         return redirect(s.meet_link or url_for("student.dashboard"))
 
-    # Auto-mark attendance
+    # Auto-mark attendance — store UTC now, display as WIB later
+    # add_attendance returns None if blocked by 90-min cooldown
     att = add_attendance(student_id=student.id,
                          teacher_id=s.teacher_id,
-                         date=s.scheduled_at,
-                         note=f"Joined: {s.title}")
+                         date=datetime.utcnow(),
+                         note=f"Joined: {s.title}",
+                         source='join')
 
+    # Even if cooldown blocked attendance, still record the join and open Meet
     sj = ScheduleJoin(schedule_id=sid, student_id=student.id,
                       attendance_id=att.id if att else None)
     db.session.add(sj)
     db.session.commit()
-    logger.info("Student %s joined schedule #%d", student.name(), sid)
+
+    cooldown_blocked = att is None
+    msg = "Opening Meet…" if not cooldown_blocked else "Joining Meet (attendance already recorded in last 90 min)"
+    logger.info("Student %s joined schedule #%d (attendance=%s)", student.name(), sid,
+                "blocked by cooldown" if cooldown_blocked else "recorded")
 
     if _is_ajax():
-        # Build progress_html identical to mark_attendance route
-        unbilled = Attendance.query.filter_by(student_id=student.id, billed=False)\
-                       .order_by(Attendance.date.asc()).all()
-        total_sessions = Attendance.query.filter_by(student_id=student.id).count()
-        for a in unbilled:
-            t = db.session.get(User, a.teacher_id)
-            a.teacher_name = t.name() if t else "?"
-        cnt = len(unbilled)
-        pct = min(int(cnt / 8 * 100), 100)
-        rem = 8 - cnt
-        rem_txt = f"{rem} more {'class' if rem==1 else 'classes'} until next receipt"
-        cells = ""
-        for i in range(8):
-            if i < cnt:
-                a = unbilled[i]
-                from ..services.i18n import to_wib
-                ld = to_wib(a.date)
-                cells += (f'<div class="cycle-cell done">'
-                          f'<div class="cell-num">#{i+1}</div>'
-                          f'<div class="cell-day">{ld.strftime("%a")}</div>'
-                          f'<div class="cell-date">{ld.strftime("%d %b")}</div>'
-                          f'<div class="cell-time">{ld.strftime("%H:%M")}</div>'
-                          f'</div>')
-            else:
-                cells += (f'<div class="cycle-cell empty-cell">'
-                          f'<div class="cell-num">#{i+1}</div>'
-                          f'<div class="cell-empty">—</div>'
-                          f'</div>')
-        if cnt > 0:
-            teacher_name = s.teacher_name if hasattr(s, 'teacher_name') else (db.session.get(User, s.teacher_id).name() if db.session.get(User, s.teacher_id) else '?')
-            progress_html = (
-                f'<div class="cycle-card">'
-                f'<div class="cycle-header"><div>'
-                f'<div class="cycle-title">{cnt} / 8 classes done</div>'
-                f'<div class="cycle-sub">with {teacher_name} · {rem_txt}</div>'
-                f'</div><div class="cycle-pct">{pct}%</div></div>'
-                f'<div class="cycle-bar"><div class="cycle-fill" style="width:{pct}%"></div></div>'
-                f'<div class="cycle-grid">{cells}</div>'
-                f'</div>'
-            )
-        else:
-            progress_html = '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">No progress yet</div></div>'
-
+        from ..models import Attendance as _Att
+        unbilled_cnt   = _Att.query.filter_by(student_id=student.id, billed=False).count()
+        total_sessions = _Att.query.filter_by(student_id=student.id).count()
         return jsonify(ok=True, already=False,
                        meet_link=s.meet_link,
-                       msg="Attendance marked! Opening Meet…",
-                       progress_html=progress_html,
-                       cycle_count=cnt,
+                       msg=msg,
+                       cooldown_blocked=cooldown_blocked,
+                       cycle_count=unbilled_cnt,
                        total_sessions=total_sessions)
     if s.meet_link:
         return redirect(s.meet_link)
@@ -379,3 +310,15 @@ def _render_schedule_card_teacher(s, teacher, invited_names=None):
         '</div>'
         '</div>'
     )
+
+
+@schedule_bp.route("/teacher/schedule/invites/<int:sid>", methods=["GET"])
+@teacher_required
+def get_invites(sid):
+    """Return current invited student IDs for a schedule (for edit modal)."""
+    teacher = _user()
+    s = Schedule.query.filter_by(id=sid, teacher_id=teacher.id).first()
+    if not s:
+        return jsonify(ok=False, msg="Not found")
+    invites = ScheduleInvite.query.filter_by(schedule_id=sid).all()
+    return jsonify(ok=True, invited_ids=[inv.student_id for inv in invites])

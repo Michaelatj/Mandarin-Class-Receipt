@@ -5,6 +5,7 @@
 {% include 'partials/quote.html' %}
 <div class="form-title">{{ tr('login') }}</div>
 <form method="POST" action="{{ url_for('auth.login') }}" autocomplete="on">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label>{{ tr('username_lbl') }}</label>
   <input type="text" name="username" placeholder="{{ tr('username_ph') }}"
          required autocomplete="username">
