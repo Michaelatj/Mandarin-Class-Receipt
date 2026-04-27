@@ -1406,7 +1406,8 @@ input:focus, select:focus, textarea:focus {
    ═══════════════════════════════════════════════════════════════ */
 .rm-box {
   position: relative;
-  overflow: hidden;
+  overflow: auto;
+  max-height: 88vh;
   max-width: 520px;
   border-radius: var(--radius-lg);
 }

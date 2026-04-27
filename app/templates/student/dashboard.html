@@ -262,6 +262,26 @@
 
 {% block page_scripts %}
 <script>
+/* ── Unpaid Tuition Reminder ── */
+const reminderModal = document.getElementById('unpaidReminderModal');
+const dismissBtn = document.getElementById('dismissReminderBtn');
+
+if (reminderModal && dismissBtn) {
+  // Check if we already showed it in this session
+  if (!sessionStorage.getItem('tuition_reminder_seen')) {
+    reminderModal.classList.remove('hidden'); // Show the modal
+    document.body.style.overflow = 'hidden';  // Stop background scrolling
+  }
+
+  // When they click "Xie xie"
+  dismissBtn.addEventListener('click', () => {
+    reminderModal.classList.add('hidden');
+    document.body.style.overflow = '';
+    
+    // Save to session storage so it doesn't pop up again until their next login
+    sessionStorage.setItem('tuition_reminder_seen', 'true');
+  });
+}
 document.getElementById('langBar').style.display  = 'none';
 document.getElementById('dmToggle').style.display = 'none';
 
@@ -547,4 +567,18 @@ function attachCardClick(card) {
 }
 document.querySelectorAll('#receiptList .rc-card').forEach(attachCardClick);
 </script>
+{# ═══ UNPAID REMINDER MODAL ═══ #}
+  {% if unpaid_count > 0 %}
+  <div class="modal-overlay hidden" id="unpaidReminderModal" style="z-index: 9999;">
+    <div class="modal-box" style="text-align: center; padding: 36px 24px;">
+      <div style="font-size: 3.5rem; margin-bottom: 12px;">💸</div>
+      <h3 style="font-family: var(--font-display); font-size: 1.5rem; color: var(--gold);">Tuition Reminder</h3>
+      <p style="color: var(--text2); font-size: .95rem; margin-bottom: 24px; line-height: 1.6;">
+        You currently have <strong style="color: var(--red);">{{ unpaid_count }} unpaid receipt(s)</strong>. <br>
+        Please check the Receipts tab and settle them when you have a moment!
+      </p>
+      <button class="btn bg" id="dismissReminderBtn" style="font-size: 1rem; padding: 12px;">🙏 Xie xie for the reminder!</button>
+    </div>
+  </div>
+  {% endif %}
 {% endblock %}
