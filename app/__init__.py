@@ -4,6 +4,7 @@ app/__init__.py — Application factory.
 import logging
 import os
 from datetime import datetime
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -17,10 +18,13 @@ csrf = CSRFProtect()
 
 
 def create_app(config_name=None):
+    
     if config_name is None:
         config_name = os.environ.get("FLASK_ENV", "default")
 
     flask_app = Flask(__name__, instance_relative_config=True)
+
+    flask_app.wsgi_app = ProxyFix(flask_app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     cfg = config_map.get(config_name, config_map["default"])
     flask_app.config.from_object(cfg)
