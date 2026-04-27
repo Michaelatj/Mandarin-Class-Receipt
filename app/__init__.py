@@ -58,6 +58,7 @@ def create_app(config_name=None):
     csrf.init_app(flask_app)
     # Accept CSRF token from header (for AJAX requests that can't easily use form fields)
     flask_app.config['WTF_CSRF_HEADERS'] = ['X-CSRFToken']
+    flask_app.config['WTF_CSRF_SSL_STRICT'] = False
 
     _configure_logging(flask_app)
 

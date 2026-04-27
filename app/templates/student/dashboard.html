@@ -307,8 +307,8 @@ const _TZ = -(new Date().getTimezoneOffset());
 document.getElementById('tzOffset').value = _TZ;
 fetch('/set_tz', {
   method:'POST',
-  headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':_CSRF},
-  body: JSON.stringify({ tz_offset: _TZ })
+headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': _CSRF},
+  body: JSON.stringify({ tz_offset: -(new Date().getTimezoneOffset()) })
 });
 
 // Refresh tz_offset every time attnForm is about to submit
