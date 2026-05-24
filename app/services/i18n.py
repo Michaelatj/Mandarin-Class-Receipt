@@ -78,6 +78,13 @@ TRANSLATIONS: dict = {
         jan="January", feb="February", mar="March", apr="April",
         may_m="May", jun="June", jul="July", aug="August",
         sep="September", oct_m="October", nov="November", dec="December",
+        tuition_rules_title="Tuition Payment Rules",
+        tuition_rules_info="Choose the payment packet that works best for you:",
+        packet_session_title="📅 Session Packet",
+        packet_session_desc="Pay per session attended (Rp 75,000/session). Flexible for irregular schedules.",
+        packet_monthly_title="📆 Monthly Packet",
+        packet_monthly_desc="Fixed monthly fee (Rp 500,000/month). Payment due every month regardless of attendance or rescheduling.",
+        packet_monthly_warning="⚠️ Important: For monthly packet students, payment is required every month even if classes are rescheduled or missed. This ensures stable income for the teacher.",
     ),
     "zh": dict(
         app_title="中文课堂", app_sub="考勤与账单系统 · Chinese Class",
@@ -146,6 +153,13 @@ TRANSLATIONS: dict = {
         jan="一月", feb="二月", mar="三月", apr="四月",
         may_m="五月", jun="六月", jul="七月", aug="八月",
         sep="九月", oct_m="十月", nov="十一月", dec="十二月",
+        tuition_rules_title="学费支付规则",
+        tuition_rules_info="选择最适合您的付费套餐：",
+        packet_session_title="📅 次付套餐",
+        packet_session_desc="按上课次数付费（75,000印尼盾/次）。适合时间不固定的学生。",
+        packet_monthly_title="📆 月付套餐",
+        packet_monthly_desc="固定月费（500,000印尼盾/月）。无论是否上课或改期，每月都需支付。",
+        packet_monthly_warning="⚠️ 重要提示：选择月付套餐的学生，即使改期或缺席，每月仍需支付费用。这确保老师有稳定的收入。",
     ),
 }
 
@@ -190,10 +204,14 @@ def get_lang() -> str:
     return session.get("lang", "en")
 
 
-def tr(key: str) -> str:
+def tr(key: str, default: str = None) -> str:
     """Return the translated string for key in the current session language."""
     lang = get_lang()
-    return TRANSLATIONS[lang].get(key, TRANSLATIONS["en"].get(key, key))
+    result = TRANSLATIONS[lang].get(key, TRANSLATIONS["en"].get(key, key))
+    # If default is provided and key not found, use default
+    if result == key and default is not None:
+        return default
+    return result
 
 
 def to_wib(dt: datetime) -> datetime:
