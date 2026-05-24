@@ -15,7 +15,15 @@ app = create_app("production")
 with app.app_context():
     try:
         inspector = inspect(db.engine)
-        if 'student_fee' in inspector.get_table_names():
+        table_names = inspector.get_table_names()
+        
+        # Create all tables if they don't exist
+        if not table_names:
+            db.create_all()
+            print("✅ Database tables created.")
+        
+        # Check student_fee table for packet_type column
+        if 'student_fee' in table_names:
             columns = [col['name'] for col in inspector.get_columns('student_fee')]
             if 'packet_type' not in columns:
                 print("🔄 Detected missing 'packet_type' column. Adding it now...")
@@ -25,10 +33,6 @@ with app.app_context():
                     conn.execute(db.text("ALTER TABLE student_fee ADD COLUMN packet_type VARCHAR(20) DEFAULT 'session'"))
                     conn.commit()
                 print("✅ Column 'packet_type' added successfully.")
-        else:
-            # If tables don't exist at all (fresh install), create them
-            db.create_all()
-            print("✅ Database tables created.")
     except Exception as e:
         print(f"⚠️ Auto-migration check failed (non-critical if tables exist): {e}")
 
