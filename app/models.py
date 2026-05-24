@@ -40,13 +40,14 @@ class StudentFee(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     fee_idr    = db.Column(db.Integer, nullable=False)
+    packet_type = db.Column(db.String(20), default="session")  # 'session' | 'monthly'
 
     __table_args__ = (
         db.UniqueConstraint("teacher_id", "student_id", name="uq_teacher_student_fee"),
     )
 
     def __repr__(self) -> str:
-        return f"<StudentFee teacher={self.teacher_id} student={self.student_id} fee={self.fee_idr}>"
+        return f"<StudentFee teacher={self.teacher_id} student={self.student_id} fee={self.fee_idr} type={self.packet_type}>"
 
 
 class Attendance(db.Model):

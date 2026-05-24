@@ -22,19 +22,20 @@ def get_custom_fee(teacher_id: int, student_id: int, default_fee: int) -> int:
     return override.fee_idr if override else default_fee
 
 
-def set_custom_fee(teacher_id: int, student_id: int, fee: int) -> None:
-    """Create or update a per-student fee override."""
+def set_custom_fee(teacher_id: int, student_id: int, fee: int, packet_type: str = "session") -> None:
+    """Create or update a per-student fee override with packet type."""
     existing = StudentFee.query.filter_by(
         teacher_id=teacher_id, student_id=student_id
     ).first()
     if existing:
         existing.fee_idr = fee
+        existing.packet_type = packet_type
     else:
         db.session.add(StudentFee(
-            teacher_id=teacher_id, student_id=student_id, fee_idr=fee
+            teacher_id=teacher_id, student_id=student_id, fee_idr=fee, packet_type=packet_type
         ))
     db.session.commit()
-    logger.info("Custom fee set: teacher=%d student=%d fee=%d", teacher_id, student_id, fee)
+    logger.info("Custom fee set: teacher=%d student=%d fee=%d type=%s", teacher_id, student_id, fee, packet_type)
 
 
 def add_attendance(student_id: int, teacher_id: int,

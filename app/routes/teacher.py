@@ -83,8 +83,12 @@ def dashboard():
                        .order_by(Receipt.issue_date.desc()).all()
     all_students = User.query.filter_by(role="student").all()
     progress     = get_student_progress(teacher.id)
-    custom_fees  = {sf.student_id: sf.fee_idr
-                    for sf in StudentFee.query.filter_by(teacher_id=teacher.id).all()}
+    
+    # Get custom fees and packet types
+    fee_overrides = StudentFee.query.filter_by(teacher_id=teacher.id).all()
+    custom_fees  = {sf.student_id: sf.fee_idr for sf in fee_overrides}
+    custom_fee_types = {sf.student_id: sf.packet_type for sf in fee_overrides}
+    
     unbilled_records = (
         Attendance.query.filter_by(teacher_id=teacher.id, billed=False)
         .order_by(Attendance.date.desc()).all()
@@ -160,7 +164,7 @@ def dashboard():
 
     resp = make_response(render_template("teacher/dashboard.html",
         user=teacher, receipts=receipts, all_students=all_students,
-        progress=progress, custom_fees=custom_fees,
+        progress=progress, custom_fees=custom_fees, custom_fee_types=custom_fee_types,
         unbilled_records=unbilled_records, r_count=r_count,
         unpaid_cnt=unpaid_cnt, student_count=student_count,
         student_sessions=student_sessions, student_unbilled=student_unbilled,
@@ -222,13 +226,15 @@ def set_fee():
     teacher    = _get_teacher()
     student_id = request.form.get("student_id", type=int)
     fee_str    = request.form.get("fee", "").strip()
+    packet_type = request.form.get("packet_type", "session")  # 'session' | 'monthly'
     if student_id and fee_str and db.session.get(User, student_id):
         fee = int(fee_str)
-        set_custom_fee(teacher.id, student_id, fee)
+        set_custom_fee(teacher.id, student_id, fee, packet_type)
         if _is_ajax():
             return jsonify(ok=True, msg=tr("ok_saved"),
                            student_id=student_id,
                            fee=fee,
+                           packet_type=packet_type,
                            fee_fmt=fmt_idr(fee))
         flash(tr("ok_saved"), "ok")
     return redirect(url_for("teacher.dashboard"))

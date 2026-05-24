@@ -69,7 +69,10 @@
                 <label>Title</label>
                 <input type="text" name="title" placeholder="e.g. HSK 2 Chapter 5" required>
                 <label>Date &amp; Time</label>
-                <input type="datetime-local" name="scheduled_at" value="{{ now }}" required>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input type="datetime-local" name="scheduled_at" id="scheduleAt" value="{{ now }}" required style="flex:1">
+                  <button type="button" class="btn bgh bsm" id="clearScheduleDate" title="Clear date" aria-label="Clear date">✕</button>
+                </div>
                 <label>Google Meet Link <span class="lbl-opt">(optional)</span></label>
                 <input type="url" name="meet_link" placeholder="https://meet.google.com/…">
                 <label>Description <span class="lbl-opt">(optional)</span></label>
@@ -239,6 +242,21 @@
 
         <p class="section-title">{{ tr('custom_fees') }}</p>
         <p style="font-size:.82rem;color:var(--text3);margin-bottom:14px">{{ tr('custom_fees_info') }}</p>
+        
+        {# Tuition Rules Info Box #}
+        <div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(147,51,234,.08));border:1px solid rgba(59,130,246,.2)">
+          <div style="padding:12px 14px">
+            <div style="font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+              <span>📋</span> {{ tr('tuition_rules_title', 'Tuition Payment Rules') }}
+            </div>
+            <ul style="margin:0;padding-left:20px;font-size:.85rem;color:var(--text2);line-height:1.6">
+              <li><strong>{{ tr('packet_session', 'Session Packet') }}:</strong> {{ tr('packet_session_desc', 'Rp 75,000 per session - Pay only for classes attended') }}</li>
+              <li><strong>{{ tr('packet_monthly', 'Monthly Packet') }}:</strong> {{ tr('packet_monthly_desc', 'Rp 500,000 per month - Fixed monthly fee regardless of attendance') }}</li>
+              <li style="margin-top:8px;color:var(--orange)"><strong>⚠️ {{ tr('monthly_policy', 'Monthly Policy') }}:</strong> {{ tr('monthly_policy_desc', 'For monthly packet students, payment is due every month regardless of rescheduling or absences. This ensures stable income for the teacher.') }}</li>
+            </ul>
+          </div>
+        </div>
+        
         <div class="card">
           {% for s in all_students %}
           <form class="fee-form fee-row" method="POST" action="{{ url_for('teacher.set_fee') }}">
@@ -246,6 +264,10 @@
             <span class="fee-name">{{ s.name() }}</span>
             <input type="number" name="fee" value="{{ custom_fees.get(s.id, '') }}"
                    placeholder="{{ user.fee_idr or tr('fee_ph') }}">
+            <select name="packet_type" style="min-width:120px;font-size:.85rem">
+              <option value="session" {% if custom_fee_types.get(s.id, 'session') == 'session' %}selected{% endif %}>📅 {{ tr('per_session', 'Per Session') }}</option>
+              <option value="monthly" {% if custom_fee_types.get(s.id) == 'monthly' %}selected{% endif %}>📆 {{ tr('per_month', 'Per Month') }}</option>
+            </select>
             <button class="btn bg bsm" type="submit">{{ tr('set_fee') }}</button>
           </form>
           {% endfor %}
@@ -586,6 +608,21 @@ ajaxForm(document.getElementById('changePwForm'), null);
 /* ════════════════════════════════════════════════════
    SCHEDULE — CREATE
    ════════════════════════════════════════════════════ */
+
+// Clear date button for schedule form
+const clearSchedBtn = document.getElementById('clearScheduleDate');
+const schedAtInput = document.getElementById('scheduleAt');
+if (clearSchedBtn && schedAtInput) {
+  clearSchedBtn.addEventListener('click', function() {
+    // Set to current datetime as fallback
+    const now = new Date();
+    const offset = now.getTimezoneOffset();
+    const local = new Date(now - offset * 60000);
+    schedAtInput.value = local.toISOString().slice(0, 16);
+    showToast('Date reset to now');
+  });
+}
+
 ajaxForm(document.getElementById('scheduleForm'), function(data){
   let list = document.getElementById('scheduleList');
   document.getElementById('scheduleEmpty')?.remove();
