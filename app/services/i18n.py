@@ -190,10 +190,15 @@ def get_lang() -> str:
     return session.get("lang", "en")
 
 
-def tr(key: str) -> str:
-    """Return the translated string for key in the current session language."""
-    lang = get_lang()
-    return TRANSLATIONS[lang].get(key, TRANSLATIONS["en"].get(key, key))
+def tr(key, default=None):
+    """Translate a key based on the current session language."""
+    lang = getattr(g, 'lang', 'en')
+    translations = get_translations(lang)
+    
+    # If key exists, return translation. Otherwise return default or the key itself.
+    if key in translations:
+        return translations[key]
+    return default if default is not None else key
 
 
 def to_wib(dt: datetime) -> datetime:
