@@ -53,6 +53,8 @@ def create_app(config_class=None):
             'to_wib': lambda dt: to_wib(dt),
             'now_dt': lambda: datetime.now(),
             'random_quote': random_quote,
+            # 👇 Add this shiny new line right here! 👇
+            'parse_raw_dates': lambda dates: __import__('app.services.i18n', fromlist=['parse_raw_dates']).parse_raw_dates(dates),
         }
 
     # Register Blueprints
