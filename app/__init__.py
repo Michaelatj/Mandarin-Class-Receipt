@@ -1,9 +1,10 @@
 import os
-from flask import Flask, g, request
+from flask import Flask, g, request, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
-from .services.i18n import get_lang, get_translations
+from datetime import datetime, timedelta
+from .services.i18n import get_lang, get_translations, get_lang, tr, fmt_date, random_quote, to_wib
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -33,18 +34,15 @@ def create_app(config_class=None):
         from .models import User
         return User.query.get(int(user_id))
 
-# Language Context Processor
+    # Language Context Processor
     @flask_app.before_request
     def load_language():
         lang = request.cookies.get('lang', 'en')
         g.lang = lang
         g.translations = get_translations(lang)
 
-	@flask_app.context_processor
+    @flask_app.context_processor
     def inject_globals():
-        from datetime import datetime, timedelta
-        from flask import session
-        from .services.i18n import random_quote, to_wib
         return {
             'lang': getattr(g, 'lang', 'en'),
             'get_lang': get_lang,
