@@ -1,16 +1,22 @@
 import os
-from flask import Flask, g, redirect, url_for, request
+from flask import Flask, g, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
-from config import Config
+from .services.i18n import get_lang, get_translations
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
-def create_app(config_class=Config):
+def create_app(config_class=None):
     flask_app = Flask(__name__)
+
+    # Load configuration
+    if config_class is None:
+        from .config import DevelopmentConfig
+        config_class = DevelopmentConfig
+    
     flask_app.config.from_object(config_class)
 
     # Initialize extensions
@@ -18,36 +24,37 @@ def create_app(config_class=Config):
     login_manager.init_app(flask_app)
     csrf.init_app(flask_app)
 
-    # Login Manager Configuration
+    # Login Manager Setup
     login_manager.login_view = 'auth.login'
-    login_manager.login_message_category = 'info'
+    login_manager.login_message = 'Please log in to access this page.'
 
     @login_manager.user_loader
     def load_user(user_id):
-        from app.models import User
+        from .models import User
         return User.query.get(int(user_id))
 
-    # Set language before each request
+    # Language Context Processor
     @flask_app.before_request
-    def load_locale():
-        if not request.path.startswith('/static'):
-            lang = request.cookies.get('lang', 'en')
-            if lang not in ['en', 'zh']:
-                lang = 'en'
-            g.lang = lang
-            g.current_url = request.path
+    def load_language():
+        lang = request.cookies.get('lang', 'en')
+        g.lang = lang
+        g.translations = get_translations(lang)
 
-    # Context processor to make tr() available in templates
     @flask_app.context_processor
     def inject_globals():
-        from app.services.i18n import tr, fmt_date, to_wib, fmt_idr
-        return dict(tr=tr, fmt_date=fmt_date, to_wib=to_wib, fmt_idr=fmt_idr)
+        return {
+            'lang': getattr(g, 'lang', 'en'),
+            'tr': lambda key, default=None: get_translations(getattr(g, 'lang', 'en')).get(key, default or key),
+            'fmt_date': lambda dt: __import__('app.services.i18n', fromlist=['fmt_date']).fmt_date(dt),
+            'fmt_idr': lambda amt: __import__('app.services.i18n', fromlist=['fmt_idr']).fmt_idr(amt),
+            'to_wib': lambda dt: __import__('app.services.i18n', fromlist=['to_wib']).to_wib(dt),
+        }
 
     # Register Blueprints
-    from app.routes.auth import auth_bp
-    from app.routes.student import student_bp
-    from app.routes.teacher import teacher_bp
-    from app.routes.schedule import schedule_bp
+    from .routes.auth import auth_bp
+    from .routes.student import student_bp
+    from .routes.teacher import teacher_bp
+    from .routes.schedule import schedule_bp
 
     flask_app.register_blueprint(auth_bp)
     flask_app.register_blueprint(student_bp)
