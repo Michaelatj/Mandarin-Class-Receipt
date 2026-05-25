@@ -33,7 +33,7 @@ def create_app(config_class=None):
         from .models import User
         return User.query.get(int(user_id))
 
-    # Language Context Processor
+# Language Context Processor
     @flask_app.before_request
     def load_language():
         lang = request.cookies.get('lang', 'en')
@@ -42,8 +42,8 @@ def create_app(config_class=None):
 
 	@flask_app.context_processor
     def inject_globals():
-        from datetime import datetime, timedelta  # Added timedelta here!
-        from flask import session                 # Added session here!
+        from datetime import datetime, timedelta
+        from flask import session
         from .services.i18n import random_quote, to_wib
         return {
             'lang': getattr(g, 'lang', 'en'),
@@ -55,8 +55,6 @@ def create_app(config_class=None):
             'now_dt': lambda: datetime.now(),
             'random_quote': random_quote,
             'parse_raw_dates': lambda dates: __import__('app.services.i18n', fromlist=['parse_raw_dates']).parse_raw_dates(dates),
-            
-            # 👇 Your brand new timezone calculator! 👇
             'local_dt': lambda dt: dt - timedelta(minutes=session.get('tz_offset', -420)),
         }
 
