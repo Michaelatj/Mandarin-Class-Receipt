@@ -1,5 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
-from flask_login import login_required, current_user
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, session, g
 from functools import wraps
 from app.models import db, User, Attendance, Receipt, StudentFee, Schedule
 from app.services.attendance import generate_receipts, get_student_progress
@@ -10,17 +9,23 @@ teacher_bp = Blueprint('teacher', __name__, url_prefix='/teacher')
 
 def teacher_required(f):
     @wraps(f)
-    @login_required
     def decorated_function(*args, **kwargs):
-        if current_user.role != 'teacher':
+        if "user_id" not in session:
+            return redirect(url_for('auth.login'))
+        user = db.session.get(User, session["user_id"])
+        if not user or user.role != 'teacher':
             flash('Access denied.', 'error')
             return redirect(url_for('auth.login'))
+        # Make current_user available for the route
+        from flask import g
+        g.current_user = user
         return f(*args, **kwargs)
     return decorated_function
 
 @teacher_bp.route('/dashboard')
 @teacher_required
 def dashboard():
+    current_user = g.current_user
     students = User.query.filter_by(role='student').all()
     fee_overrides = StudentFee.query.filter_by(teacher_id=current_user.id).all()
     

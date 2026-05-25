@@ -42,6 +42,7 @@ def create_app(config_class=None):
 
     @flask_app.context_processor
     def inject_globals():
+        from .services.i18n import random_quote
         return {
             'lang': getattr(g, 'lang', 'en'),
             'get_lang': get_lang,
@@ -49,6 +50,7 @@ def create_app(config_class=None):
             'fmt_date': lambda dt: __import__('app.services.i18n', fromlist=['fmt_date']).fmt_date(dt),
             'fmt_idr': lambda amt: __import__('app.services.i18n', fromlist=['fmt_idr']).fmt_idr(amt),
             'to_wib': lambda dt: __import__('app.services.i18n', fromlist=['to_wib']).to_wib(dt),
+            'random_quote': random_quote,
         }
 
     # Register Blueprints
