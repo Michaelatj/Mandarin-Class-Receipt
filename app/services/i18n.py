@@ -1,8 +1,5 @@
 """
 services/i18n.py — Internationalisation helpers.
-
-Translations, date formatting, and quote data all live here so
-routes and templates stay clean.
 """
 import random
 from datetime import datetime, timedelta
@@ -78,7 +75,7 @@ TRANSLATIONS: dict = {
         jan="January", feb="February", mar="March", apr="April",
         may_m="May", jun="June", jul="July", aug="August",
         sep="September", oct_m="October", nov="November", dec="December",
-        # NEW: Tuition Packet System Translations
+        # NEW: Tuition Packet System
         tuition_rules_title="Tuition Payment Rules",
         packet_session="Session Packet",
         packet_monthly="Monthly Packet",
@@ -155,7 +152,7 @@ TRANSLATIONS: dict = {
         jan="一月", feb="二月", mar="三月", apr="四月",
         may_m="五月", jun="六月", jul="七月", aug="八月",
         sep="九月", oct_m="十月", nov="十一月", dec="十二月",
-        # NEW: Tuition Packet System Translations
+        # NEW: Tuition Packet System
         tuition_rules_title="学费支付规则",
         packet_session="次付套餐",
         packet_monthly="月付套餐",
@@ -168,95 +165,54 @@ TRANSLATIONS: dict = {
 }
 
 QUOTES: list[dict] = [
-    {"zh": "千里之行，始于足下。",
-     "py": "Qiānlǐ zhī xíng, shǐ yú zú xià.",
-     "en": "A journey of a thousand miles begins with a single step."},
-    {"zh": "学而不思则罔，思而不学则殆。",
-     "py": "Xué ér bù sī zé wǎng, sī ér bù xué zé dài.",
-     "en": "Learning without thought is wasted; thought without learning is dangerous."},
-    {"zh": "不积跬步，无以至千里。",
-     "py": "Bù jī kuǐbù, wúyǐ zhì qiānlǐ.",
-     "en": "Without small steps, one cannot travel a thousand miles."},
-    {"zh": "温故而知新。",
-     "py": "Wēn gù ér zhī xīn.",
-     "en": "Review the old and you will discover something new."},
-    {"zh": "知之者不如好之者，好之者不如乐之者。",
-     "py": "Zhī zhī zhě bù rú hào zhī zhě.",
-     "en": "To know is not as good as to love; to love is not as good as to delight in."},
-    {"zh": "三人行，必有我师焉。",
-     "py": "Sān rén xíng, bì yǒu wǒ shī yān.",
-     "en": "Among three people, one is always my teacher."},
-    {"zh": "书山有路勤为径，学海无涯苦作舟。",
-     "py": "Shū shān yǒu lù qín wéi jìng.",
-     "en": "Diligence is the path up the mountain of books."},
-    {"zh": "敏而好学，不耻下问。",
-     "py": "Mǐn ér hào xué, bù chǐ xià wèn.",
-     "en": "Be eager to learn and unashamed to ask questions."},
+    {"zh": "千里之行，始于足下。", "py": "Qiānlǐ zhī xíng, shǐ yú zú xià.", "en": "A journey of a thousand miles begins with a single step."},
+    {"zh": "学而不思则罔，思而不学则殆。", "py": "Xué ér bù sī zé wǎng, sī ér bù xué zé dài.", "en": "Learning without thought is wasted; thought without learning is dangerous."},
+    {"zh": "不积跬步，无以至千里。", "py": "Bù jī kuǐbù, wúyǐ zhì qiānlǐ.", "en": "Without small steps, one cannot travel a thousand miles."},
+    {"zh": "温故而知新。", "py": "Wēn gù ér zhī xīn.", "en": "Review the old and you will discover something new."},
+    {"zh": "知之者不如好之者，好之者不如乐之者。", "py": "Zhī zhī zhě bù rú hào zhī zhě.", "en": "To know is not as good as to love; to love is not as good as to delight in."},
+    {"zh": "三人行，必有我师焉。", "py": "Sān rén xíng, bì yǒu wǒ shī yān.", "en": "Among three people, one is always my teacher."},
+    {"zh": "书山有路勤为径，学海无涯苦作舟。", "py": "Shū shān yǒu lù qín wéi jìng.", "en": "Diligence is the path up the mountain of books."},
+    {"zh": "敏而好学，不耻下问。", "py": "Mǐn ér hào xué, bù chǐ xià wèn.", "en": "Be eager to learn and unashamed to ask questions."},
     {"zh": "学无止境。", "py": "Xué wú zhǐ jìng.", "en": "There is no end to learning."},
-    {"zh": "勤能补拙。", "py": "Qín néng bǔ zhuō.",
-     "en": "Diligence can make up for lack of talent."},
+    {"zh": "勤能补拙。", "py": "Qín néng bǔ zhuō.", "en": "Diligence can make up for lack of talent."},
 ]
 
-_MONTH_KEYS = ["jan","feb","mar","apr","may_m","jun",
-               "jul","aug","sep","oct_m","nov","dec"]
+_MONTH_KEYS = ["jan","feb","mar","apr","may_m","jun","jul","aug","sep","oct_m","nov","dec"]
 _DAY_KEYS   = ["mon","tue","wed","thu","fri","sat","sun"]
-
 
 # ── Public helpers ────────────────────────────────────────────────────────────
 
 def get_lang() -> str:
     return session.get("lang", "en")
 
-
 def get_translations(lang: str) -> dict:
-    """Safe getter for translation dictionary."""
     return TRANSLATIONS.get(lang, TRANSLATIONS["en"])
 
-
 def tr(key, default=None):
-    """Translate a key based on the current session language.
-    
-    Args:
-        key: The translation key.
-        default: Optional default value if key is not found.
-    """
+    """Translate a key based on the current session language."""
     lang = get_lang()
     translations = get_translations(lang)
-    
-    # If key exists, return translation. Otherwise return default or the key itself.
     if key in translations:
         return translations[key]
     return default if default is not None else key
 
-
 def to_wib(dt: datetime) -> datetime:
-    """Convert a UTC datetime to WIB (UTC+7). All display should go through this."""
     return dt + timedelta(hours=7)
 
-
 def fmt_date(dt: datetime, lang: str | None = None) -> str:
-    """
-    Format a datetime with localised day name, e.g.:
-      EN → "Monday, 15 January 2025  14:30"
-      ZH → "2025年一月15日（星期一）14:30"
-    """
     if lang is None:
         lang = get_lang()
-    tbl        = TRANSLATIONS[lang]
-    day_name   = tbl.get(_DAY_KEYS[dt.weekday()], "")
+    tbl = TRANSLATIONS[lang]
+    day_name = tbl.get(_DAY_KEYS[dt.weekday()], "")
     month_name = tbl.get(_MONTH_KEYS[dt.month - 1], "")
     if lang == "zh":
         return f"{dt.year}年{month_name}{dt.day}日（{day_name}）{dt.hour:02d}:{dt.minute:02d}"
     return f"{day_name}, {dt.day:02d} {month_name} {dt.year}  {dt.hour:02d}:{dt.minute:02d}"
 
-
 def fmt_idr(amount: int) -> str:
-    """Format an integer as Indonesian Rupiah, e.g. 500000 → '500.000'."""
     return f"{amount:,}".replace(",", ".")
 
-
 def parse_raw_dates(raw: str) -> list[datetime]:
-    """Parse a pipe-separated string of ISO-8601 timestamps into datetime objects."""
     if not raw:
         return []
     result = []
@@ -269,7 +225,5 @@ def parse_raw_dates(raw: str) -> list[datetime]:
                 pass
     return result
 
-
 def random_quote() -> dict:
-    """Return a random motivational Chinese quote."""
     return random.choice(QUOTES)
