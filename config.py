@@ -1,3 +1,7 @@
+import os
+import secrets
+from datetime import timedelta
+
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(32))
     WTF_CSRF_SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(32))
