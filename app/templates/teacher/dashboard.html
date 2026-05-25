@@ -476,6 +476,7 @@
 {% block page_scripts %}
 <script>
 /* ── Hide floating UI controls (already in sidebar) ── */
+  const _CSRF = "{{ csrf_token() }}";
 document.getElementById('langBar').style.display  = 'none';
 document.getElementById('dmToggle').style.display = 'none';
 
@@ -583,9 +584,10 @@ const NAV = (function(){
     const btn = form.querySelector('button[type="submit"]');
     if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
     try {
-      const res = await fetch(form.action, {
-        method: 'POST', body: new FormData(form),
-        headers: {'X-Requested-With': 'XMLHttpRequest'}
+      const res  = await fetch(f.action, {
+          method:'POST', 
+          body:new FormData(f), 
+          headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': _CSRF}
       });
       const data = await res.json();
       if (data.ok) {
