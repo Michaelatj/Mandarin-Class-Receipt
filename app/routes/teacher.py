@@ -1,4 +1,4 @@
-om flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from functools import wraps
 from app.models import db, User, Attendance, Receipt, StudentFee, Schedule
