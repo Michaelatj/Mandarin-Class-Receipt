@@ -1,89 +1,146 @@
-from app.models import db, Attendance, Receipt, StudentFee, User
+"""
+services/attendance.py — Business logic for attendance & receipts.
+"""
 from datetime import datetime, timedelta
+from app.models import db, Attendance, Receipt, StudentFee, User
+from typing import Optional, Dict, Any
 
-def get_student_progress(student_id, teacher_id):
+# Constants
+CYCLE_SIZE = 8
+
+def get_student_progress(student_id: int, teacher_id: int) -> Dict[str, Any]:
     """
-    Calculate current cycle progress for a student.
-    Returns: { 'current_cycle_count': int, 'cycle_number': int, 'total_sessions': int }
+    Calculate current cycle progress for a student with a specific teacher.
+    Returns dict with: current_cycle_count, cycle_number, total_classes, next_receipt_date
     """
-    # Get all attendance records for this student with this teacher, ordered by date
+    # Get all attendances for this student-teacher pair
     attendances = Attendance.query.filter_by(
         student_id=student_id, 
         teacher_id=teacher_id
     ).order_by(Attendance.class_date).all()
     
-    total_sessions = len(attendances)
-    if total_sessions == 0:
-        return {'current_cycle_count': 0, 'cycle_number': 1, 'total_sessions': 0}
+    if not attendances:
+        return {
+            'current_cycle_count': 0,
+            'cycle_number': 1,
+            'total_classes': 0,
+            'next_receipt_date': None
+        }
     
-    # Calculate completed cycles (every 8 sessions)
-    completed_cycles = total_sessions // 8
-    current_cycle_count = total_sessions % 8
+    total_classes = len(attendances)
+    
+    # Calculate completed cycles and current progress
+    completed_cycles = total_classes // CYCLE_SIZE
+    current_cycle_count = total_classes % CYCLE_SIZE
     cycle_number = completed_cycles + 1
     
+    # Find date of next class (for next receipt estimation)
+    next_class = None
+    if current_cycle_count == 0:
+        # Just completed a cycle, next class starts new cycle
+        # Look for future scheduled classes or use last class + 1 week estimate
+        last_class = attendances[-1].class_date
+        next_class = last_class + timedelta(days=7) # Estimate
+    else:
+        # In middle of cycle
+        next_class = attendances[-1].class_date + timedelta(days=7) # Estimate
+
     return {
         'current_cycle_count': current_cycle_count,
         'cycle_number': cycle_number,
-        'total_sessions': total_sessions
+        'total_classes': total_classes,
+        'next_receipt_date': next_class
     }
 
-def generate_receipts(student_id, teacher_id):
+def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
     """
-    Check if a student has completed 8 sessions in the current cycle.
-    If so, generate a receipt for that cycle.
+    Check if student completed a cycle (8 classes) and generate receipt if needed.
+    Returns list of newly created receipts.
     """
+    new_receipts = []
+    
+    # Get fee for this student
+    fee_override = StudentFee.query.filter_by(
+        teacher_id=teacher_id, 
+        student_id=student_id
+    ).first()
+    
+    fee_amount = fee_override.fee_idr if fee_override else teacher.default_fee
+    
+    # Get all attendances
     attendances = Attendance.query.filter_by(
-        student_id=student_id, 
+        student_id=student_id,
         teacher_id=teacher_id
     ).order_by(Attendance.class_date).all()
     
-    total_sessions = len(attendances)
+    total_classes = len(attendances)
     
-    # Only generate if we have a multiple of 8 sessions (8, 16, 24...)
-    if total_sessions > 0 and total_sessions % 8 == 0:
-        # Check if receipt already exists for this cycle to prevent duplicates
-        cycle_number = total_sessions // 8
+    # Check how many receipts already exist
+    existing_receipts = Receipt.query.filter_by(
+        student_id=student_id,
+        teacher_id=teacher_id
+    ).count()
+    
+    # Calculate how many receipts should exist
+    expected_receipts = total_classes // CYCLE_SIZE
+    
+    # Generate missing receipts
+    while existing_receipts < expected_receipts:
+        cycle_start_idx = existing_receipts * CYCLE_SIZE
+        cycle_end_idx = cycle_start_idx + CYCLE_SIZE
         
-        existing_receipt = Receipt.query.filter_by(
-            student_id=student_id,
-            teacher_id=teacher_id,
-            cycle_number=cycle_number
-        ).first()
-        
-        if not existing_receipt:
-            # Determine fee
-            custom_fee = StudentFee.query.filter_by(
-                teacher_id=teacher_id, 
-                student_id=student_id
-            ).first()
-            
-            fee_amount = custom_fee.fee_idr if custom_fee else teacher.default_fee
-            
-            # Get the date of the 8th class in this cycle (the last one)
-            last_class_date = attendances[-1].class_date
-            
+        cycle_classes = attendances[cycle_start_idx:cycle_end_idx]
+        if len(cycle_classes) == CYCLE_SIZE:
             receipt = Receipt(
                 student_id=student_id,
                 teacher_id=teacher_id,
-                cycle_number=cycle_number,
-                sessions_count=8,
+                cycle_number=existing_receipts + 1,
+                class_count=CYCLE_SIZE,
                 total_fee=fee_amount,
                 generated_at=datetime.utcnow(),
-                period_start=attendances[-8].class_date,
-                period_end=last_class_date
+                period_start=cycle_classes[0].class_date,
+                period_end=cycle_classes[-1].class_date
             )
             db.session.add(receipt)
-            db.session.commit()
-            return True
-            
-    return False
+            new_receipts.append(receipt)
+            existing_receipts += 1
+    
+    return new_receipts
 
-def set_custom_fee(teacher_id, student_id, fee_idr, packet_type='session'):
+def add_attendance(student_id: int, teacher_id: int, class_date: datetime, note: str = "", is_manual: bool = False) -> Attendance:
     """
-    Set or update a custom fee for a specific student.
+    Add a single attendance record.
+    """
+    # Check for duplicates
+    existing = Attendance.query.filter_by(
+        student_id=student_id,
+        teacher_id=teacher_id,
+        class_date=class_date
+    ).first()
+    
+    if existing:
+        raise ValueError("Attendance already exists for this date/time")
+    
+    attn = Attendance(
+        student_id=student_id,
+        teacher_id=teacher_id,
+        class_date=class_date,
+        note=note,
+        is_manual=is_manual
+    )
+    db.session.add(attn)
+    
+    # Try to generate receipts if cycle completes
+    generate_receipts(student_id, teacher_id)
+    
+    return attn
+
+def set_custom_fee(teacher_id: int, student_id: int, fee_idr: int, packet_type: str = 'session') -> StudentFee:
+    """
+    Set or update custom fee for a student.
     """
     fee = StudentFee.query.filter_by(
-        teacher_id=teacher_id, 
+        teacher_id=teacher_id,
         student_id=student_id
     ).first()
     
@@ -99,5 +156,26 @@ def set_custom_fee(teacher_id, student_id, fee_idr, packet_type='session'):
         )
         db.session.add(fee)
     
-    db.session.commit()
     return fee
+
+def can_student_mark_attendance(student_id: int, teacher_id: int) -> tuple[bool, str]:
+    """
+    Check if student can mark attendance (90 min cooldown).
+    Returns (can_mark, reason_message)
+    """
+    last_attendance = Attendance.query.filter_by(
+        student_id=student_id,
+        teacher_id=teacher_id
+    ).order_by(Attendance.class_date.desc()).first()
+    
+    if not last_attendance:
+        return True, "OK"
+    
+    now = datetime.utcnow()
+    time_since_last = now - last_attendance.class_date
+    
+    if time_since_last < timedelta(minutes=90):
+        remaining = 90 - int(time_since_last.total_seconds() / 60)
+        return False, f"Please wait {remaining} minutes before marking again."
+    
+    return True, "OK"
