@@ -476,7 +476,9 @@
 {% block page_scripts %}
 <script>
 /* ── Hide floating UI controls (already in sidebar) ── */
-  const _CSRF = "{{ csrf_token() }}";
+if (typeof window._CSRF === 'undefined') {
+    window._CSRF = "{{ csrf_token() }}";
+}
 document.getElementById('langBar').style.display  = 'none';
 document.getElementById('dmToggle').style.display = 'none';
 
@@ -584,10 +586,11 @@ const NAV = (function(){
     const btn = form.querySelector('button[type="submit"]');
     if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
     try {
-      const res  = await fetch(f.action, {
+        = await fetch(f.action, {
           method:'POST', 
           body:new FormData(f), 
-          headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': _CSRF}
+          // Add 'X-CSRFToken': window._CSRF here
+          headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF}
       });
       const data = await res.json();
       if (data.ok) {
