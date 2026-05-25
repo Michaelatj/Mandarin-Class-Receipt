@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from 'partials/receipt_card.html' import receipt_card with context %}
-{% from 'partials/schedule_cards.html' import student_card %}
+{% from 'partials/schedule_cards.html' import student_card with context %}
 {% block title %}{{ tr('student_dash') }}{% endblock %}
 
 {% block page_content %}
