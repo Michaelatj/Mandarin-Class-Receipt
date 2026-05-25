@@ -29,13 +29,20 @@ def set_lang(code: str):
 
 @auth_bp.route("/")
 def index():
+    if "user_id" in session:
+        user = db.session.get(User, session["user_id"])
+        if user:
+            return redirect(url_for("teacher.dashboard") if user.role == "teacher" else url_for("student.dashboard"))
     return redirect(url_for("auth.login"))
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
+    # If already logged in, redirect to appropriate dashboard
     if "user_id" in session:
-        return redirect(url_for("student.dashboard"))
+        user = db.session.get(User, session["user_id"])
+        if user:
+            return redirect(url_for("teacher.dashboard") if user.role == "teacher" else url_for("student.dashboard"))
 
     if request.method == "POST":
         ip    = request.remote_addr
@@ -59,7 +66,7 @@ def login():
             session["fresh_login"] = True
             clear_attempts(ip)
             logger.info("User %s logged in (legacy hash migrated)", uname)
-            return redirect(url_for("student.dashboard"))
+            return redirect(url_for("teacher.dashboard") if user.role == "teacher" else url_for("student.dashboard"))
         elif not verify_password(user.password, pw):
             record_failed_attempt(ip)
             flash(tr("err_pw"), "err")
@@ -70,7 +77,7 @@ def login():
             session["fresh_login"] = True
             clear_attempts(ip)
             logger.info("User %s logged in successfully", uname)
-            return redirect(url_for("student.dashboard"))
+            return redirect(url_for("teacher.dashboard") if user.role == "teacher" else url_for("student.dashboard"))
 
     from flask import make_response
     resp = make_response(render_template("auth/login.html", quote=random_quote()))
@@ -81,8 +88,11 @@ def login():
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
+    # If already logged in, redirect to appropriate dashboard
     if "user_id" in session:
-        return redirect(url_for("student.dashboard"))
+        user = db.session.get(User, session["user_id"])
+        if user:
+            return redirect(url_for("teacher.dashboard") if user.role == "teacher" else url_for("student.dashboard"))
 
     if request.method == "POST":
         uname  = request.form.get("username", "").strip()
