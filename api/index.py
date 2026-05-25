@@ -12,7 +12,6 @@ from sqlalchemy import inspect, text
 app = create_app("production")
 
 # Auto-migration for Serverless environments (Vercel)
-# This runs once when the serverless function starts up
 with app.app_context():
     try:
         # 1. Ensure all tables exist first
@@ -44,4 +43,3 @@ with app.app_context():
         print(f"⚠️ Auto-migration check warning: {e}")
 
 # Vercel requires the app variable to be exposed at the top level
-# It is already defined above as: app = create_app("production")
