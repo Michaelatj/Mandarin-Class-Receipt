@@ -95,7 +95,7 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
 
 def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str = "", source: str = "manual") -> Attendance:
     """
-    Add a single attendance record.
+    Add a single attendance record. Matches route signature.
     """
     # Check for duplicates
     existing = Attendance.query.filter_by(
@@ -166,7 +166,6 @@ def can_student_mark_attendance(student_id: int, teacher_id: int) -> tuple[bool,
     
     return True, "OK"
 
-
 def delete_attendance(att_id: int, teacher_id: int) -> bool:
     """
     Delete an attendance record if it hasn't been billed yet.
@@ -179,7 +178,6 @@ def delete_attendance(att_id: int, teacher_id: int) -> bool:
     db.session.delete(record)
     db.session.commit()
     return True
-
 
 def mark_receipt_paid(receipt_id: int, teacher_id: int) -> bool:
     """
