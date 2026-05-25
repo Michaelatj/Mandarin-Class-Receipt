@@ -1,1 +1,30 @@
-Nothing should be ignored since only a Python source file (`app/routes/auth.py`) was modified and there are no build artifacts, dependencies, or temporary files in the changes.
+```
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database
+instance/*.db
+
+# Dependencies
+.venv/
+venv/
+env/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+*.env.*
+```
