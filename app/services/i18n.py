@@ -5,8 +5,8 @@ Translations, date formatting, and quote data all live here so
 routes and templates stay clean.
 """
 import random
-from datetime import datetime
-from flask import session
+from datetime import datetime, timedelta
+from flask import session, g
 
 # ── Translation tables ────────────────────────────────────────────────────────
 
@@ -78,13 +78,15 @@ TRANSLATIONS: dict = {
         jan="January", feb="February", mar="March", apr="April",
         may_m="May", jun="June", jul="July", aug="August",
         sep="September", oct_m="October", nov="November", dec="December",
+        # NEW: Tuition Packet System Translations
         tuition_rules_title="Tuition Payment Rules",
-        tuition_rules_info="Choose the payment packet that works best for you:",
-        packet_session_title="📅 Session Packet",
-        packet_session_desc="Pay per session attended (Rp 75,000/session). Flexible for irregular schedules.",
-        packet_monthly_title="📆 Monthly Packet",
-        packet_monthly_desc="Fixed monthly fee (Rp 500,000/month). Payment due every month regardless of attendance or rescheduling.",
-        packet_monthly_warning="⚠️ Important: For monthly packet students, payment is required every month even if classes are rescheduled or missed. This ensures stable income for the teacher.",
+        packet_session="Session Packet",
+        packet_monthly="Monthly Packet",
+        packet_session_desc="Pay per class attended (Rp 75,000/session). Flexible for irregular schedules.",
+        packet_monthly_desc="Fixed monthly fee (Rp 500,000/month). Payment is due every month regardless of attendance or rescheduling.",
+        warning_monthly_policy="⚠️ Monthly Policy: For students on the Monthly Packet, payment is required every month even if classes are missed or rescheduled. This ensures stable income for the teacher.",
+        select_packet_type="Select Packet Type",
+        current_fee="Current Fee"
     ),
     "zh": dict(
         app_title="中文课堂", app_sub="考勤与账单系统 · Chinese Class",
@@ -153,13 +155,15 @@ TRANSLATIONS: dict = {
         jan="一月", feb="二月", mar="三月", apr="四月",
         may_m="五月", jun="六月", jul="七月", aug="八月",
         sep="九月", oct_m="十月", nov="十一月", dec="十二月",
+        # NEW: Tuition Packet System Translations
         tuition_rules_title="学费支付规则",
-        tuition_rules_info="选择最适合您的付费套餐：",
-        packet_session_title="📅 次付套餐",
-        packet_session_desc="按上课次数付费（75,000印尼盾/次）。适合时间不固定的学生。",
-        packet_monthly_title="📆 月付套餐",
-        packet_monthly_desc="固定月费（500,000印尼盾/月）。无论是否上课或改期，每月都需支付。",
-        packet_monthly_warning="⚠️ 重要提示：选择月付套餐的学生，即使改期或缺席，每月仍需支付费用。这确保老师有稳定的收入。",
+        packet_session="次付套餐",
+        packet_monthly="月付套餐",
+        packet_session_desc="按上课次数付费 (75,000 印尼盾/节)。适合时间不固定的学生。",
+        packet_monthly_desc="固定月费 (500,000 印尼盾/月)。无论是否缺课或调课，每月均需支付全额学费。",
+        warning_monthly_policy="⚠️ 月付政策：选择月付套餐的学生，即使缺课或调课，每月仍需支付全额学费。这是为了保障老师的稳定收入。",
+        select_packet_type="选择套餐类型",
+        current_fee="当前费用"
     ),
 }
 
@@ -204,19 +208,29 @@ def get_lang() -> str:
     return session.get("lang", "en")
 
 
-def tr(key: str, default: str = None) -> str:
-    """Return the translated string for key in the current session language."""
+def get_translations(lang: str) -> dict:
+    """Safe getter for translation dictionary."""
+    return TRANSLATIONS.get(lang, TRANSLATIONS["en"])
+
+
+def tr(key, default=None):
+    """Translate a key based on the current session language.
+    
+    Args:
+        key: The translation key.
+        default: Optional default value if key is not found.
+    """
     lang = get_lang()
-    result = TRANSLATIONS[lang].get(key, TRANSLATIONS["en"].get(key, key))
-    # If default is provided and key not found, use default
-    if result == key and default is not None:
-        return default
-    return result
+    translations = get_translations(lang)
+    
+    # If key exists, return translation. Otherwise return default or the key itself.
+    if key in translations:
+        return translations[key]
+    return default if default is not None else key
 
 
 def to_wib(dt: datetime) -> datetime:
     """Convert a UTC datetime to WIB (UTC+7). All display should go through this."""
-    from datetime import timedelta
     return dt + timedelta(hours=7)
 
 
