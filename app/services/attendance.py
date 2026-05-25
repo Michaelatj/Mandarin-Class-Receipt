@@ -93,7 +93,7 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
     
     return new_receipts
 
-def add_attendance(student_id: int, teacher_id: int, class_date: datetime, note: str = "", is_manual: bool = False) -> Attendance:
+def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str = "", source: str = "manual") -> Attendance:
     """
     Add a single attendance record.
     """
@@ -101,7 +101,7 @@ def add_attendance(student_id: int, teacher_id: int, class_date: datetime, note:
     existing = Attendance.query.filter_by(
         student_id=student_id,
         teacher_id=teacher_id,
-        date=class_date
+        date=date
     ).first()
     
     if existing:
@@ -110,9 +110,9 @@ def add_attendance(student_id: int, teacher_id: int, class_date: datetime, note:
     attn = Attendance(
         student_id=student_id,
         teacher_id=teacher_id,
-        date=class_date,
+        date=date,
         note=note,
-        source="teacher" if not is_manual else "manual"
+        source=source
     )
     db.session.add(attn)
     
