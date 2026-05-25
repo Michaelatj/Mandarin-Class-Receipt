@@ -5,20 +5,21 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import create_app
+from app.config import ProductionConfig  # Import the config class directly
 from app.models import db
 from sqlalchemy import inspect, text
 
-# Create the Flask app instance
-app = create_app("production")
+# Create the app with the correct Config Class
+app = create_app(ProductionConfig)
 
 # Auto-migration for Serverless environments (Vercel)
 with app.app_context():
     try:
-        # 1. Ensure all tables exist first
+        # 1. Ensure all tables exist
         db.create_all()
         print("✅ Database tables verified/created.")
 
-        # 2. Specific column migration for 'packet_type'
+        # 2. Add 'packet_type' column if missing
         inspector = inspect(db.engine)
         table_names = inspector.get_table_names()
         
@@ -26,20 +27,13 @@ with app.app_context():
             columns = [col['name'] for col in inspector.get_columns('student_fee')]
             
             if 'packet_type' not in columns:
-                print("🔄 Detected missing 'packet_type' column. Adding it now...")
+                print("🔄 Adding missing 'packet_type' column...")
                 try:
                     with db.engine.connect() as conn:
                         conn.execute(text("ALTER TABLE student_fee ADD COLUMN packet_type VARCHAR(20) DEFAULT 'session'"))
                         conn.commit()
-                    print("✅ Column 'packet_type' added successfully.")
-                except Exception as col_err:
-                    print(f"⚠️ Could not add column (might already exist): {col_err}")
-            else:
-                print("✅ Column 'packet_type' already exists.")
-        else:
-            print("⚠️ Table 'student_fee' not found yet.")
-            
+                    print("✅ Column 'packet_type' added.")
+                except Exception as e:
+                    print(f"⚠️ Column migration skipped (might exist): {e}")
     except Exception as e:
-        print(f"⚠️ Auto-migration check warning: {e}")
-
-# Vercel requires the app variable to be exposed at the top level
+        print(f"⚠️ Startup warning: {e}")
