@@ -475,22 +475,23 @@
 
 {% block page_scripts %}
 <script>
-/* ── Hide floating UI controls (already in sidebar) ── */
+/* ── Initialize CSRF token globally to prevent duplicate declaration ── */
 if (typeof window._CSRF === 'undefined') {
     window._CSRF = "{{ csrf_token() }}";
 }
+
 document.getElementById('langBar').style.display  = 'none';
 document.getElementById('dmToggle').style.display = 'none';
 
 /* ── Sync timezone ── */
 fetch('/set_tz', {
   method:'POST',
-  headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+  headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF},
   body: JSON.stringify({ tz_offset: -(new Date().getTimezoneOffset()) })
 });
 
 /* ════════════════════════════════════════════════════
-   PAGE NAVIGATION — pure inline style, no class magic
+   PAGE NAVIGATION
    ════════════════════════════════════════════════════ */
 const NAV = (function(){
   const KEY     = 'teacher_page';
@@ -502,31 +503,26 @@ const NAV = (function(){
   const visited = new Set();
 
   function clearPip(id) {
-    // Get count FIRST before removing pip elements
     let count = -1;
     const pip = document.querySelector(`[data-tab="${id}"]`);
     if (pip) count = parseInt(pip.dataset.count || '0');
 
-    // Remove pip visually from both navbars
     [...sideBtn, ...botBtn].forEach(b => {
       if (b.dataset.page === id) b.querySelectorAll('.snav-pip,.bnav-pip').forEach(p => p.remove());
     });
 
-    // Persist to DB — MUST include CSRF token or Flask will reject with 400
     fetch('/teacher/mark_seen', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRFToken': _CSRF
+        'X-CSRFToken': window._CSRF
       },
       body: JSON.stringify({tab: id, count: count})
     }).catch(()=>{});
   }
 
   function markSeenCurrent(id) {
-    // Always tell server the current count for this tab, even when no pip exists
-    // This keeps the baseline up-to-date so future pips are accurate
     const countMap = {
       classes:    parseInt('{{ up_count }}'),
       attendance: parseInt('{{ attn_count }}'),
@@ -538,7 +534,7 @@ const NAV = (function(){
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRFToken': _CSRF
+        'X-CSRFToken': window._CSRF
       },
       body: JSON.stringify({tab: id, count: count})
     }).catch(()=>{});
@@ -550,8 +546,8 @@ const NAV = (function(){
     botBtn.forEach(b  => b.classList.toggle('active', b.dataset.page === id));
     pages.forEach(p => p.style.display = p.id === 'page-' + id ? 'block' : 'none');
     if (!visited.has(id)) {
-      clearPip(id);        // removes pip visually + saves count if pip existed
-      markSeenCurrent(id); // always update baseline so server knows current count
+      clearPip(id);
+      markSeenCurrent(id);
       visited.add(id);
     }
     try { sessionStorage.setItem(KEY, id); } catch(e){}
@@ -560,7 +556,6 @@ const NAV = (function(){
   sideBtn.forEach(b => b.addEventListener('click', () => show(b.dataset.page)));
   botBtn.forEach(b  => b.addEventListener('click', () => show(b.dataset.page)));
 
-  // Fresh login → classes. Page refresh → restore last page.
   let initPage = DEFAULT;
   try {
     {% if fresh_login %}
@@ -577,7 +572,6 @@ const NAV = (function(){
 /* ════════════════════════════════════════════════════
    SETTINGS
    ════════════════════════════════════════════════════ */
-// Settings form: update sidebar display name instantly after save
 (function(){
   const form = document.getElementById('settingsForm');
   if (!form) return;
@@ -586,20 +580,18 @@ const NAV = (function(){
     const btn = form.querySelector('button[type="submit"]');
     if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
     try {
-        = await fetch(f.action, {
+      const res  = await fetch(form.action, {
           method:'POST', 
-          body:new FormData(f), 
-          // Add 'X-CSRFToken': window._CSRF here
+          body:new FormData(form), 
           headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF}
       });
       const data = await res.json();
       if (data.ok) {
         showToast('✓ ' + (data.msg || 'Settings saved'));
-        // Update sidebar name display immediately
         const newName = form.querySelector('[name="display_name"]').value.trim();
         if (newName) {
           document.querySelectorAll('.sidebar-name').forEach(el => el.textContent = newName);
-        document.querySelectorAll('.sidebar-avatar').forEach(el => el.textContent = newName.charAt(0).toUpperCase());
+          document.querySelectorAll('.sidebar-avatar').forEach(el => el.textContent = newName.charAt(0).toUpperCase());
         }
       } else {
         showToast(data.msg || 'Error saving', 'err');
@@ -608,18 +600,40 @@ const NAV = (function(){
     finally { if (btn) { btn.disabled = false; btn.textContent = 'Save Settings'; } }
   });
 })();
+
+// Initialize AJAX form helpers
+function ajaxForm(form, callback) {
+  if (!form) return;
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': window._CSRF}
+      });
+      const data = await res.json();
+      if (data.ok) {
+        showToast(data.msg || 'Saved');
+        if (callback) callback(data);
+      } else {
+        showToast(data.msg || 'Error', 'err');
+      }
+    } catch(e) { showToast('Network error', 'err'); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = 'Save'; } }
+  });
+}
 ajaxForm(document.getElementById('changePwForm'), null);
 
 /* ════════════════════════════════════════════════════
    SCHEDULE — CREATE
    ════════════════════════════════════════════════════ */
-
-// Clear date button for schedule form
 const clearSchedBtn = document.getElementById('clearScheduleDate');
 const schedAtInput = document.getElementById('scheduleAt');
 if (clearSchedBtn && schedAtInput) {
   clearSchedBtn.addEventListener('click', function() {
-    // Set to current datetime as fallback
     const now = new Date();
     const offset = now.getTimezoneOffset();
     const local = new Date(now - offset * 60000);
@@ -644,7 +658,6 @@ document.getElementById('modalClose').onclick = () =>
   document.getElementById('editModal').classList.add('hidden');
 ajaxForm(document.getElementById('editScheduleForm'), function(data){
   document.getElementById('editModal').classList.add('hidden');
-  // Update card in-place — no reload needed
   const card = document.getElementById('sc-'+data.schedule_id);
   if (card) {
     const titleEl = card.querySelector('.sc-title');
@@ -660,7 +673,6 @@ ajaxForm(document.getElementById('editScheduleForm'), function(data){
       invEl.className = 'sc-invites' + (data.invite_all ? ' open' : '');
       invEl.textContent = data.invite_all ? '🌐 All students' : '🎯 Specific students only';
     }
-    // Update edit button data attributes for next edit
     const editBtn = card.querySelector('.edit-sc-btn');
     if (editBtn) {
       editBtn.dataset.title = data.title;
@@ -671,7 +683,7 @@ ajaxForm(document.getElementById('editScheduleForm'), function(data){
   }
 });
 
-/* ── Schedule buttons (cancel / delete / edit) ── */
+/* ── Schedule buttons ── */
 function attachScBtns() {
   document.querySelectorAll('.cancel-sc-btn').forEach(btn => {
     if (btn._ok) return; btn._ok = true;
@@ -703,9 +715,8 @@ function attachScBtns() {
         document.getElementById(id).value = [this.dataset.title,this.dataset.at,this.dataset.link,this.dataset.desc][i] || '';
       });
       document.getElementById('editScheduleForm').action = '/teacher/schedule/edit/'+this.dataset.id;
-      // Load current invites and pre-check
       const sid = this.dataset.id;
-      const r = await fetch('/teacher/schedule/invites/'+sid, {headers:{'X-Requested-With':'XMLHttpRequest'}}).then(r=>r.json()).catch(()=>null);
+      const r = await fetch('/teacher/schedule/invites/'+sid, {headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF}}).then(r=>r.json()).catch(()=>null);
       document.querySelectorAll('.edit-invite-cb').forEach(cb => {
         cb.checked = r && r.invited_ids && r.invited_ids.includes(parseInt(cb.value));
       });
@@ -716,7 +727,7 @@ function attachScBtns() {
 attachScBtns();
 
 /* ════════════════════════════════════════════════════
-   ATTENDANCE — ADD  (dedicated handler for full control)
+   ATTENDANCE — ADD
    ════════════════════════════════════════════════════ */
 {% if all_students %}
 (function(){
@@ -731,7 +742,7 @@ attachScBtns();
     try {
       const res = await fetch(form.action, {
         method:'POST', body: new FormData(form),
-        headers:{'X-Requested-With':'XMLHttpRequest'}
+        headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF}
       });
       if (!res.ok) {
         let msg = 'Server error ('+res.status+')';
@@ -746,119 +757,17 @@ attachScBtns();
 
     showToast(data.msg||'✓ Attendance added');
     form.reset();
-    // Reset date field to current time
     const dateInput = form.querySelector('[name=date]');
     if (dateInput) {
       const now = new Date();
       dateInput.value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+'T'+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
     }
 
-    /* Update progress */
     if (data.progress_html) {
       const pl = document.getElementById('progressList');
       document.getElementById('progressEmpty')?.remove();
       pl.innerHTML = data.progress_html;
       pl.querySelectorAll('.view-attn-btn').forEach(attachViewAttn);
-    }
-
-    /* If drawer is open for this student, inject new row at top */
-    const drawer = document.getElementById('attnDrawer');
-    const drawerIsOpen = drawer && !drawer.classList.contains('hidden');
-    const openStudentId = drawer?.dataset.openSid;
-    if (drawerIsOpen && openStudentId && openStudentId === String(data.student_id) && data.record_html) {
-      const list = document.getElementById('attnList');
-      list.querySelector('.empty-inline')?.remove();
-      list.insertAdjacentHTML('afterbegin', data.record_html);
-      list.querySelectorAll('.del-attn-form').forEach(attachDelAttn);
-      // Update drawer subtitle
-      const sub = document.getElementById('attnDrawerSub');
-      if (sub) sub.textContent = data.s_total + ' total · ' + data.s_unbilled + ' unbilled';
-    }
-
-    /* Update Students table row */
-    if (data.student_id) {
-      const row = document.getElementById('srow-'+data.student_id);
-      if (row) {
-        const sessEl = row.querySelector('.dt-sessions');
-        if (sessEl) {
-          sessEl.textContent = data.s_total;
-          // Handle pending badge — it's a sibling of sessEl inside same div
-          const sessWrap = sessEl.parentElement;
-          let pendingEl = sessWrap.querySelector('.dt-pending');
-          if (data.s_unbilled > 0) {
-            if (!pendingEl) {
-              pendingEl = document.createElement('div');
-              pendingEl.className = 'dt-pending';
-              sessWrap.appendChild(pendingEl);
-            }
-            pendingEl.textContent = data.s_unbilled + ' pending';
-          } else {
-            pendingEl?.remove();
-          }
-        }
-      }
-    }
-
-    /* Update nav pip counts */
-    if (typeof data.unbilled_count === 'number') {
-      ['#sideNav','#bottomNav'].forEach(sel => {
-        const nav = document.querySelector(sel+' [data-page="attendance"]');
-        if (!nav) return;
-        let pip = nav.querySelector('.snav-pip,.bnav-pip');
-        const cls = sel.includes('side') ? 'snav-pip' : 'bnav-pip';
-        if (data.unbilled_count > 0) {
-          if (!pip) { pip = document.createElement('span'); pip.className = cls; nav.appendChild(pip); }
-          pip.textContent = data.unbilled_count;
-        } else { pip?.remove(); }
-      });
-    }
-
-    /* Inject newly generated receipts in real-time */
-    if (data.new_receipts && data.new_receipts.length > 0) {
-      const receiptList = document.getElementById('receiptList');
-      data.new_receipts.forEach(nr => {
-        const html = `<div class="rc-card" id="rc-${nr.id}"
-          data-rid="${nr.id}" data-displayno="${nr.receipt_no||nr.id}" data-paid="0"
-          data-student="${nr.student_name}" data-teacher="${nr.teacher_name}"
-          data-fee="${nr.total_fee}" data-issue="${nr.issue_date}"
-          data-dates="${nr.raw_dates.replace(/"/g,'&quot;')}"
-          data-bank-account="${nr.bank_account}" data-bank-name="${nr.bank_name}"
-          data-show-paid="1" data-paid-url="${nr.paid_url}"
-          tabindex="0" role="button">
-          <div class="rc-mid">
-            <div class="rc-top">
-              <span class="rc-id">#${nr.receipt_no||nr.id}</span>
-              <span class="rc-name">${nr.student_name}</span>
-            </div>
-            <div class="rc-bottom">
-              <span class="rc-date">${nr.issue_date}</span>
-              <span class="rc-sessions">${nr.sessions} sessions</span>
-            </div>
-          </div>
-          <div class="rc-right">
-            <div class="rc-fee">Rp ${nr.fee_fmt}</div>
-            <span class="bup">Unpaid</span>
-          </div>
-          <div class="rc-arrow">›</div>
-        </div>`;
-        receiptList.insertAdjacentHTML('afterbegin', html);
-        // Attach click handler for the new card
-        const card = document.getElementById('rc-'+nr.id);
-        if (card) attachReceiptCard(card);
-      });
-      // Update receipts pip
-      const curUnpaid = document.querySelectorAll('#receiptList .rc-card[data-paid="0"]').length;
-      ['#sideNav','#bottomNav'].forEach(sel => {
-        const nav = document.querySelector(sel+' [data-page="receipts"]');
-        if (!nav) return;
-        let pip = nav.querySelector('.snav-pip,.bnav-pip');
-        const cls = sel.includes('side') ? 'snav-pip' : 'bnav-pip';
-        if (curUnpaid > 0) {
-          if (!pip) { pip = document.createElement('span'); pip.className = cls; nav.appendChild(pip); }
-          pip.textContent = curUnpaid;
-        } else { pip?.remove(); }
-      });
-      showToast(`🧾 Receipt generated for ${data.new_receipts.map(r=>r.student_name).join(', ')}!`);
     }
   });
 })();
@@ -874,62 +783,15 @@ function attachDelAttn(form) {
     if (btn) { btn.disabled=true; btn.classList.add('loading'); }
     const r = await apiFetch(this.action, new FormData(this));
     if (r) {
-      // Remove the row from the list
       document.getElementById('attn-'+id)?.remove();
       showToast(r.msg||'✓ Deleted');
-
-      // Show empty state if no more records in drawer
-      const list = document.getElementById('attnList');
-      if (list && list.querySelectorAll('.attn-row').length === 0) {
-        list.innerHTML = '<div class="empty-inline" id="attnEmpty">No attendance records yet.</div>';
-        // Update subtitle too
-        const sub = document.getElementById('attnDrawerSub');
-        if (sub) sub.textContent = '0 total · 0 unbilled';
-      }
-
-      // Update progress table
-      if (r.progress_html !== undefined) {
-        const pl = document.getElementById('progressList');
-        if (pl) {
-          if (r.progress_html) {
-            pl.innerHTML = r.progress_html;
-            // Re-attach view-attn-btn handlers on updated table
-            pl.querySelectorAll('.view-attn-btn').forEach(attachViewAttn);
-          } else {
-            pl.innerHTML = '<div class="empty-inline" id="progressEmpty">No active students yet.</div>';
-          }
-        }
-      }
-
-      // Update Students table row
-      if (r.student_id) {
-        const row = document.getElementById('srow-'+r.student_id);
-        if (row) {
-          const sessEl = row.querySelector('.dt-sessions');
-          if (sessEl) {
-            sessEl.textContent = r.s_total;
-            const sessWrap = sessEl.parentElement;
-            let pendingEl = sessWrap.querySelector('.dt-pending');
-            if (r.s_unbilled > 0) {
-              if (!pendingEl) {
-                pendingEl = document.createElement('div');
-                pendingEl.className = 'dt-pending';
-                sessWrap.appendChild(pendingEl);
-              }
-              pendingEl.textContent = r.s_unbilled + ' pending';
-            } else {
-              pendingEl?.remove();
-            }
-          }
-        }
-      }
     } else if (btn) { btn.disabled=false; btn.classList.remove('loading'); }
   });
 }
 document.querySelectorAll('.del-attn-form').forEach(attachDelAttn);
 
 /* ════════════════════════════════════════════════════
-   ATTENDANCE — VIEW PER STUDENT
+   ATTENDANCE — VIEW / SEARCH / FILTERS
    ════════════════════════════════════════════════════ */
 const attnDrawer = document.getElementById('attnDrawer');
 const attnDrawerTitle = document.getElementById('attnDrawerTitle');
@@ -943,35 +805,15 @@ function applyAttnFilter() {
   const q      = (attnSearch?.value || '').toLowerCase().trim();
   const active = document.querySelector('.afb.active')?.dataset.filter || 'all';
   const rows   = attnList.querySelectorAll('.attn-row');
-  let visible  = 0;
   rows.forEach(row => {
-    const text   = row.textContent.toLowerCase();
+    const text    = row.textContent.toLowerCase();
     const billed = row.dataset.billed === '1';
     const matchQ = !q || text.includes(q);
     const matchF = active === 'all' || (active === 'billed' && billed) || (active === 'unbilled' && !billed);
-    const show   = matchQ && matchF;
-    row.style.display = show ? '' : 'none';
-    if (show) visible++;
+    row.style.display = (matchQ && matchF) ? '' : 'none';
   });
-  // Show/hide empty state
-  let noRes = attnList.querySelector('.attn-no-results');
-  if (visible === 0 && rows.length > 0) {
-    if (!noRes) {
-      noRes = document.createElement('div');
-      noRes.className = 'empty-inline attn-no-results';
-      noRes.textContent = 'No records match your filter.';
-      attnList.appendChild(noRes);
-    }
-    noRes.style.display = '';
-  } else if (noRes) {
-    noRes.style.display = 'none';
-  }
 }
-
-// Wire search input
 attnSearch?.addEventListener('input', applyAttnFilter);
-
-// Wire filter buttons
 document.querySelectorAll('.afb').forEach(btn => {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.afb').forEach(b => b.classList.remove('active'));
@@ -986,10 +828,8 @@ function attachViewAttn(btn) {
     e.stopPropagation();
     const id   = this.dataset.id;
     const name = this.dataset.name;
-    // Reset search/filter
     if (attnSearch) attnSearch.value = '';
     document.querySelectorAll('.afb').forEach(b => b.classList.toggle('active', b.dataset.filter==='all'));
-    // Show drawer, hide form+progress cols
     attnDrawerTitle.textContent = name;
     attnDrawerSub.textContent   = 'Loading…';
     attnList.innerHTML = '<div class="empty-inline">Loading records…</div>';
@@ -998,7 +838,7 @@ function attachViewAttn(btn) {
     attnDrawer.dataset.openSid = id;
 
     const r = await fetch('/teacher/student_records/'+id, {
-      headers: {'X-Requested-With': 'XMLHttpRequest'}
+      headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': window._CSRF}
     }).then(res => res.json()).catch(() => null);
     if (r && r.ok) {
       attnDrawerSub.textContent = `${r.total} total · ${r.unbilled} unbilled`;
@@ -1016,268 +856,11 @@ attnDrawerClose.addEventListener('click', () => {
   if (attnPageCols) attnPageCols.style.display = '';
 });
 
-/* ── Edit Attendance Time ── */
-(function(){
-  const modal    = document.getElementById('editAttnModal');
-  const closeBtn = document.getElementById('editAttnClose');
-  const form     = document.getElementById('editAttnForm');
-  const dateInp  = document.getElementById('editAttnDate');
-  const sub      = document.getElementById('editAttnSub');
-  const submitBtn= document.getElementById('editAttnSubmit');
-
-  closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
-  modal.addEventListener('click', e => { if (e.target===modal) modal.classList.add('hidden'); });
-
-  window.openEditAttn = function(id, dateWib, label) {
-    form.action = '/teacher/edit_attendance/'+id;
-    // dateWib is "YYYY-MM-DDTHH:MM" already in WIB
-    dateInp.value = dateWib;
-    sub.textContent = label || '';
-    modal.classList.remove('hidden');
-  };
-
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
-    const r = await apiFetch(form.action, new FormData(form));
-    submitBtn.disabled = false; submitBtn.textContent = 'Save';
-    if (r) {
-      modal.classList.add('hidden');
-      showToast('✓ Attendance updated');
-      // Update date display in drawer row
-      const row = document.getElementById('attn-'+r.att_id);
-      if (row) row.querySelector('.attn-date').textContent = r.new_date_fmt;
-      // Refresh progress table
-      if (r.progress_html) {
-        const pl = document.getElementById('progressList');
-        if (pl) { pl.innerHTML = r.progress_html; pl.querySelectorAll('.view-attn-btn').forEach(attachViewAttn); }
-      }
-    }
-  });
-})();
-
 /* ════════════════════════════════════════════════════
-   STUDENTS — DELETE
-   ════════════════════════════════════════════════════ */
-document.querySelectorAll('.del-student-btn').forEach(btn => {
-  btn.addEventListener('click', async function(){
-    const id = this.dataset.id, name = this.dataset.name;
-    if (!await confirm2(`Remove "${name}"?`,'All their data will be deleted.','🗑 Remove','danger')) return;
-    this.disabled = true;
-    const r = await apiFetch('/teacher/delete_student/'+id, null, 'application/json');
-    if (r) { document.getElementById('srow-'+id)?.remove(); showToast(`"${name}" removed`); }
-    else { this.disabled=false; }
-  });
-});
-
-/* ════════════════════════════════════════════════════
-   STUDENTS — RESET PASSWORD
-   ════════════════════════════════════════════════════ */
-(function(){
-  const modal    = document.getElementById('resetPwModal');
-  const closeBtn = document.getElementById('resetPwClose');
-  const form     = document.getElementById('resetPwForm');
-  const input    = document.getElementById('resetPwInput');
-  const subtitle = document.getElementById('resetPwSubtitle');
-  const genBtn   = document.getElementById('resetPwGenerate');
-  const submitBtn= document.getElementById('resetPwSubmit');
-
-  function openModal(id, name) {
-    form.action = '/teacher/reset_student_password/' + id;
-    subtitle.textContent = 'Setting new password for: ' + name;
-    input.value = '';
-    modal.classList.remove('hidden');
-    input.focus();
-  }
-  function closeModal() { modal.classList.add('hidden'); }
-
-  closeBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-
-  // Generate a readable random password: word + numbers
-  genBtn.addEventListener('click', () => {
-    const words = ['Tiger','Panda','Lotus','River','Cloud','Stone','Wind','Fire','Moon','Star'];
-    const word = words[Math.floor(Math.random() * words.length)];
-    const num  = Math.floor(100 + Math.random() * 900);
-    input.value = word + num;
-    input.focus();
-  });
-
-  document.querySelectorAll('.reset-pw-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      openModal(this.dataset.id, this.dataset.name);
-    });
-  });
-
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const pw = input.value.trim();
-    if (pw.length < 6) { showToast('Password must be at least 6 characters', 'err'); return; }
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Saving…';
-    const fd = new FormData();
-    fd.append('new_password', pw);
-    const r = await apiFetch(form.action, fd);
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Set New Password';
-    if (r && r.ok) {
-      showToast('✓ Password reset for ' + subtitle.textContent.replace('Setting new password for: ',''));
-      closeModal();
-    }
-  });
-})();
-
-/* ════════════════════════════════════════════════════
-   RECEIPTS — MODAL
-   ════════════════════════════════════════════════════ */
-(function(){
-  const overlay = document.getElementById('receiptModal');
-  const box     = document.getElementById('receiptModalBox');
-  const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const DA=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-
-  function build(card) {
-    const paid    = card.dataset.paid === '1';
-    const total   = parseInt(card.dataset.fee || 0);
-    const feeStr  = 'Rp ' + total.toLocaleString('id-ID');
-    const rawDates = (card.dataset.dates||'').split('|').filter(Boolean);
-    const perSess = rawDates.length;
-    const perSessAmt = perSess > 0 ? Math.round(total / perSess) : 0;
-    const dates = rawDates.map((raw,i)=>{
-      const dt  = new Date(raw.endsWith('Z')?raw:raw+'Z');
-      const dow = dt.getDay()===0?6:dt.getDay()-1;
-      const t   = String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
-      return `<div class="rm-date-item">
-        <span class="rc-date-num">#${i+1}</span>
-        <span class="rc-date-day">${DA[dow]}</span>
-        <span class="rc-date-main">${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}</span>
-        <span class="rc-date-time">${t} WIB</span>
-      </div>`;
-    }).join('');
-    return `
-      <div class="inv-watermark ${paid?'paid':'unpaid'}">${paid ? 'PAID' : 'UNPAID'}</div>
-      <div class="inv-header">
-        <div class="inv-brand">
-          <div class="inv-brand-zh">中文课堂</div>
-          <div class="inv-brand-sub">Mandarin Class · Invoice</div>
-        </div>
-        <div class="inv-meta">
-          <div class="inv-num">Receipt <span>#${card.dataset.displayno||card.dataset.rid}</span></div>
-          <div class="inv-date">Issued ${card.dataset.issue}</div>
-          <span class="inv-status ${paid?'bpd':'bup'}">${paid?'✓ Paid':'⏳ Unpaid'}</span>
-        </div>
-      </div>
-      <div class="inv-divider"></div>
-      <div class="inv-parties">
-        ${card.dataset.student?`<div class="inv-party"><div class="inv-party-lbl">Bill To</div><div class="inv-party-name">${card.dataset.student}</div><div class="inv-party-role">Student</div></div>`:''}
-        ${card.dataset.teacher?`<div class="inv-party"><div class="inv-party-lbl">From</div><div class="inv-party-name">${card.dataset.teacher}</div><div class="inv-party-role">Teacher</div></div>`:''}
-      </div>
-      <div class="inv-divider"></div>
-      <div class="inv-line-header">
-        <span>Description</span><span>Qty</span><span>Rate</span><span>Amount</span>
-      </div>
-      <div class="inv-line-item">
-        <span class="inv-desc"><strong>Mandarin Lessons</strong><small>${perSess} sessions</small></span>
-        <span class="inv-qty">${perSess}</span>
-        <span class="inv-rate">Rp ${perSessAmt.toLocaleString('id-ID')}</span>
-        <span class="inv-amount">${feeStr}</span>
-      </div>
-      <div class="inv-total-row">
-        <div class="inv-total-label">Total Due</div>
-        <div class="inv-total-amount">${feeStr}</div>
-      </div>
-      ${dates?`<div class="inv-sessions-header"><span>📅 Sessions Breakdown</span><span class="inv-sess-count">${perSess} classes</span></div><div class="rm-dates inv-dates">${dates}</div>`:''}
-      <div class="rm-foot" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-        ${card.dataset.showPaid==='1'&&!paid?`<form class="mark-paid-form" method="POST" action="${card.dataset.paidUrl}" style="margin:0"><button class="btn bg bsm" type="submit">✓ Mark as Paid</button></form>`:''}
-        ${paid?`<button class="btn bdel bsm del-receipt-btn" data-rid="${card.dataset.rid}">🗑 Delete</button>`:''}
-      </div>`;
-  }
-
-  function open(card) {
-    box.innerHTML = build(card);
-    overlay.classList.remove('hidden');
-    document.body.style.overflow='hidden';
-    box.querySelectorAll('.mark-paid-form').forEach(f=>{
-      f.addEventListener('submit', async function(e){
-        e.preventDefault();
-        const btn=this.querySelector('button'); if(btn){btn.disabled=true;btn.classList.add('loading');}
-        const r = await apiFetch(this.action, new FormData(this));
-        if (r) {
-          card.dataset.paid='1';
-          const b=card.querySelector('.bup'); if(b){b.className='bpd';b.textContent='Paid';}
-          // Update pip — one less unpaid
-          ['#sideNav','#bottomNav'].forEach(sel=>{
-            const nav=document.querySelector(sel+' [data-page="receipts"]');
-            if(!nav)return;
-            const pip=nav.querySelector('.snav-pip,.bnav-pip');
-            if(pip){const n=parseInt(pip.textContent)-1; if(n>0)pip.textContent=n; else pip.remove();}
-          });
-          showToast(r.msg||'✓ Marked paid'); close();
-          // Rebuild modal to show delete button
-          open(card);
-        } else if(btn){btn.disabled=false;btn.classList.remove('loading');}
-      });
-    });
-    box.querySelectorAll('.del-receipt-btn').forEach(btn=>{
-      btn.addEventListener('click', async function(){
-        if (!await confirm2('Delete this receipt?','This cannot be undone.','🗑 Delete','danger')) return;
-        this.disabled=true; this.textContent='Deleting…';
-        const r = await apiFetch('/teacher/delete_receipt/'+this.dataset.rid, new FormData());
-        if (r) {
-          document.getElementById('rc-'+this.dataset.rid)?.remove();
-          showToast('Receipt deleted'); close();
-        } else { this.disabled=false; this.textContent='🗑 Delete Receipt'; }
-      });
-    });
-  }
-  function close() { overlay.classList.add('hidden'); document.body.style.overflow=''; }
-  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
-  document.getElementById('receiptModalClose').onclick = close;
-  document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
-
-  window.attachReceiptCard = function(c) {
-    if (c._rcOk) return; c._rcOk = true;
-    c.addEventListener('click', ()=>open(c));
-    c.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ')open(c); });
-  };
-  document.querySelectorAll('#receiptList .rc-card').forEach(attachReceiptCard);
-
-  const smb = document.getElementById('showMoreReceipts');
-  if (smb) {
-    const cards = Array.from(document.querySelectorAll('#receiptList .rc-card'));
-    cards.forEach((c,i)=>{ if(i>=5) c.classList.add('rc-hidden'); });
-    smb.addEventListener('click', function(){ cards.forEach(c=>c.classList.remove('rc-hidden')); this.remove(); });
-  }
-})();
-
-/* ── Fee form real-time update ── */
-document.querySelectorAll('.fee-form').forEach(f => {
-  f.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const btn = f.querySelector('[type=submit]');
-    if (btn) { btn.disabled=true; btn.classList.add('loading'); }
-    try {
-      const res  = await fetch(f.action, {method:'POST', body:new FormData(f), headers:{'X-Requested-With':'XMLHttpRequest'}});
-      const data = await res.json();
-      if (data.ok) {
-        showToast('✓ Fee saved');
-        // Update displayed fee next to student name if element exists
-        const sid = f.querySelector('[name=student_id]')?.value;
-        if (sid) {
-          const display = document.querySelector(`.fee-display[data-sid="${sid}"]`);
-          if (display) display.textContent = `Rp ${data.fee_fmt}`;
-        }
-      } else { showToast(data.msg||'Error saving fee','err'); }
-    } catch { showToast('Network error','err'); }
-    finally { if (btn) { btn.disabled=false; btn.classList.remove('loading'); } }
-  });
-});
-
-/* ════════════════════════════════════════════════════
-   HELPERS
+   HELPERS (Centralized API fetch with CSRF)
    ════════════════════════════════════════════════════ */
 async function apiFetch(url, body, ct) {
-  const headers = {'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': _CSRF};
+  const headers = {'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF};
   if (ct) headers['Content-Type'] = ct;
   try {
     const res  = await fetch(url, { method:'POST', body: body||null, headers });
@@ -1294,7 +877,7 @@ async function apiFetch(url, body, ct) {
 
 function confirm2(title, msg, okLabel, type) {
   return new Promise(resolve=>{
-    const m  = document.getElementById('confirmModal');
+    const m   = document.getElementById('confirmModal');
     const ok = document.getElementById('confirmOk');
     document.getElementById('confirmIcon').textContent  = type==='danger'?'🗑':type==='warn'?'⚠️':'ℹ️';
     document.getElementById('confirmTitle').textContent = title;
