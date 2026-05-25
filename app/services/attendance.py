@@ -17,7 +17,7 @@ def get_student_progress(student_id: int, teacher_id: int) -> Dict[str, Any]:
     attendances = Attendance.query.filter_by(
         student_id=student_id, 
         teacher_id=teacher_id
-    ).order_by(Attendance.class_date).all()
+    ).order_by(Attendance.date).all()
     
     if not attendances:
         return {
@@ -39,11 +39,11 @@ def get_student_progress(student_id: int, teacher_id: int) -> Dict[str, Any]:
     if current_cycle_count == 0:
         # Just completed a cycle, next class starts new cycle
         # Look for future scheduled classes or use last class + 1 week estimate
-        last_class = attendances[-1].class_date
+        last_class = attendances[-1].date
         next_class = last_class + timedelta(days=7) # Estimate
     else:
         # In middle of cycle
-        next_class = attendances[-1].class_date + timedelta(days=7) # Estimate
+        next_class = attendances[-1].date + timedelta(days=7) # Estimate
 
     return {
         'current_cycle_count': current_cycle_count,
@@ -65,13 +65,15 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
         student_id=student_id
     ).first()
     
-    fee_amount = fee_override.fee_idr if fee_override else teacher.default_fee
+    # Get teacher to access default fee
+    teacher = User.query.get(teacher_id)
+    fee_amount = fee_override.fee_idr if fee_override else (teacher.fee_idr if teacher else 0)
     
     # Get all attendances
     attendances = Attendance.query.filter_by(
         student_id=student_id,
         teacher_id=teacher_id
-    ).order_by(Attendance.class_date).all()
+    ).order_by(Attendance.date).all()
     
     total_classes = len(attendances)
     
@@ -91,15 +93,18 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
         
         cycle_classes = attendances[cycle_start_idx:cycle_end_idx]
         if len(cycle_classes) == CYCLE_SIZE:
+            # Get student info
+            student = User.query.get(student_id)
             receipt = Receipt(
                 student_id=student_id,
+                student_name=student.name() if student else "Unknown",
                 teacher_id=teacher_id,
-                cycle_number=existing_receipts + 1,
-                class_count=CYCLE_SIZE,
+                teacher_name=teacher.name() if teacher else "Unknown",
+                bank_account=teacher.bank_account if teacher else "",
+                bank_name=teacher.bank_name if teacher else "",
                 total_fee=fee_amount,
-                generated_at=datetime.utcnow(),
-                period_start=cycle_classes[0].class_date,
-                period_end=cycle_classes[-1].class_date
+                raw_dates="|".join([cls.date.isoformat() for cls in cycle_classes]),
+                issue_date=datetime.utcnow()
             )
             db.session.add(receipt)
             new_receipts.append(receipt)
@@ -115,7 +120,7 @@ def add_attendance(student_id: int, teacher_id: int, class_date: datetime, note:
     existing = Attendance.query.filter_by(
         student_id=student_id,
         teacher_id=teacher_id,
-        class_date=class_date
+        date=class_date
     ).first()
     
     if existing:
@@ -124,9 +129,9 @@ def add_attendance(student_id: int, teacher_id: int, class_date: datetime, note:
     attn = Attendance(
         student_id=student_id,
         teacher_id=teacher_id,
-        class_date=class_date,
+        date=class_date,
         note=note,
-        is_manual=is_manual
+        source="teacher" if not is_manual else "manual"
     )
     db.session.add(attn)
     
@@ -166,13 +171,13 @@ def can_student_mark_attendance(student_id: int, teacher_id: int) -> tuple[bool,
     last_attendance = Attendance.query.filter_by(
         student_id=student_id,
         teacher_id=teacher_id
-    ).order_by(Attendance.class_date.desc()).first()
+    ).order_by(Attendance.date.desc()).first()
     
     if not last_attendance:
         return True, "OK"
     
     now = datetime.utcnow()
-    time_since_last = now - last_attendance.class_date
+    time_since_last = now - last_attendance.date
     
     if time_since_last < timedelta(minutes=90):
         remaining = 90 - int(time_since_last.total_seconds() / 60)
