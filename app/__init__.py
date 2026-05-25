@@ -44,6 +44,7 @@ def create_app(config_class=None):
     def inject_globals():
         return {
             'lang': getattr(g, 'lang', 'en'),
+            'get_lang': get_lang,
             'tr': lambda key, default=None: get_translations(getattr(g, 'lang', 'en')).get(key, default or key),
             'fmt_date': lambda dt: __import__('app.services.i18n', fromlist=['fmt_date']).fmt_date(dt),
             'fmt_idr': lambda amt: __import__('app.services.i18n', fromlist=['fmt_idr']).fmt_idr(amt),
