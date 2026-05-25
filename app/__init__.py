@@ -42,14 +42,16 @@ def create_app(config_class=None):
 
     @flask_app.context_processor
     def inject_globals():
-        from .services.i18n import random_quote
+        from datetime import datetime
+        from .services.i18n import random_quote, to_wib
         return {
             'lang': getattr(g, 'lang', 'en'),
             'get_lang': get_lang,
             'tr': lambda key, default=None: get_translations(getattr(g, 'lang', 'en')).get(key, default or key),
             'fmt_date': lambda dt: __import__('app.services.i18n', fromlist=['fmt_date']).fmt_date(dt),
             'fmt_idr': lambda amt: __import__('app.services.i18n', fromlist=['fmt_idr']).fmt_idr(amt),
-            'to_wib': lambda dt: __import__('app.services.i18n', fromlist=['to_wib']).to_wib(dt),
+            'to_wib': lambda dt: to_wib(dt),
+            'now_dt': lambda: datetime.now(),
             'random_quote': random_quote,
         }
 
