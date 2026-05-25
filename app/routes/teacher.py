@@ -38,7 +38,7 @@ def dashboard():
     student_data = []
     for student in students:
         progress = get_student_progress(student.id, current_user.id)
-        fee_info = fee_map.get(student.id, {'fee_idr': current_user.default_fee, 'packet_type': 'session'})
+        fee_info = fee_map.get(student.id, {'fee_idr': current_user.fee_idr, 'packet_type': 'session'})
         
         student_data.append({
             'id': student.id,
@@ -98,12 +98,12 @@ def add_attendance():
         flash('Invalid date', 'error')
         return redirect(url_for('teacher.dashboard'))
     
-    existing = Attendance.query.filter_by(student_id=student_id, teacher_id=current_user.id, class_date=class_date).first()
+    existing = Attendance.query.filter_by(student_id=student_id, teacher_id=current_user.id, date=class_date).first()
     if existing:
         flash('Already recorded', 'warning')
         return redirect(url_for('teacher.dashboard'))
     
-    attn = Attendance(student_id=student_id, teacher_id=current_user.id, class_date=class_date, note=note, is_manual=True)
+    attn = Attendance(student_id=student_id, teacher_id=current_user.id, date=class_date, note=note)
     db.session.add(attn)
     generate_receipts(student_id, current_user.id)
     db.session.commit()
