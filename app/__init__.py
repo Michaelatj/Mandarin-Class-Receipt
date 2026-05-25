@@ -40,9 +40,10 @@ def create_app(config_class=None):
         g.lang = lang
         g.translations = get_translations(lang)
 
-    @flask_app.context_processor
+	@flask_app.context_processor
     def inject_globals():
-        from datetime import datetime
+        from datetime import datetime, timedelta  # Added timedelta here!
+        from flask import session                 # Added session here!
         from .services.i18n import random_quote, to_wib
         return {
             'lang': getattr(g, 'lang', 'en'),
@@ -53,8 +54,10 @@ def create_app(config_class=None):
             'to_wib': lambda dt: to_wib(dt),
             'now_dt': lambda: datetime.now(),
             'random_quote': random_quote,
-            # 👇 Add this shiny new line right here! 👇
             'parse_raw_dates': lambda dates: __import__('app.services.i18n', fromlist=['parse_raw_dates']).parse_raw_dates(dates),
+            
+            # 👇 Your brand new timezone calculator! 👇
+            'local_dt': lambda dt: dt - timedelta(minutes=session.get('tz_offset', -420)),
         }
 
     # Register Blueprints
