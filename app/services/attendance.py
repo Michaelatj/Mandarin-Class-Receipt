@@ -184,3 +184,31 @@ def can_student_mark_attendance(student_id: int, teacher_id: int) -> tuple[bool,
         return False, f"Please wait {remaining} minutes before marking again."
     
     return True, "OK"
+
+
+def delete_attendance(att_id: int, teacher_id: int) -> bool:
+    """
+    Delete an attendance record if it hasn't been billed yet.
+    Returns True if deleted, False if not found or already billed.
+    """
+    record = Attendance.query.get(att_id)
+    if not record or record.teacher_id != teacher_id or record.billed:
+        return False
+    
+    db.session.delete(record)
+    db.session.commit()
+    return True
+
+
+def mark_receipt_paid(receipt_id: int, teacher_id: int) -> bool:
+    """
+    Mark a receipt as paid.
+    Returns True if successful, False if not found or not owned by teacher.
+    """
+    receipt = Receipt.query.get(receipt_id)
+    if not receipt or receipt.teacher_id != teacher_id:
+        return False
+    
+    receipt.paid = True
+    db.session.commit()
+    return True
