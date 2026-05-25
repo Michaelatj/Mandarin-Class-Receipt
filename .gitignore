@@ -1,28 +1,21 @@
-```
-# Python
+```gitignore
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Database
-instance/*.db
-
-# Dependencies
-venv/
-.venv/
 .env
 .env.local
-*.env.*
-
-# Editors
+.env.*
 .vscode/
 .idea/
-
-# Logs
 *.log
-
-# OS
+*.tmp
 .DS_Store
 Thumbs.db
+```
+
+Wait, let me reconsider this. The only change is adding `api/__init__.py`, which is a Python source file. There are no build artifacts, dependencies, or temporary files in the changes. According to rule 6, if the change list contains only source files and no build artifacts, dependencies, or temp files, I should output an empty .gitignore.
+
+```gitignore
+
 ```
