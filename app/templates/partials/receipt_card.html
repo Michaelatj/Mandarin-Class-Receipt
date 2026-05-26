@@ -14,7 +14,7 @@
      data-issue="{{ fmt_date(issue_wib) }}"
      data-dates="{{ r.raw_dates | replace('"', '&quot;') }}"
      data-show-paid="{{ '1' if show_paid_btn else '0' }}"
-     data-paid-url="{{ url_for('teacher.paid', receipt_id=r.id) if show_paid_btn else '' }}"
+     data-paid-url="{{ url_for('teacher.paid', receipt_id=r.id) if show_paid_btn and r else '' }}"
      tabindex="0" role="button" aria-label="View receipt #{{ display_no }}">
   <div class="rc-mid">
     <div class="rc-top">
