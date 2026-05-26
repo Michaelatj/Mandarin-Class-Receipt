@@ -494,9 +494,16 @@ async function apiFetch(url, body, ct) {
   const headers = {'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF};
   if (ct) headers['Content-Type'] = ct;
   try {
-      const res = await fetch(url, { method:'POST', body: body, headers });
-      return await res.json();
-  } catch (err) { return null; }
+    const res  = await fetch(url, { method:'POST', body: body||null, headers });
+    if (!res.ok) {
+      let msg = 'Server error ('+res.status+')';
+      try { const d = await res.json(); msg = d.msg||msg; } catch{}
+      showToast(msg,'err'); return null;
+    }
+    const data = await res.json();
+    if (data.ok) return data;
+    showToast(data.msg||'Error','err'); return null;
+  } catch(err) { showToast('Network error — please try again','err'); return null; }
 }
 
 /* AJAX Form Helper */
@@ -505,7 +512,7 @@ function ajaxForm(form, callback) {
   form.addEventListener('submit', async function(e){
     e.preventDefault();
     const btn = form.querySelector('button[type="submit"]');
-    if (btn) btn.disabled = true;
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
     try {
       const res = await fetch(form.action, {
         method: 'POST',
@@ -514,11 +521,13 @@ function ajaxForm(form, callback) {
       });
       const data = await res.json();
       if (data.ok) {
+        showToast(data.msg || 'Saved');
         if (callback) callback(data);
-        else showToast('✓ Saved');
-      } else { showToast(data.msg || 'Error', 'err'); }
-    } catch(e) { console.error(e); }
-    finally { if (btn) btn.disabled = false; }
+      } else {
+        showToast(data.msg || 'Error', 'err');
+      }
+    } catch(e) { showToast('Network error', 'err'); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = 'Save'; } }
   });
 }
 ajaxForm(document.getElementById('changePwForm'), null);
@@ -871,7 +880,7 @@ attnDrawerClose.addEventListener('click', () => {
 });
 
 /* ════════════════════════════════════════════════════
-   FEE FORM (Real-Time Update)
+   FEE SETTINGS
    ════════════════════════════════════════════════════ */
 document.querySelectorAll('.fee-form').forEach(f => {
   f.addEventListener('submit', async function(e) {
@@ -887,11 +896,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
       const data = await res.json();
       if (data.ok) {
         showToast('✓ Fee saved');
-        const sid = f.querySelector('[name=student_id]')?.value;
-        if (sid) {
-          const display = document.querySelector(`.fee-display[data-sid="${sid}"]`);
-          if (display) display.textContent = `Rp ${data.fee_fmt}`;
-        }
       } else { showToast(data.msg||'Error saving fee','err'); }
     } catch { showToast('Network error','err'); }
     finally { if (btn) { btn.disabled=false; btn.classList.remove('loading'); } }
@@ -913,6 +917,7 @@ document.querySelectorAll('.fee-form').forEach(f => {
     
     const formData = new FormData();
     formData.append("issue_date", newDate);
+    formData.append("csrf_token", window._CSRF);
     
     const r = await apiFetch('/teacher/edit_receipt_time/' + receiptId, formData);
     if (r && r.ok) {
@@ -973,7 +978,7 @@ document.querySelectorAll('.fee-form').forEach(f => {
       </div>
       ${dates?`<div class="inv-sessions-header"><span>📅 Sessions Breakdown</span><span class="inv-sess-count">${perSess} classes</span></div><div class="rm-dates inv-dates">${dates}</div>`:''}
       <div class="rm-foot" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-        ${card.dataset.showPaid==='1'&&!paid?`<form class="mark-paid-form" method="POST" action="${card.dataset.paidUrl}" style="margin:0"><button class="btn bg bsm" type="submit">✓ Mark as Paid</button></form>`:''}
+        ${card.dataset.showPaid==='1'&&!paid?`<form class="mark-paid-form" method="POST" action="${card.dataset.paidUrl}" style="margin:0"><input type="hidden" name="csrf_token" value="${window._CSRF}"/><button class="btn bg bsm" type="submit">✓ Mark as Paid</button></form>`:''}
         ${paid?`<button class="btn bdel bsm del-receipt-btn" data-rid="${card.dataset.rid}">🗑 Delete</button>`:''}
         <button class="btn bgh bsm" onclick="editReceiptTime(${card.dataset.rid})">✏️ Edit Time</button>
       </div>`;
