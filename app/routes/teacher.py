@@ -24,11 +24,9 @@ def teacher_required(f):
     from functools import wraps
     @wraps(f)
     def decorated(*args, **kwargs):
-        if "user_id" not in session:
-            return redirect(url_for("auth.login"))
+        if "user_id" not in session: return redirect(url_for("auth.login"))
         user = db.session.get(User, session["user_id"])
-        if not user or user.role != "teacher":
-            return redirect(url_for("student.dashboard"))
+        if not user or user.role != "teacher": return redirect(url_for("student.dashboard"))
         return f(*args, **kwargs)
     return decorated
 
@@ -63,6 +61,16 @@ def dashboard():
         student_sessions=student_sessions, student_unbilled=student_unbilled,
         student_count=len(all_students), now=datetime.now().strftime("%Y-%m-%dT%H:%M"),
         quote=random_quote())
+
+@teacher_bp.route("/teacher/mark_paid/<int:receipt_id>", methods=["POST"])
+@teacher_required
+def paid(receipt_id):
+    teacher = _get_teacher()
+    if mark_receipt_paid(receipt_id, teacher.id):
+        if _is_ajax():
+            return jsonify(ok=True, msg=tr("ok_paid"), paid_label=tr("paid_lbl"))
+        flash(tr("ok_paid"), "ok")
+    return redirect(url_for("teacher.dashboard"))
 
 @teacher_bp.route("/teacher/update_settings", methods=["POST"])
 @teacher_required
@@ -142,7 +150,7 @@ def edit_receipt_time(receipt_id):
         new_date = datetime.strptime(new_issue_date_str, "%Y-%m-%dT%H:%M")
         receipt.issue_date = new_date
         db.session.commit()
-        return jsonify(ok=True, msg="Time updated", new_date=fmt_date(new_date))
+        return jsonify(ok=True, msg="Time updated", new_date=fmt_date(to_wib(new_date)))
     except ValueError:
         return jsonify(ok=False, msg="Invalid date format"), 400
 
