@@ -66,6 +66,7 @@
             <div class="card">
               <div class="card-title"><span class="card-title-icon">📆</span> Schedule a Class</div>
               <form id="scheduleForm" method="POST" action="{{ url_for('schedule.create') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <label>Title</label>
                 <input type="text" name="title" placeholder="e.g. HSK 2 Chapter 5" required>
                 <label>Date &amp; Time</label>
@@ -125,6 +126,7 @@
               <div class="card-title"><span class="card-title-icon">➕</span> {{ tr('add_manual') }}</div>
               {% if all_students %}
               <form id="addAttnForm" method="POST" action="{{ url_for('teacher.manual_add_attendance') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <label>{{ tr('manual_student') }}</label>
                 <select name="student_id" required>
                   {% for s in all_students %}<option value="{{ s.id }}">{{ s.name() }}</option>{% endfor %}
@@ -260,6 +262,7 @@
         <div class="card">
           {% for s in all_students %}
           <form class="fee-form fee-row" method="POST" action="{{ url_for('teacher.set_fee') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="student_id" value="{{ s.id }}">
             <span class="fee-name">{{ s.name() }}</span>
             <input type="number" name="fee" value="{{ custom_fees.get(s.id, '') }}"
@@ -317,6 +320,7 @@
           <div class="card">
             <div class="card-title"><span class="card-title-icon">⚙️</span> {{ tr('payment_settings') }}</div>
             <form id="settingsForm" method="POST" action="{{ url_for('teacher.update_settings') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
               <label>{{ tr('default_fee_lbl') }}</label>
               <input type="number" name="fee" value="{{ user.fee_idr }}" placeholder="500000">
               <label>Email <span class="lbl-opt">(untuk reset password)</span></label>
@@ -329,6 +333,7 @@
           <div class="card">
             <div class="card-title"><span class="card-title-icon">🔒</span> Change Password</div>
             <form id="changePwForm" method="POST" action="{{ url_for('auth.change_password') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
               <label>Current Password</label>
               <input type="password" name="current_password" required placeholder="Current password">
               <label>New Password</label>
@@ -342,6 +347,7 @@
             <div class="card-title" style="color:var(--red)"><span class="card-title-icon">⚠️</span> {{ tr('danger_zone') }}</div>
             <p style="font-size:.84rem;color:var(--text3);margin-bottom:14px">{{ tr('delete_account_warn') }}</p>
             <form method="POST" action="{{ url_for('auth.delete_account') }}" id="deleteAccountForm">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
               <label>{{ tr('confirm_pw_lbl') }}</label>
               <input type="password" name="confirm_password" required placeholder="{{ tr('password_ph') }}">
               <button class="btn bdel bsm">🗑 {{ tr('delete_account') }}</button>
@@ -412,6 +418,7 @@
     <button class="modal-close" id="modalClose">✕</button>
     <h3>Edit Class</h3>
     <form id="editScheduleForm" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <label>Title</label>
       <input type="text" name="title" id="editTitle" required>
       <label>Date &amp; Time</label>
@@ -444,6 +451,7 @@
     <h3>✏️ Edit Attendance Time</h3>
     <p style="font-size:.85rem;color:var(--text3);margin:4px 0 16px" id="editAttnSub"></p>
     <form id="editAttnForm" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <label>Date &amp; Time (WIB)</label>
       <input type="datetime-local" name="new_date" id="editAttnDate" required>
       <button class="btn bg" type="submit" id="editAttnSubmit">Save</button>
@@ -458,6 +466,7 @@
     <h3>🔑 Reset Student Password</h3>
     <p style="font-size:.85rem;color:var(--text3);margin:6px 0 16px" id="resetPwSubtitle"></p>
     <form id="resetPwForm" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       <label>New Password</label>
       <input type="text" name="new_password" id="resetPwInput"
              placeholder="Enter new password" required minlength="6"
@@ -476,7 +485,6 @@
 {% block page_scripts %}
 <script>
 /* ── Initialize CSRF token globally to prevent duplicate declaration ── */
-/* Global CSRF Token */
 if (typeof window._CSRF === 'undefined') {
     window._CSRF = "{{ csrf_token() }}";
 }
@@ -485,8 +493,10 @@ if (typeof window._CSRF === 'undefined') {
 async function apiFetch(url, body, ct) {
   const headers = {'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF};
   if (ct) headers['Content-Type'] = ct;
-  const res = await fetch(url, { method:'POST', body: body, headers });
-  return await res.json();
+  try {
+      const res = await fetch(url, { method:'POST', body: body, headers });
+      return await res.json();
+  } catch (err) { return null; }
 }
 
 /* AJAX Form Helper */
@@ -505,13 +515,12 @@ function ajaxForm(form, callback) {
       const data = await res.json();
       if (data.ok) {
         if (callback) callback(data);
-        else alert('Success');
-      }
+        else showToast('✓ Saved');
+      } else { showToast(data.msg || 'Error', 'err'); }
     } catch(e) { console.error(e); }
     finally { if (btn) btn.disabled = false; }
   });
 }
-ajaxForm(document.getElementById('settingsForm'), () => alert('Saved'));
 ajaxForm(document.getElementById('changePwForm'), null);
 
 /* ── Sync timezone ── */
@@ -631,32 +640,6 @@ const NAV = (function(){
     finally { if (btn) { btn.disabled = false; btn.textContent = 'Save Settings'; } }
   });
 })();
-
-// Initialize AJAX form helpers
-function ajaxForm(form, callback) {
-  if (!form) return;
-  form.addEventListener('submit', async function(e){
-    e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
-    try {
-      const res = await fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': window._CSRF}
-      });
-      const data = await res.json();
-      if (data.ok) {
-        showToast(data.msg || 'Saved');
-        if (callback) callback(data);
-      } else {
-        showToast(data.msg || 'Error', 'err');
-      }
-    } catch(e) { showToast('Network error', 'err'); }
-    finally { if (btn) { btn.disabled = false; btn.textContent = 'Save'; } }
-  });
-}
-ajaxForm(document.getElementById('changePwForm'), null);
 
 /* ════════════════════════════════════════════════════
    SCHEDULE — CREATE
@@ -888,23 +871,168 @@ attnDrawerClose.addEventListener('click', () => {
 });
 
 /* ════════════════════════════════════════════════════
-   HELPERS (Centralized API fetch with CSRF)
+   FEE FORM (Real-Time Update)
    ════════════════════════════════════════════════════ */
-async function apiFetch(url, body, ct) {
-  const headers = {'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF};
-  if (ct) headers['Content-Type'] = ct;
-  try {
-    const res  = await fetch(url, { method:'POST', body: body||null, headers });
-    if (!res.ok) {
-      let msg = 'Server error ('+res.status+')';
-      try { const d = await res.json(); msg = d.msg||msg; } catch{}
-      showToast(msg,'err'); return null;
+document.querySelectorAll('.fee-form').forEach(f => {
+  f.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = f.querySelector('[type=submit]');
+    if (btn) { btn.disabled=true; btn.classList.add('loading'); }
+    try {
+      const res  = await fetch(f.action, {
+          method:'POST', 
+          body:new FormData(f), 
+          headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF}
+      });
+      const data = await res.json();
+      if (data.ok) {
+        showToast('✓ Fee saved');
+        const sid = f.querySelector('[name=student_id]')?.value;
+        if (sid) {
+          const display = document.querySelector(`.fee-display[data-sid="${sid}"]`);
+          if (display) display.textContent = `Rp ${data.fee_fmt}`;
+        }
+      } else { showToast(data.msg||'Error saving fee','err'); }
+    } catch { showToast('Network error','err'); }
+    finally { if (btn) { btn.disabled=false; btn.classList.remove('loading'); } }
+  });
+});
+
+/* ════════════════════════════════════════════════════
+   RECEIPT MODAL LOGIC & EDIT TIME
+   ════════════════════════════════════════════════════ */
+(function(){
+  const overlay = document.getElementById('receiptModal');
+  const box     = document.getElementById('receiptModalBox');
+  const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DA=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  window.editReceiptTime = async function(receiptId) {
+    const newDate = prompt("Enter new date & time (YYYY-MM-DDTHH:MM):");
+    if (!newDate) return;
+    
+    const formData = new FormData();
+    formData.append("issue_date", newDate);
+    
+    const r = await apiFetch('/teacher/edit_receipt_time/' + receiptId, formData);
+    if (r && r.ok) {
+        showToast("✓ Time updated to: " + r.new_date);
+        setTimeout(() => location.reload(), 1000); 
     }
-    const data = await res.json();
-    if (data.ok) return data;
-    showToast(data.msg||'Error','err'); return null;
-  } catch(err) { showToast('Network error — please try again','err'); return null; }
-}
+  };
+
+  function build(card) {
+    const paid    = card.dataset.paid === '1';
+    const total   = parseInt(card.dataset.fee || 0);
+    const feeStr  = 'Rp ' + total.toLocaleString('id-ID');
+    const rawDates = (card.dataset.dates||'').split('|').filter(Boolean);
+    const perSess = rawDates.length;
+    const perSessAmt = perSess > 0 ? Math.round(total / perSess) : 0;
+    const dates = rawDates.map((raw,i)=>{
+      const dt  = new Date(raw.endsWith('Z')?raw:raw+'Z');
+      const dow = dt.getDay()===0?6:dt.getDay()-1;
+      const t   = String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
+      return `<div class="rm-date-item">
+        <span class="rc-date-num">#${i+1}</span>
+        <span class="rc-date-day">${DA[dow]}</span>
+        <span class="rc-date-main">${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}</span>
+        <span class="rc-date-time">${t} WIB</span>
+      </div>`;
+    }).join('');
+    return `
+      <div class="inv-watermark ${paid?'paid':'unpaid'}">${paid ? 'PAID' : 'UNPAID'}</div>
+      <div class="inv-header">
+        <div class="inv-brand">
+          <div class="inv-brand-zh">中文课堂</div>
+          <div class="inv-brand-sub">Mandarin Class · Invoice</div>
+        </div>
+        <div class="inv-meta">
+          <div class="inv-num">Receipt <span>#${card.dataset.displayno||card.dataset.rid}</span></div>
+          <div class="inv-date">Issued ${card.dataset.issue}</div>
+          <span class="inv-status ${paid?'bpd':'bup'}">${paid?'✓ Paid':'⏳ Unpaid'}</span>
+        </div>
+      </div>
+      <div class="inv-divider"></div>
+      <div class="inv-parties">
+        ${card.dataset.student?`<div class="inv-party"><div class="inv-party-lbl">Bill To</div><div class="inv-party-name">${card.dataset.student}</div><div class="inv-party-role">Student</div></div>`:''}
+        ${card.dataset.teacher?`<div class="inv-party"><div class="inv-party-lbl">From</div><div class="inv-party-name">${card.dataset.teacher}</div><div class="inv-party-role">Teacher</div></div>`:''}
+      </div>
+      <div class="inv-divider"></div>
+      <div class="inv-line-header">
+        <span>Description</span><span>Qty</span><span>Rate</span><span>Amount</span>
+      </div>
+      <div class="inv-line-item">
+        <span class="inv-desc"><strong>Mandarin Lessons</strong><small>${perSess} sessions</small></span>
+        <span class="inv-qty">${perSess}</span>
+        <span class="inv-rate">Rp ${perSessAmt.toLocaleString('id-ID')}</span>
+        <span class="inv-amount">${feeStr}</span>
+      </div>
+      <div class="inv-total-row">
+        <div class="inv-total-label">Total Due</div>
+        <div class="inv-total-amount">${feeStr}</div>
+      </div>
+      ${dates?`<div class="inv-sessions-header"><span>📅 Sessions Breakdown</span><span class="inv-sess-count">${perSess} classes</span></div><div class="rm-dates inv-dates">${dates}</div>`:''}
+      <div class="rm-foot" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+        ${card.dataset.showPaid==='1'&&!paid?`<form class="mark-paid-form" method="POST" action="${card.dataset.paidUrl}" style="margin:0"><button class="btn bg bsm" type="submit">✓ Mark as Paid</button></form>`:''}
+        ${paid?`<button class="btn bdel bsm del-receipt-btn" data-rid="${card.dataset.rid}">🗑 Delete</button>`:''}
+        <button class="btn bgh bsm" onclick="editReceiptTime(${card.dataset.rid})">✏️ Edit Time</button>
+      </div>`;
+  }
+
+  function open(card) {
+    box.innerHTML = build(card);
+    overlay.classList.remove('hidden');
+    document.body.style.overflow='hidden';
+    box.querySelectorAll('.mark-paid-form').forEach(f=>{
+      f.addEventListener('submit', async function(e){
+        e.preventDefault();
+        const btn=this.querySelector('button'); if(btn){btn.disabled=true;btn.classList.add('loading');}
+        const r = await apiFetch(this.action, new FormData(this));
+        if (r) {
+          card.dataset.paid='1';
+          const b=card.querySelector('.bup'); if(b){b.className='bpd';b.textContent='Paid';}
+          ['#sideNav','#bottomNav'].forEach(sel=>{
+            const nav=document.querySelector(sel+' [data-page="receipts"]');
+            if(!nav)return;
+            const pip=nav.querySelector('.snav-pip,.bnav-pip');
+            if(pip){const n=parseInt(pip.textContent)-1; if(n>0)pip.textContent=n; else pip.remove();}
+          });
+          showToast(r.msg||'✓ Marked paid'); close();
+          open(card);
+        } else if(btn){btn.disabled=false;btn.classList.remove('loading');}
+      });
+    });
+    box.querySelectorAll('.del-receipt-btn').forEach(btn=>{
+      btn.addEventListener('click', async function(){
+        if (!await confirm2('Delete this receipt?','This cannot be undone.','🗑 Delete','danger')) return;
+        this.disabled=true; this.textContent='Deleting…';
+        const r = await apiFetch('/teacher/delete_receipt/'+this.dataset.rid, new FormData());
+        if (r) {
+          document.getElementById('rc-'+this.dataset.rid)?.remove();
+          showToast('Receipt deleted'); close();
+        } else { this.disabled=false; this.textContent='🗑 Delete Receipt'; }
+      });
+    });
+  }
+  function close() { overlay.classList.add('hidden'); document.body.style.overflow=''; }
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+  document.getElementById('receiptModalClose').onclick = close;
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+
+  window.attachReceiptCard = function(c) {
+    if (c._rcOk) return; c._rcOk = true;
+    c.addEventListener('click', ()=>open(c));
+    c.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ')open(c); });
+  };
+  document.querySelectorAll('#receiptList .rc-card').forEach(attachReceiptCard);
+
+  const smb = document.getElementById('showMoreReceipts');
+  if (smb) {
+    const cards = Array.from(document.querySelectorAll('#receiptList .rc-card'));
+    cards.forEach((c,i)=>{ if(i>=5) c.classList.add('rc-hidden'); });
+    smb.addEventListener('click', function(){ cards.forEach(c=>c.classList.remove('rc-hidden')); this.remove(); });
+  }
+})();
 
 function confirm2(title, msg, okLabel, type) {
   return new Promise(resolve=>{
