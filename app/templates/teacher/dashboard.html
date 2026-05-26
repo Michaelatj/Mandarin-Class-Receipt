@@ -476,12 +476,43 @@
 {% block page_scripts %}
 <script>
 /* ── Initialize CSRF token globally to prevent duplicate declaration ── */
+/* Global CSRF Token */
 if (typeof window._CSRF === 'undefined') {
     window._CSRF = "{{ csrf_token() }}";
 }
 
-document.getElementById('langBar').style.display  = 'none';
-document.getElementById('dmToggle').style.display = 'none';
+/* API Fetch Helper */
+async function apiFetch(url, body, ct) {
+  const headers = {'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF};
+  if (ct) headers['Content-Type'] = ct;
+  const res = await fetch(url, { method:'POST', body: body, headers });
+  return await res.json();
+}
+
+/* AJAX Form Helper */
+function ajaxForm(form, callback) {
+  if (!form) return;
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': window._CSRF}
+      });
+      const data = await res.json();
+      if (data.ok) {
+        if (callback) callback(data);
+        else alert('Success');
+      }
+    } catch(e) { console.error(e); }
+    finally { if (btn) btn.disabled = false; }
+  });
+}
+ajaxForm(document.getElementById('settingsForm'), () => alert('Saved'));
+ajaxForm(document.getElementById('changePwForm'), null);
 
 /* ── Sync timezone ── */
 fetch('/set_tz', {
