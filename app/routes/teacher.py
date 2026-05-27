@@ -171,3 +171,12 @@ def mark_seen():
         teacher.seen_pips = _json.dumps(seen)
         db.session.commit()
     return jsonify(ok=True)
+@teacher_bp.route("/teacher/mark_paid/<int:receipt_id>", methods=["POST"])
+@teacher_required
+def paid(receipt_id): # <--- Pastikan nama fungsinya 'paid'
+    teacher = _get_teacher()
+    if mark_receipt_paid(receipt_id, teacher.id):
+        if _is_ajax():
+            return jsonify(ok=True, msg=tr("ok_paid"), paid_label=tr("paid_lbl"))
+        flash(tr("ok_paid"), "ok")
+    return redirect(url_for("teacher.dashboard"))
