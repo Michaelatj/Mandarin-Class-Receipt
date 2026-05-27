@@ -186,44 +186,43 @@ def paid(receipt_id): # <--- Pastikan nama fungsinya 'paid'
 def student_records(student_id):
     teacher = _get_teacher()
     
-    # Ambil semua data kehadiran untuk murid ini khusus yang diajar oleh guru yang sedang login
     records = Attendance.query.filter_by(
         student_id=student_id, teacher_id=teacher.id
     ).order_by(Attendance.date.desc()).all()
     
     unbilled_count = sum(1 for r in records if not r.billed)
     
-    # Buat HTML string-nya langsung di backend (sama seperti konsep cycle-grid sebelumnya)
     html = ""
     for r in records:
         ldt = to_wib(r.date)
         date_str = fmt_date(ldt)
         time_str = ldt.strftime("%H:%M")
         
-        # Penanda data-billed untuk filtering di Javascript
         billed_val = "1" if r.billed else "0"
         status_lbl = "Billed" if r.billed else "Unbilled"
         status_cls = "bpd" if r.billed else "bup"
         note_html = f'<div style="font-size:0.85rem;color:var(--text3);margin-top:4px;">{r.note}</div>' if r.note else ''
         
-        # Tombol delete hanya muncul kalau tagihan belum dibilled (belum dicetak receipt)
+        edit_btn = ""
         del_btn = ""
         if not r.billed:
+            iso_str = r.date.isoformat() + "Z"
+            edit_btn = f'<button type="button" class="btn bgh bsm edit-attn-btn" data-id="{r.id}" data-iso="{iso_str}" title="Edit Time">✏️ Edit</button>'
             del_btn = f'''
             <form class="del-attn-form" data-id="{r.id}" method="POST" action="{url_for('teacher.remove_attendance', att_id=r.id)}" style="margin:0">
                 <button type="submit" class="btn bdel-outline bsm" title="Delete">🗑️</button>
             </form>
             '''
 
-        # Rangkai HTML untuk satu baris attendance
         html += f'''
         <div class="attn-row dt-row" id="attn-{r.id}" data-billed="{billed_val}" style="display:flex; justify-content:space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border);">
             <div>
                 <div style="font-weight:600; color:var(--text);">{date_str} <span style="font-weight:400; color:var(--text2);">at {time_str} WIB</span></div>
                 {note_html}
             </div>
-            <div style="display:flex; gap: 12px; align-items:center;">
-                <span class="{status_cls}">{status_lbl}</span>
+            <div style="display:flex; gap: 6px; align-items:center;">
+                <span class="{status_cls}" style="margin-right:6px;">{status_lbl}</span>
+                {edit_btn}
                 {del_btn}
             </div>
         </div>
@@ -232,5 +231,4 @@ def student_records(student_id):
     if not records:
         html = '<div class="empty-inline">No records found.</div>'
 
-    # Kembalikan response JSON yang sesuai dengan ekspektasi JavaScript kamu
     return jsonify(ok=True, total=len(records), unbilled=unbilled_count, html=html)
