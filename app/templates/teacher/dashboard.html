@@ -97,6 +97,23 @@
             </div>
           </div>
           <div class="page-col-main">
+            
+            {# ── FILTER & BULK DELETE BAR ── #}
+            <div class="sc-filters card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding: 12px 16px; flex-wrap: wrap; gap:10px;">
+                <div class="attn-filter-row" style="margin:0">
+                  <button class="afb sc-fb active" data-filter="all">Semua</button>
+                  <button class="afb sc-fb" data-filter="upcoming">Upcoming</button>
+                  <button class="afb sc-fb" data-filter="past">Selesai/Batal</button>
+                </div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                  <label style="margin:0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                     <input type="checkbox" id="scSelectAllCb" style="margin:0; width:16px; height:16px; accent-color:var(--red);"> 
+                     <span style="font-size:0.8rem; color:var(--text2); font-weight:600; text-transform:none; letter-spacing:0;">Select All</span>
+                  </label>
+                  <button id="scBulkDelBtn" class="btn bdel bsm" disabled>🗑️ Hapus (0)</button>
+                </div>
+            </div>
+
             {% if schedules %}
             <div id="scheduleList">
               {% for s in schedules %}{{ teacher_card(s) }}{% endfor %}
@@ -540,7 +557,207 @@ fetch('/set_tz', {
 });
 
 /* ════════════════════════════════════════════════════
-   PAGE NAVIGATION
+   FITUR BARU: INJECT TOMBOL CHECKBOX & DUPLICATE 
+   (Ke Card Lama yang Dirender Jinja)
+   ════════════════════════════════════════════════════ */
+document.querySelectorAll('.sc-card').forEach(card => {
+    const id = card.id.replace('sc-', '');
+    
+    // Inject Checkbox jika belum ada
+    const head = card.querySelector('.sc-head');
+    if (head && !card.querySelector('.sc-check')) {
+        const titleEl = card.querySelector('.sc-title');
+        const timeEl = card.querySelector('.sc-time');
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.gap = '12px';
+        wrapper.style.flex = '1';
+        wrapper.style.minWidth = '0';
+        
+        wrapper.innerHTML = `<input type="checkbox" class="sc-check" value="${id}" style="width:16px;height:16px;cursor:pointer;accent-color:var(--red);margin-top:2px;">
+                             <div style="min-width:0;flex:1" class="inject-target"></div>`;
+                             
+        const target = wrapper.querySelector('.inject-target');
+        if (titleEl) target.appendChild(titleEl);
+        if (timeEl) target.appendChild(timeEl);
+        
+        head.insertBefore(wrapper, head.firstChild);
+    }
+
+    // Inject Duplicate Button jika belum ada
+    const footDiv = card.querySelector('.sc-foot > div:last-child');
+    if (footDiv && !footDiv.querySelector('.dup-sc-btn')) {
+        const editBtn = footDiv.querySelector('.edit-sc-btn');
+        let title = '', desc = '', link = '', at = '';
+        if (editBtn) {
+            title = editBtn.dataset.title || '';
+            desc = editBtn.dataset.desc || '';
+            link = editBtn.dataset.link || '';
+            at = editBtn.dataset.at || '';
+        }
+        const dupBtn = document.createElement('button');
+        dupBtn.className = 'btn bgh bsm dup-sc-btn';
+        dupBtn.dataset.id = id;
+        dupBtn.dataset.title = title;
+        dupBtn.dataset.desc = desc;
+        dupBtn.dataset.link = link;
+        dupBtn.dataset.at = at;
+        dupBtn.innerHTML = '📋 Duplicate';
+        footDiv.insertBefore(dupBtn, footDiv.firstChild);
+    }
+});
+
+/* ════════════════════════════════════════════════════
+   FITUR BARU: FILTER CLASSES & BULK DELETE
+   ════════════════════════════════════════════════════ */
+document.querySelectorAll('.sc-fb').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.sc-fb').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const filter = this.dataset.filter;
+        document.querySelectorAll('.sc-card').forEach(card => {
+            if (filter === 'all') card.style.display = '';
+            else if (filter === 'upcoming') card.style.display = (!card.classList.contains('past') && !card.classList.contains('cancelled')) ? '' : 'none';
+            else if (filter === 'past') card.style.display = (card.classList.contains('past') || card.classList.contains('cancelled')) ? '' : 'none';
+        });
+    });
+});
+
+const scSelectAllCb = document.getElementById('scSelectAllCb');
+const scBulkDelBtn = document.getElementById('scBulkDelBtn');
+
+function updateBulkDelBtn() {
+    const checked = document.querySelectorAll('.sc-check:checked');
+    if(scBulkDelBtn) {
+        scBulkDelBtn.disabled = checked.length === 0;
+        scBulkDelBtn.textContent = `🗑️ Hapus (${checked.length})`;
+    }
+}
+
+if (scSelectAllCb) {
+    scSelectAllCb.addEventListener('change', function() {
+        document.querySelectorAll('.sc-card').forEach(card => {
+            if(card.style.display !== 'none') {
+                const cb = card.querySelector('.sc-check');
+                if (cb) cb.checked = scSelectAllCb.checked;
+            }
+        });
+        updateBulkDelBtn();
+    });
+}
+
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.classList.contains('sc-check')) updateBulkDelBtn();
+});
+
+if (scBulkDelBtn) {
+    scBulkDelBtn.addEventListener('click', async function() {
+        const checked = document.querySelectorAll('.sc-check:checked');
+        if (checked.length === 0) return;
+        if (!await confirm2('Hapus Sekaligus', `Yakin mau hapus ${checked.length} kelas?`, '🗑️ Hapus', 'danger')) return;
+        
+        const ids = Array.from(checked).map(cb => parseInt(cb.value));
+        scBulkDelBtn.disabled = true;
+        scBulkDelBtn.textContent = 'Menghapus...';
+        
+        const r = await apiFetch('/teacher/schedule/bulk_delete', JSON.stringify({ids: ids}), 'application/json');
+        if (r && r.ok) {
+            ids.forEach(id => document.getElementById('sc-' + id)?.remove());
+            showToast(`✓ Berhasil menghapus ${r.deleted_ids.length} kelas`);
+            scSelectAllCb.checked = false;
+            updateBulkDelBtn();
+        } else {
+            scBulkDelBtn.disabled = false;
+            updateBulkDelBtn();
+        }
+    });
+}
+
+/* ════════════════════════════════════════════════════
+   FITUR BARU: DUPLICATE CLASS & EDIT ATTENDANCE TIME
+   ════════════════════════════════════════════════════ */
+function attachNewFeatures() {
+    // 1. Tombol Duplicate Class
+    document.querySelectorAll('.dup-sc-btn').forEach(btn => {
+        if (btn._hasDup) return; btn._hasDup = true;
+        btn.addEventListener('click', async function() {
+            ['title', 'link', 'desc', 'at'].forEach((key) => {
+                const mappedKey = key === 'at' ? 'scheduled_at' : (key === 'link' ? 'meet_link' : (key === 'desc' ? 'description' : 'title'));
+                const input = document.querySelector(`#scheduleForm [name="${mappedKey}"]`);
+                if (input) {
+                    let val = this.dataset[key] || '';
+                    if (key === 'title') val += ' (Copy)';
+                    input.value = val;
+                }
+            });
+
+            // Ambil daftar invite
+            const sid = this.dataset.id;
+            const r = await fetch('/teacher/schedule/invites/'+sid, {headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF}}).then(res=>res.json()).catch(()=>null);
+            
+            document.querySelectorAll('#scheduleForm .invite-item input[type=checkbox]').forEach(cb => {
+                cb.checked = r && r.invited_ids && r.invited_ids.includes(parseInt(cb.value));
+            });
+
+            document.getElementById('scheduleForm').scrollIntoView({behavior: 'smooth', block: 'center'});
+            
+            // Visual feedback
+            const formEl = document.getElementById('scheduleForm');
+            formEl.style.transition = 'box-shadow 0.3s';
+            formEl.style.boxShadow = '0 0 0 4px rgba(176,125,46,0.3)';
+            setTimeout(() => formEl.style.boxShadow = '', 800);
+            
+            showToast('Data kelas berhasil disalin! 📋');
+        });
+    });
+
+    // 2. Tombol Edit Waktu Attendance
+    document.querySelectorAll('.edit-attn-btn').forEach(btn => {
+        if (btn._hasEdit) return; btn._hasEdit = true;
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const id = this.dataset.id;
+            const dateIso = this.dataset.iso; 
+            
+            const dateObj = new Date(dateIso);
+            dateObj.setHours(dateObj.getHours() + 7); // Ubah UTC ke tampilan WIB
+            const localStr = dateObj.toISOString().slice(0, 16); 
+            
+            document.getElementById('editAttnDate').value = localStr;
+            const form = document.getElementById('editAttnForm');
+            form.action = '/teacher/edit_attendance/' + id;
+            document.getElementById('editAttnModal').classList.remove('hidden');
+        });
+    });
+}
+
+// Observer untuk element hasil AJAX
+const featureObserver = new MutationObserver((mutations) => {
+    mutations.forEach((m) => {
+        if (m.addedNodes.length > 0) attachNewFeatures();
+    });
+});
+featureObserver.observe(document.body, { childList: true, subtree: true });
+attachNewFeatures(); 
+
+// Logika Close & Save Edit Attendance Form
+document.getElementById('editAttnClose').onclick = () => document.getElementById('editAttnModal').classList.add('hidden');
+const editAttnForm = document.getElementById('editAttnForm');
+if (editAttnForm && !editAttnForm._ajaxBound) {
+    editAttnForm._ajaxBound = true;
+    ajaxForm(editAttnForm, function(data) {
+        document.getElementById('editAttnModal').classList.add('hidden');
+        if (data.ok) {
+            // Langsung reload record list di drawer progress-nya
+            const activeSid = document.getElementById('attnDrawer').dataset.openSid;
+            if (activeSid) document.querySelector(`.view-attn-btn[data-id="${activeSid}"]`)?.click(); 
+        }
+    });
+}
+
+/* ════════════════════════════════════════════════════
+   PAGE NAVIGATION (Asli dari kamu)
    ════════════════════════════════════════════════════ */
 const NAV = (function(){
   const KEY     = 'teacher_page';
@@ -619,7 +836,7 @@ const NAV = (function(){
 })();
 
 /* ════════════════════════════════════════════════════
-   SETTINGS
+   SETTINGS (Asli dari kamu)
    ════════════════════════════════════════════════════ */
 (function(){
   const form = document.getElementById('settingsForm');
@@ -651,7 +868,7 @@ const NAV = (function(){
 })();
 
 /* ════════════════════════════════════════════════════
-   SCHEDULE — CREATE
+   SCHEDULE — CREATE (Asli dari kamu)
    ════════════════════════════════════════════════════ */
 const clearSchedBtn = document.getElementById('clearScheduleDate');
 const schedAtInput = document.getElementById('scheduleAt');
@@ -750,7 +967,7 @@ function attachScBtns() {
 attachScBtns();
 
 /* ════════════════════════════════════════════════════
-   ATTENDANCE — ADD
+   ATTENDANCE — ADD (Asli dari kamu)
    ════════════════════════════════════════════════════ */
 {% if all_students %}
 (function(){
@@ -814,7 +1031,7 @@ function attachDelAttn(form) {
 document.querySelectorAll('.del-attn-form').forEach(attachDelAttn);
 
 /* ════════════════════════════════════════════════════
-   ATTENDANCE — VIEW / SEARCH / FILTERS
+   ATTENDANCE — VIEW / SEARCH / FILTERS (Asli dari kamu)
    ════════════════════════════════════════════════════ */
 const attnDrawer = document.getElementById('attnDrawer');
 const attnDrawerTitle = document.getElementById('attnDrawerTitle');
@@ -826,7 +1043,7 @@ const attnSearch      = document.getElementById('attnSearch');
 
 function applyAttnFilter() {
   const q      = (attnSearch?.value || '').toLowerCase().trim();
-  const active = document.querySelector('.afb.active')?.dataset.filter || 'all';
+  const active = document.querySelector('.attn-search-bar .afb.active')?.dataset.filter || 'all';
   const rows   = attnList.querySelectorAll('.attn-row');
   rows.forEach(row => {
     const text    = row.textContent.toLowerCase();
@@ -837,9 +1054,9 @@ function applyAttnFilter() {
   });
 }
 attnSearch?.addEventListener('input', applyAttnFilter);
-document.querySelectorAll('.afb').forEach(btn => {
+document.querySelectorAll('.attn-search-bar .afb').forEach(btn => {
   btn.addEventListener('click', function() {
-    document.querySelectorAll('.afb').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.attn-search-bar .afb').forEach(b => b.classList.remove('active'));
     this.classList.add('active');
     applyAttnFilter();
   });
@@ -852,7 +1069,7 @@ function attachViewAttn(btn) {
     const id   = this.dataset.id;
     const name = this.dataset.name;
     if (attnSearch) attnSearch.value = '';
-    document.querySelectorAll('.afb').forEach(b => b.classList.toggle('active', b.dataset.filter==='all'));
+    document.querySelectorAll('.attn-search-bar .afb').forEach(b => b.classList.toggle('active', b.dataset.filter==='all'));
     attnDrawerTitle.textContent = name;
     attnDrawerSub.textContent   = 'Loading…';
     attnList.innerHTML = '<div class="empty-inline">Loading records…</div>';
@@ -867,6 +1084,9 @@ function attachViewAttn(btn) {
       attnDrawerSub.textContent = `${r.total} total · ${r.unbilled} unbilled`;
       attnList.innerHTML = r.html;
       attnList.querySelectorAll('.del-attn-form').forEach(attachDelAttn);
+      
+      // Inject fitur baru karena HTML list baru saja dimuat
+      attachNewFeatures(); 
     } else {
       attnList.innerHTML = '<div class="empty-inline">Failed to load records.</div>';
     }
@@ -880,7 +1100,7 @@ attnDrawerClose.addEventListener('click', () => {
 });
 
 /* ════════════════════════════════════════════════════
-   FEE SETTINGS
+   FEE SETTINGS (Asli dari kamu)
    ════════════════════════════════════════════════════ */
 document.querySelectorAll('.fee-form').forEach(f => {
   f.addEventListener('submit', async function(e) {
@@ -903,7 +1123,7 @@ document.querySelectorAll('.fee-form').forEach(f => {
 });
 
 /* ════════════════════════════════════════════════════
-   RECEIPT MODAL LOGIC & EDIT TIME
+   RECEIPT MODAL LOGIC & EDIT TIME (Asli dari kamu)
    ════════════════════════════════════════════════════ */
 (function(){
   const overlay = document.getElementById('receiptModal');
