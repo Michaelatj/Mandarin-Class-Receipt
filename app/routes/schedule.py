@@ -16,7 +16,6 @@ from ..services.i18n import tr, fmt_date
 logger = logging.getLogger(__name__)
 schedule_bp = Blueprint("schedule", __name__)
 
-# ── Auth helpers ──────────────────────────────────────────
 def _user():
     return db.session.get(User, session.get("user_id"))
 
@@ -42,9 +41,7 @@ def teacher_required(f):
         return f(*a, **kw)
     return w
 
-# ── Helpers ───────────────────────────────────────────────
 def _enrich(schedules, viewer_id=None, viewer_role=None):
-    """Attach .joined_by, .already_joined, .invited_ids to each schedule."""
     for s in schedules:
         joins = ScheduleJoin.query.filter_by(schedule_id=s.id).all()
         s.joined_by   = {j.student_id for j in joins}
@@ -54,13 +51,8 @@ def _enrich(schedules, viewer_id=None, viewer_role=None):
         s.teacher_name = teacher.name() if teacher else "?"
         invites = ScheduleInvite.query.filter_by(schedule_id=s.id).all()
         s.invited_ids = {inv.student_id for inv in invites}
-        s.invite_all  = len(s.invited_ids) == 0  # empty = all students invited
+        s.invite_all  = len(s.invited_ids) == 0 
     return schedules
-
-
-# ════════════════════════════════════════════════════════
-#  TEACHER ROUTES
-# ════════════════════════════════════════════════════════
 
 @schedule_bp.route("/teacher/schedule/create", methods=["POST"])
 @teacher_required
@@ -81,16 +73,13 @@ def create():
         if _is_ajax(): return jsonify(ok=False, msg="Invalid date/time")
         flash("Invalid date/time", "err"); return redirect(url_for("teacher.dashboard"))
 
-    # Normalise Meet link
     if link and not link.startswith("http"):
         link = "https://" + link
 
-    s = Schedule(teacher_id=teacher.id, title=title,
-                 description=desc, meet_link=link, scheduled_at=dt)
+    s = Schedule(teacher_id=teacher.id, title=title, description=desc, meet_link=link, scheduled_at=dt)
     db.session.add(s)
-    db.session.flush()  # get s.id before commit
+    db.session.flush() 
 
-    # Save per-student invites
     invited_ids = request.form.getlist("invited_students")
     for sid_str in invited_ids:
         try:
@@ -100,9 +89,7 @@ def create():
             pass
 
     db.session.commit()
-    logger.info("Schedule #%d created by teacher %s (invites: %s)", s.id, teacher.name(), invited_ids)
 
-    # Build invited names for card display
     invited_names = []
     for sid_str in invited_ids:
         u = db.session.get(User, int(sid_str))
@@ -113,7 +100,6 @@ def create():
         return jsonify(ok=True, msg="Class scheduled!", card_html=card_html, schedule_id=s.id)
     flash("Class scheduled!", "ok")
     return redirect(url_for("teacher.dashboard"))
-
 
 @schedule_bp.route("/teacher/schedule/edit/<int:sid>", methods=["POST"])
 @teacher_required
@@ -136,7 +122,6 @@ def edit(sid):
     except ValueError:
         pass
 
-    # Update invited students
     ScheduleInvite.query.filter_by(schedule_id=sid).delete()
     for sid_str in request.form.getlist("invited_students"):
         try:
@@ -146,22 +131,15 @@ def edit(sid):
 
     db.session.commit()
     if _is_ajax():
-        # Return updated card fields so JS can update DOM without reload
         dt_fmt = s.scheduled_at.strftime("%a, %d %b %Y · %H:%M")
         at_iso = s.scheduled_at.strftime("%Y-%m-%dT%H:%M")
         invites = ScheduleInvite.query.filter_by(schedule_id=sid).all()
         invite_all = len(invites) == 0
-        return jsonify(ok=True, msg=tr("ok_saved"),
-                       schedule_id=sid,
-                       title=s.title,
-                       description=s.description or '',
-                       meet_link=s.meet_link or '',
-                       dt_fmt=dt_fmt,
-                       at_iso=at_iso,
-                       invite_all=invite_all)
+        return jsonify(ok=True, msg=tr("ok_saved"), schedule_id=sid, title=s.title,
+                       description=s.description or '', meet_link=s.meet_link or '',
+                       dt_fmt=dt_fmt, at_iso=at_iso, invite_all=invite_all)
     flash(tr("ok_saved"), "ok")
     return redirect(url_for("teacher.dashboard"))
-
 
 @schedule_bp.route("/teacher/schedule/cancel/<int:sid>", methods=["POST"])
 @teacher_required
@@ -176,7 +154,6 @@ def cancel(sid):
     if _is_ajax(): return jsonify(ok=True, msg="Class cancelled")
     flash("Class cancelled", "ok")
     return redirect(url_for("teacher.dashboard"))
-
 
 @schedule_bp.route("/teacher/schedule/delete/<int:sid>", methods=["POST"])
 @teacher_required
@@ -194,15 +171,29 @@ def delete(sid):
     flash(tr("ok_deleted"), "ok")
     return redirect(url_for("teacher.dashboard"))
 
-
-# ════════════════════════════════════════════════════════
-#  STUDENT ROUTES
-# ════════════════════════════════════════════════════════
+@schedule_bp.route("/teacher/schedule/bulk_delete", methods=["POST"])
+@teacher_required
+def bulk_delete():
+    teacher = _user()
+    data = request.get_json()
+    if not data or 'ids' not in data:
+        return jsonify(ok=False, msg="No IDs provided")
+    
+    ids = data['ids']
+    schedules = Schedule.query.filter(Schedule.id.in_(ids), Schedule.teacher_id==teacher.id).all()
+    valid_ids = [s.id for s in schedules]
+    
+    if valid_ids:
+        ScheduleJoin.query.filter(ScheduleJoin.schedule_id.in_(valid_ids)).delete(synchronize_session=False)
+        ScheduleInvite.query.filter(ScheduleInvite.schedule_id.in_(valid_ids)).delete(synchronize_session=False)
+        Schedule.query.filter(Schedule.id.in_(valid_ids)).delete(synchronize_session=False)
+        db.session.commit()
+        
+    return jsonify(ok=True, msg=f"Deleted {len(valid_ids)} classes", deleted_ids=valid_ids)
 
 @schedule_bp.route("/schedule/join/<int:sid>", methods=["POST"])
 @login_required
 def join(sid):
-    """Student clicks Join — opens Meet link AND auto-marks attendance."""
     student = _user()
     if not student or student.role != "student":
         if _is_ajax(): return jsonify(ok=False, msg="Not a student")
@@ -213,51 +204,33 @@ def join(sid):
         if _is_ajax(): return jsonify(ok=False, msg="Class not found or cancelled")
         return redirect(url_for("student.dashboard"))
 
-    # Prevent double-join per schedule
     existing = ScheduleJoin.query.filter_by(schedule_id=sid, student_id=student.id).first()
     if existing:
         if _is_ajax():
-            return jsonify(ok=True, already=True,
-                           meet_link=s.meet_link,
-                           msg="You already joined this class")
+            return jsonify(ok=True, already=True, meet_link=s.meet_link, msg="You already joined this class")
         return redirect(s.meet_link or url_for("student.dashboard"))
 
-    # Auto-mark attendance — store UTC now, display as WIB later
-    # add_attendance returns None if blocked by 90-min cooldown
-    att = add_attendance(student_id=student.id,
-                         teacher_id=s.teacher_id,
-                         date=datetime.utcnow(),
-                         note=f"Joined: {s.title}",
-                         source='join')
+    att = add_attendance(student_id=student.id, teacher_id=s.teacher_id,
+                         date=datetime.utcnow(), note=f"Joined: {s.title}", source='join')
 
-    # Even if cooldown blocked attendance, still record the join and open Meet
-    sj = ScheduleJoin(schedule_id=sid, student_id=student.id,
-                      attendance_id=att.id if att else None)
+    sj = ScheduleJoin(schedule_id=sid, student_id=student.id, attendance_id=att.id if att else None)
     db.session.add(sj)
     db.session.commit()
 
     cooldown_blocked = att is None
     msg = "Opening Meet…" if not cooldown_blocked else "Joining Meet (attendance already recorded in last 90 min)"
-    logger.info("Student %s joined schedule #%d (attendance=%s)", student.name(), sid,
-                "blocked by cooldown" if cooldown_blocked else "recorded")
 
     if _is_ajax():
         from ..models import Attendance as _Att
         unbilled_cnt   = _Att.query.filter_by(student_id=student.id, billed=False).count()
         total_sessions = _Att.query.filter_by(student_id=student.id).count()
-        return jsonify(ok=True, already=False,
-                       meet_link=s.meet_link,
-                       msg=msg,
-                       cooldown_blocked=cooldown_blocked,
-                       cycle_count=unbilled_cnt,
-                       total_sessions=total_sessions)
+        return jsonify(ok=True, already=False, meet_link=s.meet_link, msg=msg,
+                       cooldown_blocked=cooldown_blocked, cycle_count=unbilled_cnt, total_sessions=total_sessions)
     if s.meet_link:
         return redirect(s.meet_link)
     flash("Attendance marked!", "ok")
     return redirect(url_for("student.dashboard"))
 
-
-# ── Internal HTML renderer (for AJAX card injection) ─────
 def _render_schedule_card_teacher(s, teacher, invited_names=None):
     dt      = s.scheduled_at
     now     = datetime.utcnow()
@@ -268,54 +241,55 @@ def _render_schedule_card_teacher(s, teacher, invited_names=None):
 
     desc_html   = '<div class="sc-desc">'  + s.description + '</div>' if s.description else ''
     link_html   = '<div class="sc-link">🔗 <a href="' + s.meet_link + '" target="_blank" rel="noopener">' + s.meet_link + '</a></div>' if s.meet_link else ''
-    invite_html = ''
-    if invited_names:
-        invite_html = '<span class="sc-invites">🎯 Specific students only</span>'
+    
+    if invited_names is not None:
+        invite_html = '<span class="sc-invites specific">🎯 Specific students only</span>'
     else:
-        invite_html = '<span class="sc-invites open">🌐 All students</span>'
+        inv_count = ScheduleInvite.query.filter_by(schedule_id=s.id).count()
+        invite_html = '<span class="sc-invites specific">🎯 Specific students only</span>' if inv_count > 0 else '<span class="sc-invites open">🌐 All students</span>'
 
     action_btns = ''
     if not s.cancelled and not is_past:
         action_btns = (
-            '<button class="btn bgh bsm edit-sc-btn"'
-            ' data-id="'    + str(s.id)   + '"'
-            ' data-title="' + s.title     + '"'
-            ' data-desc="'  + (s.description or '') + '"'
-            ' data-link="'  + (s.meet_link or '')   + '"'
-            ' data-at="'    + at_iso      + '">✏️ Edit</button>'
-            '<button class="btn bdel-outline bsm cancel-sc-btn" data-id="' + str(s.id) + '">✕ Cancel</button>'
+            f'<button class="btn bgh bsm edit-sc-btn" data-id="{s.id}" data-title="{s.title}" data-desc="{s.description or ""}"'
+            f' data-link="{s.meet_link or ""}" data-at="{at_iso}">✏️ Edit</button>'
+            f'<button class="btn bdel-outline bsm cancel-sc-btn" data-id="{s.id}">✕ Cancel</button>'
         )
-    action_btns += '<button class="btn bdel bsm delete-sc-btn" data-id="' + str(s.id) + '">🗑</button>'
+    
+    # Tambah Duplicate button
+    action_btns += (
+        f'<button class="btn bgh bsm dup-sc-btn" data-id="{s.id}" data-title="{s.title}"'
+        f' data-desc="{s.description or ""}" data-link="{s.meet_link or ""}" data-at="{at_iso}">📋 Duplicate</button>'
+        f'<button class="btn bdel bsm delete-sc-btn" data-id="{s.id}">🗑</button>'
+    )
 
     badge_label = 'CANCELLED' if s.cancelled else ('ENDED' if is_past else 'UPCOMING')
 
-    return (
-        '<div class="sc-card ' + status + '" id="sc-' + str(s.id) + '">'
-        '<div class="sc-head">'
-        '<div style="min-width:0;flex:1">'
-        '<div class="sc-title">' + s.title + '</div>'
-        '<div class="sc-time">📅 ' + dt_fmt + '</div>'
-        '</div>'
-        '<span class="sc-badge ' + status + '">' + badge_label + '</span>'
-        '</div>'
-        + desc_html + link_html +
-        '<div class="sc-foot">'
-        '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">'
-        '<span class="sc-joined">👥 0 students joined</span>'
-        + invite_html +
-        '</div>'
-        '<div style="display:flex;gap:7px;flex-shrink:0">'
-        + action_btns +
-        '</div>'
-        '</div>'
-        '</div>'
-    )
+    # Checkbox untuk select
+    checkbox_html = f'<input type="checkbox" class="sc-check" value="{s.id}" style="width:16px;height:16px;cursor:pointer;accent-color:var(--red);margin-top:2px;">'
 
+    return (
+        f'<div class="sc-card {status}" id="sc-{s.id}">'
+        f'<div class="sc-head">'
+        f'<div style="display:flex;gap:12px;flex:1;min-width:0;">'
+        f'{checkbox_html}'
+        f'<div style="min-width:0;flex:1">'
+        f'<div class="sc-title">{s.title}</div>'
+        f'<div class="sc-time">📅 {dt_fmt}</div>'
+        f'</div></div>'
+        f'<span class="sc-badge {status}">{badge_label}</span>'
+        f'</div>{desc_html}{link_html}'
+        f'<div class="sc-foot">'
+        f'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">'
+        f'<span class="sc-joined">👥 {getattr(s, "join_count", 0)} students joined</span>'
+        f'{invite_html}</div>'
+        f'<div style="display:flex;gap:7px;flex-shrink:0;flex-wrap:wrap;">{action_btns}</div>'
+        f'</div></div>'
+    )
 
 @schedule_bp.route("/teacher/schedule/invites/<int:sid>", methods=["GET"])
 @teacher_required
 def get_invites(sid):
-    """Return current invited student IDs for a schedule (for edit modal)."""
     teacher = _user()
     s = Schedule.query.filter_by(id=sid, teacher_id=teacher.id).first()
     if not s:
