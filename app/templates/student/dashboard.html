@@ -249,45 +249,31 @@
     </button>
   </nav>
 
-</div>
-<!-- 💸 PAYMENT REMINDER POP-UP -->
-{% if unpaid_receipts and unpaid_receipts|length > 0 %}
-<div class="modal-overlay hidden" id="paymentReminderModal" style="z-index: 9999; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);">
-  <div class="modal-box card" style="background: #fff; text-align: center; padding: 40px 24px; border-radius: 12px; max-width: 320px; position: relative;">
-    <button class="modal-close" id="closeReminderBtn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text3);">✕</button>
-    
-    <div style="font-size: 3.5rem; margin-bottom: 12px;">👋</div>
-    <h3 style="margin-bottom: 12px; color: var(--text);">Friendly Reminder</h3>
-    <p style="color: var(--text2); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px;">
-      Hi <strong>{{ user.name() }}</strong>, it looks like you have an unpaid tuition fee. Please complete your payment at your earliest convenience so we can continue our awesome learning journey together! 📚✨
-    </p>
-    <button class="btn bg" id="ackReminderBtn" style="width: 100%; padding: 12px; border-radius: 8px;">Okay, I'll check it!</button>
+  {% if unpaid_count > 0 %}
+  <div class="modal-overlay hidden" id="paymentReminderModal" style="z-index: 9999; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);">
+    <div class="modal-box card" style="background: #fff; text-align: center; padding: 40px 24px; border-radius: 12px; max-width: 320px; position: relative;">
+      <button class="modal-close" id="closeReminderBtn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text3);">✕</button>
+      
+      <div style="font-size: 3.5rem; margin-bottom: 12px;">👋</div>
+      <h3 style="margin-bottom: 12px; color: var(--text);">Friendly Reminder</h3>
+      <p style="color: var(--text2); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px;">
+        Hi <strong>{{ user.name() }}</strong>, it looks like you have an unpaid tuition fee. Please complete your payment at your earliest convenience so we can continue our awesome learning journey together! 📚✨
+      </p>
+      <button class="btn bg" id="ackReminderBtn" style="width: 100%; padding: 12px; border-radius: 8px;">Okay, I'll check it!</button>
+    </div>
   </div>
-</div>
+  {% endif %}
 
-{% if unpaid_count > 0 %}
-<div class="modal-overlay hidden" id="paymentReminderModal" style="z-index: 9999; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);">
-  <div class="modal-box card" style="background: #fff; text-align: center; padding: 40px 24px; border-radius: 12px; max-width: 320px; position: relative;">
-    <button class="modal-close" id="closeReminderBtn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text3);">✕</button>
-    
-    <div style="font-size: 3.5rem; margin-bottom: 12px;">👋</div>
-    <h3 style="margin-bottom: 12px; color: var(--text);">Friendly Reminder</h3>
-    <p style="color: var(--text2); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px;">
-      Hi <strong>{{ user.name() }}</strong>, it looks like you have an unpaid tuition fee. Please complete your payment at your earliest convenience so we can continue our awesome learning journey together! 📚✨
-    </p>
-    <button class="btn bg" id="ackReminderBtn" style="width: 100%; padding: 12px; border-radius: 8px;">Okay, I'll check it!</button>
+  {# ═══ RECEIPT MODAL ═══ #}
+  <div class="rm-overlay hidden" id="receiptModal">
+    <div class="rm-box">
+      <button class="rm-close" id="receiptModalClose" aria-label="Close">✕</button>
+      <div id="receiptModalBox"></div>
+    </div>
   </div>
-</div>
-{% endif %} {# ═══ RECEIPT MODAL ═══ #}
-<div class="rm-overlay hidden" id="receiptModal">
-  <div class="rm-box">
-    <button class="rm-close" id="receiptModalClose" aria-label="Close">✕</button>
-    <div id="receiptModalBox"></div>
-  </div>
+
 </div>
 {% endblock %}
-
-{% block page_scripts %}
 
 {% block page_scripts %}
 <script>
@@ -387,7 +373,7 @@ ajaxForm(document.getElementById('changePwForm'), null);
         const newName = form.querySelector('[name="display_name"]').value.trim();
         if (newName) {
           document.querySelectorAll('.sidebar-name').forEach(el => el.textContent = newName);
-        document.querySelectorAll('.sidebar-avatar').forEach(el => el.textContent = newName.charAt(0).toUpperCase());
+          document.querySelectorAll('.sidebar-avatar').forEach(el => el.textContent = newName.charAt(0).toUpperCase());
         }
       } else {
         showToast(data.msg || 'Error saving profile', 'err');
@@ -576,36 +562,19 @@ function attachCardClick(card) {
 }
 document.querySelectorAll('#receiptList .rc-card').forEach(attachCardClick);
 
-  document.addEventListener("DOMContentLoaded", function() {
-    // Cek apakah pop-up sudah pernah ditutup di sesi login ini
-    if (!sessionStorage.getItem('paymentReminderSeen')) {
-      const modal = document.getElementById('paymentReminderModal');
-      modal.classList.remove('hidden');
-      
-      // Fungsi untuk menutup modal & set flag di sessionStorage
-      const closeModal = () => {
-        modal.classList.add('hidden');
-        sessionStorage.setItem('paymentReminderSeen', 'true');
-      };
-      
-      document.getElementById('closeReminderBtn').addEventListener('click', closeModal);
-      document.getElementById('ackReminderBtn').addEventListener('click', closeModal);
-    }
-  });
-  document.addEventListener("DOMContentLoaded", function() {
-    const modal = document.getElementById('paymentReminderModal');
-    // Hanya jalan kalau ada modal (ada tagihan) DAN belum pernah dilihat
-    if (modal && !sessionStorage.getItem('paymentReminderSeen')) {
-      modal.classList.remove('hidden');
-      
-      const closeModal = () => {
-        modal.classList.add('hidden');
-        sessionStorage.setItem('paymentReminderSeen', 'true');
-      };
-      
-      document.getElementById('closeReminderBtn').addEventListener('click', closeModal);
-      document.getElementById('ackReminderBtn').addEventListener('click', closeModal);
-    }
+document.addEventListener("DOMContentLoaded", function() {
+  const modal = document.getElementById('paymentReminderModal');
+  if (modal && !sessionStorage.getItem('paymentReminderSeen')) {
+    modal.classList.remove('hidden');
+    
+    const closeModal = () => {
+      modal.classList.add('hidden');
+      sessionStorage.setItem('paymentReminderSeen', 'true');
+    };
+    
+    document.getElementById('closeReminderBtn').addEventListener('click', closeModal);
+    document.getElementById('ackReminderBtn').addEventListener('click', closeModal);
+  }
 });
 </script>
 {% endblock %}
