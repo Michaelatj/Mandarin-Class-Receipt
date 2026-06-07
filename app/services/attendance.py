@@ -34,47 +34,50 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
         billed=False
     ).order_by(Attendance.date.asc()).all()
     
-    # Selama jumlah absen yang belum ditagih >= 8 (CYCLE_SIZE), buat struk!
-    while len(unbilled_attendances) >= CYCLE_SIZE:
-        # Ambil 8 absen pertama dari daftar yang belum ditagih
-        cycle_classes = unbilled_attendances[:CYCLE_SIZE]
-        
-        # Tarik data biaya
-        fee_override = StudentFee.query.filter_by(teacher_id=teacher_id, student_id=student_id).first()
-        teacher = User.query.get(teacher_id)
-        fee_amount = fee_override.fee_idr if fee_override else (teacher.fee_idr if teacher else 0)
-        student = User.query.get(student_id)
-        
-        # Buat receipt
+    if not unbilled_attendances:
+        return new_receipts
+
+    # Tarik data biaya dan data guru
+    fee_override = StudentFee.query.filter_by(teacher_id=teacher_id, student_id=student_id).first()
+    teacher = User.query.get(teacher_id)
+    fee_amount = fee_override.fee_idr if fee_override else (teacher.fee_idr if teacher else 0)
+    student = User.query.get(student_id)
+    
+    # Ambil info bank guru untuk isi field wajib
+    t_bank_acc = teacher.bank_account if teacher and teacher.bank_account else "N/A"
+    t_bank_name = teacher.bank_name if teacher and teacher.bank_name else "N/A"
+    
+    def _create_receipt(cycle_classes):
         receipt = Receipt(
             student_id=student_id,
             student_name=student.name() if student else "Unknown",
             teacher_id=teacher_id,
             teacher_name=teacher.name() if teacher else "Unknown",
             total_fee=fee_amount,
+            bank_account=t_bank_acc,  # Diisi biar tidak error NotNull
+            bank_name=t_bank_name,    # Diisi biar tidak error NotNull
             raw_dates="|".join([cls.date.isoformat() for cls in cycle_classes]),
             issue_date=datetime.utcnow(),
             paid=False
         )
         db.session.add(receipt)
-        
-        # Tandai absen sebagai sudah dibayar/ditagih (PENTING!)
+        # Tandai absen sebagai sudah ditagih
         for cls in cycle_classes:
             cls.billed = True
-        
-        new_receipts.append(receipt)
-        
-        # Kurangi list unbilled_attendances untuk putaran loop berikutnya
+        return receipt
+
+    # Selama jumlah absen yang belum ditagih >= 8 (CYCLE_SIZE), buat struk!
+    while len(unbilled_attendances) >= CYCLE_SIZE:
+        cycle_classes = unbilled_attendances[:CYCLE_SIZE]
+        new_receipts.append(_create_receipt(cycle_classes))
         unbilled_attendances = unbilled_attendances[CYCLE_SIZE:]
             
     return new_receipts
 
 def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str = "", source: str = "teacher") -> Attendance:
     """
-    Menambahkan kehadiran dengan toleransi waktu 60 detik
-    agar tidak terjadi error duplikasi yang tidak perlu.
+    Menambahkan kehadiran dengan toleransi waktu 60 detik.
     """
-    # Toleransi: cari record yang ada di rentang waktu 60 detik dari waktu input
     start_time = date - timedelta(seconds=30)
     end_time = date + timedelta(seconds=30)
     
@@ -86,8 +89,6 @@ def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str =
     ).first()
     
     if existing:
-        # Daripada raise ValueError yang bikin app crash (error 500),
-        # kita return record yang sudah ada saja (atau kamu bisa sesuaikan logikanya)
         return existing
     
     attn = Attendance(
