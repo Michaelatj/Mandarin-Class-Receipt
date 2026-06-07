@@ -576,5 +576,28 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('ackReminderBtn').addEventListener('click', closeModal);
   }
 });
+  document.addEventListener("DOMContentLoaded", function() {
+    const modal = document.getElementById('paymentReminderModal');
+    if (!modal) return; // Kalau modal nggak ada, stop script
+
+    // Cek apakah sudah pernah dilihat
+    if (sessionStorage.getItem('paymentReminderSeen')) {
+        modal.classList.add('hidden');
+    }
+
+    const closeModal = () => {
+        modal.classList.add('hidden');
+        sessionStorage.setItem('paymentReminderSeen', 'true');
+    };
+
+    // Tambahkan event listener dengan pengecekan
+    document.getElementById('closeReminderBtn')?.addEventListener('click', closeModal);
+    document.getElementById('ackReminderBtn')?.addEventListener('click', closeModal);
+    
+    // Klik di luar modal juga buat nutup
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+});
 </script>
 {% endblock %}
