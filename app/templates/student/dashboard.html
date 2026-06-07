@@ -594,5 +594,20 @@ document.querySelectorAll('#receiptList .rc-card').forEach(attachCardClick);
       document.getElementById('ackReminderBtn').addEventListener('click', closeModal);
     }
   });
+  document.addEventListener("DOMContentLoaded", function() {
+    const modal = document.getElementById('paymentReminderModal');
+    // Hanya jalan kalau ada modal (ada tagihan) DAN belum pernah dilihat
+    if (modal && !sessionStorage.getItem('paymentReminderSeen')) {
+      modal.classList.remove('hidden');
+      
+      const closeModal = () => {
+        modal.classList.add('hidden');
+        sessionStorage.setItem('paymentReminderSeen', 'true');
+      };
+      
+      document.getElementById('closeReminderBtn').addEventListener('click', closeModal);
+      document.getElementById('ackReminderBtn').addEventListener('click', closeModal);
+    }
+});
 </script>
 {% endblock %}
