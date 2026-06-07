@@ -27,62 +27,66 @@ def get_student_progress(teacher_id: int) -> list[dict]:
 def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
     new_receipts = []
     
-    # Ambil HANYA absensi yang belum ditagih (billed=False)
-    unbilled_attendances = Attendance.query.filter_by(
-        student_id=student_id, 
-        teacher_id=teacher_id, 
-        billed=False
+    # 1. Ambil data unbilled
+    unbilled = Attendance.query.filter_by(
+        student_id=student_id, teacher_id=teacher_id, billed=False
     ).order_by(Attendance.date.asc()).all()
     
-    # --- DEBUG LOG ---
-    print(f"DEBUG: Checking receipts for Student ID: {student_id}")
-    print(f"DEBUG: Found {len(unbilled_attendances)} unbilled attendances.")
-    # -----------------
+    if not unbilled:
+        return new_receipts
     
-    # Selama jumlah absen yang belum ditagih >= 8 (CYCLE_SIZE), buat struk!
-    while len(unbilled_attendances) >= CYCLE_SIZE:
-        print("DEBUG: Condition met (>=8 classes), generating receipt...")
-        
-        cycle_classes = unbilled_attendances[:CYCLE_SIZE]
-        
-        # Tarik data biaya
-        fee_override = StudentFee.query.filter_by(teacher_id=teacher_id, student_id=student_id).first()
-        teacher = User.query.get(teacher_id)
-        fee_amount = fee_override.fee_idr if fee_override else (teacher.fee_idr if teacher else 0)
-        student = User.query.get(student_id)
-        
-        # Ambil info bank guru
-        t_bank_acc = teacher.bank_account if teacher and teacher.bank_account else "N/A"
-        t_bank_name = teacher.bank_name if teacher and teacher.bank_name else "N/A"
+    # 2. Ambil data tarif dan tipe paket
+    fee_obj = StudentFee.query.filter_by(teacher_id=teacher_id, student_id=student_id).first()
+    teacher = User.query.get(teacher_id)
+    
+    # Default fee jika tidak ada override
+    base_fee = fee_obj.fee_idr if fee_obj else (teacher.fee_idr if teacher else 0)
+    packet_type = fee_obj.packet_type if fee_obj else 'session'
+    
+    # Info bank guru
+    t_bank_acc = teacher.bank_account or "N/A"
+    t_bank_name = teacher.bank_name or "N/A"
+    student = User.query.get(student_id)
 
-        # Buat receipt
-        receipt = Receipt(
-            student_id=student_id,
-            student_name=student.name() if student else "Unknown",
-            teacher_id=teacher_id,
-            teacher_name=teacher.name() if teacher else "Unknown",
-            total_fee=fee_amount,
-            bank_account=t_bank_acc,
-            bank_name=t_bank_name,
-            raw_dates="|".join([cls.date.isoformat() for cls in cycle_classes]),
-            issue_date=datetime.utcnow(),
-            paid=False
-        )
-        db.session.add(receipt)
-        
-        # Tandai absen sebagai sudah ditagih
-        for cls in cycle_classes:
-            cls.billed = True
-        
-        new_receipts.append(receipt)
-        unbilled_attendances = unbilled_attendances[CYCLE_SIZE:]
+    # 3. Logika Billing
+    if packet_type == 'session':
+        # Bills every 8 sessions
+        while len(unbilled) >= CYCLE_SIZE:
+            cycle = unbilled[:CYCLE_SIZE]
+            # MATH FIX: Session * Fee
+            total = len(cycle) * base_fee 
             
+            receipt = Receipt(
+                student_id=student_id, student_name=student.name(),
+                teacher_id=teacher_id, teacher_name=teacher.name(),
+                total_fee=total, bank_account=t_bank_acc, bank_name=t_bank_name,
+                raw_dates="|".join([cls.date.isoformat() for cls in cycle]),
+                issue_date=datetime.utcnow(), paid=False
+            )
+            db.session.add(receipt)
+            for cls in cycle: cls.billed = True
+            new_receipts.append(receipt)
+            unbilled = unbilled[CYCLE_SIZE:]
+
+    elif packet_type == 'monthly':
+        # Bills if >= 30 days since first attendance in the unbilled list
+        first_date = unbilled[0].date
+        if (datetime.utcnow() - first_date).days >= 30:
+            total = base_fee # Flat fee
+            receipt = Receipt(
+                student_id=student_id, student_name=student.name(),
+                teacher_id=teacher_id, teacher_name=teacher.name(),
+                total_fee=total, bank_account=t_bank_acc, bank_name=t_bank_name,
+                raw_dates="|".join([cls.date.isoformat() for cls in unbilled]),
+                issue_date=datetime.utcnow(), paid=False
+            )
+            db.session.add(receipt)
+            for cls in unbilled: cls.billed = True
+            new_receipts.append(receipt)
+
     return new_receipts
 
 def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str = "", source: str = "teacher") -> Attendance:
-    """
-    Menambahkan kehadiran dengan toleransi waktu 60 detik.
-    """
     start_time = date - timedelta(seconds=30)
     end_time = date + timedelta(seconds=30)
     
@@ -97,16 +101,13 @@ def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str =
         return existing
     
     attn = Attendance(
-        student_id=student_id,
-        teacher_id=teacher_id,
-        date=date,
-        note=note,
-        source=source,
-        billed=False
+        student_id=student_id, teacher_id=teacher_id,
+        date=date, note=note, source=source, billed=False
     )
     db.session.add(attn)
     db.session.commit()
     
+    # Memicu logic generate
     generate_receipts(student_id, teacher_id)
     db.session.commit()
     
