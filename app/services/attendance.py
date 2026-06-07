@@ -34,42 +34,47 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
         billed=False
     ).order_by(Attendance.date.asc()).all()
     
-    if not unbilled_attendances:
-        return new_receipts
+    # --- DEBUG LOG ---
+    print(f"DEBUG: Checking receipts for Student ID: {student_id}")
+    print(f"DEBUG: Found {len(unbilled_attendances)} unbilled attendances.")
+    # -----------------
+    
+    # Selama jumlah absen yang belum ditagih >= 8 (CYCLE_SIZE), buat struk!
+    while len(unbilled_attendances) >= CYCLE_SIZE:
+        print("DEBUG: Condition met (>=8 classes), generating receipt...")
+        
+        cycle_classes = unbilled_attendances[:CYCLE_SIZE]
+        
+        # Tarik data biaya
+        fee_override = StudentFee.query.filter_by(teacher_id=teacher_id, student_id=student_id).first()
+        teacher = User.query.get(teacher_id)
+        fee_amount = fee_override.fee_idr if fee_override else (teacher.fee_idr if teacher else 0)
+        student = User.query.get(student_id)
+        
+        # Ambil info bank guru
+        t_bank_acc = teacher.bank_account if teacher and teacher.bank_account else "N/A"
+        t_bank_name = teacher.bank_name if teacher and teacher.bank_name else "N/A"
 
-    # Tarik data biaya dan data guru
-    fee_override = StudentFee.query.filter_by(teacher_id=teacher_id, student_id=student_id).first()
-    teacher = User.query.get(teacher_id)
-    fee_amount = fee_override.fee_idr if fee_override else (teacher.fee_idr if teacher else 0)
-    student = User.query.get(student_id)
-    
-    # Ambil info bank guru untuk isi field wajib
-    t_bank_acc = teacher.bank_account if teacher and teacher.bank_account else "N/A"
-    t_bank_name = teacher.bank_name if teacher and teacher.bank_name else "N/A"
-    
-    def _create_receipt(cycle_classes):
+        # Buat receipt
         receipt = Receipt(
             student_id=student_id,
             student_name=student.name() if student else "Unknown",
             teacher_id=teacher_id,
             teacher_name=teacher.name() if teacher else "Unknown",
             total_fee=fee_amount,
-            bank_account=t_bank_acc,  # Diisi biar tidak error NotNull
-            bank_name=t_bank_name,    # Diisi biar tidak error NotNull
+            bank_account=t_bank_acc,
+            bank_name=t_bank_name,
             raw_dates="|".join([cls.date.isoformat() for cls in cycle_classes]),
             issue_date=datetime.utcnow(),
             paid=False
         )
         db.session.add(receipt)
+        
         # Tandai absen sebagai sudah ditagih
         for cls in cycle_classes:
             cls.billed = True
-        return receipt
-
-    # Selama jumlah absen yang belum ditagih >= 8 (CYCLE_SIZE), buat struk!
-    while len(unbilled_attendances) >= CYCLE_SIZE:
-        cycle_classes = unbilled_attendances[:CYCLE_SIZE]
-        new_receipts.append(_create_receipt(cycle_classes))
+        
+        new_receipts.append(receipt)
         unbilled_attendances = unbilled_attendances[CYCLE_SIZE:]
             
     return new_receipts
