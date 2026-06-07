@@ -96,13 +96,21 @@ def manual_add_attendance():
     student_id = request.form.get("student_id", type=int)
     note = request.form.get("note", "").strip()
     date_str = request.form.get("date", "")
-    try:
-        dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M")
-    except ValueError:
-        dt = datetime.utcnow()
     
+    dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M") if date_str else datetime.utcnow()
+    
+    # 1. Add attendance
     add_attendance(student_id=student_id, teacher_id=teacher.id, date=dt, note=note, source='teacher')
-    return jsonify(ok=True, msg=tr("ok_attn")) if _is_ajax() else redirect(url_for("teacher.dashboard"))
+    
+    # 2. Ambil data terbaru untuk update UI
+    progress = get_student_progress(teacher.id)
+    
+    # 3. Kembalikan data JSON agar frontend bisa update otomatis
+    return jsonify(
+        ok=True, 
+        msg=tr("ok_attn"),
+        progress_html=render_template("teacher/partials/progress_list.html", progress=progress)
+    )
 
 @teacher_bp.route("/teacher/delete_attendance/<int:att_id>", methods=["POST"])
 @teacher_required
