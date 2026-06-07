@@ -91,11 +91,24 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
 
 def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str = "", source: str = "teacher") -> Attendance:
     """
-    Menambahkan kehadiran dan otomatis memicu logic struk/tagihan.
+    Menambahkan kehadiran dengan toleransi waktu 60 detik
+    agar tidak terjadi error duplikasi yang tidak perlu.
     """
-    existing = Attendance.query.filter_by(student_id=student_id, teacher_id=teacher_id, date=date).first()
+    # Toleransi: cari record yang ada di rentang waktu 60 detik dari waktu input
+    start_time = date - timedelta(seconds=30)
+    end_time = date + timedelta(seconds=30)
+    
+    existing = Attendance.query.filter(
+        Attendance.student_id == student_id,
+        Attendance.teacher_id == teacher_id,
+        Attendance.date >= start_time,
+        Attendance.date <= end_time
+    ).first()
+    
     if existing:
-        raise ValueError("Kehadiran sudah tercatat untuk waktu ini")
+        # Daripada raise ValueError yang bikin app crash (error 500),
+        # kita return record yang sudah ada saja (atau kamu bisa sesuaikan logikanya)
+        return existing
     
     attn = Attendance(
         student_id=student_id,
@@ -106,10 +119,10 @@ def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str =
         billed=False
     )
     db.session.add(attn)
-    db.session.commit() # Penting: Commit absen dulu biar masuk daftar `unbilled`
+    db.session.commit()
     
     generate_receipts(student_id, teacher_id)
-    db.session.commit() # Commit struk jika fungsi di atas berhasil buat struk baru
+    db.session.commit()
     
     return attn
 
