@@ -26,37 +26,72 @@ def get_student_progress(teacher_id: int) -> list[dict]:
 
 def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
     new_receipts = []
+    
+    # Ambil semua data absensi murid ini yang belum ditagih
+    unbilled = Attendance.query.filter_by(
+        student_id=student_id, teacher_id=teacher_id, billed=False
+    ).order_by(Attendance.date.asc()).all()
+    
+    if not unbilled:
+        return new_receipts
+
+    # Tarik data biaya dan tipe paket
     fee_override = StudentFee.query.filter_by(teacher_id=teacher_id, student_id=student_id).first()
     teacher = User.query.get(teacher_id)
     fee_amount = fee_override.fee_idr if fee_override else (teacher.fee_idr if teacher else 0)
+    packet_type = getattr(fee_override, 'packet_type', 'session') if fee_override else 'session'
     
-    attendances = Attendance.query.filter_by(student_id=student_id, teacher_id=teacher_id).order_by(Attendance.date).all()
-    total_classes = len(attendances)
-    existing_receipts = Receipt.query.filter_by(student_id=student_id, teacher_id=teacher.id).count()
-    expected_receipts = total_classes // CYCLE_SIZE
-    
-    while existing_receipts < expected_receipts:
-        cycle_start_idx = existing_receipts * CYCLE_SIZE
-        cycle_classes = attendances[cycle_start_idx:cycle_start_idx + CYCLE_SIZE]
-        if len(cycle_classes) == CYCLE_SIZE:
-            student = User.query.get(student_id)
-            receipt = Receipt(
-                student_id=student_id,
-                student_name=student.name() if student else "Unknown",
-                teacher_id=teacher_id,
-                teacher_name=teacher.name() if teacher else "Unknown",
-                total_fee=fee_amount,
-                raw_dates="|".join([cls.date.isoformat() for cls in cycle_classes]),
-                issue_date=datetime.utcnow()
-            )
-            db.session.add(receipt)
-            new_receipts.append(receipt)
-            existing_receipts += 1
+    def _create_receipt(cycle_classes):
+        student = User.query.get(student_id)
+        receipt = Receipt(
+            student_id=student_id,
+            student_name=student.name() if student else "Unknown",
+            teacher_id=teacher_id,
+            teacher_name=teacher.name() if teacher else "Unknown",
+            total_fee=fee_amount,
+            raw_dates="|".join([cls.date.isoformat() for cls in cycle_classes]),
+            issue_date=datetime.utcnow(),
+            paid=False
+        )
+        db.session.add(receipt)
+        # Tandai semua absen dalam putaran ini sebagai sudah ditagih
+        for cls in cycle_classes:
+            cls.billed = True
+        return receipt
+
+    # ==== LOGIKA BILLING ====
+    if packet_type == 'session':
+        # Tiap 8 pertemuan, jadikan 1 struk
+        while len(unbilled) >= CYCLE_SIZE:
+            cycle_classes = unbilled[:CYCLE_SIZE]
+            unbilled = unbilled[CYCLE_SIZE:]
+            new_receipts.append(_create_receipt(cycle_classes))
+
+    elif packet_type == 'monthly':
+        # Hitung jarak 30 hari dari absen pertama yang belum ditagih
+        while unbilled:
+            first_date = unbilled[0].date
+            last_date = unbilled[-1].date
+            
+            # Jika sudah mencapai 30 hari atau lebih
+            if (last_date - first_date).days >= 30:
+                # Kumpulkan semua absen yang masuk dalam rentang kurang dari 30 hari
+                cycle_classes = [a for a in unbilled if (a.date - first_date).days < 30]
+                
+                # Sisa absen yang ada di hari ke-30 atau lebih (termasuk last_date), jadi cycle bulan depan
+                unbilled = [a for a in unbilled if a not in cycle_classes]
+                
+                # Buat struk untuk satu bulan tersebut
+                new_receipts.append(_create_receipt(cycle_classes))
+            else:
+                # Jika hari ini belum mencapai 30 hari, keluar dari loop (jangan buat struk dulu)
+                break
+                
     return new_receipts
 
 def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str = "", source: str = "teacher") -> Attendance:
     """
-    Menambahkan kehadiran. Argumen sudah disesuaikan agar sesuai dengan teacher.py
+    Menambahkan kehadiran dan otomatis memicu logic struk/tagihan.
     """
     existing = Attendance.query.filter_by(student_id=student_id, teacher_id=teacher_id, date=date).first()
     if existing:
@@ -67,13 +102,14 @@ def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str =
         teacher_id=teacher_id,
         date=date,
         note=note,
-        source=source
+        source=source,
+        billed=False
     )
     db.session.add(attn)
-    db.session.commit() # Penting: Commit di sini agar data tersimpan
+    db.session.commit() # Penting: Commit absen dulu biar masuk daftar `unbilled`
     
     generate_receipts(student_id, teacher_id)
-    db.session.commit() # Commit receipt jika ada
+    db.session.commit() # Commit struk jika fungsi di atas berhasil buat struk baru
     
     return attn
 
