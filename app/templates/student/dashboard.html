@@ -544,27 +544,25 @@ const DZ=['星期一','星期二','星期三','星期四','星期五','星期六
 function buildRcModal(card) {
   const lang = document.documentElement.lang||'en';
   const paid = card.dataset.paid==='1';
-  const fee  = 'Rp '+parseInt(card.dataset.fee||0).toLocaleString('id-ID');
-  const dates = (card.dataset.dates||'').split('|').filter(Boolean).map((raw,i)=>{
-    const dt  = new Date(raw.endsWith('Z')?raw:raw+'Z');
-    const dow = dt.getDay()===0?6:dt.getDay()-1;
-    const t   = String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
-    const day  = lang==='zh'?DZ[dow]:DA[dow];
-    const date = lang==='zh'?`${dt.getFullYear()}年${MZ[dt.getMonth()]}月${dt.getDate()}日`:`${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}`;
-    return `<div class="rm-date-item"><span class="rc-date-num">#${i+1}</span><span class="rc-date-day">${day}</span><span class="rc-date-main">${date}</span><span class="rc-date-time">${t}</span></div>`;
-  }).join('');
+  const fee  = parseInt(card.dataset.fee||0);
+  const dates = (card.dataset.dates||'').split('|').filter(Boolean);
+  const qty = dates.length;
+  const rate = fee / qty; // Menghitung rate per sesi
+
+  // Update UI Modal
   return `
-    <div class="rm-header">
-      <div><div class="rm-lbl">Receipt</div><div class="rm-id">#${card.dataset.rid}</div></div>
-      <div class="rm-header-right"><div class="rm-issue">${card.dataset.issue}</div><span class="${paid?'bpd':'bup'}">${paid?'Paid':'Unpaid'}</span></div>
-    </div>
+    <div class="rm-header">...</div>
     <div class="rm-body">
-      ${card.dataset.student?`<div class="rr"><span class="rl">Student</span><span class="rv">${card.dataset.student}</span></div>`:''}
-      ${card.dataset.teacher?`<div class="rr"><span class="rl">Teacher</span><span class="rv">${card.dataset.teacher}</span></div>`:''}
-      <div class="rr"><span class="rl">Total Fee</span><span class="rv money">${fee}</span></div>
+      <!-- TAMBAHKAN TABEL DETAIL DI SINI -->
+      <table class="rm-table">
+        <thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Mandarin Lessons</td><td>${qty}</td><td>Rp ${rate.toLocaleString('id-ID')}</td><td>Rp ${fee.toLocaleString('id-ID')}</td></tr>
+        </tbody>
+      </table>
+      <div class="rr"><span class="rl">Total Fee</span><span class="rv money">Rp ${fee.toLocaleString('id-ID')}</span></div>
     </div>
-    ${dates?`<div class="rc-dates-label">📅 Sessions attended</div><div class="rm-dates">${dates}</div>`:''}`;
-}
+    ...`;
 
 function openRcModal(card) {
   rcBox.innerHTML = buildRcModal(card);
