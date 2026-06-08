@@ -131,6 +131,20 @@ body {
   margin-bottom: 18px;
 }
 
+/* Tambahkan di CSS kamu */
+.btn-plus {
+    background: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.btn-plus:hover { transform: scale(1.1); }s
+
 /* Flash messages in auth */
 .auth-flashes { padding: 0 28px; margin-top: -4px; }
 
