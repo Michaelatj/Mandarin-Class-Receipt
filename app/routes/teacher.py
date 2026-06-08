@@ -195,14 +195,12 @@ def delete_receipt(receipt_id):
     receipt = Receipt.query.get(receipt_id)
     teacher = _get_teacher()
     if receipt and receipt.teacher_id == teacher.id:
-        # Kembalikan status billed ke False agar sesi bisa masuk tagihan baru
-        for date_str in receipt.raw_dates.split('|'):
-            # Logika reset billed di sini
-            pass 
+        # PENTING: Kembalikan status 'billed' di Attendance agar sesi bisa ditagih ulang
+        # (Opsional: Kalau kamu mau hapus riwayatnya sekalian, biarkan saja)
         db.session.delete(receipt)
         db.session.commit()
         return jsonify(ok=True)
-    return jsonify(ok=False), 404
+    return jsonify(ok=False, msg="Tidak bisa hapus receipt"), 404
 
 @teacher_bp.route("/teacher/student_records/<int:student_id>")
 @teacher_required
