@@ -29,7 +29,8 @@
       <div class="sidebar-user">
         <div class="sidebar-avatar">{{ user.name()[0] }}</div>
         <span class="sidebar-name">{{ user.name() }}</span>
-        <a href="{{ url_for('auth.logout') }}" class="sidebar-logout">{{ tr('logout') }}</a>
+        {# FIX: Hapus memori popup saat klik logout agar muncul lagi saat login #}
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-logout" onclick="sessionStorage.removeItem('paymentReminderSeen');">{{ tr('logout') }}</a>
       </div>
     </div>
   </aside>
@@ -98,7 +99,17 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">{{ tr('current_progress') }}</h1>
-            <p class="page-sub">Your current billing cycle — 8 classes per receipt</p>
+            {# UI FIX: Menampilkan tipe paket dan harga jika data sudah disiapkan di backend #}
+            {% set p_type = user.package_type if user.package_type is defined else none %}
+            {% set p_price = user.session_price if user.session_price is defined else 0 %}
+            
+            {% if p_type == 'monthly' %}
+              <p class="page-sub">📦 Paket Bulanan — Rp {{ "{:,.0f}".format(p_price) }} / bulan</p>
+            {% elif p_type == 'per_session' %}
+              <p class="page-sub">🎟️ Paket Per Sesi — Rp {{ "{:,.0f}".format(p_price) }} / sesi</p>
+            {% else %}
+              <p class="page-sub">Your current billing cycle</p>
+            {% endif %}
           </div>
         </div>
         <div id="progressArea">
@@ -284,13 +295,13 @@ document.addEventListener("DOMContentLoaded", function() {
         method:'POST',
         headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':'{{ csrf_token() }}'},
         body: JSON.stringify({ tz_offset: _TZ })
-    }).catch(() => {}); // Catch silent errors if offline
+    }).catch(() => {});
 
     // Handle Payment Reminder Modal
     const modal = document.getElementById('paymentReminderModal');
     if (modal) {
         const closeModal = () => {
-            modal.style.display = 'none'; // Overrides inline flex!
+            modal.style.display = 'none';
             sessionStorage.setItem('paymentReminderSeen', 'true');
         };
 
@@ -302,20 +313,18 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('closeReminderBtn')?.addEventListener('click', closeModal);
         document.getElementById('ackReminderBtn')?.addEventListener('click', closeModal);
         
-        // Klik di luar modal buat nutup
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closeModal();
         });
     }
 });
 
-// Refresh tz_offset every time attnForm is about to submit
 const _attnForm = document.getElementById('attnForm');
 if (_attnForm) {
   _attnForm.addEventListener('submit', function() {
     const tzInput = document.getElementById('tzOffset');
     if(tzInput) tzInput.value = -(new Date().getTimezoneOffset());
-  }, true); // capture phase — runs before ajaxForm's listener
+  }, true); 
 }
 
 /* ── Navigation ── */
@@ -327,7 +336,6 @@ if (_attnForm) {
   const visited = new Set();
 
   function markSeen(page) {
-    // Use actual server-rendered counts — not DOM pip (which may not exist if no pip)
     const countMap = {
       classes:  parseInt('{{ new_count }}') || 0,
       progress: parseInt('{{ unbilled_count }}') || 0,
@@ -339,7 +347,6 @@ if (_attnForm) {
       headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRFToken':_CSRF},
       body: JSON.stringify({tab: page, count: count})
     }).catch(()=>{});
-    // Clear matching pips in both navbars
     document.querySelectorAll('[data-page="'+page+'"] .snav-pip, [data-page="'+page+'"] .bnav-pip')
       .forEach(p => p.remove());
   }
@@ -354,7 +361,7 @@ if (_attnForm) {
       b.classList.toggle('active', b.dataset.page===id);
     });
     pg.forEach(p=>p.style.display=p.id==='page-'+id?'block':'none');
-    if (isNew) markSeen(id); // always mark seen with real count, removes pip too
+    if (isNew) markSeen(id); 
     visited.add(id);
     try{sessionStorage.setItem(KEY,id);}catch(e){}
   }
@@ -377,7 +384,7 @@ if (document.getElementById('changePwForm')) {
     ajaxForm(document.getElementById('changePwForm'), null);
 }
 
-// Profile form: update sidebar display name instantly after save
+// Profile form
 (function(){
   const form = document.getElementById('profileForm');
   if (!form) return;
@@ -393,7 +400,6 @@ if (document.getElementById('changePwForm')) {
       const data = await res.json();
       if (data.ok) {
         showToast('✓ Profile saved');
-        // Update sidebar name display immediately
         const newName = form.querySelector('[name="display_name"]').value.trim();
         if (newName) {
           document.querySelectorAll('.sidebar-name').forEach(el => el.textContent = newName);
@@ -407,7 +413,6 @@ if (document.getElementById('changePwForm')) {
   });
 })();
 
-/* ── Update sidebar/bottom nav pips ── */
 function updatePip(navSel, page, count, label) {
   document.querySelectorAll(navSel + ' [data-page="' + page + '"]').forEach(btn => {
     const pipCls = navSel.includes('side') ? 'snav-pip' : 'bnav-pip';
@@ -422,14 +427,11 @@ function updatePip(navSel, page, count, label) {
 }
 
 function updateAllPips(data) {
-  // Progress pip: cycle_count/8
   if (typeof data.cycle_count === 'number') {
     const lbl = data.cycle_count > 0 ? data.cycle_count + '/8' : null;
     ['#sideNav', '#bottomNav'].forEach(s => updatePip(s, 'progress', data.cycle_count, lbl));
   }
-  // Receipts pip: unpaid count
   if (typeof data.receipt_count === 'number') {
-    // After a new receipt is created cycle resets, the new receipt is unpaid
     const newUnpaid = (data.cycle_count === 0 && data.new_receipt_html) ? 1 : 0;
     ['#sideNav', '#bottomNav'].forEach(s => updatePip(s, 'receipts', newUnpaid, newUnpaid || null));
   }
@@ -444,10 +446,8 @@ if (document.getElementById('attnForm')) {
       }
       updateAllPips(data);
 
-      // Update stat numbers on Classes page in real-time
       if (typeof data.cycle_count === 'number') {
         const statNums = document.querySelectorAll('.stat-num');
-        // First stat-num = unbilled count, second = total sessions
         if (statNums[0]) statNums[0].textContent = data.cycle_count;
         if (statNums[1] && typeof data.total_sessions === 'number') statNums[1].textContent = data.total_sessions;
       }
@@ -489,14 +489,12 @@ document.querySelectorAll('.join-btn').forEach(btn => {
         const link  = data.meet_link;
 
         if (data.already) {
-          // Already joined this specific schedule
           showToast('Already joined — reopening Meet…');
           if (link) { foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Rejoin Meet</a>`; setTimeout(()=>window.open(link,'_blank'),300); }
           return;
         }
 
         if (data.cooldown_blocked) {
-          // Attendance already recorded within 90 min — open meet but no new attendance
           showToast('✓ Meet opened (attendance already recorded this session)');
           if (link) { foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.78rem;color:var(--text3);margin-left:8px">attendance recorded earlier</span>`; setTimeout(()=>window.open(link,'_blank'),300); }
           else { foot.innerHTML = `<span style="font-size:.84rem;color:var(--text3);font-style:italic">✓ Already recorded this session</span>`; }
@@ -504,7 +502,6 @@ document.querySelectorAll('.join-btn').forEach(btn => {
           return;
         }
 
-        // Normal join — attendance recorded
         showToast('✓ Attendance recorded!');
         if (link) {
           foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.8rem;color:var(--text3);margin-left:8px">✓ Recorded</span>`;
@@ -514,7 +511,6 @@ document.querySelectorAll('.join-btn').forEach(btn => {
         }
         if (badge) { badge.style.color='var(--green)'; badge.textContent='✓ Joined'; }
 
-        // Update stat numbers real-time
         if (typeof data.cycle_count === 'number') {
           const statNums = document.querySelectorAll('.stat-num');
           if (statNums[0]) statNums[0].textContent = data.cycle_count;
