@@ -548,8 +548,14 @@ function buildRcModal(card) {
   const dates = (card.dataset.dates||'').split('|').filter(Boolean);
   const qty = dates.length;
   const rate = fee / qty; // Menghitung rate per sesi
-
-  // Update UI Modal
+    const dt  = new Date(raw.endsWith('Z')?raw:raw+'Z');
+    const dow = dt.getDay()===0?6:dt.getDay()-1;
+    const t   = String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
+    const day  = lang==='zh'?DZ[dow]:DA[dow];
+    const date = lang==='zh'?`${dt.getFullYear()}年${MZ[dt.getMonth()]}月${dt.getDate()}日`:`${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}`;
+    return `<div class="rm-date-item"><span class="rc-date-num">#${i+1}</span><span class="rc-date-day">${day}</span><span class="rc-date-main">${date}</span><span class="rc-date-time">${t}</span></div>`;
+  }).join('');
+// Update UI Modal
   return `
     <div class="rm-header">...</div>
     <div class="rm-body">
@@ -563,6 +569,7 @@ function buildRcModal(card) {
       <div class="rr"><span class="rl">Total Fee</span><span class="rv money">Rp ${fee.toLocaleString('id-ID')}</span></div>
     </div>
     ...`;
+}
 
 function openRcModal(card) {
   rcBox.innerHTML = buildRcModal(card);
