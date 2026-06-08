@@ -189,6 +189,21 @@ def paid(receipt_id): # <--- Pastikan nama fungsinya 'paid'
         flash(tr("ok_paid"), "ok")
     return redirect(url_for("teacher.dashboard"))
 
+@teacher_bp.route("/teacher/delete_receipt/<int:receipt_id>", methods=["POST"])
+@teacher_required
+def delete_receipt(receipt_id):
+    receipt = Receipt.query.get(receipt_id)
+    teacher = _get_teacher()
+    if receipt and receipt.teacher_id == teacher.id:
+        # Kembalikan status billed ke False agar sesi bisa masuk tagihan baru
+        for date_str in receipt.raw_dates.split('|'):
+            # Logika reset billed di sini
+            pass 
+        db.session.delete(receipt)
+        db.session.commit()
+        return jsonify(ok=True)
+    return jsonify(ok=False), 404
+
 @teacher_bp.route("/teacher/student_records/<int:student_id>")
 @teacher_required
 def student_records(student_id):
