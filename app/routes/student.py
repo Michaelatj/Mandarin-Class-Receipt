@@ -39,6 +39,14 @@ def dashboard():
     if user.role == "teacher":
         return redirect(url_for("teacher.dashboard"))
 
+    from ..models import StudentFee
+    fee_data = StudentFee.query.filter_by(student_id=user.id).first()
+    # Inject data ke object user agar mudah diakses di template
+    user.package_type = fee_data.packet_type if fee_data else 'session'
+    user.session_price = fee_data.fee_idr if fee_data else 0
+
+    teachers = User.query.filter_by(role="teacher").all()
+  
     teachers       = User.query.filter_by(role="teacher").all()
     receipts       = Receipt.query.filter_by(student_id=user.id)\
                         .order_by(Receipt.issue_date.desc()).all()
