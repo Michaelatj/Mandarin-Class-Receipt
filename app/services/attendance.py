@@ -26,6 +26,7 @@ def get_student_progress(teacher_id: int) -> list[dict]:
 
 def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
     new_receipts = []
+    # Ambil absensi yang belum dibayar
     unbilled = Attendance.query.filter_by(
         student_id=student_id, teacher_id=teacher_id, billed=False
     ).order_by(Attendance.date.asc()).all()
@@ -37,41 +38,37 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
     teacher = User.query.get(teacher_id)
     student = User.query.get(student_id)
     
-    # Harga dan Tipe Paket
-    base_fee = fee_obj.fee_idr if fee_obj else (teacher.fee_idr if teacher else 70000)
+    base_fee = fee_obj.fee_idr if fee_obj else 0
     packet_type = fee_obj.packet_type if fee_obj else 'session'
     
     t_bank_acc = teacher.bank_account if teacher and teacher.bank_account else "N/A"
     t_bank_name = teacher.bank_name if teacher and teacher.bank_name else "N/A"
 
     first_date = unbilled[0].date
-    is_month_passed = (datetime.utcnow() - first_date).days >= 30
+    days_since_start = (datetime.utcnow() - first_date).days
 
-    # LOGIKA BARU
-    # 1. Paket per_session: Bill setiap 30 hari, hitung per sesi
-    # 2. Paket monthly: Bill setiap 30 hari, harga flat
-    # 3. Default (Legacy): Bill setiap 8 sesi (tetap dipertahankan untuk kompatibilitas)
-    
+    # LOGIKA BILLING
+    # Pemicu: 30 hari sudah lewat (bulanan/per sesi) ATAU sudah 8x sesi (default)
     should_bill = False
     total_fee = 0
     
     if packet_type == 'monthly':
-        if is_month_passed:
+        if days_since_start >= 30:
             should_bill = True
-            total_fee = base_fee
+            total_fee = base_fee # Harga flat per bulan
     elif packet_type == 'per_session':
-        if is_month_passed:
+        if days_since_start >= 30:
             should_bill = True
-            total_fee = len(unbilled) * base_fee
-    else: # Default 8 sesi
-        if len(unbilled) >= CYCLE_SIZE:
+            total_fee = len(unbilled) * base_fee # Harga dikali jumlah sesi
+    else: # Default legacy cycle
+        if len(unbilled) >= 8:
             should_bill = True
             total_fee = len(unbilled) * base_fee
 
     if should_bill:
         receipt = Receipt(
-            student_id=student_id, student_name=student.name() if student else "Unknown",
-            teacher_id=teacher_id, teacher_name=teacher.name() if teacher else "Unknown",
+            student_id=student_id, student_name=student.name(),
+            teacher_id=teacher_id, teacher_name=teacher.name(),
             total_fee=total_fee, bank_account=t_bank_acc, bank_name=t_bank_name,
             raw_dates="|".join([cls.date.isoformat() for cls in unbilled]),
             issue_date=datetime.utcnow(), paid=False
