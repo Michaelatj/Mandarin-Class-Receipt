@@ -5,42 +5,34 @@
 
 {% block page_content %}
 <div class="app-shell">
-
-  {# ══ SIDEBAR (desktop) ══ #}
-  <aside class="app-sidebar" id="appSidebar">
-    <div class="sidebar-brand">
-      <span class="sidebar-brand-zh">中文课堂</span>
-      <span class="sidebar-brand-tag">Student Dashboard</span>
-    </div>
-    <nav class="sidebar-nav" id="sideNav">
-      <button class="snav-btn" data-page="classes" data-count="{{ new_count }}">
-        <span class="snav-icon">📆</span>
-        <span class="snav-label">Classes</span>
-        {% if show_classes_pip %}<span class="snav-pip gold">{{ new_count }}</span>{% endif %}
-      </button>
-      <button class="snav-btn" data-page="progress" data-count="{{ unbilled_count }}">
-        <span class="snav-icon">📊</span>
-        <span class="snav-label">Progress</span>
-        {% if show_progress_pip %}<span class="snav-pip gold">{{ unbilled_count }}/8</span>{% endif %}
-      </button>
-      <button class="snav-btn" data-page="receipts" data-count="{{ unpaid_count }}">
-        <span class="snav-icon">🧾</span>
-        <span class="snav-label">Receipts</span>
-        {% if show_receipts_pip %}<span class="snav-pip">{{ unpaid_count }}</span>{% endif %}
-      </button>
-      <button class="snav-btn" data-page="settings" data-count="0">
-        <span class="snav-icon">⚙️</span>
-        <span class="snav-label">Settings</span>
-      </button>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <div class="sidebar-avatar">{{ user.name()[0] }}</div>
-        <span class="sidebar-name">{{ user.name() }}</span>
-        <a href="{{ url_for('auth.logout') }}" class="sidebar-logout">{{ tr('logout') }}</a>
-      </div>
-    </div>
-  </aside>
+  {# SIDEBAR #}
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-brand"><span class="sidebar-brand-zh">中文课堂</span><span class="sidebar-brand-tag">Student Dashboard</span></div>
+    <nav class="sidebar-nav" id="sideNav">
+      <button class="snav-btn" data-page="classes" data-count="{{ new_count }}">
+        <span class="snav-icon">📆</span><span class="snav-label">Classes</span>
+        {% if show_classes_pip %}<span class="snav-pip gold">{{ new_count }}</span>{% endif %}
+      </button>
+      <button class="snav-btn" data-page="progress" data-count="{{ unbilled_count }}">
+        <span class="snav-icon">📊</span><span class="snav-label">Progress</span>
+        {% if show_progress_pip %}<span class="snav-pip gold">{{ unbilled_count }}/8</span>{% endif %}
+      </button>
+      <button class="snav-btn" data-page="receipts" data-count="{{ unpaid_count }}">
+        <span class="snav-icon">🧾</span><span class="snav-label">Receipts</span>
+        {% if show_receipts_pip %}<span class="snav-pip">{{ unpaid_count }}</span>{% endif %}
+      </button>
+      <button class="snav-btn" data-page="settings" data-count="0">
+        <span class="snav-icon">⚙️</span><span class="snav-label">Settings</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ user.name()[0] }}</div>
+        <span class="sidebar-name">{{ user.name() }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-logout">{{ tr('logout') }}</a>
+      </div>
+    </div>
+  </aside>
 
   {# ══ MAIN ══ #}
   <div class="app-main">
