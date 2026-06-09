@@ -273,6 +273,7 @@ def mark_attendance():
                 f' data-fee="{r.total_fee}"'
                 f' data-issue="{issue_fmt}"'
                 f' data-dates="{r.raw_dates or ""}"'
+                f' data-package-type="{user.package_type}"'
                 f' data-show-paid="0" data-paid-url=""'
                 f' tabindex="0" role="button">'
                 f'<div class="rc-mid">'
