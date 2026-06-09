@@ -1160,35 +1160,128 @@ document.querySelectorAll('.fee-form').forEach(f => {
     }
   };
 
+window.userPackageType = "{{ user.package_type if user.package_type is defined else 'per_session' }}"; 
+
 function build(card) {
-    const paid    = card.dataset.paid === '1';
-    const total   = parseInt(card.dataset.fee || 0);
-    const rawDates = (card.dataset.dates||'').split('|').filter(Boolean);
-    const qty = rawDates.length;
-    const rate = qty > 0 ? Math.round(total / qty) : 0;
-    const feeStr = 'Rp ' + total.toLocaleString('id-ID');
-    const rateStr = 'Rp ' + rate.toLocaleString('id-ID');
+  const paid    = card.dataset.paid === '1';
+  const fee     = parseInt(card.dataset.fee || 0);
+  const dates   = (card.dataset.dates || '').split('|').filter(Boolean);
+  const qty     = dates.length;
+  
+  // Deteksi tipe paket
+  const packageType = card.dataset.packageType || window.userPackageType || 'per_session';
+  const targetLabel = card.dataset.student ? 'Student' : 'Tutor';
+  const targetName  = card.dataset.student || card.dataset.teacher || 'Unknown';
+  
+  let tableRows = '';
+  
+  // Kondisi 1: Paket Bulanan
+  if (packageType === 'monthly') {
+    tableRows = `
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 10px 4px; color: #333;">Mandarin Course Fee (Monthly Package)</td>
+        <td style="text-align: center; padding: 10px 4px; color: #333;">1 mo</td>
+        <td style="text-align: right; padding: 10px 4px; color: #333;">Rp ${fee.toLocaleString('id-ID')}</td>
+        <td style="text-align: right; padding: 10px 4px; font-weight: bold; color: #333;">Rp ${fee.toLocaleString('id-ID')}</td>
+      </tr>
+    `;
+  } 
+  // Kondisi 2: Paket Per Sesi
+  else {
+    const rate = qty > 0 ? Math.round(fee / qty) : 0;
+    tableRows = `
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 10px 4px; color: #333;">Mandarin Lesson Sessions (Per Session)</td>
+        <td style="text-align: center; padding: 10px 4px; color: #333;">${qty}</td>
+        <td style="text-align: right; padding: 10px 4px; color: #333;">Rp ${rate.toLocaleString('id-ID')}</td>
+        <td style="text-align: right; padding: 10px 4px; font-weight: bold; color: #333;">Rp ${fee.toLocaleString('id-ID')}</td>
+      </tr>
+    `;
+  }
 
-    // CSS untuk tabel agar rapi seperti Invoice
-    const tableStyle = `
-      <style>
-        .inv-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-        .inv-table th { border-bottom: 2px solid #eee; text-align: left; padding: 8px; color: #666; }
-        .inv-table td { padding: 8px; border-bottom: 1px solid #eee; }
-        .inv-total { font-size: 1.2rem; font-weight: bold; text-align: right; padding-top: 10px; }
-      </style>`;
+  // Setelan Full English
+  const DA_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const MO_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    return tableStyle + `
-      <div class="inv-header">... (seperti kode lama) ...</div>
-      <table class="inv-table">
-        <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
+  // List absensi
+  const datesHtml = dates.map((raw, i) => {
+    const dt  = new Date(raw.endsWith('Z') ? raw : raw + 'Z');
+    const dow = dt.getDay();
+    const t   = String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+    
+    const day  = DA_EN[dow];
+    const date = `${dt.getDate()} ${MO_EN[dt.getMonth()]} ${dt.getFullYear()}`;
+        
+    return `
+      <div class="rm-date-item" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 0.88rem;">
+        <span class="rc-date-num" style="color: #d4af37; font-weight: bold; min-width: 30px;">#${i+1}</span>
+        <span class="rc-date-day" style="color: #666; min-width: 60px;">${day}</span>
+        <span class="rc-date-main" style="flex: 1; color: #333; padding-left: 10px;">${date}</span>
+        <span class="rc-date-time" style="color: #88px; font-family: monospace;">${t} WIB</span>
+      </div>`;
+  }).join('');
+
+  // Setup tombol khusus akses Guru (Teacher)
+  const rid = card.dataset.rid;
+  let actionBtns = '';
+  
+  if (!paid) {
+      actionBtns += `
+        <form method="POST" action="/teacher/mark_paid/${rid}" class="mark-paid-form" style="margin:0; flex:1">
+          <input type="hidden" name="csrf_token" value="${window._CSRF}"/>
+          <button type="submit" class="btn bg" style="width:100%; justify-content:center">💰 Mark as Paid</button>
+        </form>
+      `;
+  } else {
+      actionBtns += `
+        <div style="flex:1; background:var(--green-light); color:var(--green); text-align:center; padding:10px; border-radius:8px; font-weight:bold;">✓ Already Paid</div>
+      `;
+  }
+
+  // Append tombol Edit Date & Delete
+  actionBtns += `
+      <button class="btn bgh bsm" style="flex:none" onclick="window.editReceiptTime('${rid}')" title="Edit Date">✏️ Edit Date</button>
+      <button type="button" class="btn bdel bsm del-receipt-btn" data-rid="${rid}" style="flex:none" title="Delete">🗑️</button>
+  `;
+
+  // Output akhir HTML
+  return `
+    <div class="rm-header" style="border-bottom: 2px solid #f5f5f5; padding-bottom: 12px; margin-bottom: 16px; text-align: left;">
+      <h3 style="margin: 0; color: #111; font-size: 1.3rem;">🧾 Receipt Details</h3>
+      <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #666;">Receipt ID: #${rid || ''} · ${targetLabel}: <strong>${targetName}</strong></p>
+    </div>
+    <div class="rm-body" style="text-align: left;">
+      <table class="rm-table" style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.92rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid #eee; color: #555; font-weight: bold;">
+            <th style="text-align: left; padding: 8px 4px;">Package Description</th>
+            <th style="text-align: center; padding: 8px 4px; width: 60px;">Qty</th>
+            <th style="text-align: right; padding: 8px 4px; width: 100px;">Rate</th>
+            <th style="text-align: right; padding: 8px 4px; width: 110px;">Amount</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr><td>Mandarin Lessons</td><td>${qty}</td><td>${rateStr}</td><td>${feeStr}</td></tr>
+          ${tableRows}
         </tbody>
       </table>
-      <div class="inv-total">Total: ${feeStr}</div>
-      ... (tambahkan sisa footer button) ...`;
-  }
+      
+      <div class="rr" style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: bold; margin-top: 10px; padding: 12px 4px; background: #fafafa; border-radius: 6px;">
+        <span class="rl" style="color: #333;">Total Amount:</span>
+        <span class="rv money" style="color: #27ae60;">Rp ${fee.toLocaleString('id-ID')}</span>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #444; border-bottom: 2px solid #f5f5f5; padding-bottom: 6px;">🗓️ Attendance History Log</h4>
+        <div class="rm-dates-list" style="max-height: 200px; overflow-y: auto; padding-right: 5px;">
+          ${datesHtml || '<p style="color: #999; font-style: italic; font-size: 0.9rem; padding: 10px 0;">No attendance records found.</p>'}
+        </div>
+      </div>
+      
+      <div class="rm-actions" style="display:flex; gap:8px; margin-top:24px; border-top: 2px solid #f5f5f5; padding-top:16px;">
+        ${actionBtns}
+      </div>
+    </div>`;
+}
 
   function open(card) {
     box.innerHTML = build(card);
