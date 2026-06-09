@@ -542,24 +542,33 @@ const MZ=['一','二','三','四','五','六','七','八','九','十','十一','
 const DZ=['星期一','星期二','星期三','星期四','星期五','星期六','星期日'];
 
 function buildRcModal(card) {
-  const lang = document.documentElement.lang||'en';
-  const paid = card.dataset.paid==='1';
-  const fee  = parseInt(card.dataset.fee||0);
-  const dates = (card.dataset.dates||'').split('|').filter(Boolean);
+  const lang = document.documentElement.lang || 'en';
+  const paid = card.dataset.paid === '1';
+  const fee  = parseInt(card.dataset.fee || 0);
+  const dates = (card.dataset.dates || '').split('|').filter(Boolean);
   const qty = dates.length;
-  const rate = fee / qty; // Menghitung rate per sesi
-    const dt  = new Date(raw.endsWith('Z')?raw:raw+'Z');
-    const dow = dt.getDay()===0?6:dt.getDay()-1;
-    const t   = String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
-    const day  = lang==='zh'?DZ[dow]:DA[dow];
-    const date = lang==='zh'?`${dt.getFullYear()}年${MZ[dt.getMonth()]}月${dt.getDate()}日`:`${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}`;
+  // Prevent dividing by zero if qty is somehow 0
+  const rate = qty > 0 ? fee / qty : 0; 
+  
+  // FIX: Added the missing dates.map() declaration! 🛠️
+  const datesHtml = dates.map((raw, i) => {
+    const dt  = new Date(raw.endsWith('Z') ? raw : raw + 'Z');
+    const dow = dt.getDay() === 0 ? 6 : dt.getDay() - 1;
+    const t   = String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0');
+    const day  = lang === 'zh' ? DZ[dow] : DA[dow];
+    const date = lang === 'zh' 
+        ? `${dt.getFullYear()}年${MZ[dt.getMonth()]}月${dt.getDate()}日` 
+        : `${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}`;
+        
     return `<div class="rm-date-item"><span class="rc-date-num">#${i+1}</span><span class="rc-date-day">${day}</span><span class="rc-date-main">${date}</span><span class="rc-date-time">${t}</span></div>`;
   }).join('');
-// Update UI Modal
+
+  // Update UI Modal structure
   return `
-    <div class="rm-header">...</div>
+    <div class="rm-header">
+      <h3 style="margin:0;">Receipt Details</h3>
+    </div>
     <div class="rm-body">
-      <!-- TAMBAHKAN TABEL DETAIL DI SINI -->
       <table class="rm-table">
         <thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
         <tbody>
@@ -567,8 +576,14 @@ function buildRcModal(card) {
         </tbody>
       </table>
       <div class="rr"><span class="rl">Total Fee</span><span class="rv money">Rp ${fee.toLocaleString('id-ID')}</span></div>
-    </div>
-    ...`;
+      
+      <div style="margin-top: 20px;">
+        <h4 style="font-size: 0.9rem; color: var(--text2); margin-bottom: 8px;">Class Dates</h4>
+        <div class="rm-dates-list">
+          ${datesHtml}
+        </div>
+      </div>
+    </div>`;
 }
 
 function openRcModal(card) {
