@@ -301,3 +301,16 @@ def run_migration():
     except Exception as e:
         db.session.rollback()
         return f"❌ Gagal melakukan migrasi: {str(e)}"
+
+@teacher_bp.route("/fix_db")
+def fix_db():
+    from sqlalchemy import text
+    try:
+        # Menambahkan kolom ke database PostgreSQL
+        db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS packet_type VARCHAR(20);"))
+        db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS custom_qty INTEGER;"))
+        db.session.commit()
+        return "<h1>✅ DATABASE BERHASIL DIPERBAIKI!</h1> <p>Silakan klik <a href='/teacher/dashboard'>di sini untuk ke Dashboard</a></p>"
+    except Exception as e:
+        db.session.rollback()
+        return f"<h1>❌ Gagal:</h1> <p>{str(e)}</p>"
