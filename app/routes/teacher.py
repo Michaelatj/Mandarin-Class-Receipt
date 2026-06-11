@@ -314,3 +314,37 @@ def fix_db():
     except Exception as e:
         db.session.rollback()
         return f"<h1>❌ Gagal:</h1> <p>{str(e)}</p>"
+
+
+from datetime import datetime, timedelta
+
+@teacher_bp.route("/teacher/edit_receipt_dates/<int:receipt_id>", methods=["POST"])
+@teacher_required
+def edit_receipt_dates(receipt_id):
+    receipt = db.session.get(Receipt, receipt_id)
+    teacher = _get_teacher()
+    
+    if not receipt or receipt.teacher_id != teacher.id:
+        return jsonify(ok=False, msg="Receipt tidak ditemukan"), 404
+        
+    try:
+        # Mengambil semua array tanggal sesi dari form input
+        updated_dates = request.form.getlist("session_dates")
+        
+        utc_date_strings = []
+        for d_str in updated_dates:
+            if d_str:
+                # d_str dari input datetime-local berformat: YYYY-MM-DDTHH:MM
+                # Karena input berupa waktu lokal WIB (UTC+7), kurangi 7 jam untuk konversi ke UTC
+                local_dt = datetime.strptime(d_str, "%Y-%m-%dT%H:%M")
+                utc_dt = local_dt - timedelta(hours=7)
+                utc_date_strings.append(utc_dt.strftime("%Y-%m-%dT%H:%M:%SZ"))
+                
+        # Gabungkan kembali string tanggal dengan separator pipa |
+        receipt.raw_dates = "|".join(utc_date_strings)
+        db.session.commit()
+        
+        return jsonify(ok=True, msg="Seluruh tanggal sesi absensi berhasil diperbarui!")
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(ok=False, msg=str(e)), 400
