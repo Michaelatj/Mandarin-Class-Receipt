@@ -1167,8 +1167,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
 (function(){
   const overlay = document.getElementById('receiptModal');
   const box     = document.getElementById('receiptModalBox');
-  const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const DA=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   window.editReceiptTime = async function(receiptId) {
     const newDate = prompt("Enter new date & time (YYYY-MM-DDTHH:MM):");
@@ -1192,7 +1190,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
     const fee     = parseInt(card.dataset.fee || 0);
     const dates   = (card.dataset.dates || '').split('|').filter(Boolean);
     
-    // LOGIKA BARU: Cek apakah ada data override dari database, jika tidak fallback ke default
     const packageType = card.dataset.packetType || card.dataset.packageType || window.userPackageType || 'session';
     const qty = card.dataset.customQty ? parseInt(card.dataset.customQty) : dates.length;
     
@@ -1201,7 +1198,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
     
     let tableRows = '';
     
-    // Kondisi 1: Paket Bulanan
     if (packageType === 'monthly') {
       tableRows = `
         <tr style="border-bottom: 1px solid #eee;">
@@ -1211,9 +1207,7 @@ document.querySelectorAll('.fee-form').forEach(f => {
           <td style="text-align: right; padding: 10px 4px; font-weight: bold; color: #333;">Rp ${fee.toLocaleString('id-ID')}</td>
         </tr>
       `;
-    } 
-    // Kondisi 2: Paket Per Sesi
-    else {
+    } else {
       const rate = qty > 0 ? Math.round(fee / qty) : 0;
       tableRows = `
         <tr style="border-bottom: 1px solid #eee;">
@@ -1225,29 +1219,19 @@ document.querySelectorAll('.fee-form').forEach(f => {
       `;
     }
 
-    // Setelan Full English
-    const DA_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const MO_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    // List absensi
+    // List absensi dipetakan langsung ke Input Datetime agar guru bisa mengedit per sesi
     const datesHtml = dates.map((raw, i) => {
       const dt  = new Date(raw.endsWith('Z') ? raw : raw + 'Z');
-      const dow = dt.getDay();
-      const t   = String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+      const pad = (n) => String(n).padStart(2, '0');
+      const localIso = dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()) + 'T' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
       
-      const day  = DA_EN[dow];
-      const date = `${dt.getDate()} ${MO_EN[dt.getMonth()]} ${dt.getFullYear()}`;
-          
       return `
-        <div class="rm-date-item" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 0.88rem;">
-          <span class="rc-date-num" style="color: #d4af37; font-weight: bold; min-width: 30px;">#${i+1}</span>
-          <span class="rc-date-day" style="color: #666; min-width: 60px;">${day}</span>
-          <span class="rc-date-main" style="flex: 1; color: #333; padding-left: 10px;">${date}</span>
-          <span class="rc-date-time" style="color: #88px; font-family: monospace;">${t} WIB</span>
+        <div class="rm-date-item" style="display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #eee;">
+          <span style="color: #d4af37; font-weight: bold; min-width: 25px;">#${i+1}</span>
+          <input type="datetime-local" name="session_dates" value="${localIso}" required style="flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.88rem; font-family: monospace;">
         </div>`;
     }).join('');
 
-    // Setup tombol khusus akses Guru (Teacher)
     const rid = card.dataset.rid;
     let actionBtns = '';
     
@@ -1264,14 +1248,12 @@ document.querySelectorAll('.fee-form').forEach(f => {
         `;
     }
 
-    // Append tombol Edit Receipt, Edit Date & Delete
     actionBtns += `
-        <button class="btn bgh bsm" style="flex:none" onclick="window.editReceiptDetail('${rid}')" title="Edit Receipt Detail">📝 Edit Detail</button>
-        <button class="btn bgh bsm" style="flex:none" onclick="window.editReceiptTime('${rid}')" title="Edit Date">📅 Edit Date</button>
+        <button type="button" class="btn bgh bsm" style="flex:none" onclick="window.editReceiptDetail('${rid}')" title="Edit Receipt Detail">📝 Edit Detail</button>
+        <button type="button" class="btn bgh bsm" style="flex:none" onclick="window.editReceiptTime('${rid}')" title="Edit Date">📅 Edit Date</button>
         <button type="button" class="btn bdel bsm del-receipt-btn" data-rid="${rid}" style="flex:none" title="Delete">🗑️</button>
     `;
 
-    // Output akhir HTML
     return `
       <div class="rm-header" style="border-bottom: 2px solid #f5f5f5; padding-bottom: 12px; margin-bottom: 16px; text-align: left;">
         <h3 style="margin: 0; color: #111; font-size: 1.3rem;">🧾 Receipt Details</h3>
@@ -1298,10 +1280,14 @@ document.querySelectorAll('.fee-form').forEach(f => {
         </div>
 
         <div style="margin-top: 24px;">
-          <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #444; border-bottom: 2px solid #f5f5f5; padding-bottom: 6px;">🗓️ Attendance History Log</h4>
-          <div class="rm-dates-list" style="max-height: 200px; overflow-y: auto; padding-right: 5px;">
-            ${datesHtml || '<p style="color: #999; font-style: italic; font-size: 0.9rem; padding: 10px 0;">No attendance records found.</p>'}
-          </div>
+          <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #444; border-bottom: 2px solid #f5f5f5; padding-bottom: 6px;">🗓️ Edit Attendance Sessions Log</h4>
+          <form id="editReceiptDatesForm" method="POST" action="/teacher/edit_receipt_dates/${rid}" style="margin:0;">
+            <input type="hidden" name="csrf_token" value="${window._CSRF}"/>
+            <div class="rm-dates-list" style="max-height: 200px; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 6px;">
+              ${datesHtml || '<p style="color: #999; font-style: italic; font-size: 0.9rem; padding: 10px 0;">No attendance records found.</p>'}
+            </div>
+            ${dates.length > 0 ? `<button type="submit" class="btn bg bsm" style="margin-top: 12px; width: 100%; justify-content: center; background: #10b981;">⚙️ Save All Session Dates</button>` : ''}
+          </form>
         </div>
         
         <div class="rm-actions" style="display:flex; gap:8px; margin-top:24px; border-top: 2px solid #f5f5f5; padding-top:16px;">
@@ -1314,6 +1300,24 @@ document.querySelectorAll('.fee-form').forEach(f => {
     box.innerHTML = build(card);
     overlay.classList.remove('hidden');
     document.body.style.overflow='hidden';
+
+    // Handler Submit Perubahan Tanggal Log Absensi Murid
+    box.querySelectorAll('#editReceiptDatesForm').forEach(f => {
+      f.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('button[type="submit"]');
+        if (btn) { btn.disabled = true; btn.textContent = 'Saving dates...'; }
+        
+        const r = await apiFetch(this.action, new FormData(this));
+        if (r && r.ok) {
+            showToast(r.msg || '✓ Tanggal sesi diperbarui');
+            setTimeout(() => location.reload(), 500);
+        } else {
+            if (btn) { btn.disabled = false; btn.innerHTML = '⚙️ Save All Session Dates'; }
+        }
+      });
+    });
+
     box.querySelectorAll('.mark-paid-form').forEach(f=>{
       f.addEventListener('submit', async function(e){
         e.preventDefault();
@@ -1333,6 +1337,7 @@ document.querySelectorAll('.fee-form').forEach(f => {
         } else if(btn){btn.disabled=false;btn.classList.remove('loading');}
       });
     });
+
     box.querySelectorAll('.del-receipt-btn').forEach(btn=>{
       btn.addEventListener('click', async function(){
         if (!await confirm2('Delete this receipt?','This cannot be undone.','🗑 Delete','danger')) return;
@@ -1345,6 +1350,7 @@ document.querySelectorAll('.fee-form').forEach(f => {
       });
     });
   }
+
   function close() { overlay.classList.add('hidden'); document.body.style.overflow=''; }
   overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
   document.getElementById('receiptModalClose').onclick = close;
@@ -1364,7 +1370,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
     smb.addEventListener('click', function(){ cards.forEach(c=>c.classList.remove('rc-hidden')); this.remove(); });
   }
 
-  // FITUR BARU: Fungsi untuk membuka modal Edit Detail
   window.editReceiptDetail = function(rid) {
       const card = document.getElementById('rc-' + rid);
       if(!card) return;
@@ -1386,14 +1391,12 @@ document.querySelectorAll('.fee-form').forEach(f => {
 
   document.getElementById('editReceiptClose').onclick = () => document.getElementById('editReceiptModal').classList.add('hidden');
 
-  // Submit form via AJAX dan otomatis reload
   const editRcForm = document.getElementById('editReceiptForm');
   if (editRcForm && !editRcForm._ajaxBound) {
       editRcForm._ajaxBound = true;
       ajaxForm(editRcForm, function(data) {
           document.getElementById('editReceiptModal').classList.add('hidden');
           if (data.ok) {
-              // Kasih jeda setengah detik biar pop-up 'success' kelihatan, terus reload page
               setTimeout(() => location.reload(), 500); 
           }
       });
