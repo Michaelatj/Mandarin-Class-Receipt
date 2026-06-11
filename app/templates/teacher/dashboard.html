@@ -597,12 +597,10 @@ fetch('/set_tz', {
 
 /* ════════════════════════════════════════════════════
    FITUR BARU: INJECT TOMBOL CHECKBOX & DUPLICATE 
-   (Ke Card Lama yang Dirender Jinja)
    ════════════════════════════════════════════════════ */
 document.querySelectorAll('.sc-card').forEach(card => {
     const id = card.id.replace('sc-', '');
     
-    // Inject Checkbox jika belum ada
     const head = card.querySelector('.sc-head');
     if (head && !card.querySelector('.sc-check')) {
         const titleEl = card.querySelector('.sc-title');
@@ -624,7 +622,6 @@ document.querySelectorAll('.sc-card').forEach(card => {
         head.insertBefore(wrapper, head.firstChild);
     }
 
-    // Inject Duplicate Button jika belum ada
     const footDiv = card.querySelector('.sc-foot > div:last-child');
     if (footDiv && !footDiv.querySelector('.dup-sc-btn')) {
         const editBtn = footDiv.querySelector('.edit-sc-btn');
@@ -717,7 +714,6 @@ if (scBulkDelBtn) {
    FITUR BARU: DUPLICATE CLASS & EDIT ATTENDANCE TIME
    ════════════════════════════════════════════════════ */
 function attachNewFeatures() {
-    // 1. Tombol Duplicate Class
     document.querySelectorAll('.dup-sc-btn').forEach(btn => {
         if (btn._hasDup) return; btn._hasDup = true;
         btn.addEventListener('click', async function() {
@@ -731,7 +727,6 @@ function attachNewFeatures() {
                 }
             });
 
-            // Ambil daftar invite
             const sid = this.dataset.id;
             const r = await fetch('/teacher/schedule/invites/'+sid, {headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF}}).then(res=>res.json()).catch(()=>null);
             
@@ -741,7 +736,6 @@ function attachNewFeatures() {
 
             document.getElementById('scheduleForm').scrollIntoView({behavior: 'smooth', block: 'center'});
             
-            // Visual feedback
             const formEl = document.getElementById('scheduleForm');
             formEl.style.transition = 'box-shadow 0.3s';
             formEl.style.boxShadow = '0 0 0 4px rgba(176,125,46,0.3)';
@@ -751,7 +745,6 @@ function attachNewFeatures() {
         });
     });
 
-    // 2. Tombol Edit Waktu Attendance
     document.querySelectorAll('.edit-attn-btn').forEach(btn => {
         if (btn._hasEdit) return; btn._hasEdit = true;
         btn.addEventListener('click', function(e) {
@@ -771,7 +764,6 @@ function attachNewFeatures() {
     });
 }
 
-// Observer untuk element hasil AJAX
 const featureObserver = new MutationObserver((mutations) => {
     mutations.forEach((m) => {
         if (m.addedNodes.length > 0) attachNewFeatures();
@@ -780,7 +772,6 @@ const featureObserver = new MutationObserver((mutations) => {
 featureObserver.observe(document.body, { childList: true, subtree: true });
 attachNewFeatures(); 
 
-// Logika Close & Save Edit Attendance Form
 document.getElementById('editAttnClose').onclick = () => document.getElementById('editAttnModal').classList.add('hidden');
 const editAttnForm = document.getElementById('editAttnForm');
 if (editAttnForm && !editAttnForm._ajaxBound) {
@@ -788,7 +779,6 @@ if (editAttnForm && !editAttnForm._ajaxBound) {
     ajaxForm(editAttnForm, function(data) {
         document.getElementById('editAttnModal').classList.add('hidden');
         if (data.ok) {
-            // Langsung reload record list di drawer progress-nya
             const activeSid = document.getElementById('attnDrawer').dataset.openSid;
             if (activeSid) document.querySelector(`.view-attn-btn[data-id="${activeSid}"]`)?.click(); 
         }
@@ -932,7 +922,6 @@ ajaxForm(document.getElementById('scheduleForm'), function(data){
   attachScBtns();
 });
 
-/* ── Edit modal ── */
 document.getElementById('modalClose').onclick = () =>
   document.getElementById('editModal').classList.add('hidden');
 ajaxForm(document.getElementById('editScheduleForm'), function(data){
@@ -962,7 +951,6 @@ ajaxForm(document.getElementById('editScheduleForm'), function(data){
   }
 });
 
-/* ── Schedule buttons ── */
 function attachScBtns() {
   document.querySelectorAll('.cancel-sc-btn').forEach(btn => {
     if (btn._ok) return; btn._ok = true;
@@ -1052,7 +1040,6 @@ attachScBtns();
 })();
 {% endif %}
 
-/* ── Delete attendance row ── */
 function attachDelAttn(form) {
   if (!form || form._ok) return; form._ok = true;
   form.addEventListener('submit', async function(e){
@@ -1124,7 +1111,6 @@ function attachViewAttn(btn) {
       attnList.innerHTML = r.html;
       attnList.querySelectorAll('.del-attn-form').forEach(attachDelAttn);
       
-      // Inject fitur baru karena HTML list baru saja dimuat
       attachNewFeatures(); 
     } else {
       attnList.innerHTML = '<div class="empty-inline">Failed to load records.</div>';
@@ -1204,7 +1190,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
       `;
     }
 
-    // List absensi dipetakan langsung ke Input Datetime agar guru bisa mengedit per sesi
     const datesHtml = dates.map((raw, i) => {
       const dt  = new Date(raw.endsWith('Z') ? raw : raw + 'Z');
       const pad = (n) => String(n).padStart(2, '0');
@@ -1285,7 +1270,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
     overlay.classList.remove('hidden');
     document.body.style.overflow='hidden';
 
-    // Handler Submit Perubahan Tanggal Log Absensi Murid
     box.querySelectorAll('#editReceiptDatesForm').forEach(f => {
       f.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -1316,4 +1300,99 @@ document.querySelectorAll('.fee-form').forEach(f => {
             const pip=nav.querySelector('.snav-pip,.bnav-pip');
             if(pip){const n=parseInt(pip.textContent)-1; if(n>0)pip.textContent=n; else pip.remove();}
           });
-          showToast(r.msg||'✓ Marked paid');
+          showToast(r.msg||'✓ Marked paid'); close();
+          open(card);
+        } else if(btn){btn.disabled=false;btn.classList.remove('loading');}
+      });
+    });
+
+    box.querySelectorAll('.del-receipt-btn').forEach(btn=>{
+      btn.addEventListener('click', async function(){
+        if (!await confirm2('Delete this receipt?','This cannot be undone.','🗑 Delete','danger')) return;
+        this.disabled=true; this.textContent='Deleting…';
+        const r = await apiFetch('/teacher/delete_receipt/'+this.dataset.rid, new FormData());
+        if (r) {
+          document.getElementById('rc-'+this.dataset.rid)?.remove();
+          showToast('Receipt deleted'); close();
+        } else { this.disabled=false; this.textContent='🗑 Delete Receipt'; }
+      });
+    });
+  }
+
+  function close() { overlay.classList.add('hidden'); document.body.style.overflow=''; }
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+  document.getElementById('receiptModalClose').onclick = close;
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+
+  window.attachReceiptCard = function(c) {
+    if (c._rcOk) return; c._rcOk = true;
+    c.addEventListener('click', ()=>open(c));
+    c.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ')open(c); });
+  };
+  document.querySelectorAll('#receiptList .rc-card').forEach(attachReceiptCard);
+
+  const smb = document.getElementById('showMoreReceipts');
+  if (smb) {
+    const cards = Array.from(document.querySelectorAll('#receiptList .rc-card'));
+    cards.forEach((c,i)=>{ if(i>=5) c.classList.add('rc-hidden'); });
+    smb.addEventListener('click', function(){ cards.forEach(c=>c.classList.remove('rc-hidden')); this.remove(); });
+  }
+
+  window.editReceiptDetail = function(rid) {
+      const card = document.getElementById('rc-' + rid);
+      if(!card) return;
+
+      const fee = card.dataset.fee;
+      const dates = (card.dataset.dates || '').split('|').filter(Boolean);
+      const qty = card.dataset.customQty ? card.dataset.customQty : dates.length;
+      
+      let pType = card.dataset.packetType || window.userPackageType || 'session';
+      if (pType !== 'monthly' && pType !== 'session') pType = 'session'; 
+
+      document.getElementById('editRcType').value = pType;
+      document.getElementById('editRcQty').value = qty;
+      document.getElementById('editRcFee').value = fee;
+
+      document.getElementById('editReceiptForm').action = '/teacher/edit_receipt/' + rid;
+      document.getElementById('editReceiptModal').classList.remove('hidden');
+  };
+
+  document.getElementById('editReceiptClose').onclick = () => document.getElementById('editReceiptModal').classList.add('hidden');
+
+  const editRcForm = document.getElementById('editReceiptForm');
+  if (editRcForm && !editRcForm._ajaxBound) {
+      editRcForm._ajaxBound = true;
+      ajaxForm(editRcForm, function(data) {
+          document.getElementById('editReceiptModal').classList.add('hidden');
+          if (data.ok) {
+              setTimeout(() => location.reload(), 500); 
+          }
+      });
+  }
+
+})();
+
+function confirm2(title, msg, okLabel, type) {
+  return new Promise(resolve=>{
+    const m   = document.getElementById('confirmModal');
+    const ok = document.getElementById('confirmOk');
+    document.getElementById('confirmIcon').textContent  = type==='danger'?'🗑':type==='warn'?'⚠️':'ℹ️';
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent   = msg;
+    ok.textContent = okLabel||'Confirm';
+    ok.className   = 'btn bsm '+(type==='danger'?'bdel':type==='warn'?'bdel-outline':'br');
+    m.classList.remove('hidden');
+    function done(v) {
+      m.classList.add('hidden');
+      ok.removeEventListener('click',onY);
+      document.getElementById('confirmCancel').removeEventListener('click',onN);
+      resolve(v);
+    }
+    function onY(){done(true);}  function onN(){done(false);}
+    ok.addEventListener('click',onY);
+    document.getElementById('confirmCancel').addEventListener('click',onN);
+    m.addEventListener('click', function h(e){ if(e.target===m){done(false);m.removeEventListener('click',h);} },{once:true});
+  });
+}
+</script>
+{% endblock %}
