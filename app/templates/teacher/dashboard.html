@@ -1161,28 +1161,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
   });
 });
 
-/* ════════════════════════════════════════════════════
-   RECEIPT MODAL LOGIC & EDIT TIME & EDIT DETAIL
-   ════════════════════════════════════════════════════ */
-(function(){
-  const overlay = document.getElementById('receiptModal');
-  const box     = document.getElementById('receiptModalBox');
-
-  window.editReceiptTime = async function(receiptId) {
-    const newDate = prompt("Enter new date & time (YYYY-MM-DDTHH:MM):");
-    if (!newDate) return;
-    
-    const formData = new FormData();
-    formData.append("issue_date", newDate);
-    formData.append("csrf_token", window._CSRF);
-    
-    const r = await apiFetch('/teacher/edit_receipt_time/' + receiptId, formData);
-    if (r && r.ok) {
-        showToast("✓ Time updated to: " + r.new_date);
-        setTimeout(() => location.reload(), 1000); 
-    }
-  };
-
   window.userPackageType = "{{ user.package_type if user.package_type is defined else 'session' }}"; 
 
   function build(card) {
@@ -1250,7 +1228,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
 
     actionBtns += `
         <button type="button" class="btn bgh bsm" style="flex:none" onclick="window.editReceiptDetail('${rid}')" title="Edit Receipt Detail">📝 Edit Detail</button>
-        <button type="button" class="btn bgh bsm" style="flex:none" onclick="window.editReceiptTime('${rid}')" title="Edit Date">📅 Edit Date</button>
         <button type="button" class="btn bdel bsm del-receipt-btn" data-rid="${rid}" style="flex:none" title="Delete">🗑️</button>
     `;
 
