@@ -154,6 +154,33 @@ def edit_receipt_time(receipt_id):
     except ValueError:
         return jsonify(ok=False, msg="Invalid date format"), 400
 
+@teacher_bp.route("/teacher/edit_receipt/<int:receipt_id>", methods=["POST"])
+@teacher_required
+def edit_receipt(receipt_id):
+    receipt = db.session.get(Receipt, receipt_id)
+    teacher = _get_teacher()
+    
+    if not receipt or receipt.teacher_id != teacher.id:
+        return jsonify(ok=False, msg="Receipt not found"), 404
+    
+    try:
+        # Ambil data dari form modal
+        new_fee = request.form.get("total_fee", type=int)
+        new_qty = request.form.get("custom_qty", type=int)
+        new_type = request.form.get("packet_type")
+        
+        if new_fee is not None:
+            receipt.total_fee = new_fee
+        if new_qty is not None:
+            receipt.custom_qty = new_qty
+        if new_type in ["session", "monthly"]:
+            receipt.packet_type = new_type
+            
+        db.session.commit()
+        return jsonify(ok=True, msg="Detail receipt berhasil diperbarui!")
+    except Exception as e:
+        return jsonify(ok=False, msg=str(e)), 400
+
 @teacher_bp.route("/teacher/reset_student_password/<int:student_id>", methods=["POST"])
 @teacher_required
 def reset_student_password(student_id):
