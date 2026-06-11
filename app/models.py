@@ -82,6 +82,8 @@ class Receipt(db.Model):
     raw_dates    = db.Column(db.String(2000), nullable=False, default="")
     issue_date   = db.Column(db.DateTime, default=datetime.utcnow)
     paid         = db.Column(db.Boolean, default=False)
+    packet_type  = db.Column(db.String(20), nullable=True) # Override tipe paket: 'session' atau 'monthly'
+    custom_qty   = db.Column(db.Integer, nullable=True)    # Override jumlah quantity
 
     def get_dates(self):
         """Return a list of datetime objects parsed from raw_dates."""

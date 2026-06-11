@@ -154,6 +154,33 @@ def edit_receipt_time(receipt_id):
     except ValueError:
         return jsonify(ok=False, msg="Invalid date format"), 400
 
+@teacher_bp.route("/teacher/edit_receipt/<int:receipt_id>", methods=["POST"])
+@teacher_required
+def edit_receipt(receipt_id):
+    receipt = db.session.get(Receipt, receipt_id)
+    teacher = _get_teacher()
+    
+    if not receipt or receipt.teacher_id != teacher.id:
+        return jsonify(ok=False, msg="Receipt not found"), 404
+    
+    try:
+        # Ambil data dari form modal
+        new_fee = request.form.get("total_fee", type=int)
+        new_qty = request.form.get("custom_qty", type=int)
+        new_type = request.form.get("packet_type")
+        
+        if new_fee is not None:
+            receipt.total_fee = new_fee
+        if new_qty is not None:
+            receipt.custom_qty = new_qty
+        if new_type in ["session", "monthly"]:
+            receipt.packet_type = new_type
+            
+        db.session.commit()
+        return jsonify(ok=True, msg="Detail receipt berhasil diperbarui!")
+    except Exception as e:
+        return jsonify(ok=False, msg=str(e)), 400
+
 @teacher_bp.route("/teacher/reset_student_password/<int:student_id>", methods=["POST"])
 @teacher_required
 def reset_student_password(student_id):
@@ -253,3 +280,38 @@ def student_records(student_id):
         html = '<div class="empty-inline">No records found.</div>'
 
     return jsonify(ok=True, total=len(records), unbilled=unbilled_count, html=html)
+
+
+from sqlalchemy import text
+
+@teacher_bp.route("/teacher/run_migration")
+@teacher_required
+def run_migration():
+    """
+    Route sementara untuk update database PostgreSQL di Vercel.
+    Akan menambahkan kolom packet_type dan custom_qty ke tabel receipt.
+    """
+    try:
+        # Perintah SQL khusus PostgreSQL untuk menambahkan kolom jika belum ada
+        db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS packet_type VARCHAR(20);"))
+        db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS custom_qty INTEGER;"))
+        db.session.commit()
+        
+        return "✅ Migrasi database PostgreSQL berhasil! Silakan kembali ke <a href='/teacher/dashboard'>Dashboard</a>."
+    except Exception as e:
+        db.session.rollback()
+        return f"❌ Gagal melakukan migrasi: {str(e)}"
+
+@teacher_bp.route("/fix_db")
+def fix_db():
+    from sqlalchemy import text
+    try:
+        # Menambahkan kolom ke database PostgreSQL
+        db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS packet_type VARCHAR(20);"))
+        db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS custom_qty INTEGER;"))
+        db.session.commit()
+        return "<h1>✅ DATABASE BERHASIL DIPERBAIKI!</h1> <p>Silakan klik <a href='/teacher/dashboard'>di sini untuk ke Dashboard</a></p>"
+    except Exception as e:
+        db.session.rollback()
+        return f"<h1>❌ Gagal:</h1> <p>{str(e)}</p>"
+
