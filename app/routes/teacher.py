@@ -280,3 +280,24 @@ def student_records(student_id):
         html = '<div class="empty-inline">No records found.</div>'
 
     return jsonify(ok=True, total=len(records), unbilled=unbilled_count, html=html)
+
+
+from sqlalchemy import text
+
+@teacher_bp.route("/teacher/run_migration")
+@teacher_required
+def run_migration():
+    """
+    Route sementara untuk update database PostgreSQL di Vercel.
+    Akan menambahkan kolom packet_type dan custom_qty ke tabel receipt.
+    """
+    try:
+        # Perintah SQL khusus PostgreSQL untuk menambahkan kolom jika belum ada
+        db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS packet_type VARCHAR(20);"))
+        db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS custom_qty INTEGER;"))
+        db.session.commit()
+        
+        return "✅ Migrasi database PostgreSQL berhasil! Silakan kembali ke <a href='/teacher/dashboard'>Dashboard</a>."
+    except Exception as e:
+        db.session.rollback()
+        return f"❌ Gagal melakukan migrasi: {str(e)}"
