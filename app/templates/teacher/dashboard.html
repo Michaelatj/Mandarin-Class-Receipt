@@ -796,7 +796,7 @@ if (editAttnForm && !editAttnForm._ajaxBound) {
 }
 
 /* ════════════════════════════════════════════════════
-   PAGE NAVIGATION (Asli dari kamu)
+   PAGE NAVIGATION
    ════════════════════════════════════════════════════ */
 const NAV = (function(){
   const KEY     = 'teacher_page';
@@ -875,7 +875,7 @@ const NAV = (function(){
 })();
 
 /* ════════════════════════════════════════════════════
-   SETTINGS (Asli dari kamu)
+   SETTINGS
    ════════════════════════════════════════════════════ */
 (function(){
   const form = document.getElementById('settingsForm');
@@ -907,7 +907,7 @@ const NAV = (function(){
 })();
 
 /* ════════════════════════════════════════════════════
-   SCHEDULE — CREATE (Asli dari kamu)
+   SCHEDULE — CREATE
    ════════════════════════════════════════════════════ */
 const clearSchedBtn = document.getElementById('clearScheduleDate');
 const schedAtInput = document.getElementById('scheduleAt');
@@ -1006,7 +1006,7 @@ function attachScBtns() {
 attachScBtns();
 
 /* ════════════════════════════════════════════════════
-   ATTENDANCE — ADD (Asli dari kamu)
+   ATTENDANCE — ADD
    ════════════════════════════════════════════════════ */
 {% if all_students %}
 (function(){
@@ -1070,7 +1070,7 @@ function attachDelAttn(form) {
 document.querySelectorAll('.del-attn-form').forEach(attachDelAttn);
 
 /* ════════════════════════════════════════════════════
-   ATTENDANCE — VIEW / SEARCH / FILTERS (Asli dari kamu)
+   ATTENDANCE — VIEW / SEARCH / FILTERS
    ════════════════════════════════════════════════════ */
 const attnDrawer = document.getElementById('attnDrawer');
 const attnDrawerTitle = document.getElementById('attnDrawerTitle');
@@ -1139,7 +1139,7 @@ attnDrawerClose.addEventListener('click', () => {
 });
 
 /* ════════════════════════════════════════════════════
-   FEE SETTINGS (Asli dari kamu)
+   FEE SETTINGS
    ════════════════════════════════════════════════════ */
 document.querySelectorAll('.fee-form').forEach(f => {
   f.addEventListener('submit', async function(e) {
@@ -1160,6 +1160,13 @@ document.querySelectorAll('.fee-form').forEach(f => {
     finally { if (btn) { btn.disabled=false; btn.classList.remove('loading'); } }
   });
 });
+
+/* ════════════════════════════════════════════════════
+   RECEIPT MODAL LOGIC & EDIT DETAIL
+   ════════════════════════════════════════════════════ */
+(function(){
+  const overlay = document.getElementById('receiptModal');
+  const box     = document.getElementById('receiptModalBox');
 
   window.userPackageType = "{{ user.package_type if user.package_type is defined else 'session' }}"; 
 
@@ -1309,99 +1316,4 @@ document.querySelectorAll('.fee-form').forEach(f => {
             const pip=nav.querySelector('.snav-pip,.bnav-pip');
             if(pip){const n=parseInt(pip.textContent)-1; if(n>0)pip.textContent=n; else pip.remove();}
           });
-          showToast(r.msg||'✓ Marked paid'); close();
-          open(card);
-        } else if(btn){btn.disabled=false;btn.classList.remove('loading');}
-      });
-    });
-
-    box.querySelectorAll('.del-receipt-btn').forEach(btn=>{
-      btn.addEventListener('click', async function(){
-        if (!await confirm2('Delete this receipt?','This cannot be undone.','🗑 Delete','danger')) return;
-        this.disabled=true; this.textContent='Deleting…';
-        const r = await apiFetch('/teacher/delete_receipt/'+this.dataset.rid, new FormData());
-        if (r) {
-          document.getElementById('rc-'+this.dataset.rid)?.remove();
-          showToast('Receipt deleted'); close();
-        } else { this.disabled=false; this.textContent='🗑 Delete Receipt'; }
-      });
-    });
-  }
-
-  function close() { overlay.classList.add('hidden'); document.body.style.overflow=''; }
-  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
-  document.getElementById('receiptModalClose').onclick = close;
-  document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
-
-  window.attachReceiptCard = function(c) {
-    if (c._rcOk) return; c._rcOk = true;
-    c.addEventListener('click', ()=>open(c));
-    c.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ')open(c); });
-  };
-  document.querySelectorAll('#receiptList .rc-card').forEach(attachReceiptCard);
-
-  const smb = document.getElementById('showMoreReceipts');
-  if (smb) {
-    const cards = Array.from(document.querySelectorAll('#receiptList .rc-card'));
-    cards.forEach((c,i)=>{ if(i>=5) c.classList.add('rc-hidden'); });
-    smb.addEventListener('click', function(){ cards.forEach(c=>c.classList.remove('rc-hidden')); this.remove(); });
-  }
-
-  window.editReceiptDetail = function(rid) {
-      const card = document.getElementById('rc-' + rid);
-      if(!card) return;
-
-      const fee = card.dataset.fee;
-      const dates = (card.dataset.dates || '').split('|').filter(Boolean);
-      const qty = card.dataset.customQty ? card.dataset.customQty : dates.length;
-      
-      let pType = card.dataset.packetType || window.userPackageType || 'session';
-      if (pType !== 'monthly' && pType !== 'session') pType = 'session'; 
-
-      document.getElementById('editRcType').value = pType;
-      document.getElementById('editRcQty').value = qty;
-      document.getElementById('editRcFee').value = fee;
-
-      document.getElementById('editReceiptForm').action = '/teacher/edit_receipt/' + rid;
-      document.getElementById('editReceiptModal').classList.remove('hidden');
-  };
-
-  document.getElementById('editReceiptClose').onclick = () => document.getElementById('editReceiptModal').classList.add('hidden');
-
-  const editRcForm = document.getElementById('editReceiptForm');
-  if (editRcForm && !editRcForm._ajaxBound) {
-      editRcForm._ajaxBound = true;
-      ajaxForm(editRcForm, function(data) {
-          document.getElementById('editReceiptModal').classList.add('hidden');
-          if (data.ok) {
-              setTimeout(() => location.reload(), 500); 
-          }
-      });
-  }
-
-})();
-
-function confirm2(title, msg, okLabel, type) {
-  return new Promise(resolve=>{
-    const m   = document.getElementById('confirmModal');
-    const ok = document.getElementById('confirmOk');
-    document.getElementById('confirmIcon').textContent  = type==='danger'?'🗑':type==='warn'?'⚠️':'ℹ️';
-    document.getElementById('confirmTitle').textContent = title;
-    document.getElementById('confirmMsg').textContent   = msg;
-    ok.textContent = okLabel||'Confirm';
-    ok.className   = 'btn bsm '+(type==='danger'?'bdel':type==='warn'?'bdel-outline':'br');
-    m.classList.remove('hidden');
-    function done(v) {
-      m.classList.add('hidden');
-      ok.removeEventListener('click',onY);
-      document.getElementById('confirmCancel').removeEventListener('click',onN);
-      resolve(v);
-    }
-    function onY(){done(true);}  function onN(){done(false);}
-    ok.addEventListener('click',onY);
-    document.getElementById('confirmCancel').addEventListener('click',onN);
-    m.addEventListener('click', function h(e){ if(e.target===m){done(false);m.removeEventListener('click',h);} },{once:true});
-  });
-}
-</script>
-{% endblock %}
+          showToast(r.msg||'✓ Marked paid');
