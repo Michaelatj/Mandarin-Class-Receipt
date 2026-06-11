@@ -490,6 +490,31 @@
   </div>
 </div>
 
+{# ── Edit Receipt Modal ── #}
+<div class="modal-overlay hidden" id="editReceiptModal">
+  <div class="modal-box">
+    <button class="modal-close" id="editReceiptClose">✕</button>
+    <h3>✏️ Edit Detail Receipt</h3>
+    <form id="editReceiptForm" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      
+      <label>Tipe Paket</label>
+      <select name="packet_type" id="editRcType">
+        <option value="session">Per Session</option>
+        <option value="monthly">Monthly</option>
+      </select>
+      
+      <label>Quantity (Sesi/Bulan)</label>
+      <input type="number" name="custom_qty" id="editRcQty" required>
+      
+      <label>Total Harga (Rp)</label>
+      <input type="number" name="total_fee" id="editRcFee" required>
+      
+      <button class="btn bg" type="submit" style="margin-top: 12px;">Save Changes</button>
+    </form>
+  </div>
+</div>
+
 {# ── Reset Password Modal ── #}
 <div class="modal-overlay hidden" id="resetPwModal">
   <div class="modal-box">
