@@ -16,7 +16,7 @@
      data-show-paid="{{ '1' if show_paid_btn else '0' }}"
      data-paid-url="{{ url_for('teacher.paid', receipt_id=r.id) if show_paid_btn and r else '' }}"
      data-packet-type="{{ r.packet_type or '' }}" 
-     data-custom-qty="{{ r.custom_qty or '' }}"
+     data-custom-qty="{{ r.custom_qty if r.custom_qty is not none else '' }}"
      tabindex="0" role="button" aria-label="View receipt #{{ display_no }}">
   <div class="rc-mid">
     <div class="rc-top">
@@ -26,7 +26,20 @@
     </div>
     <div class="rc-bottom">
       <span class="rc-date">{{ fmt_date(issue_wib) }}</span>
-      <span class="rc-sessions">{{ dates|length }} sessions</span>
+      
+      {# --- LOGIKA BARU UNTUK SESSION / MONTH --- #}
+      {% set p_type = r.packet_type if r.packet_type else 'session' %}
+      {% set qty = r.custom_qty if r.custom_qty is not none else dates|length %}
+      
+      <span class="rc-sessions">
+        {% if p_type == 'monthly' %}
+          {{ qty if qty > 0 else 1 }} sessions per month ({{ dates|length }} logs)
+        {% else %}
+          {{ qty }} session{{ 's' if qty != 1 else '' }}
+        {% endif %}
+      </span>
+      {# ----------------------------------------- #}
+
     </div>
   </div>
   <div class="rc-right">
