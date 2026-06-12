@@ -1170,13 +1170,12 @@ document.querySelectorAll('.fee-form').forEach(f => {
     let tableRows = '';
     
     if (packageType === 'monthly') {
+      const moQty = qty > 0 ? qty : 1; // Ambil nilai qty asli, jika 0 maka jadikan 1
       tableRows = `
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px 4px; color: #333;">Mandarin Course Fee (Monthly Package)</td>
-          <td style="text-align: center; padding: 10px 4px; color: #333;">1 mo</td>
+          <td style="text-align: center; padding: 10px 4px; color: #333;">${moQty} mo</td>
           <td style="text-align: right; padding: 10px 4px; color: #333;">Rp ${fee.toLocaleString('id-ID')}</td>
-          <td style="text-align: right; padding: 10px 4px; font-weight: bold; color: #333;">Rp ${fee.toLocaleString('id-ID')}</td>
-        </tr>
       `;
     } else {
       const rate = qty > 0 ? Math.round(fee / qty) : 0;
