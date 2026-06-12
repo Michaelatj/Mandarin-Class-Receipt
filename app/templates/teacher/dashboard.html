@@ -1170,7 +1170,7 @@ document.querySelectorAll('.fee-form').forEach(f => {
     let tableRows = '';
     
     if (packageType === 'monthly') {
-      const moQty = qty > 0 ? qty : 8; // Default 8 sessions per month
+      const moQty = qty > 0 ? qty : 8; 
       tableRows = `
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px 4px; color: #333;">Mandarin Course Fee (Monthly Package)</td>
@@ -1192,7 +1192,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
     }
 
     const datesHtml = dates.map((raw, i) => {
-      // PERBAIKAN: Ubah spasi menjadi 'T' agar browser tidak Error (Invalid Date)
       let cleanRaw = raw.trim().replace(' ', 'T');
       if (!cleanRaw.endsWith('Z') && !cleanRaw.includes('+')) {
           cleanRaw += 'Z';
@@ -1204,7 +1203,7 @@ document.querySelectorAll('.fee-form').forEach(f => {
           const pad = (n) => String(n).padStart(2, '0');
           localIso = dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()) + 'T' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
       }
-
+      
       return `
         <div class="rm-date-item" style="display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #eee;">
           <span style="color: #d4af37; font-weight: bold; min-width: 25px;">#${i+1}</span>
@@ -1243,7 +1242,7 @@ document.querySelectorAll('.fee-form').forEach(f => {
           <thead>
             <tr style="border-bottom: 2px solid #eee; color: #555; font-weight: bold;">
               <th style="text-align: left; padding: 8px 4px;">Package Description</th>
-              <th style="text-align: center; padding: 8px 4px; width: 120px;">Qty</th>
+              <th style="text-align: center; padding: 8px 4px; width: 60px;">Qty</th>
               <th style="text-align: right; padding: 8px 4px; width: 100px;">Rate</th>
               <th style="text-align: right; padding: 8px 4px; width: 110px;">Amount</th>
             </tr>
@@ -1274,3 +1273,135 @@ document.querySelectorAll('.fee-form').forEach(f => {
         </div>
       </div>`;
   }
+
+  function open(card) {
+    box.innerHTML = build(card);
+    overlay.classList.remove('hidden');
+    document.body.style.overflow='hidden';
+
+    box.querySelectorAll('#editReceiptDatesForm').forEach(f => {
+      f.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('button[type="submit"]');
+        if (btn) { btn.disabled = true; btn.textContent = 'Saving dates...'; }
+        
+        const r = await apiFetch(this.action, new FormData(this));
+        if (r && r.ok) {
+            showToast(r.msg || '✓ Tanggal sesi diperbarui');
+            setTimeout(() => location.reload(), 500);
+        } else {
+            if (btn) { btn.disabled = false; btn.innerHTML = '⚙️ Save All Session Dates'; }
+        }
+      });
+    });
+
+    box.querySelectorAll('.mark-paid-form').forEach(f=>{
+      f.addEventListener('submit', async function(e){
+        e.preventDefault();
+        const btn=this.querySelector('button'); if(btn){btn.disabled=true;btn.classList.add('loading');}
+        const r = await apiFetch(this.action, new FormData(this));
+        if (r) {
+          card.dataset.paid='1';
+          const b=card.querySelector('.bup'); if(b){b.className='bpd';b.textContent='Paid';}
+          ['#sideNav','#bottomNav'].forEach(sel=>{
+            const nav=document.querySelector(sel+' [data-page="receipts"]');
+            if(!nav)return;
+            const pip=nav.querySelector('.snav-pip,.bnav-pip');
+            if(pip){const n=parseInt(pip.textContent)-1; if(n>0)pip.textContent=n; else pip.remove();}
+          });
+          showToast(r.msg||'✓ Marked paid'); close();
+          open(card);
+        } else if(btn){btn.disabled=false;btn.classList.remove('loading');}
+      });
+    });
+
+    box.querySelectorAll('.del-receipt-btn').forEach(btn=>{
+      btn.addEventListener('click', async function(){
+        if (!await confirm2('Delete this receipt?','This cannot be undone.','🗑 Delete','danger')) return;
+        this.disabled=true; this.textContent='Deleting…';
+        const r = await apiFetch('/teacher/delete_receipt/'+this.dataset.rid, new FormData());
+        if (r) {
+          document.getElementById('rc-'+this.dataset.rid)?.remove();
+          showToast('Receipt deleted'); close();
+        } else { this.disabled=false; this.textContent='🗑 Delete Receipt'; }
+      });
+    });
+  }
+
+  function close() { overlay.classList.add('hidden'); document.body.style.overflow=''; }
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+  document.getElementById('receiptModalClose').onclick = close;
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+
+  window.attachReceiptCard = function(c) {
+    if (c._rcOk) return; c._rcOk = true;
+    c.addEventListener('click', ()=>open(c));
+    c.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ')open(c); });
+  };
+  document.querySelectorAll('#receiptList .rc-card').forEach(attachReceiptCard);
+
+  const smb = document.getElementById('showMoreReceipts');
+  if (smb) {
+    const cards = Array.from(document.querySelectorAll('#receiptList .rc-card'));
+    cards.forEach((c,i)=>{ if(i>=5) c.classList.add('rc-hidden'); });
+    smb.addEventListener('click', function(){ cards.forEach(c=>c.classList.remove('rc-hidden')); this.remove(); });
+  }
+
+  window.editReceiptDetail = function(rid) {
+      const card = document.getElementById('rc-' + rid);
+      if(!card) return;
+
+      const fee = card.dataset.fee;
+      const dates = (card.dataset.dates || '').split('|').filter(Boolean);
+      const qty = card.dataset.customQty ? card.dataset.customQty : dates.length;
+      
+      let pType = card.dataset.packetType || window.userPackageType || 'session';
+      if (pType !== 'monthly' && pType !== 'session') pType = 'session'; 
+
+      document.getElementById('editRcType').value = pType;
+      document.getElementById('editRcQty').value = qty;
+      document.getElementById('editRcFee').value = fee;
+
+      document.getElementById('editReceiptForm').action = '/teacher/edit_receipt/' + rid;
+      document.getElementById('editReceiptModal').classList.remove('hidden');
+  };
+
+  document.getElementById('editReceiptClose').onclick = () => document.getElementById('editReceiptModal').classList.add('hidden');
+
+  const editRcForm = document.getElementById('editReceiptForm');
+  if (editRcForm && !editRcForm._ajaxBound) {
+      editRcForm._ajaxBound = true;
+      ajaxForm(editRcForm, function(data) {
+          document.getElementById('editReceiptModal').classList.add('hidden');
+          if (data.ok) {
+              setTimeout(() => location.reload(), 500); 
+          }
+      });
+  }
+
+})();
+
+function confirm2(title, msg, okLabel, type) {
+  return new Promise(resolve=>{
+    const m   = document.getElementById('confirmModal');
+    const ok = document.getElementById('confirmOk');
+    document.getElementById('confirmIcon').textContent  = type==='danger'?'🗑':type==='warn'?'⚠️':'ℹ️';
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent   = msg;
+    ok.textContent = okLabel||'Confirm';
+    ok.className   = 'btn bsm '+(type==='danger'?'bdel':type==='warn'?'bdel-outline':'br');
+    m.classList.remove('hidden');
+    function done(v) {
+      m.classList.add('hidden');
+      ok.removeEventListener('click',onY);
+      document.getElementById('confirmCancel').removeEventListener('click',onN);
+      resolve(v);
+    }
+    function onY(){done(true);}  function onN(){done(false);}
+    ok.addEventListener('click',onY);
+    document.getElementById('confirmCancel').addEventListener('click',onN);
+    m.addEventListener('click', function h(e){ if(e.target===m){done(false);m.removeEventListener('click',h);} },{once:true});
+  });
+}
+</script>
+{% endblock %}
