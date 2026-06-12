@@ -33,7 +33,7 @@
       
       <span class="rc-sessions">
         {% if p_type == 'monthly' %}
-          {{ qty if qty > 0 else 1 }} month ({{ dates|length }} logs)
+          {{ qty if qty > 0 else 1 }} sessions per month ({{ dates|length }} logs)
         {% else %}
           {{ qty }} session{{ 's' if qty != 1 else '' }}
         {% endif %}
