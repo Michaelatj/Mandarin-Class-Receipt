@@ -55,6 +55,36 @@ def dashboard():
     student_sessions = {s.id: Attendance.query.filter_by(student_id=s.id, teacher_id=teacher.id).count() for s in all_students}
     student_unbilled = {s.id: Attendance.query.filter_by(student_id=s.id, teacher_id=teacher.id, billed=False).count() for s in all_students}
 
+    # --- BUG 2 FIX: Teacher VIP Notification Radar 📡 ---
+    import json as _json
+    try:
+        seen = _json.loads(teacher.seen_pips or "{}")
+    except Exception:
+        seen = {}
+
+    if not seen:
+        seen = {
+            "classes": up_count,
+            "attendance": len(unbilled_records),
+            "receipts": unpaid_cnt,
+        }
+        try:
+            teacher.seen_pips = _json.dumps(seen)
+            db.session.commit()
+        except Exception:
+            pass
+
+    def _pip(tab, current):
+        last = seen.get(tab, None)
+        if last is None:
+            return False
+        return current > int(last)
+
+    show_classes_pip    = up_count > 0 and _pip("classes", up_count)
+    show_attendance_pip = len(unbilled_records) > 0 and _pip("attendance", len(unbilled_records))
+    show_receipts_pip   = unpaid_cnt > 0 and _pip("receipts", unpaid_cnt)
+    # ----------------------------------------------------
+
     return render_template("teacher/dashboard.html",
         user=teacher, receipts=receipts, all_students=all_students,
         progress=progress, custom_fees=custom_fees, custom_fee_types=custom_fee_types,
@@ -62,6 +92,9 @@ def dashboard():
         schedules=schedules, up_count=up_count, attn_count=len(unbilled_records),
         student_sessions=student_sessions, student_unbilled=student_unbilled,
         student_count=len(all_students), now=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+        show_classes_pip=show_classes_pip, 
+        show_attendance_pip=show_attendance_pip, 
+        show_receipts_pip=show_receipts_pip,
         quote=random_quote())
 
 @teacher_bp.route("/teacher/update_settings", methods=["POST"])
