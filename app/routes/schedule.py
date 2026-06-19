@@ -210,14 +210,33 @@ def join(sid):
             return jsonify(ok=True, already=True, meet_link=s.meet_link, msg="You already joined this class")
         return redirect(s.meet_link or url_for("student.dashboard"))
 
-    att = add_attendance(student_id=student.id, teacher_id=s.teacher_id,
-                         date=datetime.utcnow(), note=f"Joined: {s.title}", source='join')
+    # --- BUG 1 FIX: 90-Min Cooldown Radar 📡 ---
+    COOLDOWN_SECONDS = 90 * 60
+    last_att = (Attendance.query
+                .filter(Attendance.student_id==student.id,
+                        Attendance.source.in_(['student','join']))
+                .order_by(Attendance.date.desc())
+                .first())
+    
+    cooldown_blocked = False
+    att = None
+
+    # Check if they just submitted an attendance recently
+    if last_att:
+        elapsed_sec = (datetime.utcnow() - last_att.date).total_seconds()
+        if 0 < elapsed_sec < COOLDOWN_SECONDS:
+            cooldown_blocked = True
+            att = last_att  # Link to the existing one! No double records! 🛑
+
+    # Only create a new attendance if they passed the cooldown
+    if not cooldown_blocked:
+        att = add_attendance(student_id=student.id, teacher_id=s.teacher_id,
+                             date=datetime.utcnow(), note=f"Joined: {s.title}", source='join')
 
     sj = ScheduleJoin(schedule_id=sid, student_id=student.id, attendance_id=att.id if att else None)
     db.session.add(sj)
     db.session.commit()
 
-    cooldown_blocked = att is None
     msg = "Opening Meet…" if not cooldown_blocked else "Joining Meet (attendance already recorded in last 90 min)"
 
     if _is_ajax():
