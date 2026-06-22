@@ -347,4 +347,20 @@ def fix_db():
     except Exception as e:
         db.session.rollback()
         return f"<h1>❌ Gagal:</h1> <p>{str(e)}</p>"
-
+@teacher_bp.route("/teacher/force_receipt/<int:student_id>", methods=["POST"])
+@teacher_required
+def force_receipt(student_id):
+    teacher = _get_teacher()
+    # Panggil fungsi dengan force=True
+    new_receipts = generate_receipts(student_id, teacher.id, force=True)
+    
+    if new_receipts:
+        if _is_ajax(): 
+            return jsonify(ok=True, msg="Receipt berhasil di-generate secara manual!")
+        flash("Receipt berhasil di-generate secara manual!", "ok")
+    else:
+        if _is_ajax(): 
+            return jsonify(ok=False, msg="Tidak ada attendance yang belum dibayar.")
+        flash("Tidak ada attendance yang belum dibayar.", "err")
+        
+    return redirect(url_for("teacher.dashboard"))
