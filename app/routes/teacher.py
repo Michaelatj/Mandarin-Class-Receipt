@@ -10,6 +10,7 @@ from ..models import User, Receipt, Attendance, StudentFee, Schedule, ScheduleJo
 from ..services.attendance import (
     add_attendance, delete_attendance,
     mark_receipt_paid, get_student_progress, set_custom_fee,
+    generate_receipts  # <--- Tambahkan ini di sini! 🎯
 )
 from ..services.i18n import tr, fmt_date, random_quote, to_wib, fmt_idr
 from ..services.security import hash_password
