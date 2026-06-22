@@ -24,9 +24,8 @@ def get_student_progress(teacher_id: int) -> list[dict]:
         progress[record.student_id]["dates"].append(record.date)
     return list(progress.values())
 
-def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
+def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> list[Receipt]:
     new_receipts = []
-    # Ambil absensi yang belum dibayar
     unbilled = Attendance.query.filter_by(
         student_id=student_id, teacher_id=teacher_id, billed=False
     ).order_by(Attendance.date.asc()).all()
@@ -47,21 +46,20 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
     first_date = unbilled[0].date
     days_since_start = (datetime.utcnow() - first_date).days
 
-    # LOGIKA BILLING
-    # Pemicu: 30 hari sudah lewat (bulanan/per sesi) ATAU sudah 8x sesi (default)
     should_bill = False
     total_fee = 0
     
+    # FIX: Tambahkan kondisi `or force` di setiap pilihan 💥
     if packet_type == 'monthly':
-        if days_since_start >= 30:
+        if days_since_start >= 30 or force:
             should_bill = True
-            total_fee = base_fee # Harga flat per bulan
+            total_fee = base_fee
     elif packet_type == 'per_session':
-        if days_since_start >= 30:
+        if days_since_start >= 30 or force:
             should_bill = True
-            total_fee = len(unbilled) * base_fee # Harga dikali jumlah sesi
-    else: # Default legacy cycle
-        if len(unbilled) >= 8:
+            total_fee = len(unbilled) * base_fee
+    else: 
+        if len(unbilled) >= 8 or force:
             should_bill = True
             total_fee = len(unbilled) * base_fee
 
@@ -71,7 +69,8 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
             teacher_id=teacher_id, teacher_name=teacher.name(),
             total_fee=total_fee, bank_account=t_bank_acc, bank_name=t_bank_name,
             raw_dates="|".join([cls.date.isoformat() for cls in unbilled]),
-            issue_date=datetime.utcnow(), paid=False
+            issue_date=datetime.utcnow(), paid=False,
+            packet_type=packet_type, custom_qty=len(unbilled) # Simpan qty aktual saat diregenerate
         )
         db.session.add(receipt)
         for cls in unbilled: cls.billed = True
