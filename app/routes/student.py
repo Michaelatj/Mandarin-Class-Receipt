@@ -161,12 +161,9 @@ def mark_attendance():
         flash(tr("err_user"), "err")
         return redirect(url_for("student.dashboard"))
 
-    # Save tz_offset in session so Jinja templates can display local time
     tz_offset = request.form.get("tz_offset", type=int, default=0)
     session["tz_offset"] = tz_offset
 
-    # 90-minute cooldown — block if student already submitted or joined a class recently.
-    # Only check source='student' or source='join' records (not teacher manual adds).
     COOLDOWN_SECONDS = 90 * 60
     last_att = (Attendance.query
                 .filter(Attendance.student_id==user.id,
@@ -182,10 +179,8 @@ def mark_attendance():
             flash(msg, "err")
             return redirect(url_for("student.dashboard"))
 
-    # Store UTC in DB — display offset is applied at render time via local_dt()
     now_utc = datetime.utcnow()
     add_attendance(student_id=user.id, teacher_id=teacher.id, date=now_utc, source='student')
-
 
     if _is_ajax():
         unbilled       = Attendance.query.filter_by(student_id=user.id, billed=False)\
@@ -196,19 +191,16 @@ def mark_attendance():
             a.teacher_name = t.name() if t else "?"
 
         cnt  = len(unbilled)
-        pct  = min(int(cnt / 8 * 100), 100)
-        rem  = 8 - cnt
-        lang = session.get('lang', 'en')
-        rem_txt = f'还需 {rem} 节课后生成收据' if lang == 'zh' \
-                  else f"{rem} more {'class' if rem==1 else 'classes'} until next receipt"
-
-        # Apply WIB (UTC+7) for all time display
+        
+        # ── FIX: Hilangkan batas 8 dan biarkan fleksibel ──
+        # Buat minimal 8 kotak. Kalau kehadiran (cnt) lebih dari 8, kotaknya memanjang mengikuti cnt.
+        box_count = max(8, cnt)
+        
         from ..services.i18n import to_wib as _to_wib
 
-        # Build cycle-grid HTML with WIB time applied
         cells = ""
-        for i in range(8):
-            if i < len(unbilled):
+        for i in range(box_count):
+            if i < cnt:
                 a    = unbilled[i]
                 ldt  = _to_wib(a.date)
                 cells += (
@@ -232,24 +224,20 @@ def mark_attendance():
                 f'<div class="cycle-card">'
                 f'<div class="cycle-header">'
                 f'<div>'
-                f'<div class="cycle-title">{cnt} / 8 {tr("classes_done")}</div>'
-                f'<div class="cycle-sub">{tr("with_teacher")} {teacher.name()} · {rem_txt}</div>'
+                f'<div class="cycle-title">{cnt} {tr("classes_done")}</div>'
+                f'<div class="cycle-sub">{tr("with_teacher")} {teacher.name()}</div>'
                 f'</div>'
-                f'<div class="cycle-pct">{pct}%</div>'
                 f'</div>'
-                f'<div class="cycle-bar"><div class="cycle-fill" style="width:{pct}%"></div></div>'
                 f'<div class="cycle-grid">{cells}</div>'
                 f'</div>'
             )
         else:
             progress_html = f'<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">{tr("no_progress")}</div></div>'
 
-        # Check if a new receipt was just generated (cycle completed)
         new_receipts = Receipt.query.filter_by(student_id=user.id)\
                            .order_by(Receipt.issue_date.desc()).all()
         receipt_count = len(new_receipts)
 
-        # Build receipt card HTML only when a new receipt was just created (cnt reset to 0)
         new_receipt_html = None
         if cnt == 0 and new_receipts:
             r = new_receipts[0]
@@ -299,7 +287,6 @@ def mark_attendance():
 
     flash(tr("ok_attn"), "ok")
     return redirect(url_for("student.dashboard"))
-
 
 @student_bp.route("/update_profile", methods=["POST"])
 @login_required
