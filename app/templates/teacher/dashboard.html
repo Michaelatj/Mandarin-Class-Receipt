@@ -36,7 +36,7 @@
       <button class="snav-btn" data-page="attendance">
         <span class="snav-icon">✅</span>
         <span class="snav-label">Attendance</span>
-        {% if show_attn_pip %}<span class="snav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
+        {% if show_attendance_pip %}<span class="snav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="students">
         <span class="snav-icon">👥</span>
@@ -181,13 +181,13 @@
             <div id="progressList">
             {% if progress %}
             <div class="data-table">
-              <div class="dt-head" style="grid-template-columns:1fr 80px 120px 44px">
+              <div class="dt-head" style="grid-template-columns:1fr 80px 120px 80px">
                 <span>Student</span><span>Unbilled</span><span>Progress</span><span></span>
               </div>
               {% for sp in progress %}
               {% set is_zero = sp.count == 0 %}
               <div class="dt-row prog-row" id="prog-{{ sp.student_id }}"
-                   style="grid-template-columns:1fr 80px 120px 44px;cursor:pointer{% if is_zero %};opacity:.65{% endif %}"
+                   style="grid-template-columns:1fr 80px 120px 80px;cursor:pointer{% if is_zero %};opacity:.65{% endif %}"
                    data-id="{{ sp.student_id }}" data-name="{{ sp.name }}">
                 <div>
                   <div class="dt-name">{{ sp.name }}</div>
@@ -202,8 +202,16 @@
                     <div class="progress-fill" style="width:{{ [sp.count/8*100|int,100]|min }}%"></div>
                   </div>
                 </div>
-                <button class="btn bg bsm view-attn-btn"
-                        data-id="{{ sp.student_id }}" data-name="{{ sp.name }}">📋</button>
+                
+                {# --- TOMBOL GENERATE MANUAL & VIEW --- #}
+                <div style="display: flex; gap: 4px;">
+                  <form class="force-rc-form" method="POST" action="{{ url_for('teacher.force_receipt', student_id=sp.student_id) }}" style="margin:0;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn bgh bsm" title="Force Print Receipt" {% if is_zero %}disabled{% endif %}>🧾</button>
+                  </form>
+                  <button class="btn bg bsm view-attn-btn" data-id="{{ sp.student_id }}" data-name="{{ sp.name }}">📋</button>
+                </div>
+                {# ------------------------------------- #}
               </div>
               {% endfor %}
             </div>
@@ -249,13 +257,13 @@
         </div>
         {% if all_students %}
         <div class="data-table" style="margin-bottom:24px">
-          <div class="dt-head">
-            <span>Student</span><span>Joined</span><span>Sessions</span><span>Password</span><span></span>
+          <div class="dt-head" style="grid-template-columns: 1fr 100px 100px 80px 80px;">
+            <span>Student</span><span>Joined</span><span>Sessions</span><span>Billing</span><span>Actions</span>
           </div>
           {% for s in all_students %}
           {% set ss = student_sessions.get(s.id, 0) %}
           {% set su = student_unbilled.get(s.id, 0) %}
-          <div class="dt-row" id="srow-{{ s.id }}">
+          <div class="dt-row" id="srow-{{ s.id }}" style="grid-template-columns: 1fr 100px 100px 80px 80px;">
             <div>
               <div class="dt-name">{{ s.name() }}</div>
               <div class="dt-meta">@{{ s.username }}</div>
@@ -265,10 +273,20 @@
               <div class="dt-sessions">{{ ss }}</div>
               {% if su > 0 %}<div class="dt-pending">{{ su }} pending</div>{% endif %}
             </div>
-            <button class="btn bg bsm reset-pw-btn"
-                    data-id="{{ s.id }}" data-name="{{ s.name() }}">🔑 Reset</button>
-            <button class="btn bdel-outline bsm del-student-btn"
-                    data-id="{{ s.id }}" data-name="{{ s.name() }}">🗑</button>
+            
+            {# --- TOMBOL GENERATE MANUAL --- #}
+            <form class="force-rc-form" method="POST" action="{{ url_for('teacher.force_receipt', student_id=s.id) }}" style="margin:0;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="btn bgh bsm" {% if su == 0 %}disabled{% endif %}>🧾 Print</button>
+            </form>
+            {# ------------------------------ #}
+
+            <div style="display:flex; gap:4px;">
+              <button class="btn bg bsm reset-pw-btn"
+                      data-id="{{ s.id }}" data-name="{{ s.name() }}" title="Reset Password">🔑</button>
+              <button class="btn bdel-outline bsm del-student-btn"
+                      data-id="{{ s.id }}" data-name="{{ s.name() }}" title="Delete Student">🗑</button>
+            </div>
           </div>
           {% endfor %}
         </div>
@@ -400,7 +418,7 @@
     </button>
     <button class="bnav-btn" data-page="attendance">
       <div class="bnav-icon">✅
-        {% if show_attn_pip %}<span class="bnav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
+        {% if show_attendance_pip %}<span class="bnav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
       </div>
       <span>Attend</span>
     </button>
@@ -1035,6 +1053,9 @@ attachScBtns();
       document.getElementById('progressEmpty')?.remove();
       pl.innerHTML = data.progress_html;
       pl.querySelectorAll('.view-attn-btn').forEach(attachViewAttn);
+      
+      // Re-attach force-rc listeners inside the new HTML
+      pl.querySelectorAll('.force-rc-form').forEach(attachForceRcBtn);
     }
   });
 })();
@@ -1403,5 +1424,36 @@ function confirm2(title, msg, okLabel, type) {
     m.addEventListener('click', function h(e){ if(e.target===m){done(false);m.removeEventListener('click',h);} },{once:true});
   });
 }
+
+/* ════════════════════════════════════════════════════
+   FITUR BARU: FORCE MANUAL RECEIPT
+   ════════════════════════════════════════════════════ */
+function attachForceRcBtn(form) {
+  if (form._forceRcBound) return;
+  form._forceRcBound = true;
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    if (!await confirm2('Print Manual Receipt?', 'Paksa buat receipt sekarang meskipun cycle belum selesai?', '🧾 Print', 'info')) return;
+    
+    const btn = this.querySelector('button');
+    const originalText = btn.innerHTML;
+    btn.disabled = true; 
+    btn.innerHTML = '...';
+    
+    const r = await apiFetch(this.action, new FormData(this));
+    if (r && r.ok) {
+        showToast('✓ ' + r.msg);
+        setTimeout(() => location.reload(), 800);
+    } else {
+        btn.disabled = false; 
+        btn.innerHTML = originalText;
+    }
+  });
+}
+
+// Attach to all force receipt forms on load
+document.querySelectorAll('.force-rc-form').forEach(attachForceRcBtn);
+
 </script>
 {% endblock %}

@@ -218,9 +218,13 @@ def parse_raw_dates(raw: str) -> list[datetime]:
     result = []
     for part in raw.split("|"):
         part = part.strip()
+        # Clean up 'Z' if present, to be safe
+        if part.endswith("Z"):
+            part = part[:-1] + "+00:00"
         if part:
             try:
-                result.append(datetime.strptime(part, "%Y-%m-%dT%H:%M:%S"))
+                # FIX: Use fromisoformat which handles microseconds automatically! 🎯
+                result.append(datetime.fromisoformat(part))
             except ValueError:
                 pass
     return result

@@ -10,6 +10,7 @@ from ..models import User, Receipt, Attendance, StudentFee, Schedule, ScheduleJo
 from ..services.attendance import (
     add_attendance, delete_attendance,
     mark_receipt_paid, get_student_progress, set_custom_fee,
+    generate_receipts  # <--- Tambahkan ini di sini! 🎯
 )
 from ..services.i18n import tr, fmt_date, random_quote, to_wib, fmt_idr
 from ..services.security import hash_password
@@ -347,4 +348,20 @@ def fix_db():
     except Exception as e:
         db.session.rollback()
         return f"<h1>❌ Gagal:</h1> <p>{str(e)}</p>"
-
+@teacher_bp.route("/teacher/force_receipt/<int:student_id>", methods=["POST"])
+@teacher_required
+def force_receipt(student_id):
+    teacher = _get_teacher()
+    # Panggil fungsi dengan force=True
+    new_receipts = generate_receipts(student_id, teacher.id, force=True)
+    
+    if new_receipts:
+        if _is_ajax(): 
+            return jsonify(ok=True, msg="Receipt berhasil di-generate secara manual!")
+        flash("Receipt berhasil di-generate secara manual!", "ok")
+    else:
+        if _is_ajax(): 
+            return jsonify(ok=False, msg="Tidak ada attendance yang belum dibayar.")
+        flash("Tidak ada attendance yang belum dibayar.", "err")
+        
+    return redirect(url_for("teacher.dashboard"))
