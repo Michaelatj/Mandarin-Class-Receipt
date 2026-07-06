@@ -4,13 +4,13 @@ routes/teacher.py — Teacher Blueprint
 import logging
 from datetime import datetime, timedelta
 from flask import (Blueprint, render_template, redirect, url_for,
-                   request, session, flash, jsonify, g, make_response)
+                   request, session, flash, jsonify, g, make_response, render_template_string)
 from .. import db
 from ..models import User, Receipt, Attendance, StudentFee, Schedule, ScheduleJoin, ScheduleInvite
 from ..services.attendance import (
     add_attendance, delete_attendance,
     mark_receipt_paid, get_student_progress, set_custom_fee,
-    generate_receipts  # <--- Tambahkan ini di sini! 🎯
+    generate_receipts
 )
 from ..services.i18n import tr, fmt_date, random_quote, to_wib, fmt_idr
 from ..services.security import hash_password
@@ -40,8 +40,13 @@ def _get_teacher():
 @teacher_required
 def dashboard():
     teacher = _get_teacher()
-    receipts = Receipt.query.filter_by(teacher_id=teacher.id).order_by(Receipt.issue_date.desc()).all()
     all_students = User.query.filter_by(role="student").all()
+    
+    # 🔥 AUTO-GENERATE RECEIPT TRIGGER 🔥
+    for s in all_students:
+        generate_receipts(s.id, teacher.id)
+
+    receipts = Receipt.query.filter_by(teacher_id=teacher.id).order_by(Receipt.issue_date.desc()).all()
     progress = get_student_progress(teacher.id)
     
     custom_fees = {sf.student_id: sf.fee_idr for sf in StudentFee.query.filter_by(teacher_id=teacher.id).all()}
@@ -56,7 +61,7 @@ def dashboard():
     student_sessions = {s.id: Attendance.query.filter_by(student_id=s.id, teacher_id=teacher.id).count() for s in all_students}
     student_unbilled = {s.id: Attendance.query.filter_by(student_id=s.id, teacher_id=teacher.id, billed=False).count() for s in all_students}
 
-    # --- BUG 2 FIX: Teacher VIP Notification Radar 📡 ---
+    # --- VIP Notification Radar 📡 ---
     import json as _json
     try:
         seen = _json.loads(teacher.seen_pips or "{}")
@@ -133,18 +138,49 @@ def manual_add_attendance():
     
     dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M") if date_str else datetime.utcnow()
     
-    # 1. Add attendance
     add_attendance(student_id=student_id, teacher_id=teacher.id, date=dt, note=note, source='teacher')
-    
-    # 2. Ambil data terbaru untuk update UI
     progress = get_student_progress(teacher.id)
     
-    # 3. Kembalikan data JSON agar frontend bisa update otomatis
-    return jsonify(
-        ok=True, 
-        msg=tr("ok_attn"),
-        progress_html=render_template("teacher/partials/progress_list.html", progress=progress)
-    )
+    # ── FIX: Template string langsung dirender tanpa file partial baru & hilangkan /8 ──
+    template_str = """
+    {% if progress %}
+    <div class="data-table">
+      <div class="dt-head" style="grid-template-columns:1fr 80px 80px">
+        <span>Student</span><span>Unbilled</span><span></span>
+      </div>
+      {% for sp in progress %}
+      {% set is_zero = sp.count == 0 %}
+      <div class="dt-row prog-row" id="prog-{{ sp.student_id }}"
+           style="grid-template-columns:1fr 80px 80px;cursor:pointer{% if is_zero %};opacity:.65{% endif %}"
+           data-id="{{ sp.student_id }}" data-name="{{ sp.name }}">
+        <div>
+          <div class="dt-name">{{ sp.name }}</div>
+          <div class="dt-meta">
+            {% if sp.dates %}Last: {{ fmt_date(to_wib(sp.dates[-1])) }}
+            {% else %}<span style="color:var(--text3);font-style:italic">No unbilled sessions</span>{% endif %}
+          </div>
+        </div>
+        <div style="font-weight:700;font-size:.92rem;color:{% if is_zero %}var(--text3){% else %}var(--text){% endif %}">
+            {{ sp.count }}
+        </div>
+        <div style="display: flex; gap: 4px; justify-content: flex-end;">
+          <form class="force-rc-form" method="POST" action="{{ url_for('teacher.force_receipt', student_id=sp.student_id) }}" style="margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="btn bgh bsm" title="Force Print Receipt" {% if is_zero %}disabled{% endif %}>🧾</button>
+          </form>
+          <button type="button" class="btn bg bsm view-attn-btn" data-id="{{ sp.student_id }}" data-name="{{ sp.name }}">📋</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <div class="empty-inline" id="progressEmpty">{{ tr('no_students') }}</div>
+    {% endif %}
+    """
+    
+    progress_html = render_template_string(template_str, progress=progress, fmt_date=fmt_date, to_wib=to_wib, tr=tr)
+    
+    return jsonify(ok=True, msg=tr("ok_attn"), progress_html=progress_html)
 
 @teacher_bp.route("/teacher/delete_attendance/<int:att_id>", methods=["POST"])
 @teacher_required
@@ -198,7 +234,6 @@ def edit_receipt(receipt_id):
         return jsonify(ok=False, msg="Receipt not found"), 404
     
     try:
-        # Ambil data dari form modal
         new_fee = request.form.get("total_fee", type=int)
         new_qty = request.form.get("custom_qty", type=int)
         new_type = request.form.get("packet_type")
@@ -240,9 +275,10 @@ def mark_seen():
         teacher.seen_pips = _json.dumps(seen)
         db.session.commit()
     return jsonify(ok=True)
+
 @teacher_bp.route("/teacher/mark_paid/<int:receipt_id>", methods=["POST"])
 @teacher_required
-def paid(receipt_id): # <--- Pastikan nama fungsinya 'paid'
+def paid(receipt_id):
     teacher = _get_teacher()
     if mark_receipt_paid(receipt_id, teacher.id):
         if _is_ajax():
@@ -256,8 +292,6 @@ def delete_receipt(receipt_id):
     receipt = Receipt.query.get(receipt_id)
     teacher = _get_teacher()
     if receipt and receipt.teacher_id == teacher.id:
-        # PENTING: Kembalikan status 'billed' di Attendance agar sesi bisa ditagih ulang
-        # (Opsional: Kalau kamu mau hapus riwayatnya sekalian, biarkan saja)
         db.session.delete(receipt)
         db.session.commit()
         return jsonify(ok=True)
@@ -321,16 +355,10 @@ from sqlalchemy import text
 @teacher_bp.route("/teacher/run_migration")
 @teacher_required
 def run_migration():
-    """
-    Route sementara untuk update database PostgreSQL di Vercel.
-    Akan menambahkan kolom packet_type dan custom_qty ke tabel receipt.
-    """
     try:
-        # Perintah SQL khusus PostgreSQL untuk menambahkan kolom jika belum ada
         db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS packet_type VARCHAR(20);"))
         db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS custom_qty INTEGER;"))
         db.session.commit()
-        
         return "✅ Migrasi database PostgreSQL berhasil! Silakan kembali ke <a href='/teacher/dashboard'>Dashboard</a>."
     except Exception as e:
         db.session.rollback()
@@ -340,7 +368,6 @@ def run_migration():
 def fix_db():
     from sqlalchemy import text
     try:
-        # Menambahkan kolom ke database PostgreSQL
         db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS packet_type VARCHAR(20);"))
         db.session.execute(text("ALTER TABLE receipt ADD COLUMN IF NOT EXISTS custom_qty INTEGER;"))
         db.session.commit()
@@ -348,11 +375,11 @@ def fix_db():
     except Exception as e:
         db.session.rollback()
         return f"<h1>❌ Gagal:</h1> <p>{str(e)}</p>"
+
 @teacher_bp.route("/teacher/force_receipt/<int:student_id>", methods=["POST"])
 @teacher_required
 def force_receipt(student_id):
     teacher = _get_teacher()
-    # Panggil fungsi dengan force=True
     new_receipts = generate_receipts(student_id, teacher.id, force=True)
     
     if new_receipts:
