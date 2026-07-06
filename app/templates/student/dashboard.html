@@ -133,6 +133,17 @@
                   <div class="cycle-sub">{{ tr('with_teacher') }} {{ t.name() }}</div>
                 </div>
               </div>
+              {# ── Progress Table / Cycle Grid ── #}
+            {% if unbilled_count > 0 %}
+            {# ── Progress Table / Cycle Grid ── #}
+            {% if unbilled_count > 0 %}
+            <div class="cycle-card">
+              <div class="cycle-header">
+                <div>
+                  <div class="cycle-title">{{ unbilled_count }} {{ tr('classes_done') }}</div>
+                  <div class="cycle-sub">{{ tr('with_teacher') }} {{ unbilled[0].teacher_name }}</div>
+                </div>
+              </div>
               <div class="cycle-grid">
                 {% set box_count = 8 if unbilled_count < 8 else unbilled_count %}
                 {% for i in range(box_count) %}
@@ -151,6 +162,26 @@
                       <div class="cell-empty">—</div>
                     </div>
                   {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+              <div class="empty-icon">📊</div>
+              <div class="empty-title">{{ tr('no_progress') }}</div>
+              <div class="empty-sub">Join a class to start tracking your progress.</div>
+            </div>
+            {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+              <div class="empty-icon">📊</div>
+              <div class="empty-title">{{ tr('no_progress') }}</div>
+              <div class="empty-sub">Join a class to start tracking your progress.</div>
+            </div>
+            {% endif %}
                 {% endfor %}
               </div>
             </div>
