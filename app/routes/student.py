@@ -46,8 +46,13 @@ def dashboard():
     user.session_price = fee_data.fee_idr if fee_data else 0
 
     teachers = User.query.filter_by(role="teacher").all()
+
+    # 🔥 AUTO-GENERATE RECEIPT TRIGGER 🔥
+    # Silent check in the background when dashboard loads
+    from ..services.attendance import generate_receipts
+    for t in teachers:
+        generate_receipts(user.id, t.id)
   
-    teachers       = User.query.filter_by(role="teacher").all()
     receipts       = Receipt.query.filter_by(student_id=user.id)\
                         .order_by(Receipt.issue_date.desc()).all()
     unbilled       = Attendance.query.filter_by(student_id=user.id, billed=False)\
@@ -185,7 +190,6 @@ def mark_attendance():
     # Store UTC in DB — display offset is applied at render time via local_dt()
     now_utc = datetime.utcnow()
     add_attendance(student_id=user.id, teacher_id=teacher.id, date=now_utc, source='student')
-
 
     if _is_ajax():
         unbilled       = Attendance.query.filter_by(student_id=user.id, billed=False)\
