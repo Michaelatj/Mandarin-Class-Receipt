@@ -126,24 +126,34 @@
               </div>
               <div class="cycle-pct">{{ pct }}%</div>
             </div>
-            <div class="cycle-bar"><div class="cycle-fill" style="width:{{ pct }}%"></div></div>
-            <div class="cycle-grid">
-              {% for i in range(8) %}
-                {% set a = unbilled[i] if i < unbilled|length else none %}
-                <div class="cycle-cell {{ 'done' if a else 'empty-cell' }}">
-                  <div class="cell-num">#{{ i+1 }}</div>
-                  {% if a %}
-                    {% set ld = local_dt(a.date) %}
-                    <div class="cell-day">{{ ld.strftime('%a') }}</div>
-                    <div class="cell-date">{{ ld.strftime('%d %b') }}</div>
-                    <div class="cell-time">{{ ld.strftime('%H:%M') }}</div>
-                  {% else %}
-                    <div class="cell-empty">—</div>
-                  {% endif %}
+            <div class="cycle-card">
+              <div class="cycle-header">
+                <div>
+                  <div class="cycle-title">{{ unbilled_count }} {{ tr('classes_done') }}</div>
+                  <div class="cycle-sub">{{ tr('with_teacher') }} {{ t.name() }}</div>
                 </div>
-              {% endfor %}
+              </div>
+              <div class="cycle-grid">
+                {% set box_count = 8 if unbilled_count < 8 else unbilled_count %}
+                {% for i in range(box_count) %}
+                  {% if i < unbilled_count %}
+                    {% set a = unbilled[i] %}
+                    {% set ldt = to_wib(a.date) %}
+                    <div class="cycle-cell done">
+                      <div class="cell-num">#{{ i+1 }}</div>
+                      <div class="cell-day">{{ ldt.strftime('%a') }}</div>
+                      <div class="cell-date">{{ ldt.strftime('%d %b') }}</div>
+                      <div class="cell-time">{{ ldt.strftime('%H:%M') }}</div>
+                    </div>
+                  {% else %}
+                    <div class="cycle-cell empty-cell">
+                      <div class="cell-num">#{{ i+1 }}</div>
+                      <div class="cell-empty">—</div>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
             </div>
-          </div>
         {% else %}
           <div class="empty-state">
             <div class="empty-icon">📊</div>
