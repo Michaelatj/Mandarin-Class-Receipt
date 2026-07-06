@@ -24,7 +24,7 @@ def get_student_progress(teacher_id: int) -> list[dict]:
         progress[record.student_id]["dates"].append(record.date)
     return list(progress.values())
 
-def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
+def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> list[Receipt]:
     new_receipts = []
     # Ambil absensi yang belum dibayar
     unbilled = Attendance.query.filter_by(
@@ -53,15 +53,15 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
     total_fee = 0
     
     if packet_type == 'monthly':
-        if days_since_start >= 30:
+        if days_since_start >= 30 or force:
             should_bill = True
             total_fee = base_fee # Harga flat per bulan
     elif packet_type == 'per_session':
-        if days_since_start >= 30:
+        if days_since_start >= 30 or force:
             should_bill = True
             total_fee = len(unbilled) * base_fee # Harga dikali jumlah sesi
     else: # Default legacy cycle
-        if len(unbilled) >= 8:
+        if len(unbilled) >= 8 or days_since_start >= 30 or force:
             should_bill = True
             total_fee = len(unbilled) * base_fee
 
@@ -71,7 +71,8 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
             teacher_id=teacher_id, teacher_name=teacher.name(),
             total_fee=total_fee, bank_account=t_bank_acc, bank_name=t_bank_name,
             raw_dates="|".join([cls.date.isoformat() for cls in unbilled]),
-            issue_date=datetime.utcnow(), paid=False
+            issue_date=datetime.utcnow(), paid=False,
+            packet_type=packet_type, custom_qty=len(unbilled)
         )
         db.session.add(receipt)
         for cls in unbilled: cls.billed = True
@@ -81,15 +82,26 @@ def generate_receipts(student_id: int, teacher_id: int) -> list[Receipt]:
     return new_receipts
 
 def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str = "", source: str = "teacher") -> Attendance:
-    start_time = date - timedelta(seconds=30)
-    end_time = date + timedelta(seconds=30)
-    
-    existing = Attendance.query.filter(
-        Attendance.student_id == student_id,
-        Attendance.teacher_id == teacher_id,
-        Attendance.date >= start_time,
-        Attendance.date <= end_time
-    ).first()
+    # 90-MINUTE GLOBAL DB COOLDOWN
+    if source in ['student', 'join']:
+        start_time = date - timedelta(minutes=90)
+        existing = Attendance.query.filter(
+            Attendance.student_id == student_id,
+            Attendance.teacher_id == teacher_id,
+            Attendance.date >= start_time,
+            Attendance.date <= date,
+            Attendance.source.in_(['student', 'join'])
+        ).first()
+    else:
+        # Teacher manual input check (30 seconds)
+        start_time = date - timedelta(seconds=30)
+        end_time = date + timedelta(seconds=30)
+        existing = Attendance.query.filter(
+            Attendance.student_id == student_id,
+            Attendance.teacher_id == teacher_id,
+            Attendance.date >= start_time,
+            Attendance.date <= end_time
+        ).first()
     
     if existing:
         return existing
