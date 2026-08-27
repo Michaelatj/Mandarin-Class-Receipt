@@ -398,11 +398,23 @@ def force_receipt(student_id):
     return redirect(url_for("teacher.dashboard"))
 @teacher_bp.route('/receipt/<int:receipt_id>/cancel', methods=['POST'])
 def cancel_receipt_route(receipt_id):
-    teacher_id = session.get('user_id')
-    if not teacher_id or session.get('role') != 'teacher':
+    # Ambil user ID dari session (support user_id maupun teacher_id)
+    teacher_id = session.get('user_id') or session.get('teacher_id')
+    if not teacher_id:
+        flash('Silakan login terlebih dahulu.', 'warning')
+        return redirect(url_for('auth.login'))
+
+    # Cek user ke database
+    teacher = (
+        db.session.get(User, teacher_id)
+        if hasattr(db.session, 'get')
+        else User.query.get(teacher_id)
+    )
+    if not teacher or str(getattr(teacher, 'role', '')).lower() != 'teacher':
         flash('Unauthorized access.', 'danger')
         return redirect(url_for('auth.login'))
 
+    # Jalankan pembatalan receipt
     success = cancel_receipt(receipt_id, teacher_id)
     if success:
         flash(
