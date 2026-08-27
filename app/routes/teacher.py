@@ -8,9 +8,13 @@ from flask import (Blueprint, render_template, redirect, url_for,
 from .. import db
 from ..models import User, Receipt, Attendance, StudentFee, Schedule, ScheduleJoin, ScheduleInvite
 from ..services.attendance import (
-    add_attendance, delete_attendance,
-    mark_receipt_paid, get_student_progress, set_custom_fee,
-    generate_receipts
+    add_attendance,
+    cancel_receipt,
+    delete_attendance,
+    generate_receipts,
+    get_student_progress,
+    mark_receipt_paid,
+    set_custom_fee,
 )
 from ..services.i18n import tr, fmt_date, random_quote, to_wib, fmt_idr
 from ..services.security import hash_password
@@ -392,3 +396,20 @@ def force_receipt(student_id):
         flash("Tidak ada attendance yang belum dibayar.", "err")
         
     return redirect(url_for("teacher.dashboard"))
+@teacher_bp.route('/receipt/<int:receipt_id>/cancel', methods=['POST'])
+@login_required
+def cancel_receipt_route(receipt_id):
+    if current_user.role != 'teacher':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    success = cancel_receipt(receipt_id, current_user.id)
+    if success:
+        flash(
+            'Receipt berhasil dibatalkan! Progress absensi murid telah dikembalikan.',
+            'success',
+        )
+    else:
+        flash('Gagal membatalkan receipt.', 'danger')
+
+    return redirect(url_for('teacher.dashboard'))
