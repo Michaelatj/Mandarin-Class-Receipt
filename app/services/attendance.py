@@ -57,6 +57,9 @@ def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> 
     elif packet_type == 'per_session':
         if days_since_start >= 30 or force:
             should_bill = True
+            total_fee = len(unbilled) * base_fee # Harga dikali jumlah sesi
+    else: # Default legacy cycle
+        if len(unbilled) >= 8 or days_since_start >= 30 or force:
             total_fee = len(unbilled) * base_fee
     else: 
         if len(unbilled) >= 8 or force:
@@ -70,6 +73,7 @@ def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> 
             total_fee=total_fee, bank_account=t_bank_acc, bank_name=t_bank_name,
             raw_dates="|".join([cls.date.isoformat() for cls in unbilled]),
             issue_date=datetime.utcnow(), paid=False,
+            packet_type=packet_type, custom_qty=len(unbilled)
             packet_type=packet_type, custom_qty=len(unbilled) # Simpan qty aktual saat diregenerate
         )
         db.session.add(receipt)
@@ -80,15 +84,26 @@ def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> 
     return new_receipts
 
 def add_attendance(student_id: int, teacher_id: int, date: datetime, note: str = "", source: str = "teacher") -> Attendance:
-    start_time = date - timedelta(seconds=30)
-    end_time = date + timedelta(seconds=30)
-    
-    existing = Attendance.query.filter(
-        Attendance.student_id == student_id,
-        Attendance.teacher_id == teacher_id,
-        Attendance.date >= start_time,
-        Attendance.date <= end_time
-    ).first()
+    # 90-MINUTE GLOBAL DB COOLDOWN
+    if source in ['student', 'join']:
+        start_time = date - timedelta(minutes=90)
+        existing = Attendance.query.filter(
+            Attendance.student_id == student_id,
+            Attendance.teacher_id == teacher_id,
+            Attendance.date >= start_time,
+            Attendance.date <= date,
+            Attendance.source.in_(['student', 'join'])
+        ).first()
+    else:
+        # Teacher manual input check (30 seconds)
+        start_time = date - timedelta(seconds=30)
+        end_time = date + timedelta(seconds=30)
+        existing = Attendance.query.filter(
+            Attendance.student_id == student_id,
+            Attendance.teacher_id == teacher_id,
+            Attendance.date >= start_time,
+            Attendance.date <= end_time
+        ).first()
     
     if existing:
         return existing
