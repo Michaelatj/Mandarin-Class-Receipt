@@ -71,16 +71,17 @@ def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> 
     should_bill = False
     total_fee = 0
 
-    if packet_type == "monthly":
-        # Tagihan terbit begitu masuk ke bulan kalender berikutnya (misal tgl 1 ke atas)
+    # ✅ KODE YANG BENAR:
+    if packet_type == 'monthly':
         if months_elapsed >= 1 or force:
             should_bill = True
             total_fee = base_fee
-    elif packet_type == "per_session":
+    elif packet_type == 'per_session':
         if days_since_start >= 30 or force:
             should_bill = True
             total_fee = len(unbilled) * base_fee
-    else:  # Default / paket 'session' (tiap CYCLE_SIZE pertemuan)
+    else:
+        # Default paket 'session' (tiap 8 pertemuan)
         if len(unbilled) >= CYCLE_SIZE or force:
             should_bill = True
             total_fee = len(unbilled) * base_fee
