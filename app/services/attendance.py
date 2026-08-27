@@ -194,3 +194,31 @@ def mark_receipt_paid(receipt_id: int, teacher_id: int) -> bool:
     receipt.paid = True
     db.session.commit()
     return True
+
+def cancel_receipt(receipt_id: int, teacher_id: int) -> bool:
+    """Membatalkan receipt dan mengembalikan status kehadiran menjadi billed=False (unbilled)."""
+    receipt = db.session.get(Receipt, receipt_id)
+    if not receipt or receipt.teacher_id != teacher_id:
+        return False
+
+    # 1. Kembalikan semua sesi absensi yang ada di raw_dates menjadi billed = False
+    if receipt.raw_dates:
+        date_strs = receipt.raw_dates.split("|")
+        for d_str in date_strs:
+            try:
+                dt = datetime.fromisoformat(d_str)
+                # Cari record attendance murid & guru pada tanggal tersebut
+                attn = Attendance.query.filter_by(
+                    student_id=receipt.student_id,
+                    teacher_id=teacher_id,
+                    date=dt,
+                ).first()
+                if attn:
+                    attn.billed = False
+            except Exception:
+                continue
+
+    # 2. Hapus receipt
+    db.session.delete(receipt)
+    db.session.commit()
+    return True
