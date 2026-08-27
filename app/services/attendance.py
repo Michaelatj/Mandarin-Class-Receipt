@@ -71,6 +71,7 @@ def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> 
     should_bill = False
     total_fee = 0
 
+    
     # ✅ KODE YANG BENAR:
     if packet_type == 'monthly':
         if months_elapsed >= 1 or force:
