@@ -49,20 +49,18 @@ def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> 
     should_bill = False
     total_fee = 0
     
-    # FIX: Tambahkan kondisi `or force` di setiap pilihan 💥
+    # ✅ KODE YANG BENAR:
     if packet_type == 'monthly':
-        if days_since_start >= 30 or force:
+        if months_elapsed >= 1 or force:
             should_bill = True
             total_fee = base_fee
     elif packet_type == 'per_session':
         if days_since_start >= 30 or force:
             should_bill = True
-            total_fee = len(unbilled) * base_fee # Harga dikali jumlah sesi
-    else: # Default legacy cycle
-        if len(unbilled) >= 8 or days_since_start >= 30 or force:
             total_fee = len(unbilled) * base_fee
-    else: 
-        if len(unbilled) >= 8 or force:
+    else:
+        # Default paket 'session' (tiap 8 pertemuan)
+        if len(unbilled) >= CYCLE_SIZE or force:
             should_bill = True
             total_fee = len(unbilled) * base_fee
 
