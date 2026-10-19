@@ -41,3 +41,11 @@ config_map = {
     "production":  ProductionConfig,
     "default":     DevelopmentConfig,
 }
+
+def _database_url():
+    url = os.environ.get("DATABASE_URL", "sqlite:///attendance.db")
+    # beberapa penyedia memberi awalan lama atau khusus driver, samakan ke psycopg2
+    for prefix in ("postgres://", "postgresql+psycopg://"):
+        if url.startswith(prefix):
+            url = "postgresql://" + url[len(prefix):]
+    return url
