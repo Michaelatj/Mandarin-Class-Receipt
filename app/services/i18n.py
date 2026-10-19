@@ -84,7 +84,6 @@ TRANSLATIONS: dict = {
         warning_monthly_policy="⚠️ Monthly Policy: For students on the Monthly Packet, payment is required every month even if classes are missed or rescheduled. This ensures stable income for the teacher.",
         select_packet_type="Select Packet Type",
         current_fee="Current Fee",
-        back_login="Back to Login",
         remember_me="Remember me on this device",
     ),
     "zh": dict(
@@ -164,7 +163,6 @@ TRANSLATIONS: dict = {
         select_packet_type="选择套餐类型",
         current_fee="当前费用",
         remember_me="在此设备上记住我",
-        back_login="返回登录",
     ),
 }
 
