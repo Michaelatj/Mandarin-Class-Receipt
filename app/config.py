@@ -14,13 +14,13 @@ from datetime import timedelta
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(32))
     WTF_CSRF_SECRET_KEY = os.environ.get("SECRET_KEY", secrets.token_hex(32))
-    WTF_CSRF_TIME_LIMIT = 3600   # 1 hour token validity
+    WTF_CSRF_TIME_LIMIT = None   # 1 hour token validity
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///attendance.db")
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = os.environ.get("HTTPS", "") == "1"
-    PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
+    PERMANENT_SESSION_LIFETIME = timedelta(days=30)
     LOGIN_MAX_ATTEMPTS = 10
     LOGIN_LOCKOUT_SECONDS = 300
     CLASSES_PER_CYCLE = 8
@@ -41,3 +41,11 @@ config_map = {
     "production":  ProductionConfig,
     "default":     DevelopmentConfig,
 }
+
+def _database_url():
+    url = os.environ.get("DATABASE_URL", "sqlite:///attendance.db")
+    # beberapa penyedia memberi awalan lama atau khusus driver, samakan ke psycopg2
+    for prefix in ("postgres://", "postgresql+psycopg://"):
+        if url.startswith(prefix):
+            url = "postgresql://" + url[len(prefix):]
+    return url

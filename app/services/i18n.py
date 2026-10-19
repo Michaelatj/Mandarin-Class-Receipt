@@ -83,7 +83,8 @@ TRANSLATIONS: dict = {
         packet_monthly_desc="Fixed monthly fee (Rp 500,000/month). Payment is due every month regardless of attendance or rescheduling.",
         warning_monthly_policy="⚠️ Monthly Policy: For students on the Monthly Packet, payment is required every month even if classes are missed or rescheduled. This ensures stable income for the teacher.",
         select_packet_type="Select Packet Type",
-        current_fee="Current Fee"
+        current_fee="Current Fee",
+        remember_me="Remember me on this device",
     ),
     "zh": dict(
         app_title="中文课堂", app_sub="考勤与账单系统 · Chinese Class",
@@ -160,7 +161,8 @@ TRANSLATIONS: dict = {
         packet_monthly_desc="固定月费 (500,000 印尼盾/月)。无论是否缺课或调课，每月均需支付全额学费。",
         warning_monthly_policy="⚠️ 月付政策：选择月付套餐的学生，即使缺课或调课，每月仍需支付全额学费。这是为了保障老师的稳定收入。",
         select_packet_type="选择套餐类型",
-        current_fee="当前费用"
+        current_fee="当前费用",
+        remember_me="在此设备上记住我",
     ),
 }
 

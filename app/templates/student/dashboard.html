@@ -254,6 +254,10 @@
     <div class="bnav-icon">⚙️</div>
     <span>Settings</span>
   </button>
+  <a class="bnav-btn" href="{{ url_for('auth.logout') }}" style="text-decoration:none;color:inherit" onclick="sessionStorage.removeItem('paymentReminderSeen');">
+    <div class="bnav-icon" style="color:var(--red)">🚪</div>
+    <span>{{ tr('logout') }}</span>
+  </a>
 </nav>
 
 {# ══ MODALS ══ #}
