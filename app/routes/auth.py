@@ -4,7 +4,7 @@ routes/auth.py — Authentication Blueprint (login, register, logout, language).
 import re
 import logging
 from flask import (Blueprint, render_template, redirect, url_for,
-                   request, session, flash)
+                   request, session, flash, current_app, make_response)
 from .. import db
 from ..models import User
 from ..services.security import (
@@ -18,6 +18,37 @@ logger = logging.getLogger(__name__)
 auth_bp = Blueprint("auth", __name__)
 
 USERNAME_RE = re.compile(r"^[A-Za-z0-9_.+-]{3,40}$")
+
+KNOWN_USERS_COOKIE = "known_users"
+KNOWN_USERS_MAX = 5
+KNOWN_USERS_AGE = 60 * 60 * 24 * 90  # 90 hari
+
+
+def _read_known_users():
+    raw = request.cookies.get(KNOWN_USERS_COOKIE, "")
+    # koma tidak lolos USERNAME_RE, jadi aman dipakai sebagai pemisah
+    return [n for n in raw.split(",") if USERNAME_RE.match(n)][:KNOWN_USERS_MAX]
+
+
+def _finish_login(user, uname, ip, remember):
+    # tanpa remember, cookie sesi hilang begitu browser ditutup
+    session.permanent = remember
+    session["user_id"] = user.id
+    session["fresh_login"] = True
+    clear_attempts(ip)
+
+    endpoint = "teacher.dashboard" if user.role == "teacher" else "student.dashboard"
+    resp = redirect(url_for(endpoint))
+
+    if remember:
+        names = [n for n in _read_known_users() if n != uname]
+        names.insert(0, uname)
+        resp.set_cookie(
+            KNOWN_USERS_COOKIE, ",".join(names[:KNOWN_USERS_MAX]),
+            max_age=KNOWN_USERS_AGE, httponly=True, samesite="Lax",
+            secure=current_app.config["SESSION_COOKIE_SECURE"],
+        )
+    return resp
 
 
 @auth_bp.route("/lang/<code>")
@@ -38,16 +69,17 @@ def index():
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-    # If already logged in, redirect to appropriate dashboard
+    # kalau sudah login, langsung ke dashboard
     if "user_id" in session:
         user = db.session.get(User, session["user_id"])
         if user:
             return redirect(url_for("teacher.dashboard") if user.role == "teacher" else url_for("student.dashboard"))
 
     if request.method == "POST":
-        ip    = request.remote_addr
-        uname = request.form.get("username", "").strip()
-        pw    = request.form.get("password", "")
+        ip       = request.remote_addr
+        uname    = request.form.get("username", "").strip()
+        pw       = request.form.get("password", "")
+        remember = request.form.get("remember") == "1"
 
         if is_rate_limited(ip):
             flash(tr("err_locked"), "err")
@@ -59,28 +91,21 @@ def login():
             record_failed_attempt(ip)
             flash(tr("err_user"), "err")
         elif is_legacy_hash(user.password) and migrate_legacy_password(user, pw):
-            # Legacy hash matched — password was upgraded in-place
+            # hash lama cocok, password sudah di-upgrade di tempat
             db.session.commit()
-            session.permanent = True
-            session["user_id"] = user.id
-            session["fresh_login"] = True
-            clear_attempts(ip)
             logger.info("User %s logged in (legacy hash migrated)", uname)
-            return redirect(url_for("teacher.dashboard") if user.role == "teacher" else url_for("student.dashboard"))
+            return _finish_login(user, uname, ip, remember)
         elif not verify_password(user.password, pw):
             record_failed_attempt(ip)
             flash(tr("err_pw"), "err")
             logger.warning("Failed login for user %r from %s", uname, ip)
         else:
-            session.permanent = True
-            session["user_id"] = user.id
-            session["fresh_login"] = True
-            clear_attempts(ip)
             logger.info("User %s logged in successfully", uname)
-            return redirect(url_for("teacher.dashboard") if user.role == "teacher" else url_for("student.dashboard"))
+            return _finish_login(user, uname, ip, remember)
 
-    from flask import make_response
-    resp = make_response(render_template("auth/login.html", quote=random_quote()))
+    resp = make_response(render_template(
+        "auth/login.html", quote=random_quote(), known_users=_read_known_users()
+    ))
     resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     resp.headers['Pragma'] = 'no-cache'
     return resp
@@ -211,4 +236,3 @@ def change_password():
     flash(msg, "ok")
     redir = url_for("teacher.dashboard") if user.role == "teacher" else url_for("student.dashboard")
     return redirect(redir)
-
