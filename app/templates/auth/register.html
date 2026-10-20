@@ -11,8 +11,11 @@
          title="3–40 characters: letters, numbers, _ . + -"
          autocomplete="username">
   <label>{{ tr('password_lbl') }}</label>
-  <input type="password" name="password" placeholder="{{ tr('password_ph') }}"
-         required minlength="6" autocomplete="new-password">
+  <div class="pw-wrap">
+    <input type="password" name="password" placeholder="{{ tr('password_ph') }}"
+           required minlength="6" autocomplete="new-password">
+    {% include 'partials/pw_toggle.html' %}
+  </div>
   <label>{{ tr('display_name_lbl') }}</label>
   <input type="text" name="display_name"
          placeholder="{{ tr('display_name_ph') }}" autocomplete="name">

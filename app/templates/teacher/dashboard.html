@@ -24,32 +24,37 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <span class="sidebar-brand-zh">中文课堂</span>
-      <span class="sidebar-brand-tag">Teacher Dashboard</span>
+      <span class="sidebar-brand-tag">{{ tr('teacher_tag') }}</span>
     </div>
     <nav class="sidebar-nav" id="sideNav">
       <button class="snav-btn" data-page="classes">
         <span class="snav-icon">📆</span>
-        <span class="snav-label">Classes</span>
+        <span class="snav-label">{{ tr('nav_classes') }}</span>
         {% set up_count = schedules | selectattr('cancelled','equalto',false) | list | length %}
         {% if show_classes_pip %}<span class="snav-pip gold" data-tab="classes" data-count="{{ up_count }}">{{ up_count }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="attendance">
         <span class="snav-icon">✅</span>
-        <span class="snav-label">Attendance</span>
+        <span class="snav-label">{{ tr('nav_attendance') }}</span>
         {% if show_attendance_pip %}<span class="snav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="students">
         <span class="snav-icon">👥</span>
-        <span class="snav-label">Students</span>
+        <span class="snav-label">{{ tr('nav_students') }}</span>
       </button>
       <button class="snav-btn" data-page="receipts">
         <span class="snav-icon">🧾</span>
-        <span class="snav-label">Receipts</span>
+        <span class="snav-label">{{ tr('nav_receipts') }}</span>
         {% if show_receipts_pip %}<span class="snav-pip" data-tab="receipts" data-count="{{ unpaid_cnt }}">{{ unpaid_cnt }}</span>{% endif %}
       </button>
+      <a class="snav-link" href="{{ url_for('quiz.coming_soon') }}">
+        <span class="snav-icon">📝</span>
+        <span class="snav-label">{{ tr('nav_quiz') }}</span>
+        <span class="snav-soon">{{ tr('quiz_soon_badge') }}</span>
+      </a>
       <button class="snav-btn" data-page="settings">
         <span class="snav-icon">⚙️</span>
-        <span class="snav-label">Settings</span>
+        <span class="snav-label">{{ tr('nav_settings') }}</span>
       </button>
     </nav>
     <div class="sidebar-footer">
@@ -71,8 +76,8 @@
       <div class="app-page" id="page-classes">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Classes</h1>
-            <p class="page-sub">Schedule and manage your class sessions</p>
+            <h1 class="page-title">{{ tr('nav_classes') }}</h1>
+            <p class="page-sub">{{ tr('page_classes_sub_teacher') }}</p>
           </div>
         </div>
         <div class="page-cols">
@@ -147,8 +152,8 @@
       <div class="app-page" id="page-attendance">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Attendance</h1>
-            <p class="page-sub">Add sessions manually and track student progress</p>
+            <h1 class="page-title">{{ tr('nav_attendance') }}</h1>
+            <p class="page-sub">{{ tr('page_attendance_sub') }}</p>
           </div>
         </div>
         <div class="page-cols">
@@ -248,8 +253,8 @@
       <div class="app-page" id="page-students">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Students</h1>
-            <p class="page-sub">{{ student_count }} student{{ 's' if student_count != 1 else '' }} registered</p>
+            <h1 class="page-title">{{ tr('nav_students') }}</h1>
+            <p class="page-sub">{{ (tr('student_count_one') if student_count == 1 else tr('student_count_many')).format(n=student_count) }}</p>
           </div>
         </div>
         {% if all_students %}
@@ -335,7 +340,7 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">{{ tr('all_receipts') }}</h1>
-            <p class="page-sub">{{ receipts|length }} total · {{ unpaid_cnt }} unpaid</p>
+            <p class="page-sub">{{ tr('receipts_summary').format(total=receipts|length, unpaid=unpaid_cnt) }}</p>
           </div>
         </div>
         {% if receipts %}
@@ -358,11 +363,18 @@
       <div class="app-page" id="page-settings">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Settings</h1>
-            <p class="page-sub">Manage your account and payment preferences</p>
+            <h1 class="page-title">{{ tr('nav_settings') }}</h1>
+            <p class="page-sub">{{ tr('settings_sub_teacher') }}</p>
           </div>
         </div>
         <div class="settings-grid">
+          <div class="card">
+            <div class="card-title"><span class="card-title-icon">🌐</span> {{ tr('language_lbl') }}</div>
+            <div class="lang-switch">
+              <a href="{{ url_for('auth.set_lang', code='en') }}" class="lb {% if get_lang()=='en' %}on{% endif %}">EN</a>
+              <a href="{{ url_for('auth.set_lang', code='zh') }}" class="lb {% if get_lang()=='zh' %}on{% endif %}">中文</a>
+            </div>
+          </div>
           <div class="card">
             <div class="card-title"><span class="card-title-icon">⚙️</span> {{ tr('payment_settings') }}</div>
             <form id="settingsForm" method="POST" action="{{ url_for('teacher.update_settings') }}">
@@ -411,31 +423,35 @@
       <div class="bnav-icon">📆
         {% if show_classes_pip %}<span class="bnav-pip" data-tab="classes" data-count="{{ up_count }}">{{ up_count }}</span>{% endif %}
       </div>
-      <span>Classes</span>
+      <span>{{ tr('nav_classes') }}</span>
     </button>
     <button class="bnav-btn" data-page="attendance">
       <div class="bnav-icon">✅
         {% if show_attendance_pip %}<span class="bnav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
       </div>
-      <span>Attend</span>
+      <span>{{ tr('nav_attend_short') }}</span>
     </button>
     <button class="bnav-btn" data-page="students">
       <div class="bnav-icon">👥</div>
-      <span>Students</span>
+      <span>{{ tr('nav_students') }}</span>
     </button>
     <button class="bnav-btn" data-page="receipts">
       <div class="bnav-icon">🧾
         {% if show_receipts_pip %}<span class="bnav-pip" data-tab="receipts" data-count="{{ unpaid_cnt }}">{{ unpaid_cnt }}</span>{% endif %}
       </div>
-      <span>Receipts</span>
+      <span>{{ tr('nav_receipts') }}</span>
     </button>
+    <a class="bnav-btn" href="{{ url_for('quiz.coming_soon') }}" style="text-decoration:none">
+      <div class="bnav-icon">📝</div>
+      <span>{{ tr('nav_quiz') }}</span>
+    </a>
     <button class="bnav-btn" data-page="settings">
       <div class="bnav-icon">⚙️</div>
-      <span>Settings</span>
+      <span>{{ tr('nav_settings') }}</span>
     </button>
     <a class="bnav-btn" href="{{ url_for('auth.logout') }}" style="text-decoration:none;color:inherit">
       <div class="bnav-icon" style="color:var(--red)">🚪</div>
-      <span style="color:var(--red)">Logout</span>
+      <span style="color:var(--red)">{{ tr('logout') }}</span>
     </a>
   </nav>
 

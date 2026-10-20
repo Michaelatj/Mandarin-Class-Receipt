@@ -55,7 +55,7 @@ def _finish_login(user, uname, ip, remember):
 def set_lang(code: str):
     if code in ("en", "zh"):
         session["lang"] = code
-    return redirect(request.referrer or url_for("student.dashboard"))
+    return redirect(request.referrer or url_for("auth.index"))
 
 
 @auth_bp.route("/")
