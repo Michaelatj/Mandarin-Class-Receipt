@@ -6,6 +6,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
 <link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=25" }}">
+{% block head_extra %}{% endblock %}
 </head>
 <body>
 
@@ -140,6 +141,8 @@ document.addEventListener('click', function(e) {
   };
 })();
 </script>
+<script src="{{ url_for('auth.i18n_data') }}?v={{ i18n_version }}"></script>
+<script src="{{ url_for('static', filename='js/i18n-live.js') }}?v=1"></script>
 {% block page_scripts %}{% endblock %}
 </body>
 </html>

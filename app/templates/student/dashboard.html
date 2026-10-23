@@ -22,10 +22,9 @@
         <span class="snav-icon">🧾</span><span class="snav-label">{{ tr('nav_receipts') }}</span>
         {% if show_receipts_pip %}<span class="snav-pip">{{ unpaid_count }}</span>{% endif %}
       </button>
-      <a class="snav-link" href="{{ url_for('quiz.coming_soon') }}">
+      <a class="snav-link" href="{{ url_for('quiz.index') }}">
         <span class="snav-icon">📝</span>
         <span class="snav-label">{{ tr('nav_quiz') }}</span>
-        <span class="snav-soon">{{ tr('quiz_soon_badge') }}</span>
       </a>
       <button class="snav-btn" data-page="settings" data-count="0">
         <span class="snav-icon">⚙️</span><span class="snav-label">{{ tr('nav_settings') }}</span>
@@ -262,7 +261,7 @@
     </div>
     <span>{{ tr('nav_receipts') }}</span>
   </button>
-  <a class="bnav-btn" href="{{ url_for('quiz.coming_soon') }}" style="text-decoration:none">
+  <a class="bnav-btn" href="{{ url_for('quiz.index') }}" style="text-decoration:none">
     <div class="bnav-icon">📝</div>
     <span>{{ tr('nav_quiz') }}</span>
   </a>

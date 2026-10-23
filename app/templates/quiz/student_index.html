@@ -1,0 +1,46 @@
+{% extends "quiz/layout.html" %}
+{% block qz_title %}Quiz{% endblock %}
+
+{% block qz_body %}
+<div class="qz-head">
+  <div>
+    <h1 class="qz-h1">Quizzes from your teacher</h1>
+    <p class="qz-sub">Pick a quiz and answer the questions. You see your score right away.</p>
+  </div>
+</div>
+
+<div class="card">
+  {% if quizzes %}
+    {% for q in quizzes %}
+    {% set b = best.get(q.id) %}
+    {% set t = titles.get(q.id) %}
+    <div class="qz-item">
+      <div class="qz-item-main">
+        <div class="qz-item-title">{{ q.title }}</div>
+        {% if q.description %}<div class="qz-item-desc">{{ q.description }}</div>{% endif %}
+        <div class="qz-meta">
+          <span>{{ q.questions|length }} question{{ '' if q.questions|length == 1 else 's' }}</span>
+          <span>{% if q.time_limit_seconds %}Time limit: {{ q.time_limit_seconds }}s{% else %}No time limit{% endif %}</span>
+        </div>
+        {% if b %}
+        <div class="qz-best">Best score: {{ b.accuracy_score|int }}{% if t %} · {{ t.icon }} {{ t.name }} ({{ t.pinyin }}){% endif %}</div>
+        {% endif %}
+      </div>
+      <div class="qz-item-actions">
+        {% if b and not q.allow_retakes %}
+          <span class="badge badge-gray">Finished</span>
+        {% else %}
+          <a class="btn qz-btn-gold qz-btn-sm" href="{{ url_for('quiz.play', quiz_id=q.id) }}">{% if b %}Try again{% else %}Start{% endif %}</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📝</div>
+      <div class="empty-title">No quizzes yet</div>
+      <div class="empty-sub">When your teacher gives you a quiz, it will show up here.</div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

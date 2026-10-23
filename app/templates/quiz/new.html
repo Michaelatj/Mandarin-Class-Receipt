@@ -1,0 +1,50 @@
+{% extends "quiz/layout.html" %}
+{% block qz_title %}New quiz{% endblock %}
+{% block qz_back %}Back to quizzes{% endblock %}
+{% block qz_attrs %}data-page="new" data-create-url="{{ url_for('quiz.api_create') }}"{% endblock %}
+
+{% block qz_body %}
+<div class="qz-head">
+  <div>
+    <h1 class="qz-h1">New quiz</h1>
+    <p class="qz-sub">You do not write the questions yourself. Copy a ready-made prompt, let a free chatbot turn your lesson into a quiz, then paste its reply here.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="qz-section-title">Step 1. Make the prompt</div>
+  <p class="qz-hint-text">The prompt below changes as you adjust these choices.</p>
+  <div class="qz-row">
+    <div class="qz-field">
+      <label for="qz-hsk">HSK level</label>
+      <select id="qz-hsk">
+        {% for n in range(1, 7) %}<option value="{{ n }}" {% if n == 2 %}selected{% endif %}>HSK {{ n }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="qz-field">
+      <label for="qz-count">Number of questions (4 to 30)</label>
+      <input type="number" id="qz-count" min="4" max="30" value="10">
+    </div>
+  </div>
+  <label>Question types</label>
+  <div class="qz-kinds" id="qz-kinds" style="margin-top:6px"></div>
+
+  <label for="qz-prompt">Prompt</label>
+  <textarea id="qz-prompt" class="qz-textarea" readonly data-no-i18n style="margin-top:6px"></textarea>
+  <div class="qz-actions-row"><button type="button" class="btn bgh qz-btn-sm" id="qz-copy">Copy prompt</button></div>
+</div>
+
+<div class="card">
+  <div class="qz-section-title">Step 2. Paste the reply</div>
+  <ol class="qz-steps">
+    <li>Paste the prompt into any free AI chatbot.</li>
+    <li>Replace the line that says to paste your lesson material with your own lesson.</li>
+    <li>Send it, then copy the reply and paste it below.</li>
+  </ol>
+  <textarea id="qz-json" class="qz-textarea" data-no-i18n placeholder="{&quot;title&quot;: &quot;...&quot;, &quot;questions&quot;: [...]}" style="min-height:180px"></textarea>
+  <div class="qz-actions-row"><button type="button" class="btn qz-btn-gold qz-btn-sm" id="qz-create">Create quiz</button></div>
+  <div class="qz-errors" id="qz-errors" hidden></div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-teacher.js') + '?v=1' }}"></script>{% endblock %}

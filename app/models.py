@@ -138,3 +138,46 @@ class ScheduleInvite(db.Model):
         db.UniqueConstraint("schedule_id", "student_id", name="uq_schedule_invite"),
     )
 
+
+
+class Quiz(db.Model):
+    """A quiz made by a teacher. Questions live in one JSON column."""
+    __tablename__ = "quiz"
+
+    id                 = db.Column(db.Integer, primary_key=True)
+    teacher_id         = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    title              = db.Column(db.String(200), nullable=False)
+    description        = db.Column(db.String(500), default="")
+    questions          = db.Column(db.JSON, nullable=False, default=list)
+    hide_pinyin        = db.Column(db.Boolean, default=False)
+    time_limit_seconds = db.Column(db.Integer, default=0)       # 0 = no timer
+    allow_retakes      = db.Column(db.Boolean, default=True)
+    assign_all         = db.Column(db.Boolean, default=False)   # visible to every student
+    created_at         = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class QuizAssign(db.Model):
+    """A quiz given to one specific student."""
+    __tablename__ = "quiz_assign"
+    __table_args__ = (db.UniqueConstraint("quiz_id", "student_id", name="uq_quiz_assign"),)
+
+    id          = db.Column(db.Integer, primary_key=True)
+    quiz_id     = db.Column(db.Integer, db.ForeignKey("quiz.id"), nullable=False, index=True)
+    student_id  = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    assigned_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class QuizAttempt(db.Model):
+    __tablename__ = "quiz_attempt"
+
+    id             = db.Column(db.Integer, primary_key=True)
+    quiz_id        = db.Column(db.Integer, db.ForeignKey("quiz.id"), nullable=False, index=True)
+    student_id     = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    answers        = db.Column(db.JSON, nullable=False, default=dict)   # {question_id: {value, usedMeaning, answeredAtMs}}
+    answer_order   = db.Column(db.JSON, nullable=False, default=list)
+    accuracy_score = db.Column(db.Float)
+    xp_score       = db.Column(db.Float)
+    longest_streak = db.Column(db.Integer, default=0)
+    title          = db.Column(db.String(50))
+    started_at     = db.Column(db.DateTime, default=datetime.utcnow)
+    submitted_at   = db.Column(db.DateTime)
