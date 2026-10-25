@@ -22,7 +22,7 @@
   function compile(from, to) {
     return D.patterns.map((pair) => {
       const names = [];
-      const src = escRe(pair[from]).replace(/\\\{(\w+)\\\}/g, (_, n) => { names.push(n); return '([\\s\\S]+?)'; });
+      const src = escRe(pair[from]).replace(/\\\{(\w+)\\\}/g, (_, n) => { names.push(n); return /^num/.test(n) ? '(\\d+)' : '([\\s\\S]+?)'; });
       return { re: new RegExp('^' + src + '$'), dst: pair[to], names };
     });
   }

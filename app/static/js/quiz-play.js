@@ -147,13 +147,13 @@
     const a = S.answers[q.id];
     if (a && a.checked) return a.correct === true ? 'right' : a.correct === false ? 'wrong' : 'done';
     if (q.type === 'sentence_reorder') return (S.reorder[q.id] || []).length ? 'pending' : '';
-    return a && a.value != null ? 'pending' : '';
+    return a && (Array.isArray(a.value) ? a.value.length > 0 : a.value != null) ? 'pending' : '';
   }
 
   function ready(q) {
     if (q.type === 'sentence_reorder') return (S.reorder[q.id] || []).length === q.chunks.length;
     const a = S.answers[q.id];
-    return !!(a && a.value != null);
+    return !!(a && (Array.isArray(a.value) ? a.value.length > 0 : a.value != null));
   }
 
   function render() {
@@ -177,18 +177,19 @@
       q.chunks.forEach((c) => { chunkById[c.id] = c; });
       const verdict = a.checked ? (a.correct === true ? 'right' : a.correct === false ? 'wrong' : '') : '';
       const assembled = placed.length
-        ? placed.map((id) => `<button type="button" class="qz-chip ${locked ? 'locked' : ''}" data-a="unplace" data-id="${id}">${esc(chunkById[id].text)}</button>`).join('')
+        ? placed.map((id) => `<button type="button" class="qz-chip ${locked ? 'locked' : ''}" data-no-i18n data-a="unplace" data-id="${id}">${esc(chunkById[id].text)}</button>`).join('')
         : `<span class="qz-placeholder">${T('Tap the pieces below to build the sentence.')}</span>`;
       const pool = q.chunks.filter((c) => !placed.includes(c.id))
-        .map((c) => `<button type="button" class="qz-chip ${locked ? 'locked' : ''}" data-a="place" data-id="${c.id}">${esc(c.text)}</button>`).join('');
+        .map((c) => `<button type="button" class="qz-chip ${locked ? 'locked' : ''}" data-no-i18n data-a="place" data-id="${c.id}">${esc(c.text)}</button>`).join('');
       body = `
         <div class="qz-assembled ${verdict} ${a.checking ? 'checking' : ''}" id="qz-target">${assembled}</div>
         <div class="qz-pool">${pool}</div>
         ${locked || !placed.length ? '' : `<button type="button" class="qz-link" data-a="reset">${T('Start over')}</button>`}`;
     } else {
-      body = '<div class="qz-options">' + q.options.map((text, idx) => {
+      const multi = q.type === 'multiple_select';
+      body = (multi ? `<div class="qz-multi-hint">${T('Select all that apply')}</div>` : '') + '<div class="qz-options">' + q.options.map((text, idx) => {
         const value = q.optionValues[idx];
-        const chosen = a.value === value;
+        const chosen = multi ? (Array.isArray(a.value) && a.value.includes(value)) : a.value === value;
         let cls = 'qz-option';
         if (chosen && a.checked) cls += a.correct === true ? ' right' : a.correct === false ? ' wrong' : ' selected';
         else if (chosen) cls += a.checking ? ' selected checking' : ' selected';
@@ -196,7 +197,7 @@
         const mark = chosen && a.checked ? (a.correct === true ? '<span class="qz-mark" style="color:var(--green)">✓</span>' : a.correct === false ? '<span class="qz-mark" style="color:var(--red)">✕</span>' : '') : '';
         const meaning = showHint && q.optionMeanings && q.optionMeanings[idx]
           ? `<span class="qz-option-meaning">${esc(q.optionMeanings[idx])}</span>` : '';
-        return `<div class="${cls}" data-a="opt" data-i="${idx}" role="button" tabindex="0"><span class="qz-dot"></span><span>${esc(text)}${meaning}</span>${mark}</div>`;
+        return `<div class="${cls}" data-a="opt" data-i="${idx}" role="button" tabindex="0"><span class="${multi ? 'qz-box' : 'qz-dot'}"></span><span data-no-i18n>${esc(text)}${meaning}</span>${mark}</div>`;
       }).join('') + '</div>';
     }
 
@@ -233,8 +234,8 @@
           <span class="qz-qindex">${T('Question')} ${S.i + 1} / ${n}</span>
           ${hasHint(q) ? `<button type="button" class="qz-lamp ${showHint ? 'lit' : ''}" data-a="lamp" title="${T('Show the meaning (halves the points for this question)')}" aria-label="${T('Show the meaning (halves the points for this question)')}">💡</button>` : ''}
         </div>
-        <div class="qz-qtext">${esc(q.question)}</div>
-        ${showHint && q.questionMeaning ? `<div class="qz-meaning">${esc(q.questionMeaning)}</div>` : ''}
+        <div class="qz-qtext" data-no-i18n>${esc(q.question)}</div>
+        ${showHint && q.questionMeaning ? `<div class="qz-meaning" data-no-i18n>${esc(q.questionMeaning)}</div>` : ''}
         ${body}
         ${verdictLine}
       </div>
@@ -254,7 +255,8 @@
     if (!ready(q)) return;
     const prev = S.answers[q.id] || {};
     if (prev.checked || prev.checking) return;
-    const value = q.type === 'sentence_reorder' ? (S.reorder[q.id] || []).slice() : prev.value;
+    const value = q.type === 'sentence_reorder' ? (S.reorder[q.id] || []).slice()
+      : (Array.isArray(prev.value) ? prev.value.slice() : prev.value);
     const a = S.answers[q.id] = {
       value, usedMeaning: !!S.usedHint[q.id], answeredAtMs: Date.now() - S.startedAt,
       checking: true, checked: false, correct: null,
@@ -314,6 +316,7 @@
     S.quiz.questions.forEach((q) => {
       const a = S.answers[q.id];
       if (!a || a.value == null) return;
+      if (Array.isArray(a.value) && !a.value.length) return;
       if (q.type === 'sentence_reorder' && a.value.length !== q.chunks.length) return;
       answers[q.id] = { value: a.value, usedMeaning: !!a.usedMeaning, answeredAtMs: a.answeredAtMs };
     });
@@ -333,10 +336,11 @@
     const top = t.name === '状元';
     const review = r.review.map((item, idx) => `
       <div class="qz-review-q ${item.correct ? 'ok' : 'bad'}">
-        <div class="q">${idx + 1}. ${esc(item.question)}</div>
-        <div class="a"><b>${T('Your answer')}:</b> ${esc(item.given || '-')}</div>
-        ${item.correct ? '' : `<div class="a"><b>${T('Correct answer')}:</b> ${esc(item.correctAnswer)}</div>`}
-        ${item.explanation ? `<div class="why">${esc(item.explanation)}</div>` : ''}
+        <div class="q" data-no-i18n>${idx + 1}. ${esc(item.question)}</div>
+        <div class="a"><b>${T('Your answer')}:</b> <span data-no-i18n>${esc(item.given || '-')}</span></div>
+        ${item.correct ? '' : `<div class="a"><b>${T('Correct answer')}:</b> <span data-no-i18n>${esc(item.correctAnswer)}</span></div>`}
+        ${!item.correct && item.otherOrders && item.otherOrders.length ? `<div class="a"><b>${T('Also accepted')}:</b> <span data-no-i18n>${esc(item.otherOrders.join('  |  '))}</span></div>` : ''}
+        ${item.explanation ? `<div class="why" data-no-i18n>${esc(item.explanation)}</div>` : ''}
       </div>`).join('');
 
     paint(`
@@ -345,7 +349,7 @@
           <div class="qz-title-label">${T('Your title for this quiz')}</div>
           <div class="qz-title-icon">${esc(t.icon)}</div>
           <div class="qz-title-name">${esc(t.name)}</div>
-          <div class="qz-title-sub">${esc(t.pinyin)} · ${esc(t.meaning)}</div>
+          <div class="qz-title-sub"><span data-no-i18n>${esc(t.pinyin)}</span> · <span>${esc(t.meaning)}</span></div>
         </div>
         <div class="qz-scores">
           <div class="qz-score">
@@ -390,7 +394,15 @@
 
     if (act === 'opt') {
       if (locked) return;
-      S.answers[q.id] = { value: q.optionValues[Number(el.dataset.i)], usedMeaning: !!S.usedHint[q.id] };
+      const picked = q.optionValues[Number(el.dataset.i)];
+      if (q.type === 'multiple_select') {
+        const now = Array.isArray(a.value) ? a.value.slice() : [];
+        const at = now.indexOf(picked);
+        if (at >= 0) now.splice(at, 1); else now.push(picked);
+        S.answers[q.id] = { value: now, usedMeaning: !!S.usedHint[q.id] };
+      } else {
+        S.answers[q.id] = { value: picked, usedMeaning: !!S.usedHint[q.id] };
+      }
       render();
     } else if (act === 'place') {
       if (locked) return;

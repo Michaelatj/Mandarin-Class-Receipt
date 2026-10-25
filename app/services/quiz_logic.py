@@ -83,14 +83,24 @@ def validate_quiz_payload(payload):
             if not isinstance(chunks, list) or not (2 <= len(chunks) <= MAX_CHUNKS) \
                     or not all(isinstance(c, str) and c.strip() for c in chunks):
                 errors.append(f"{label}: needs between 2 and {MAX_CHUNKS} text chunks.")
-        elif qtype == "multiple_choice":
+        elif qtype in ("multiple_choice", "multiple_select"):
             options = q.get("options")
             if not isinstance(options, list) or not (2 <= len(options) <= MAX_OPTIONS) \
                     or not all(isinstance(o, str) and o.strip() for o in options):
                 errors.append(f"{label}: needs between 2 and {MAX_OPTIONS} text options.")
                 continue
-            if q.get("answer") not in options:
-                errors.append(f"{label}: the answer must match one of the options exactly.")
+            if len({o.strip() for o in options}) != len(options):
+                errors.append(f"{label}: the options must all be different.")
+            if qtype == "multiple_choice":
+                if q.get("answer") not in options:
+                    errors.append(f"{label}: the answer must match one of the options exactly.")
+            else:
+                answers = q.get("answers")
+                if not isinstance(answers, list) or not answers \
+                        or not all(a in options for a in answers) or len(set(answers)) != len(answers):
+                    errors.append(f"{label}: answers must list correct options, each copied exactly from the options.")
+                elif len(answers) >= len(options):
+                    errors.append(f"{label}: at least one option must be wrong.")
             meanings = q.get("optionMeanings")
             if meanings is not None and (not isinstance(meanings, list) or len(meanings) != len(options)):
                 errors.append(f"{label}: optionMeanings must have the same length as options.")
@@ -100,33 +110,57 @@ def validate_quiz_payload(payload):
 
 
 def _alt_orders(chunks, raw):
-    """Turn alternative orders (lists of chunk text) into index lists."""
-    result = []
+    """Alternative correct orders as index lists.
+
+    Each order may be given as chunk indexes (the editor) or as chunk text
+    (what a chatbot writes). Orders that are not a full rearrangement of the
+    chunks, equal the main order, or repeat another one are dropped.
+    """
+    result, seen = [], {tuple(range(len(chunks)))}
     if not isinstance(raw, list):
-        return result
+        return []
     for order in raw:
         if not isinstance(order, list) or len(order) != len(chunks):
             continue
-        remaining = list(enumerate(chunks))
-        indices = []
-        for text in order:
-            text = str(text).strip()
-            hit = next((k for k, (_, c) in enumerate(remaining) if c == text), None)
-            if hit is None:
-                break
-            indices.append(remaining.pop(hit)[0])
-        if len(indices) == len(chunks):
+        indices = None
+        if all(isinstance(v, int) and not isinstance(v, bool) for v in order):
+            if sorted(order) == list(range(len(chunks))):
+                indices = list(order)
+        else:
+            remaining = list(enumerate(chunks))
+            found = []
+            for text in order:
+                text = str(text).strip()
+                hit = next((k for k, (_, c) in enumerate(remaining) if c == text), None)
+                if hit is None:
+                    break
+                found.append(remaining.pop(hit)[0])
+            if len(found) == len(chunks):
+                indices = found
+        if indices is not None and tuple(indices) not in seen:
+            seen.add(tuple(indices))
             result.append(indices)
     return result
 
 
-def normalize_quiz(payload):
-    """Build the stored question list from a validated payload."""
+def normalize_quiz(payload, existing_ids=None):
+    """Build the stored question list from a validated payload.
+
+    When a teacher edits a quiz, questions keep their id (so saved answers still
+    belong to them). Only ids that already exist on this quiz are accepted.
+    """
+    allowed = set(existing_ids or [])
+    used = set()
     questions = []
     for q in payload["questions"]:
+        qid = q.get("id")
+        if not (isinstance(qid, str) and qid in allowed and qid not in used):
+            qid = new_id()
+        used.add(qid)
+        qtype = q.get("type") if q.get("type") in ("sentence_reorder", "multiple_select") else "multiple_choice"
         base = {
-            "id": new_id(),
-            "type": "sentence_reorder" if q.get("type") == "sentence_reorder" else "multiple_choice",
+            "id": qid,
+            "type": qtype,
             "question": _clean(q["question"]),
             "questionMeaning": _clean(q["questionMeaning"]) if q.get("questionMeaning") else None,
             "explanation": _clean(q["explanation"], 600) if q.get("explanation") else None,
@@ -140,7 +174,11 @@ def normalize_quiz(payload):
             base["options"] = [_clean(o) for o in q["options"]]
             meanings = q.get("optionMeanings")
             base["optionMeanings"] = [_clean(m) for m in meanings] if isinstance(meanings, list) else None
-            base["answer"] = _clean(q["answer"])
+            if qtype == "multiple_select":
+                wanted = {_clean(a) for a in q["answers"]}
+                base["answers"] = [o for o in base["options"] if o in wanted]   # keep the options' order
+            else:
+                base["answer"] = _clean(q["answer"])
         questions.append(base)
     return {
         "title": _clean(payload["title"], 200),
@@ -188,6 +226,14 @@ def to_student_view(quiz):
             chunks = [{"id": i, "text": fix(text)} for i, text in enumerate(q["chunks"])]
             random.shuffle(chunks)
             item["chunks"] = chunks
+        elif q["type"] == "multiple_select":
+            order = list(range(len(q["options"])))
+            random.shuffle(order)
+            options = [q["options"][i] for i in order]
+            meanings = [q["optionMeanings"][i] for i in order] if q.get("optionMeanings") else None
+            item["options"] = [fix(o) for o in options]
+            item["optionValues"] = options
+            item["optionMeanings"] = meanings
         else:
             options, meanings = _pick_display_options(q)
             item["options"] = [fix(o) for o in options]
@@ -218,6 +264,11 @@ def is_answer_correct(q, value):
         if value == list(range(total)):
             return True
         return any(value == order for order in (q.get("altOrders") or []))
+    if q["type"] == "multiple_select":
+        if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+            return False
+        # all-or-nothing: exactly the right set, no more and no fewer
+        return len(set(value)) == len(value) and set(value) == set(q["answers"])
     return isinstance(value, str) and value == q["answer"]
 
 
@@ -275,7 +326,19 @@ def display_answer(q, value):
         if isinstance(value, list) and all(isinstance(v, int) and 0 <= v < len(q["chunks"]) for v in value):
             return " ".join(q["chunks"][v] for v in value)
         return None
+    if q["type"] == "multiple_select":
+        if isinstance(value, list) and all(isinstance(v, str) for v in value):
+            return " / ".join(value) if value else None
+        return None
     return value if isinstance(value, str) else None
+
+
+def correct_text(q):
+    if q["type"] == "sentence_reorder":
+        return " ".join(q["chunks"])
+    if q["type"] == "multiple_select":
+        return " / ".join(q["answers"])
+    return q["answer"]
 
 
 def build_review(questions, answers):
@@ -290,7 +353,19 @@ def build_review(questions, answers):
             "questionMeaning": q.get("questionMeaning"),
             "explanation": q.get("explanation"),
             "given": display_answer(q, value),
-            "correctAnswer": " ".join(q["chunks"]) if q["type"] == "sentence_reorder" else q["answer"],
+            "correctAnswer": correct_text(q),
+            "otherOrders": [" ".join(q["chunks"][i] for i in order) for order in (q.get("altOrders") or [])]
+                           if q["type"] == "sentence_reorder" else [],
             "correct": is_answer_correct(q, value),
         })
     return review
+
+
+def regrade_attempt(attempt, questions, time_limit_seconds):
+    """Score a finished attempt again against the current questions."""
+    scored = recompute_score(attempt.answers or {}, attempt.answer_order or [], questions, time_limit_seconds)
+    title = compute_title(scored["accuracy"], scored["longest_streak"], len(questions))
+    attempt.accuracy_score = scored["accuracy"]
+    attempt.xp_score = scored["xp"]
+    attempt.longest_streak = scored["longest_streak"]
+    attempt.title = title["name"]

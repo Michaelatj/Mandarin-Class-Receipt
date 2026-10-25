@@ -13,6 +13,7 @@
     </div>
     <p class="qz-sub" style="margin-top:8px"><span>{{ quiz.questions|length }} question{{ '' if quiz.questions|length == 1 else 's' }}</span>{% if quiz.description %} · <span data-no-i18n>{{ quiz.description }}</span>{% endif %}</p>
   </div>
+  <a class="btn qz-btn-gold qz-btn-sm" href="{{ url_for('quiz.edit', quiz_id=quiz.id) }}">Edit questions</a>
 </div>
 
 <div class="card">
@@ -80,6 +81,7 @@
                   <div class="q" data-no-i18n>{{ loop.index }}. {{ item.question }}</div>
                   <div class="a"><b>Student answer:</b> <span data-no-i18n>{{ item.given if item.given else '-' }}</span></div>
                   {% if not item.correct %}<div class="a"><b>Correct answer:</b> <span data-no-i18n>{{ item.correctAnswer }}</span></div>{% endif %}
+                  {% if not item.correct and item.otherOrders %}<div class="a"><b>Also accepted:</b> <span data-no-i18n>{{ item.otherOrders|join('  |  ') }}</span></div>{% endif %}
                 </div>
                 {% endfor %}
               </div>

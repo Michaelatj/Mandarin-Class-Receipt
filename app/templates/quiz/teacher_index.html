@@ -15,8 +15,8 @@
     {% for q in quizzes %}
     <div class="qz-item">
       <div class="qz-item-main">
-        <div class="qz-item-title">{{ q.title }}</div>
-        {% if q.description %}<div class="qz-item-desc">{{ q.description }}</div>{% endif %}
+        <div class="qz-item-title" data-no-i18n>{{ q.title }}</div>
+        {% if q.description %}<div class="qz-item-desc" data-no-i18n>{{ q.description }}</div>{% endif %}
         <div class="qz-meta">
           <span>{{ q.questions|length }} question{{ '' if q.questions|length == 1 else 's' }}</span>
           <span>{% if q.assign_all %}Given to all students{% else %}Given to {{ assigned.get(q.id, 0) }} student{{ '' if assigned.get(q.id, 0) == 1 else 's' }}{% endif %}</span>

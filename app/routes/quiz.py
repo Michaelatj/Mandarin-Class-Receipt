@@ -8,7 +8,6 @@ a time (each answer is checked instantly), and gets a score and a fun title.
 Everything a student receives is stripped of correct answers; grading always
 happens here on the server.
 """
-import time
 import logging
 from datetime import datetime
 from functools import wraps
@@ -26,28 +25,6 @@ quiz_bp = Blueprint("quiz", __name__)
 
 MAX_PAYLOAD_BYTES = 400_000
 MAX_TIME_LIMIT = 7200  # seconds
-
-# Question lists never change after a quiz is created, so a short in-process
-# cache keeps "check this answer" down to a single database read.
-_QUESTION_CACHE = {}
-_CACHE_TTL = 300
-
-
-def _questions_for(quiz_id):
-    hit = _QUESTION_CACHE.get(quiz_id)
-    now = time.time()
-    if hit and hit[0] > now:
-        return hit[1]
-    quiz = db.session.get(Quiz, quiz_id)
-    if not quiz:
-        return None
-    _QUESTION_CACHE[quiz_id] = (now + _CACHE_TTL, quiz.questions)
-    return quiz.questions
-
-
-def _forget(quiz_id):
-    _QUESTION_CACHE.pop(quiz_id, None)
-
 
 # ---------------------------------------------------------------------
 # Access helpers
@@ -164,7 +141,7 @@ def api_create(user):
     db.session.add(quiz)
     db.session.commit()
     logger.info("Quiz %s created by teacher %s (%d questions)", quiz.id, user.id, len(quiz.questions))
-    return jsonify(ok=True, id=quiz.id, url=url_for("quiz.detail", quiz_id=quiz.id)), 201
+    return jsonify(ok=True, id=quiz.id, url=url_for("quiz.edit", quiz_id=quiz.id, new=1)), 201
 
 
 # ---------------------------------------------------------------------
@@ -193,6 +170,60 @@ def detail(user, quiz_id):
 
     return render_template("quiz/detail.html", home=url_for("quiz.index"), quiz=quiz,
                            students=students, assigned_ids=assigned_ids, rows=rows)
+
+
+def _question_stats(quiz):
+    """How many finished attempts answered each question, and how many got it right."""
+    stats = {q["id"]: {"answered": 0, "correct": 0} for q in quiz.questions}
+    by_id = {q["id"]: q for q in quiz.questions}
+    for a in QuizAttempt.query.filter_by(quiz_id=quiz.id).filter(QuizAttempt.submitted_at.isnot(None)).all():
+        for qid, given in (a.answers or {}).items():
+            if qid in by_id:
+                stats[qid]["answered"] += 1
+                if ql.is_answer_correct(by_id[qid], given.get("value")):
+                    stats[qid]["correct"] += 1
+    return stats
+
+
+@quiz_bp.route("/quiz/<int:quiz_id>/edit")
+@guard("teacher")
+def edit(user, quiz_id):
+    quiz = _own_quiz(user, quiz_id)
+    if not quiz:
+        return _not_found()
+    submitted = (QuizAttempt.query.filter_by(quiz_id=quiz.id)
+                 .filter(QuizAttempt.submitted_at.isnot(None)).count())
+    return render_template("quiz/edit.html", home=url_for("quiz.detail", quiz_id=quiz.id), quiz=quiz,
+                           stats=_question_stats(quiz), submitted=submitted,
+                           is_new=request.args.get("new") == "1")
+
+
+@quiz_bp.route("/quiz/api/<int:quiz_id>/questions", methods=["POST"])
+@guard("teacher")
+def api_questions(user, quiz_id):
+    quiz = _own_quiz(user, quiz_id)
+    if not quiz:
+        return _not_found()
+    if (request.content_length or 0) > MAX_PAYLOAD_BYTES:
+        return jsonify(ok=False, msg="That quiz is too large."), 413
+    data = request.get_json(silent=True) or {}
+    questions = data.get("questions")
+    errors = ql.validate_quiz_payload({"title": quiz.title, "questions": questions})
+    if errors:
+        return jsonify(ok=False, msg="This quiz has problems.", details=errors[:12]), 400
+
+    norm = ql.normalize_quiz({"title": quiz.title, "questions": questions},
+                             existing_ids=[q["id"] for q in quiz.questions])
+    quiz.questions = norm["questions"]          # assign a new list so the JSON column is saved
+
+    # A corrected answer key should fix everyone's score, so grade finished attempts again
+    attempts = QuizAttempt.query.filter_by(quiz_id=quiz.id).filter(QuizAttempt.submitted_at.isnot(None)).all()
+    for a in attempts:
+        ql.regrade_attempt(a, quiz.questions, quiz.time_limit_seconds)
+    db.session.commit()
+    logger.info("Quiz %s edited by teacher %s (%d questions, %d results re-graded)",
+                quiz.id, user.id, len(quiz.questions), len(attempts))
+    return jsonify(ok=True, count=len(quiz.questions), regraded=len(attempts))
 
 
 @quiz_bp.route("/quiz/api/<int:quiz_id>/update", methods=["POST"])
@@ -246,7 +277,6 @@ def api_delete(user, quiz_id):
     QuizAssign.query.filter_by(quiz_id=quiz.id).delete(synchronize_session=False)
     db.session.delete(quiz)
     db.session.commit()
-    _forget(quiz_id)
     return jsonify(ok=True, url=url_for("quiz.index"))
 
 
@@ -308,8 +338,9 @@ def api_answer(user, attempt_id):
     if not attempt or attempt.submitted_at:
         return jsonify(ok=False, msg="This attempt is closed."), 404
     data = request.get_json(silent=True) or {}
-    questions = _questions_for(attempt.quiz_id)
-    q = next((x for x in (questions or []) if x["id"] == data.get("questionId")), None)
+    # read fresh every time: a teacher may have just corrected the answer key
+    quiz = db.session.get(Quiz, attempt.quiz_id)
+    q = next((x for x in (quiz.questions if quiz else []) if x["id"] == data.get("questionId")), None)
     if not q:
         return jsonify(ok=False, msg="Question not found."), 404
     return jsonify(ok=True, correct=ql.is_answer_correct(q, data.get("value")))
@@ -328,6 +359,10 @@ def _clean_answers(questions, raw):
         if q["type"] == "sentence_reorder":
             if not (isinstance(value, list) and len(value) <= ql.MAX_CHUNKS
                     and all(isinstance(v, int) and not isinstance(v, bool) for v in value)):
+                continue
+        elif q["type"] == "multiple_select":
+            if not (isinstance(value, list) and len(value) <= ql.MAX_OPTIONS
+                    and all(isinstance(v, str) and len(v) <= ql.MAX_TEXT for v in value)):
                 continue
         elif not (isinstance(value, str) and len(value) <= ql.MAX_TEXT):
             continue
