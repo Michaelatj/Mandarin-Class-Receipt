@@ -1,0 +1,24 @@
+{% extends "quiz/layout.html" %}
+{% block qz_title %}{{ quiz.title }}{% endblock %}
+{% block qz_back %}Back to quizzes{% endblock %}
+{% block qz_attrs %}data-page="play" data-start-url="{{ url_for('quiz.api_start', quiz_id=quiz.id) }}" data-attempt-base="/quiz/api/attempt/" data-home="{{ home }}"{% endblock %}
+
+{% block qz_body %}
+<div id="qz-play">
+  <div class="qz-start">
+    <h1 data-no-i18n>{{ quiz.title }}</h1>
+    {% if quiz.description %}<p data-no-i18n>{{ quiz.description }}</p>{% endif %}
+    <div class="qz-meta">
+      <span>{{ question_count }} question{{ '' if question_count == 1 else 's' }}</span>
+      <span>{% if quiz.time_limit_seconds %}Time limit: {{ quiz.time_limit_seconds }}s for the whole quiz{% else %}No time limit{% endif %}</span>
+    </div>
+    {% if blocked %}
+      <div class="qz-notice">You already finished this quiz and your teacher turned retakes off.</div>
+    {% else %}
+      <button type="button" class="btn qz-btn-gold" id="qz-begin">Start quiz</button>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-play.js') + '?v=1' }}"></script>{% endblock %}

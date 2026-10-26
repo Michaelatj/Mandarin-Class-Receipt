@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{% block qz_title %}Quiz{% endblock %}{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') + '?v=1' }}">{% endblock %}
+
+{% block page_content %}
+<div class="qz-shell" {% block qz_attrs %}{% endblock %}>
+  <header class="qz-top">
+    <a class="qz-back" href="{{ home }}">&larr; {% block qz_back %}Back to dashboard{% endblock %}</a>
+  </header>
+  <div class="qz-flashes">{% include 'partials/flashes.html' %}</div>
+  {% block qz_body %}{% endblock %}
+</div>
+{% endblock %}

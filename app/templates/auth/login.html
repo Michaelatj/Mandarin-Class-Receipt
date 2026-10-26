@@ -13,8 +13,11 @@
     {% for name in known_users %}<option value="{{ name }}">{% endfor %}
   </datalist>
   <label>{{ tr('password_lbl') }}</label>
-  <input type="password" name="password" placeholder="{{ tr('password_ph') }}"
-         required autocomplete="current-password">
+  <div class="pw-wrap">
+    <input type="password" name="password" placeholder="{{ tr('password_ph') }}"
+           required autocomplete="current-password">
+    {% include 'partials/pw_toggle.html' %}
+  </div>
   <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-weight:400;font-size:.85rem;color:var(--text2);letter-spacing:0;cursor:pointer;margin:2px 0 14px">
     <input type="checkbox" name="remember" value="1" style="width:15px;height:15px;margin:0;accent-color:var(--gold)">
     {{ tr('remember_me') }}

@@ -1700,3 +1700,55 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--gold);
   color: #fff;
 }
+
+
+/* ── Password show / hide ── */
+.pw-wrap { position: relative; margin-bottom: 14px; }
+.pw-wrap input { margin-bottom: 0; padding-right: 42px; }
+.pw-toggle {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 42px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 0; color: var(--text3);
+  cursor: pointer; border-radius: 0 var(--radius) var(--radius) 0;
+}
+.pw-toggle:hover { color: var(--text); }
+.pw-toggle:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.pw-toggle svg {
+  width: 18px; height: 18px; fill: none; stroke: currentColor;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.pw-toggle .eye-off { display: none; }
+.pw-toggle.on .eye { display: none; }
+.pw-toggle.on .eye-off { display: block; }
+
+/* ── Language switch inside settings ── */
+.lang-switch { display: flex; gap: 6px; }
+
+/* ── Sidebar link to another page (Quiz) ── */
+.snav-link {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 11px; margin-bottom: 1px;
+  border-radius: 8px; text-decoration: none;
+  color: rgba(255,255,255,.45);
+  font-family: var(--font-body); font-size: .875rem; font-weight: 500;
+  transition: background .12s, color .12s;
+}
+.snav-link:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.8); }
+.snav-soon {
+  font-size: .68rem; font-weight: 600; padding: 1px 8px; border-radius: 100px;
+  background: rgba(255,255,255,.1); color: rgba(255,255,255,.6);
+}
+
+/* ── Quiz (coming soon) page ── */
+.quiz-badge {
+  display: inline-block; margin-bottom: 12px; padding: 3px 11px;
+  font-size: .75rem; font-weight: 600; color: var(--gold);
+  background: rgba(176,125,46,.12); border-radius: 100px;
+}
+.quiz-lead { margin: 0 0 18px; font-size: .9rem; line-height: 1.6; color: var(--text2); }
+.quiz-list-title { margin: 0 0 4px; font-size: .8rem; font-weight: 600; color: var(--text3); }
+.quiz-list { list-style: none; margin: 0 0 20px; padding: 0; }
+.quiz-list li {
+  padding: 9px 0; border-top: 1px solid var(--border);
+  font-size: .85rem; line-height: 1.5; color: var(--text2);
+}

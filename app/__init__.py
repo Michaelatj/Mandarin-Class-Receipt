@@ -37,7 +37,7 @@ def create_app(config_class=None):
     # Language Context Processor
     @flask_app.before_request
     def load_language():
-        lang = request.cookies.get('lang', 'en')
+        lang = session.get('lang', 'en')
         g.lang = lang
         g.translations = get_translations(lang)
 
@@ -45,6 +45,7 @@ def create_app(config_class=None):
     def inject_globals():
         return {
             'lang': getattr(g, 'lang', 'en'),
+            'i18n_version': __import__('app.services.i18n_live', fromlist=['version']).version(),
             'get_lang': get_lang,
             'tr': lambda key, default=None: get_translations(getattr(g, 'lang', 'en')).get(key, default or key),
             'fmt_date': lambda dt: __import__('app.services.i18n', fromlist=['fmt_date']).fmt_date(dt),
@@ -61,10 +62,12 @@ def create_app(config_class=None):
     from .routes.student import student_bp
     from .routes.teacher import teacher_bp
     from .routes.schedule import schedule_bp
+    from .routes.quiz import quiz_bp
 
     flask_app.register_blueprint(auth_bp)
     flask_app.register_blueprint(student_bp)
     flask_app.register_blueprint(teacher_bp)
     flask_app.register_blueprint(schedule_bp)
+    flask_app.register_blueprint(quiz_bp)
 
     return flask_app

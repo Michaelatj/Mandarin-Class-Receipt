@@ -52,7 +52,7 @@
       <form action="{{ url_for('teacher.cancel_receipt_route', receipt_id=r.id) }}" 
             method="POST" 
             style="display: inline-block; margin-top: 4px;"
-            onsubmit="event.stopPropagation(); return confirm('Apakah Anda yakin ingin membatalkan/redo receipt #{{ display_no }}? Sesi absensi murid akan dikembalikan ke status belum ditagih.');">
+            onsubmit="event.stopPropagation(); var m = 'Apakah Anda yakin ingin membatalkan/redo receipt #{{ display_no }}? Sesi absensi murid akan dikembalikan ke status belum ditagih.'; return confirm(window.I18N ? I18N.t(m) : m);">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" 
                 onclick="event.stopPropagation();"

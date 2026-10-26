@@ -1,0 +1,103 @@
+{% extends "quiz/layout.html" %}
+{% block qz_title %}{{ quiz.title }}{% endblock %}
+{% block qz_back %}Back to quizzes{% endblock %}
+{% block qz_attrs %}data-page="detail" data-update-url="{{ url_for('quiz.api_update', quiz_id=quiz.id) }}" data-delete-url="{{ url_for('quiz.api_delete', quiz_id=quiz.id) }}"{% endblock %}
+
+{% block qz_body %}
+<div class="qz-head">
+  <div style="flex:1;min-width:240px">
+    <label for="qz-title-input">Quiz title</label>
+    <div class="qz-title-edit" style="margin-top:6px">
+      <input type="text" id="qz-title-input" value="{{ quiz.title }}" maxlength="200" data-no-i18n>
+      <button type="button" class="btn bgh qz-btn-sm" id="qz-title-save">Save</button>
+    </div>
+    <p class="qz-sub" style="margin-top:8px"><span>{{ quiz.questions|length }} question{{ '' if quiz.questions|length == 1 else 's' }}</span>{% if quiz.description %} · <span data-no-i18n>{{ quiz.description }}</span>{% endif %}</p>
+  </div>
+  <a class="btn qz-btn-gold qz-btn-sm" href="{{ url_for('quiz.edit', quiz_id=quiz.id) }}">Edit questions</a>
+</div>
+
+<div class="card">
+  <div class="qz-section-title">Who gets this quiz</div>
+  <p class="qz-hint-text">Students only see quizzes that are given to them.</p>
+  <label class="qz-student" style="margin-bottom:8px">
+    <input type="checkbox" id="qz-assign-all" {% if quiz.assign_all %}checked{% endif %}>
+    <span>All students</span>
+  </label>
+  <div id="qz-picker" {% if quiz.assign_all %}style="opacity:.5"{% endif %}>
+    {% if students %}
+    <div class="qz-students">
+      {% for s in students %}
+      <label class="qz-student"><input type="checkbox" class="qz-stu" value="{{ s.id }}" {% if s.id in assigned_ids %}checked{% endif %}><span data-no-i18n>{{ s.name() }}</span></label>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="qz-hint-text">No students have registered yet.</p>
+    {% endif %}
+  </div>
+  <div class="qz-actions-row"><button type="button" class="btn bgh qz-btn-sm" id="qz-assign-save">Save choice</button></div>
+</div>
+
+<div class="card">
+  <div class="qz-section-title">Settings</div>
+  <div class="qz-setting">
+    <div class="qz-setting-text"><b>Hide pinyin from students</b><span>Students see Hanzi only. You always see full pinyin.</span></div>
+    <input type="checkbox" id="qz-hide-pinyin" {% if quiz.hide_pinyin %}checked{% endif %}>
+  </div>
+  <div class="qz-setting">
+    <div class="qz-setting-text"><b>Allow retakes</b><span>Turn off to give each student one try.</span></div>
+    <input type="checkbox" id="qz-retakes" {% if quiz.allow_retakes %}checked{% endif %}>
+  </div>
+  <div class="qz-setting">
+    <div class="qz-setting-text"><b>Time limit for the whole quiz (seconds)</b><span>0 means no timer. It starts when the student begins.</span></div>
+    <input type="number" id="qz-time" min="0" max="7200" value="{{ quiz.time_limit_seconds or 0 }}">
+  </div>
+</div>
+
+<div class="card">
+  <div class="qz-section-title">Results</div>
+  {% if rows %}
+  <div class="qz-table-wrap">
+    <table class="qz-table">
+      <thead><tr>
+        <th>Student</th><th>Accuracy</th><th>Game score</th><th>Best streak</th><th>Title</th><th>Submitted</th>
+      </tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr>
+          <td data-no-i18n>{{ r.student }}</td>
+          <td class="num">{{ r.attempt.accuracy_score|int }}</td>
+          <td class="num">{{ r.attempt.xp_score }}</td>
+          <td class="num">{{ r.attempt.longest_streak }}</td>
+          <td>{% if r.title %}<span class="qz-badge-title">{{ r.title.icon }} {{ r.title.name }}</span>{% endif %}</td>
+          <td>{{ fmt_date(to_wib(r.attempt.submitted_at)) }}</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="padding-top:0">
+            <details class="qz-review">
+              <summary>Review answers</summary>
+              <div class="qz-review-list">
+                {% for item in r.review %}
+                <div class="qz-review-q {{ 'ok' if item.correct else 'bad' }}">
+                  <div class="q" data-no-i18n>{{ loop.index }}. {{ item.question }}</div>
+                  <div class="a"><b>Student answer:</b> <span data-no-i18n>{{ item.given if item.given else '-' }}</span></div>
+                  {% if not item.correct %}<div class="a"><b>Correct answer:</b> <span data-no-i18n>{{ item.correctAnswer }}</span></div>{% endif %}
+                  {% if not item.correct and item.otherOrders %}<div class="a"><b>Also accepted:</b> <span data-no-i18n>{{ item.otherOrders|join('  |  ') }}</span></div>{% endif %}
+                </div>
+                {% endfor %}
+              </div>
+            </details>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><div class="empty-title">No results yet</div><div class="empty-sub">Results show up here after students submit.</div></div>
+  {% endif %}
+</div>
+
+<div class="qz-danger"><button type="button" class="btn br qz-btn-sm" id="qz-delete">Delete quiz</button></div>
+{% endblock %}
+
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-teacher.js') + '?v=1' }}"></script>{% endblock %}

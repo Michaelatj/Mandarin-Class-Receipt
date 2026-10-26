@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=24" }}">
+<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=25" }}">
+{% block head_extra %}{% endblock %}
 </head>
 <body>
 
@@ -96,6 +97,19 @@ function ajaxForm(form, onSuccess) {
 
 history.replaceState(null, '', location.href);
 
+/* ── Show / hide password ── */
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.pw-toggle');
+  if (!btn) return;
+  const input = btn.parentElement.querySelector('input');
+  if (!input) return;
+  const reveal = input.type === 'password';
+  input.type = reveal ? 'text' : 'password';
+  btn.classList.toggle('on', reveal);
+  btn.setAttribute('aria-pressed', reveal ? 'true' : 'false');
+  btn.setAttribute('aria-label', reveal ? btn.dataset.hide : btn.dataset.show);
+});
+
 /* ── Ripple effect on all .btn clicks ── */
 document.addEventListener('click', function(e) {
   const btn = e.target.closest('.btn');
@@ -127,6 +141,8 @@ document.addEventListener('click', function(e) {
   };
 })();
 </script>
+<script src="{{ url_for('auth.i18n_data') }}?v={{ i18n_version }}"></script>
+<script src="{{ url_for('static', filename='js/i18n-live.js') }}?v=1"></script>
 {% block page_scripts %}{% endblock %}
 </body>
 </html>

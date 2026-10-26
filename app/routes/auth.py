@@ -55,7 +55,19 @@ def _finish_login(user, uname, ip, remember):
 def set_lang(code: str):
     if code in ("en", "zh"):
         session["lang"] = code
-    return redirect(request.referrer or url_for("student.dashboard"))
+    # The page switches language on its own; it only needs the choice saved.
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return ("", 204)
+    return redirect(request.referrer or url_for("auth.index"))
+
+
+@auth_bp.route("/i18n-data.js")
+def i18n_data():
+    from ..services.i18n_live import data_js
+    resp = make_response(data_js())
+    resp.headers["Content-Type"] = "application/javascript; charset=utf-8"
+    resp.headers["Cache-Control"] = "public, max-age=86400"   # the URL carries a version, so a new dictionary busts it
+    return resp
 
 
 @auth_bp.route("/")
@@ -173,7 +185,26 @@ def delete_account():
         flash(tr("err_delete_pw"), "err")
         return redirect(url_for("student.dashboard"))
 
-    from ..models import Attendance, Receipt, StudentFee
+    from ..models import (Attendance, Receipt, StudentFee, Schedule, ScheduleJoin,
+                          ScheduleInvite, Quiz, QuizAssign, QuizAttempt)
+    # Quizzes first: attempts and assignments point at both quizzes and users
+    my_quiz_ids = [q.id for q in Quiz.query.filter_by(teacher_id=user.id).all()]
+    if my_quiz_ids:
+        QuizAttempt.query.filter(QuizAttempt.quiz_id.in_(my_quiz_ids)).delete(synchronize_session=False)
+        QuizAssign.query.filter(QuizAssign.quiz_id.in_(my_quiz_ids)).delete(synchronize_session=False)
+        Quiz.query.filter(Quiz.id.in_(my_quiz_ids)).delete(synchronize_session=False)
+    QuizAttempt.query.filter_by(student_id=user.id).delete(synchronize_session=False)
+    QuizAssign.query.filter_by(student_id=user.id).delete(synchronize_session=False)
+
+    # Schedule rows reference attendance rows and users
+    my_schedule_ids = [s.id for s in Schedule.query.filter_by(teacher_id=user.id).all()]
+    if my_schedule_ids:
+        ScheduleJoin.query.filter(ScheduleJoin.schedule_id.in_(my_schedule_ids)).delete(synchronize_session=False)
+        ScheduleInvite.query.filter(ScheduleInvite.schedule_id.in_(my_schedule_ids)).delete(synchronize_session=False)
+        Schedule.query.filter(Schedule.id.in_(my_schedule_ids)).delete(synchronize_session=False)
+    ScheduleJoin.query.filter_by(student_id=user.id).delete(synchronize_session=False)
+    ScheduleInvite.query.filter_by(student_id=user.id).delete(synchronize_session=False)
+
     # Delete all related data first (no cascade set up, so manual)
     Attendance.query.filter(
         (Attendance.student_id == user.id) | (Attendance.teacher_id == user.id)

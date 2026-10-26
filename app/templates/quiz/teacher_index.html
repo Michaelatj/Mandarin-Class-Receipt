@@ -1,0 +1,39 @@
+{% extends "quiz/layout.html" %}
+{% block qz_title %}Quiz{% endblock %}
+
+{% block qz_body %}
+<div class="qz-head">
+  <div>
+    <h1 class="qz-h1">Quizzes</h1>
+    <p class="qz-sub">Make a quiz from your lesson material and give it to your students.</p>
+  </div>
+  <a class="btn qz-btn-gold qz-btn-sm" href="{{ url_for('quiz.new') }}">New quiz</a>
+</div>
+
+<div class="card">
+  {% if quizzes %}
+    {% for q in quizzes %}
+    <div class="qz-item">
+      <div class="qz-item-main">
+        <div class="qz-item-title" data-no-i18n>{{ q.title }}</div>
+        {% if q.description %}<div class="qz-item-desc" data-no-i18n>{{ q.description }}</div>{% endif %}
+        <div class="qz-meta">
+          <span>{{ q.questions|length }} question{{ '' if q.questions|length == 1 else 's' }}</span>
+          <span>{% if q.assign_all %}Given to all students{% else %}Given to {{ assigned.get(q.id, 0) }} student{{ '' if assigned.get(q.id, 0) == 1 else 's' }}{% endif %}</span>
+          <span>{{ submitted.get(q.id, 0) }} submitted</span>
+        </div>
+      </div>
+      <div class="qz-item-actions">
+        <a class="btn bgh qz-btn-sm" href="{{ url_for('quiz.detail', quiz_id=q.id) }}">Open</a>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📝</div>
+      <div class="empty-title">No quizzes yet</div>
+      <div class="empty-sub">Create your first quiz to give it to your students.</div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

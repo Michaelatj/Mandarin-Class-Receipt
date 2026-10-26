@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ tr('nav_quiz') }}{% endblock %}
+
+{% block body %}
+<span class="quiz-badge">{{ tr('quiz_soon_badge') }}</span>
+<div class="form-title">{{ tr('quiz_teacher_head') if role == 'teacher' else tr('quiz_student_head') }}</div>
+<p class="quiz-lead">{{ tr('quiz_teacher_desc') if role == 'teacher' else tr('quiz_student_desc') }}</p>
+
+<p class="quiz-list-title">{{ tr('quiz_planned') }}</p>
+<ul class="quiz-list">
+  <li>{{ tr('quiz_f_types') }}</li>
+  {% if role == 'teacher' %}
+  <li>{{ tr('quiz_f_assign') }}</li>
+  <li>{{ tr('quiz_f_scores') }}</li>
+  {% else %}
+  <li>{{ tr('quiz_f_timer') }}</li>
+  <li>{{ tr('quiz_f_streak') }}</li>
+  {% endif %}
+</ul>
+
+<a href="{{ home }}" class="btn bgh" style="display:block;text-align:center">{{ tr('quiz_back') }}</a>
+{% endblock %}

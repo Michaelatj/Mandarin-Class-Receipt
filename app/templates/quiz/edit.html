@@ -1,0 +1,40 @@
+{% extends "quiz/layout.html" %}
+{% block qz_title %}Edit questions{% endblock %}
+{% block qz_back %}Back to quiz{% endblock %}
+{% block qz_attrs %}data-page="edit" data-save-url="{{ url_for('quiz.api_questions', quiz_id=quiz.id) }}" data-detail-url="{{ url_for('quiz.detail', quiz_id=quiz.id) }}"{% endblock %}
+
+{% block qz_body %}
+<div class="qz-head">
+  <div>
+    <h1 class="qz-h1">Edit questions</h1>
+    <p class="qz-sub" data-no-i18n>{{ quiz.title }}</p>
+  </div>
+  <button type="button" class="btn qz-btn-gold qz-btn-sm" id="qe-save">Save changes</button>
+</div>
+
+{% if is_new %}
+<div class="qz-notice" style="margin:0 0 14px">Quiz created. Read through every question and answer, and fix anything that does not match what you want. Students cannot see this quiz until you give it to them.</div>
+{% endif %}
+{% if submitted %}
+<div class="qz-notice" style="margin:0 0 14px">Finished results: {{ submitted }}. Saving re-grades them with your changes.</div>
+{% endif %}
+
+<div id="qe-list"></div>
+
+<div class="card">
+  <div class="qz-section-title">Add a question</div>
+  <div class="qz-actions-row" id="qe-add">
+    <button type="button" class="btn bgh qz-btn-sm" data-add="multiple_choice">One correct answer</button>
+    <button type="button" class="btn bgh qz-btn-sm" data-add="multiple_select">Several correct answers</button>
+    <button type="button" class="btn bgh qz-btn-sm" data-add="sentence_reorder">Reorder the sentence</button>
+  </div>
+</div>
+
+<div class="qz-errors" id="qe-errors" hidden></div>
+<div class="qz-actions-row" style="margin-top:14px"><button type="button" class="btn qz-btn-gold qz-btn-sm" id="qe-save2">Save changes</button></div>
+
+<script type="application/json" id="qe-data">{{ quiz.questions|tojson }}</script>
+<script type="application/json" id="qe-stats">{{ stats|tojson }}</script>
+{% endblock %}
+
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-edit.js') + '?v=1' }}"></script>{% endblock %}

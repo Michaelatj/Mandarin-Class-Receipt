@@ -7,23 +7,27 @@
 <div class="app-shell">
   {# SIDEBAR #}
   <aside class="app-sidebar" id="appSidebar">
-    <div class="sidebar-brand"><span class="sidebar-brand-zh">中文课堂</span><span class="sidebar-brand-tag">Student Dashboard</span></div>
+    <div class="sidebar-brand"><span class="sidebar-brand-zh">中文课堂</span><span class="sidebar-brand-tag">{{ tr('student_tag') }}</span></div>
     <nav class="sidebar-nav" id="sideNav">
       <button class="snav-btn" data-page="classes" data-count="{{ new_count }}">
-        <span class="snav-icon">📆</span><span class="snav-label">Classes</span>
+        <span class="snav-icon">📆</span><span class="snav-label">{{ tr('nav_classes') }}</span>
         {% if show_classes_pip %}<span class="snav-pip gold">{{ new_count }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="progress" data-count="{{ unbilled_count }}">
-        <span class="snav-icon">📊</span><span class="snav-label">Progress</span>
+        <span class="snav-icon">📊</span><span class="snav-label">{{ tr('nav_progress') }}</span>
         {# FIX: Hapus hardcoded /8 #}
         {% if show_progress_pip %}<span class="snav-pip gold">{{ unbilled_count }}</span>{% endif %}
       </button>
       <button class="snav-btn" data-page="receipts" data-count="{{ unpaid_count }}">
-        <span class="snav-icon">🧾</span><span class="snav-label">Receipts</span>
+        <span class="snav-icon">🧾</span><span class="snav-label">{{ tr('nav_receipts') }}</span>
         {% if show_receipts_pip %}<span class="snav-pip">{{ unpaid_count }}</span>{% endif %}
       </button>
+      <a class="snav-link" href="{{ url_for('quiz.index') }}">
+        <span class="snav-icon">📝</span>
+        <span class="snav-label">{{ tr('nav_quiz') }}</span>
+      </a>
       <button class="snav-btn" data-page="settings" data-count="0">
-        <span class="snav-icon">⚙️</span><span class="snav-label">Settings</span>
+        <span class="snav-icon">⚙️</span><span class="snav-label">{{ tr('nav_settings') }}</span>
       </button>
     </nav>
     <div class="sidebar-footer">
@@ -45,8 +49,8 @@
       <div class="app-page" id="page-classes">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Classes</h1>
-            <p class="page-sub">Upcoming sessions scheduled by your teacher</p>
+            <h1 class="page-title">{{ tr('nav_classes') }}</h1>
+            <p class="page-sub">{{ tr('page_classes_sub_student') }}</p>
           </div>
           {% if teachers %}
           <div class="page-action">
@@ -107,7 +111,7 @@
             {% elif p_type == 'per_session' %}
               <p class="page-sub">🎟️ Paket Per Sesi — Rp {{ "{:,.0f}".format(p_price) }} / sesi</p>
             {% else %}
-              <p class="page-sub">Your current billing cycle</p>
+              <p class="page-sub">{{ tr('progress_sub_student') }}</p>
             {% endif %}
           </div>
         </div>
@@ -161,7 +165,7 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">{{ tr('your_receipts') }}</h1>
-            <p class="page-sub">{{ receipts|length }} total receipts</p>
+            <p class="page-sub">{{ tr('receipts_total_student').format(n=receipts|length) }}</p>
           </div>
         </div>
         <div id="receiptSection">
@@ -186,11 +190,18 @@
       <div class="app-page" id="page-settings">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Settings</h1>
-            <p class="page-sub">Manage your account</p>
+            <h1 class="page-title">{{ tr('nav_settings') }}</h1>
+            <p class="page-sub">{{ tr('settings_sub_student') }}</p>
           </div>
         </div>
         <div class="settings-grid">
+          <div class="card">
+            <div class="card-title"><span class="card-title-icon">🌐</span> {{ tr('language_lbl') }}</div>
+            <div class="lang-switch">
+              <a href="{{ url_for('auth.set_lang', code='en') }}" class="lb {% if get_lang()=='en' %}on{% endif %}">EN</a>
+              <a href="{{ url_for('auth.set_lang', code='zh') }}" class="lb {% if get_lang()=='zh' %}on{% endif %}">中文</a>
+            </div>
+          </div>
           <div class="card">
             <div class="card-title"><span class="card-title-icon">👤</span> Profile</div>
             <form id="profileForm" method="POST" action="{{ url_for('student.update_profile') }}">
@@ -235,24 +246,28 @@
     <div class="bnav-icon">📆
       {% if show_classes_pip %}<span class="bnav-pip">{{ new_count }}</span>{% endif %}
     </div>
-    <span>Classes</span>
+    <span>{{ tr('nav_classes') }}</span>
   </button>
   <button class="bnav-btn" data-page="progress" data-count="{{ unbilled_count }}">
     <div class="bnav-icon">📊
       {# FIX: Hapus hardcoded /8 #}
       {% if show_progress_pip %}<span class="bnav-pip">{{ unbilled_count }}</span>{% endif %}
     </div>
-    <span>Progress</span>
+    <span>{{ tr('nav_progress') }}</span>
   </button>
   <button class="bnav-btn" data-page="receipts" data-count="{{ unpaid_count }}">
     <div class="bnav-icon">🧾
       {% if show_receipts_pip %}<span class="bnav-pip">{{ unpaid_count }}</span>{% endif %}
     </div>
-    <span>Receipts</span>
+    <span>{{ tr('nav_receipts') }}</span>
   </button>
+  <a class="bnav-btn" href="{{ url_for('quiz.index') }}" style="text-decoration:none">
+    <div class="bnav-icon">📝</div>
+    <span>{{ tr('nav_quiz') }}</span>
+  </a>
   <button class="bnav-btn" data-page="settings" data-count="0">
     <div class="bnav-icon">⚙️</div>
-    <span>Settings</span>
+    <span>{{ tr('nav_settings') }}</span>
   </button>
   <a class="bnav-btn" href="{{ url_for('auth.logout') }}" style="text-decoration:none;color:inherit" onclick="sessionStorage.removeItem('paymentReminderSeen');">
     <div class="bnav-icon" style="color:var(--red)">🚪</div>
