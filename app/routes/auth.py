@@ -19,18 +19,7 @@ auth_bp = Blueprint("auth", __name__)
 
 USERNAME_RE = re.compile(r"^[A-Za-z0-9_.+-]{3,40}$")
 
-KNOWN_USERS_COOKIE = "known_users"
-KNOWN_USERS_MAX = 5
-KNOWN_USERS_AGE = 60 * 60 * 24 * 90  # 90 hari
-
-
-def _read_known_users():
-    raw = request.cookies.get(KNOWN_USERS_COOKIE, "")
-    # koma tidak lolos USERNAME_RE, jadi aman dipakai sebagai pemisah
-    return [n for n in raw.split(",") if USERNAME_RE.match(n)][:KNOWN_USERS_MAX]
-
-
-def _finish_login(user, uname, ip, remember):
+def _finish_login(user, ip, remember):
     # tanpa remember, cookie sesi hilang begitu browser ditutup
     session.permanent = remember
     session["user_id"] = user.id
@@ -38,17 +27,8 @@ def _finish_login(user, uname, ip, remember):
     clear_attempts(ip)
 
     endpoint = "teacher.dashboard" if user.role == "teacher" else "student.dashboard"
-    resp = redirect(url_for(endpoint))
-
-    if remember:
-        names = [n for n in _read_known_users() if n != uname]
-        names.insert(0, uname)
-        resp.set_cookie(
-            KNOWN_USERS_COOKIE, ",".join(names[:KNOWN_USERS_MAX]),
-            max_age=KNOWN_USERS_AGE, httponly=True, samesite="Lax",
-            secure=current_app.config["SESSION_COOKIE_SECURE"],
-        )
-    return resp
+    # redirect (bukan JSON) supaya browser menawarkan simpan password
+    return redirect(url_for(endpoint))
 
 
 @auth_bp.route("/lang/<code>")
@@ -106,18 +86,16 @@ def login():
             # hash lama cocok, password sudah di-upgrade di tempat
             db.session.commit()
             logger.info("User %s logged in (legacy hash migrated)", uname)
-            return _finish_login(user, uname, ip, remember)
+            return _finish_login(user, ip, remember)
         elif not verify_password(user.password, pw):
             record_failed_attempt(ip)
             flash(tr("err_pw"), "err")
             logger.warning("Failed login for user %r from %s", uname, ip)
         else:
             logger.info("User %s logged in successfully", uname)
-            return _finish_login(user, uname, ip, remember)
+            return _finish_login(user, ip, remember)
 
-    resp = make_response(render_template(
-        "auth/login.html", quote=random_quote(), known_users=_read_known_users()
-    ))
+    resp = make_response(render_template("auth/login.html", quote=random_quote()))
     resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     resp.headers['Pragma'] = 'no-cache'
     return resp
