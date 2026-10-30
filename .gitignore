@@ -1,1 +1,27 @@
-Nothing needs to be added to .gitignore since only a Python source file (`app/__init__.py`) was modified and no build artifacts, dependencies, or temporary files were detected in the changes.
+# virtual environment (folder "attendance" di mesin lokal)
+attendance/
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# data lokal dan rahasia
+instance/
+*.db
+*.sqlite3
+.env
+.env.*
+
+# editor dan sistem
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+tempCodeRunnerFile.py
+
+# Vercel
+.vercel/
