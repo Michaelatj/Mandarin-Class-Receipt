@@ -63,11 +63,13 @@ def create_app(config_class=None):
     from .routes.teacher import teacher_bp
     from .routes.schedule import schedule_bp
     from .routes.quiz import quiz_bp
+    from .routes.pwa import pwa_bp
 
     flask_app.register_blueprint(auth_bp)
     flask_app.register_blueprint(student_bp)
     flask_app.register_blueprint(teacher_bp)
     flask_app.register_blueprint(schedule_bp)
     flask_app.register_blueprint(quiz_bp)
+    flask_app.register_blueprint(pwa_bp)
 
     return flask_app

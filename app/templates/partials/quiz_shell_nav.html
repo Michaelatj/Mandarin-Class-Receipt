@@ -1,0 +1,73 @@
+{# Sidebar and bottom nav for the quiz pages, same look as the dashboards so moving
+   between them feels like one app. On the dashboards the tabs switch in place; here they
+   link back to the dashboard and remember which tab to open. #}
+
+{% set TEACHER_ITEMS = [('classes','📆','nav_classes','nav_classes'),('attendance','✅','nav_attendance','nav_attend_short'),('students','👥','nav_students','nav_students'),('receipts','🧾','nav_receipts','nav_receipts'),('quiz','📝','nav_quiz','nav_quiz'),('settings','⚙️','nav_settings','nav_settings')] %}
+{% set STUDENT_ITEMS = [('classes','📆','nav_classes','nav_classes'),('progress','📊','nav_progress','nav_progress'),('receipts','🧾','nav_receipts','nav_receipts'),('quiz','📝','nav_quiz','nav_quiz'),('settings','⚙️','nav_settings','nav_settings')] %}
+
+{% macro sidebar(user) %}
+{% set role = user.role %}
+{% set dash = url_for('teacher.dashboard') if role == 'teacher' else url_for('student.dashboard') %}
+<aside class="app-sidebar" id="appSidebar">
+  <div class="sidebar-brand">
+    <span class="sidebar-brand-zh">中文课堂</span>
+    <span class="sidebar-brand-tag">{{ tr('teacher_tag') if role == 'teacher' else tr('student_tag') }}</span>
+  </div>
+  <nav class="sidebar-nav" id="sideNav">
+    {% for key, icon, label, short in (TEACHER_ITEMS if role == 'teacher' else STUDENT_ITEMS) %}
+      {% if key == 'quiz' %}
+      <a class="snav-link active" href="{{ url_for('quiz.index') }}" aria-current="page">
+        <span class="snav-icon">{{ icon }}</span><span class="snav-label">{{ tr(label) }}</span>
+      </a>
+      {% else %}
+      <a class="snav-link" href="{{ dash }}" data-go="{{ key }}">
+        <span class="snav-icon">{{ icon }}</span><span class="snav-label">{{ tr(label) }}</span>
+      </a>
+      {% endif %}
+    {% endfor %}
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">{{ user.name()[0] }}</div>
+      <span class="sidebar-name">{{ user.name() }}</span>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-logout">{{ tr('logout') }}</a>
+    </div>
+  </div>
+</aside>
+{% endmacro %}
+
+{% macro bottomnav(user) %}
+{% set role = user.role %}
+{% set dash = url_for('teacher.dashboard') if role == 'teacher' else url_for('student.dashboard') %}
+<nav class="app-bottom-nav" id="bottomNav">
+  {% for key, icon, label, short in (TEACHER_ITEMS if role == 'teacher' else STUDENT_ITEMS) %}
+    {% if key == 'quiz' %}
+    <a class="bnav-btn active" href="{{ url_for('quiz.index') }}" aria-current="page" style="text-decoration:none">
+      <div class="bnav-icon">{{ icon }}</div><span>{{ tr(short) }}</span>
+    </a>
+    {% else %}
+    <a class="bnav-btn" href="{{ dash }}" data-go="{{ key }}" style="text-decoration:none">
+      <div class="bnav-icon">{{ icon }}</div><span>{{ tr(short) }}</span>
+    </a>
+    {% endif %}
+  {% endfor %}
+  <a class="bnav-btn" href="{{ url_for('auth.logout') }}" style="text-decoration:none;color:inherit">
+    <div class="bnav-icon" style="color:var(--red)">🚪</div>
+    <span style="color:var(--red)">{{ tr('logout') }}</span>
+  </a>
+</nav>
+{% endmacro %}
+
+{% macro script(user) %}
+<script>
+// Pilih tab yang dibuka di dashboard sebelum pindah halaman (dashboard membaca kunci ini).
+(function () {
+  var key = '{{ "teacher_page" if user.role == "teacher" else "student_page" }}';
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-go]');
+    if (!a) return;
+    try { sessionStorage.setItem(key, a.getAttribute('data-go')); } catch (err) {}
+  });
+})();
+</script>
+{% endmacro %}

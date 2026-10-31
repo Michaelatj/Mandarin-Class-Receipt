@@ -1,0 +1,21 @@
+{# expects `streak` from services.streaks.attendance_streak #}
+{% if streak %}
+<div class="streak-card">
+  <div class="streak-seal {% if not streak.tier %}none{% endif %}">{{ streak.tier.char if streak.tier else '勤' }}</div>
+  <div class="streak-main">
+    <div class="streak-title">
+      {% if streak.current %}{{ streak.current }} class{{ '' if streak.current == 1 else 'es' }} in a row{% else %}No streak yet{% endif %}
+      {% if streak.tier %}<span class="streak-chip">{{ streak.tier.name }}</span>{% endif %}
+    </div>
+    <div class="streak-sub">
+      {% if streak.total == 0 %}
+        Your streak starts with the first scheduled class.
+      {% else %}
+        Joined {{ streak.attended }} of {{ streak.total }} scheduled classes · best streak {{ streak.best }}
+        {% if streak.next_at %}· {{ streak.next_at - streak.current }} more to reach the next badge{% endif %}
+      {% endif %}
+    </div>
+    {% if streak.total and streak.next_at %}<div class="streak-bar"><div style="width:{{ streak.progress }}%"></div></div>{% endif %}
+  </div>
+</div>
+{% endif %}

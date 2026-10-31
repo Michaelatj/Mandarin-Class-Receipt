@@ -27,6 +27,7 @@
         {% endif %}
       </div>
       <div class="qz-item-actions">
+        {% if b %}<a class="btn bgh qz-btn-sm" href="{{ url_for('quiz.cards', quiz_id=q.id) }}">Study cards</a>{% endif %}
         {% if b and not q.allow_retakes %}
           <span class="badge badge-gray">Finished</span>
         {% else %}

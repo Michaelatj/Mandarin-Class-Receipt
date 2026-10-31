@@ -2,10 +2,28 @@
 <html lang="{{ get_lang() }}" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script>
+/* apply saved theme and skin before the first paint so the page does not flash */
+(function () {
+  try {
+    var r = document.documentElement, t = localStorage.getItem('theme'), k = localStorage.getItem('skin');
+    if (t) r.setAttribute('data-theme', t);
+    if (k) r.setAttribute('data-skin', k);
+  } catch (e) {}
+})();
+</script>
+<link rel="manifest" href="{{ url_for('pwa.manifest') }}">
+<meta name="theme-color" content="#19160f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="中文课堂">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=25" }}">
+<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=26" }}">
 {% block head_extra %}{% endblock %}
 </head>
 <body>
@@ -16,13 +34,27 @@
   <a href="{{ url_for('auth.set_lang', code='zh') }}" class="lb {% if get_lang()=='zh' %}on{% endif %}">中文</a>
 </div>
 <button class="theme-btn" id="dmToggle" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+<button class="theme-btn skin-btn" id="skinToggle" title="Tema 中国风" aria-label="China theme" style="font-family:var(--font-zh);font-weight:700">中</button>
 
 <div id="toast"></div>
 
 {% block page_content %}
 <div class="auth-shell">
+  <div class="skin-deco" aria-hidden="true">
+    <span class="lantern l1"><span class="body"></span></span>
+    <span class="lantern l2"><span class="body"></span></span>
+  </div>
   <div class="auth-card">
     <div class="auth-head">
+      <svg class="panda" viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="30" cy="26" r="14" fill="#1d1a16"/><circle cx="90" cy="26" r="14" fill="#1d1a16"/>
+        <circle cx="60" cy="64" r="44" fill="#fffdf7" stroke="#1d1a16" stroke-width="2"/>
+        <ellipse cx="42" cy="58" rx="11" ry="14" fill="#1d1a16" transform="rotate(20 42 58)"/>
+        <ellipse cx="78" cy="58" rx="11" ry="14" fill="#1d1a16" transform="rotate(-20 78 58)"/>
+        <circle cx="43" cy="57" r="4" fill="#fffdf7"/><circle cx="77" cy="57" r="4" fill="#fffdf7"/>
+        <ellipse cx="60" cy="74" rx="6" ry="4.5" fill="#1d1a16"/>
+        <path d="M52 83 Q60 90 68 83" stroke="#1d1a16" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      </svg>
       <div class="auth-logo">
         <span class="auth-logo-dot"></span>
         <span style="font-family:var(--font-zh)">中文课堂</span>
@@ -50,7 +82,38 @@ function applyTheme(t) {
 const _saved = (function(){ try { return localStorage.getItem('theme'); } catch(e){ return null; } })()
   || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 applyTheme(_saved);
-_btn.addEventListener('click', () => applyTheme(_html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+_btn.addEventListener('click', () => withFade(() => applyTheme(_html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')));
+
+/* ── Optional China skin ── */
+function withFade(fn) {
+  _html.classList.add('theme-anim');
+  fn();
+  clearTimeout(window._fadeT);
+  window._fadeT = setTimeout(() => _html.classList.remove('theme-anim'), 450);
+}
+function applySkin(on) {
+  if (on) _html.setAttribute('data-skin', 'china'); else _html.removeAttribute('data-skin');
+  try { if (on) localStorage.setItem('skin', 'china'); else localStorage.removeItem('skin'); } catch(e){}
+  syncThemeControls();
+}
+function syncThemeControls() {
+  const th = _html.getAttribute('data-theme');
+  document.querySelectorAll('#skinSwitch [data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === th));
+  document.querySelectorAll('#skinSwitch [data-skin-toggle]').forEach(b => b.classList.toggle('on', _html.getAttribute('data-skin') === 'china'));
+}
+document.addEventListener('click', function(e) {
+  const mode = e.target.closest('#skinSwitch [data-mode]');
+  if (mode) { withFade(() => { applyTheme(mode.dataset.mode); syncThemeControls(); }); return; }
+  if (e.target.closest('#skinSwitch [data-skin-toggle]') || e.target.closest('#skinToggle')) {
+    withFade(() => applySkin(_html.getAttribute('data-skin') !== 'china'));
+  }
+});
+syncThemeControls();
+
+/* ── PWA: service worker ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
 
 /* ── Toast ── */
 function showToast(msg, type) {

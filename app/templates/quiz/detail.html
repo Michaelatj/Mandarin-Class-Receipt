@@ -13,7 +13,10 @@
     </div>
     <p class="qz-sub" style="margin-top:8px"><span>{{ quiz.questions|length }} question{{ '' if quiz.questions|length == 1 else 's' }}</span>{% if quiz.description %} · <span data-no-i18n>{{ quiz.description }}</span>{% endif %}</p>
   </div>
-  <a class="btn qz-btn-gold qz-btn-sm" href="{{ url_for('quiz.edit', quiz_id=quiz.id) }}">Edit questions</a>
+  <div class="qz-actions-row">
+    <a class="btn bgh qz-btn-sm" href="{{ url_for('quiz.cards', quiz_id=quiz.id) }}">Preview cards</a>
+    <a class="btn qz-btn-gold qz-btn-sm" href="{{ url_for('quiz.edit', quiz_id=quiz.id) }}">Edit questions</a>
+  </div>
 </div>
 
 <div class="card">

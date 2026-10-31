@@ -1,0 +1,60 @@
+{% extends "quiz/layout.html" %}
+{% block qz_title %}Study cards{% endblock %}
+{% block qz_back %}Back to quizzes{% endblock %}
+{% block qz_attrs %}data-page="cards"{% endblock %}
+
+{% block qz_body %}
+<div class="qz-head">
+  <div>
+    <h1 class="qz-h1" data-no-i18n>{{ quiz.title }}</h1>
+    <p class="qz-sub">Study cards from this quiz. Tap a card to see the answer.</p>
+  </div>
+</div>
+
+{% if deck %}
+<div class="fc-wrap" id="fc">
+  <div class="fc-bar">
+    <span id="fc-count"></span>
+    <button type="button" class="qz-link" id="fc-shuffle" style="margin:0">Shuffle</button>
+  </div>
+  <div class="fc-progress"><div id="fc-prog" style="width:0"></div></div>
+
+  <div class="fc-stage">
+    <div class="fc-card" id="fc-card" tabindex="0" role="button" aria-label="Flip card">
+      <div class="fc-face fc-front">
+        <div class="fc-text" id="fc-front" data-no-i18n></div>
+        <div class="fc-sub" id="fc-front-sub" data-no-i18n></div>
+        <div class="fc-hint">Tap to flip</div>
+      </div>
+      <div class="fc-face fc-back">
+        <div class="fc-text" id="fc-back" data-no-i18n></div>
+        <div class="fc-why" id="fc-why" data-no-i18n></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fc-actions">
+    <button type="button" class="btn bgh qz-btn-sm" id="fc-prev">Previous</button>
+    <div class="fc-mid">
+      <button type="button" class="btn bgh qz-btn-sm" id="fc-again">Still learning</button>
+      <button type="button" class="btn qz-btn-gold qz-btn-sm" id="fc-know">Got it</button>
+    </div>
+    <button type="button" class="btn bgh qz-btn-sm" id="fc-next">Next</button>
+  </div>
+
+  <div class="card" id="fc-done" hidden style="margin-top:18px;text-align:center">
+    <div class="qz-section-title" id="fc-done-title"></div>
+    <p class="qz-hint-text" id="fc-done-sub"></p>
+    <div class="qz-actions-row" style="justify-content:center">
+      <button type="button" class="btn qz-btn-gold qz-btn-sm" id="fc-redo-learning">Study the ones I missed</button>
+      <button type="button" class="btn bgh qz-btn-sm" id="fc-redo-all">Start over</button>
+    </div>
+  </div>
+</div>
+<script type="application/json" id="fc-data">{{ deck|tojson }}</script>
+{% else %}
+<div class="card"><div class="empty-state"><div class="empty-title">No cards yet</div><div class="empty-sub">This quiz has no questions.</div></div></div>
+{% endif %}
+{% endblock %}
+
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/flashcards.js') + '?v=1' }}"></script>{% endblock %}
