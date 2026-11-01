@@ -36,16 +36,6 @@ The app has two roles, chosen when registering: **teacher** and **student**. Eac
 - Each attempt gets an accuracy score, an XP score, a longest streak, and a title based on the result (童生 up to 状元).
 - The teacher sees per-question statistics.
 
-### Monthly recap and WhatsApp
-
-- From the Students tab the teacher opens a recap for any of the last six months: attendance dates, receipts issued, and what is still unpaid, as a one-page PDF (generated with ReportLab).
-- On a phone, the Send button opens the share sheet with the PDF already attached, so the teacher only picks WhatsApp and the chat. Where file sharing is not available, the PDF is downloaded and a WhatsApp chat opens with the message filled in. WhatsApp does not allow a website to send files on its own without the paid Business API, so the last tap is manual.
-
-### Streaks and flashcards
-
-- Students earn an attendance streak badge (勤, 恒, 毅, 卓 at 3, 5, 10, 20 classes) for joining scheduled classes in a row. Cancelled classes and classes the student was not invited to do not count. The teacher sees each student's streak in the Students tab.
-- After a student finishes a quiz, the questions become flashcards (question on the front, correct answer on the back) with Got it / Still learning tracking. The teacher can preview the cards of their own quizzes.
-
 ### Accounts and interface
 
 - Register, log in, log out, change password, delete account. Teachers can reset a student's password.
@@ -53,10 +43,7 @@ The app has two roles, chosen when registering: **teacher** and **student**. Eac
 - Passwords are hashed with PBKDF2-SHA256. Old hashes from earlier versions are upgraded automatically on the next login.
 - Failed logins are rate limited per IP address. All forms use CSRF protection.
 - The whole interface switches between English and 中文 instantly, without reloading the page.
-- Light and dark theme, plus an optional China skin (bright red and cream, with red lanterns, clouds, plum blossoms, a pagoda and a red frame as SVG ornaments, plus a panda on the login page) that works in both modes. The theme picker is in Settings.
-- The quiz pages use the same sidebar and bottom navigation as the dashboards, and page changes cross-fade instead of reloading from blank (browsers with cross-document view transitions).
-- Installable as an app on a phone (PWA): home-screen icon, full-screen window, and an offline page when there is no connection. Only static files are cached, never pages or user data.
-- Mobile-friendly layout with a bottom navigation bar, and times shown in WIB (UTC+7).
+- Light and dark theme, mobile-friendly layout with a bottom navigation bar, and times shown in WIB (UTC+7).
 
 ## Tools and technologies
 
@@ -66,8 +53,6 @@ The app has two roles, chosen when registering: **teacher** and **student**. Eac
 | Web framework | Flask 3 with blueprints and an app factory |
 | Database access | Flask-SQLAlchemy / SQLAlchemy 2.0 |
 | Database | SQLite for local development, PostgreSQL ([Neon](https://neon.tech)) in production, through `psycopg2-binary` |
-| PDF | ReportLab |
-| Installable app | Web app manifest and a service worker (no framework) |
 | Security | Werkzeug password hashing, Flask-WTF CSRF protection, secure session cookies |
 | Templating | Jinja2 |
 | Hosting | [Vercel](https://vercel.com) (Python serverless function in `api/index.py`) |
@@ -87,14 +72,11 @@ Mandarin-Class-Receipt/
 │   │   ├── auth.py          # Login, register, logout, language, change/delete account
 │   │   ├── student.py       # Student dashboard, mark attendance, profile
 │   │   ├── teacher.py       # Teacher dashboard, fees, attendance and receipt management
-│   │   ├── schedule.py      # Create / edit / cancel schedules, student join, offline roll call
-│   │   ├── quiz.py          # Quiz creation, assignment, play, grading, flashcards
-│   │   └── pwa.py           # Web app manifest, service worker, offline page
+│   │   ├── schedule.py      # Create / edit / cancel schedules, student join
+│   │   └── quiz.py          # Quiz creation, assignment, play, grading
 │   ├── services/
 │   │   ├── attendance.py    # Receipt generation and billing rules
 │   │   ├── quiz_logic.py    # Quiz validation, shuffling, scoring, titles
-│   │   ├── streaks.py       # Attendance streaks and badge tiers
-│   │   ├── recap.py         # Monthly recap data, PDF, WhatsApp message
 │   │   ├── security.py      # Password hashing, login rate limiting
 │   │   ├── i18n.py          # English / Chinese strings, date and currency formatting
 │   │   ├── i18n_live.py     # Serves the dictionary for instant language switching
@@ -102,17 +84,14 @@ Mandarin-Class-Receipt/
 │   │   └── email_otp.py     # Email OTP helper (not connected to a route yet)
 │   ├── static/
 │   │   ├── css/             # main.css, quiz.css
-│   │   ├── js/              # i18n-live.js, quiz-*.js, flashcards.js, recap.js, offline-class.js
-│   │   ├── icons/           # App icons for the home screen
-│   │   └── sw.js            # Service worker
+│   │   └── js/              # i18n-live.js, quiz-play.js, quiz-edit.js, quiz-teacher.js
 │   └── templates/
 │       ├── base.html        # Shared layout, theme toggle, toast, CSRF helper
 │       ├── auth/            # login, register
 │       ├── student/         # dashboard
 │       ├── teacher/         # dashboard
-│       ├── quiz/            # teacher and student quiz pages, flashcards
-│       └── partials/        # flashes, quote, receipt card, schedule cards, password toggle,
-│                            # quiz shell nav, streak card
+│       ├── quiz/            # teacher and student quiz pages
+│       └── partials/        # flashes, quote, receipt card, schedule cards, password toggle
 ├── instance/                # Local SQLite database (created automatically, not committed)
 ├── migrate_db.py            # One-off migration for old SQLite databases
 ├── migrate_packet_type.py   # One-off migration: adds packet_type to student_fee
