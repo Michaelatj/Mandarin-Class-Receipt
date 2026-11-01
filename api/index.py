@@ -52,5 +52,21 @@ with app.app_context():
                 except Exception as e:
                     print(f"⚠️ Column migration skipped (might exist): {e}")
 
+        # --- Offline classes and roll call columns on schedule ---
+        if 'schedule' in table_names:
+            columns = [col['name'] for col in inspector.get_columns('schedule')]
+            wanted = {
+                'mode': "VARCHAR(10) DEFAULT 'online'",
+                'location': "VARCHAR(200) DEFAULT ''",
+                'rollcall_code': "VARCHAR(8)",
+                'rollcall_until': "TIMESTAMP",
+            }
+            with db.engine.connect() as conn:
+                for name, ddl in wanted.items():
+                    if name not in columns:
+                        print(f"Adding missing '{name}' column to schedule...")
+                        conn.execute(text(f"ALTER TABLE schedule ADD COLUMN {name} {ddl}"))
+                conn.commit()
+
     except Exception as e:
         print(f"⚠️ Startup warning: {e}")

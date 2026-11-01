@@ -4,7 +4,7 @@ models.py — SQLAlchemy database models.
 All models live here so they are imported once and shared across
 blueprints without circular imports.
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 from . import db
 
 
@@ -106,6 +106,26 @@ class Schedule(db.Model):
     scheduled_at = db.Column(db.DateTime, nullable=False)
     created_at  = db.Column(db.DateTime, default=datetime.utcnow)
     cancelled   = db.Column(db.Boolean, default=False)
+
+    # in-person classes: where it is held, and the code students type for the roll call (点名)
+    mode           = db.Column(db.String(10), default="online")
+    location       = db.Column(db.String(200), default="")
+    rollcall_code  = db.Column(db.String(8))
+    rollcall_until = db.Column(db.DateTime)
+
+    @property
+    def is_offline(self):
+        return (self.mode or "online") == "offline"
+
+    def rollcall_open(self, now=None):
+        now = now or datetime.utcnow()
+        return bool(self.rollcall_code and self.rollcall_until and self.rollcall_until > now)
+
+    def in_rollcall_window(self, now=None):
+        """Roll call only makes sense around the class: 3 hours before to 8 hours after it starts."""
+        now = now or datetime.utcnow()
+        return self.is_offline and not self.cancelled \
+            and self.scheduled_at - timedelta(hours=3) <= now <= self.scheduled_at + timedelta(hours=8)
 
     def __repr__(self):
         return f"<Schedule #{self.id} '{self.title}' at {self.scheduled_at:%Y-%m-%d %H:%M}>"

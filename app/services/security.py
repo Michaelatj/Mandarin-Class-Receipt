@@ -77,10 +77,10 @@ def migrate_legacy_password(user, plain_password: str) -> bool:
 
 # ── Rate limiting ─────────────────────────────────────────────────────────────
 
-def is_rate_limited(ip: str) -> bool:
-    """Return True if the IP has exceeded the allowed login attempts."""
-    max_attempts = current_app.config["LOGIN_MAX_ATTEMPTS"]
-    lockout_secs = current_app.config["LOGIN_LOCKOUT_SECONDS"]
+def is_rate_limited(ip: str, max_attempts: int = None, lockout_secs: int = None) -> bool:
+    """Return True if the key has exceeded the allowed attempts. Limits default to the login settings."""
+    max_attempts = max_attempts or current_app.config["LOGIN_MAX_ATTEMPTS"]
+    lockout_secs = lockout_secs or current_app.config["LOGIN_LOCKOUT_SECONDS"]
     cutoff = datetime.utcnow() - timedelta(seconds=lockout_secs)
     recent = [t for t in _login_attempts.get(ip, []) if t > cutoff]
     _login_attempts[ip] = recent

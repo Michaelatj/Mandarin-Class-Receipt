@@ -1849,20 +1849,22 @@ button.lb { cursor: pointer; font-size: .85rem; padding: 7px 14px; }
 .skin-btn { top: 54px; }
 
 [data-skin="china"] {
-  --red: #b3202a; --red-soft: #fdeceb;
-  --gold: #b8892b; --gold-soft: #fbf3dc;
-  --bg: #f8f1e4; --surface: #fffdf7; --surface2: #fbf5e8;
-  --border: #eadfc7; --border2: #dccca8;
-  --text: #2b1a14; --text2: #5a4036; --text3: #8f7766;
-  --sidebar-bg: #5e1119; --sidebar-border: rgba(232,200,122,.18);
+  /* red and cream only: no orange or yellow in the interface itself */
+  --red: #d4151c; --red-soft: #fde8e4;
+  --gold: #b3141b; --gold-soft: #fbe3de;
+  --bg: #f6e7c8; --surface: #fffaf0; --surface2: #fbf0d9;
+  --border: #ecd5b8; --border2: #dfc29c;
+  --text: #2e120e; --text2: #5a3128; --text3: #7a5646;
+  --sidebar-bg: #d4151c; --sidebar-border: rgba(255,255,255,.22);
   --font-display: 'Noto Serif SC', 'Fraunces', Georgia, serif;
 }
 [data-skin="china"][data-theme="dark"] {
-  --bg: #160c0a; --surface: #221310; --surface2: #2b1a15;
-  --border: #3b2620; --border2: #4b3129;
-  --text: #f6e9d6; --text2: #cdb594; --text3: #8f7a64;
-  --red-soft: #331411; --gold-soft: #2a210c;
-  --sidebar-bg: #2a0a0f;
+  --red: #ff6b70; --red-soft: #4a1e1c;
+  --gold: #ff6b70; --gold-soft: #4a1e1c;
+  --bg: #241915; --surface: #31221d; --surface2: #3a2923;
+  --border: #4f3830; --border2: #634638;
+  --text: #fbefd8; --text2: #e6d2b3; --text3: #c2a98c;
+  --sidebar-bg: #b3121a;
 }
 
 /* faint coin-ring pattern behind everything */
@@ -1874,17 +1876,17 @@ button.lb { cursor: pointer; font-size: .85rem; padding: 7px 14px; }
   background-size: 44px 44px;
 }
 
-[data-skin="china"] .sidebar-brand-zh {
-  background: linear-gradient(180deg, #f5dc9a, #c9962f); -webkit-background-clip: text; background-clip: text; color: transparent;
+[data-skin="china"] .sidebar-brand-zh { background: none; -webkit-text-fill-color: #fff; color: #fff; }
+[data-skin="china"] .snav-btn.active, [data-skin="china"] .snav-link.active {
+  background: #fff; box-shadow: none; font-weight: 700;
 }
-[data-skin="china"] .snav-btn.active, [data-skin="china"] .snav-link.active { box-shadow: inset 3px 0 0 var(--gold); }
-[data-skin="china"] .card { border-top: 2px solid var(--gold); }
+[data-skin="china"] .card { border-top: 2px solid var(--red); }
 [data-skin="china"] .page-title::after {
   content: ""; display: block; width: 56px; height: 3px; margin-top: 8px; border-radius: 2px;
   background: linear-gradient(90deg, var(--red), var(--gold));
 }
-[data-skin="china"] .auth-head { position: relative; background: linear-gradient(135deg, #5e1119 0%, #8a1a24 100%); }
-[data-skin="china"] .auth-logo-dot { background: var(--gold); }
+[data-skin="china"] .auth-head { position: relative; background: linear-gradient(135deg, #e0242a 0%, #c8101a 100%); }
+[data-skin="china"] .auth-logo-dot { background: #fff; }
 
 /* lanterns and panda (login and register pages) */
 [data-skin="china"] .skin-deco { display: block; position: fixed; top: 0; left: 0; right: 0; height: 0; z-index: 1; pointer-events: none; }
@@ -1927,3 +1929,166 @@ body:has(.app-shell) .lang-bar { display: none; }
 #toast { animation: none; }
 #toast.show { animation: toastSlide .35s cubic-bezier(.2,.8,.4,1) both; }
 #toast.show.toast-out { animation: toastOut .25s cubic-bezier(.4,0,1,1) both; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   China skin ornaments: red frame, lanterns, corner frets, pagoda.
+   Drawn as SVG files that are only downloaded when the skin is on.
+   ═══════════════════════════════════════════════════════════════ */
+.orn { display: none; }
+[data-skin="china"] .orn { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+[data-skin="china"] .app-content,
+[data-skin="china"] .auth-card { position: relative; z-index: 1; }
+[data-skin="china"][data-theme="dark"] .orn { opacity: .6; }
+
+.orn > div { position: absolute; background-repeat: no-repeat; }
+.orn-frame { inset: 10px; border: 3px solid var(--red); border-radius: 4px; opacity: .9; }
+.orn-lanterns { top: 13px; left: 22px; width: 170px; height: 170px; background-image: url('/static/img/china/lanterns.svg'); background-size: contain; transform-origin: 30% 0; animation: lanternSway 5s ease-in-out infinite alternate; }
+.orn-fret { top: 10px; right: 10px; width: 130px; height: 130px; background-image: url('/static/img/china/fret.svg'); background-size: contain; }
+.orn-fret.bl { top: auto; right: auto; left: 10px; bottom: 10px; transform: rotate(180deg); }
+.orn-pagoda { right: 14px; bottom: 14px; width: 300px; height: 250px; background-image: url('/static/img/china/pagoda.svg'); background-size: contain; background-position: right bottom; }
+
+/* inside the app: leave the sidebar alone, hang the lanterns from the top right */
+body:has(.app-shell) .orn-frame { left: calc(var(--sidebar-w) + 10px); }
+body:has(.app-shell) .orn-lanterns { left: auto; right: 30px; width: 130px; height: 130px; transform-origin: 70% 0; }
+body:has(.app-shell) .orn-fret:not(.bl) { display: none; }
+body:has(.app-shell) .orn-fret.bl { left: calc(var(--sidebar-w) + 10px); }
+body:has(.app-shell) .orn-pagoda { width: 240px; height: 200px; }
+
+@media (max-width: 860px) {
+  body:has(.app-shell) .orn-frame { left: 8px; right: 8px; top: 8px; bottom: calc(var(--bottom-tab-h) + 8px); }
+  body:has(.app-shell) .orn-lanterns { right: 10px; width: 84px; height: 84px; }
+  body:has(.app-shell) .orn-pagoda, body:has(.app-shell) .orn-fret.bl { display: none; }
+}
+@media (max-width: 700px) {
+  .orn-lanterns { left: 8px; width: 96px; height: 96px; }
+  .orn-fret { width: 80px; height: 80px; }
+  .orn-fret.bl { width: 80px; height: 80px; }
+  .orn-pagoda { width: 170px; height: 140px; }
+}
+
+/* ── China skin touch-ups ── */
+[data-skin="china"] .auth-sub { color: rgba(255,255,255,.92); }
+[data-skin="china"] .auth-logo { color: #fff; }
+
+/* a quiet pagoda scene fills the empty part of the sidebar */
+[data-skin="china"] .app-sidebar::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 90px; height: 190px; pointer-events: none;
+  background: url('/static/img/china/pagoda-side.svg') center bottom / contain no-repeat; opacity: .85;
+}
+[data-skin="china"] .app-sidebar { overflow: hidden; }
+@media (max-height: 640px) { [data-skin="china"] .app-sidebar::after { display: none; } }
+
+body:has(.app-shell) .orn-lanterns { width: 160px; height: 160px; }
+[data-skin="china"] .page-header { padding-right: 170px; }
+@media (max-width: 860px) {
+  [data-skin="china"] .page-header { padding-right: 76px; }
+  [data-skin="china"] .app-bottom-nav .bnav-btn { color: rgba(255,240,200,.82); }
+  [data-skin="china"] .app-bottom-nav .bnav-btn.active { color: #fff; }
+  [data-skin="china"] .app-bottom-nav .bnav-btn span { color: inherit !important; }
+  [data-skin="china"] .app-bottom-nav .bnav-btn:last-child { color: #ffe7a1; }
+}
+
+/* date and time field is narrow in the schedule form on desktop */
+@media (min-width: 861px) {
+  input[type=datetime-local] { padding-left: 10px; padding-right: 8px; font-size: .82rem; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Offline classes and roll call (点名)
+   ═══════════════════════════════════════════════════════════════ */
+.seg { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--border2); border-radius: 12px; background: var(--surface2); margin-bottom: 12px; }
+.seg-btn {
+  flex: 1; padding: 9px 10px; border: 0; border-radius: 9px; background: transparent; cursor: pointer;
+  font: inherit; font-size: .9rem; font-weight: 600; color: var(--text2); transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+.seg-btn.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.seg-note { font-size: .82rem; color: var(--text3); margin: 6px 0 14px; line-height: 1.5; }
+[hidden] { display: none !important; }
+
+.sc-mode { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 100px; font-size: .7rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
+.sc-mode.offline { background: var(--gold-soft); color: var(--gold); }
+.sc-loc { font-size: .88rem; color: var(--text2); margin-top: 6px; }
+
+.rc-box { max-width: 460px; }
+.rc-sub { font-size: .95rem; color: var(--text2); margin: -6px 0 14px; }
+.rc-code {
+  font-family: var(--font-display); font-size: 4rem; font-weight: 700; letter-spacing: .28em; text-align: center;
+  padding: 14px 0 14px .28em; margin: 6px 0 4px; border-radius: var(--radius-lg);
+  background: var(--gold-soft); color: var(--text); border: 1px dashed var(--gold);
+}
+.rc-timer { text-align: center; font-size: .95rem; color: var(--text3); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.rc-hint { font-size: .85rem; color: var(--text3); line-height: 1.5; }
+.rc-listhead { display: flex; justify-content: space-between; align-items: baseline; margin: 18px 0 8px; font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); }
+.rc-list { display: flex; flex-direction: column; gap: 6px; max-height: 36vh; overflow-y: auto; }
+.rc-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%;
+  padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+  font: inherit; font-size: .98rem; color: var(--text); cursor: pointer; text-align: left;
+  transition: background-color .2s ease, border-color .2s ease, transform .15s ease;
+}
+.rc-row:active { transform: scale(.985); }
+.rc-row.on { background: var(--green-soft, #e7f6ec); border-color: var(--green, #2f9e5b); }
+.rc-mark { font-size: .8rem; font-weight: 600; color: var(--text3); white-space: nowrap; }
+.rc-row.on .rc-mark { color: var(--green, #2f9e5b); }
+.rc-empty { padding: 12px; text-align: center; font-size: .9rem; color: var(--text3); }
+
+.rc-input {
+  font-family: var(--font-display); font-size: 2.2rem !important; letter-spacing: .5em; text-align: center;
+  padding: 12px 8px 12px calc(8px + .5em) !important;
+}
+.rc-msg { min-height: 1.4em; margin: 6px 0 12px; font-size: .92rem; line-height: 1.45; }
+.rc-msg.err { color: var(--red); }
+.rc-msg.ok { color: var(--green, #2f9e5b); }
+
+#rcStop { margin-top: 12px; }
+
+
+/* ── China skin: readable text on the red sidebar and bottom bar ──
+   The default sidebar is dark and uses faint white for inactive items. On bright red that
+   made the labels hard to read, so everything on red is solid white here. */
+[data-skin="china"] .sidebar-brand-tag { color: rgba(255,255,255,.92); }
+[data-skin="china"] .snav-btn, [data-skin="china"] .snav-link { color: #fff; opacity: 1; }
+[data-skin="china"] .snav-btn:hover, [data-skin="china"] .snav-link:hover { background: rgba(255,255,255,.14); color: #fff; }
+[data-skin="china"] .snav-icon { opacity: 1; }
+[data-skin="china"] .sidebar-name { color: #fff; }
+[data-skin="china"] .sidebar-logout { color: #fff; border-color: rgba(255,255,255,.6); }
+[data-skin="china"] .sidebar-logout:hover { background: rgba(255,255,255,.16); }
+[data-skin="china"] .sidebar-avatar { background: #fff; color: var(--red); }
+[data-skin="china"] .app-bottom-nav .bnav-btn { color: rgba(255,255,255,.92); }
+[data-skin="china"] .app-bottom-nav .bnav-btn.active { color: #fff; }
+[data-skin="china"] .app-bottom-nav .bnav-btn:last-child { color: #fff; }
+[data-skin="china"] .app-bottom-nav .bnav-btn span { color: inherit !important; }
+[data-skin="china"] .app-bottom-nav .bnav-btn .bnav-icon { color: inherit !important; }
+[data-skin="china"] .btn.bg, [data-skin="china"] .btn-gold, [data-skin="china"] .qz-btn-gold { color: #fff; }
+
+/* the active item is a white pill with red text, which reads clearly on the red bar */
+[data-skin="china"] .snav-btn.active, [data-skin="china"] .snav-btn.active:hover,
+[data-skin="china"] .snav-link.active, [data-skin="china"] .snav-link.active:hover { color: var(--red); }
+[data-skin="china"][data-theme="dark"] .snav-btn.active, [data-skin="china"][data-theme="dark"] .snav-link.active { color: #b3121a; }
+[data-skin="china"] .app-bottom-nav .bnav-btn.active { background: #fff; color: var(--red); border-radius: 12px; margin: 4px 2px; }
+
+/* ── China dark mode: a lighter red so red text stays readable, dark text on red buttons ── */
+[data-skin="china"][data-theme="dark"] .btn.br, [data-skin="china"][data-theme="dark"] .btn.bg,
+[data-skin="china"][data-theme="dark"] .btn-gold, [data-skin="china"][data-theme="dark"] .qz-btn-gold,
+[data-skin="china"][data-theme="dark"] .lb.on, [data-skin="china"][data-theme="dark"] .afb.active,
+[data-skin="china"][data-theme="dark"] .sc-fb.active { color: #2a0d0d; }
+[data-skin="china"][data-theme="dark"] .snav-btn.active, [data-skin="china"][data-theme="dark"] .snav-link.active { background: #fff; color: #b3121a; }
+[data-skin="china"][data-theme="dark"] .sidebar-avatar { background: #fff; color: #b3121a; }
+[data-skin="china"][data-theme="dark"] .app-bottom-nav .bnav-btn.active { color: #b3121a; }
+
+/* dark mode, any skin */
+.theme-btn { color: var(--text); }
+[data-theme="dark"] .sc-invites.open { color: #5fd08c; }
+[data-theme="dark"] { --green: #5fd08c; }
+
+/* ── China skin: last fixes ── */
+@media (max-width: 860px) {
+  body:has(.app-shell) .orn-lanterns { right: 6px; top: 8px; width: 78px; height: 78px; }
+  [data-skin="china"] .page-header { padding-right: 84px; }
+}
+[data-skin="china"] .app-bottom-nav a[href*="logout"],
+[data-skin="china"] .app-bottom-nav a[href*="logout"] span,
+[data-skin="china"] .app-bottom-nav a[href*="logout"] .bnav-icon { color: #fff !important; }
+[data-skin="china"] .streak-seal.none { background: #ead7d0; color: #7a5646; }

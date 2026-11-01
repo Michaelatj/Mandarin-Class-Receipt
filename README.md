@@ -22,9 +22,10 @@ The app has two roles, chosen when registering: **teacher** and **student**. Eac
 
 ### Schedule
 
-- The teacher creates a class schedule with a title, description, time, and Meet link, and chooses which students are invited.
-- Students see their upcoming classes. Pressing Join opens the link and marks attendance automatically.
-- Schedules can be edited, cancelled, deleted, or deleted in bulk.
+- The teacher creates a class schedule with a title, description, time, and a class type, and chooses which students are invited.
+- **Online** classes have a Meet link. Students press Join, which opens the link and marks attendance automatically.
+- **Offline** (in-person) classes have a location instead. During the class the teacher opens a roll call (点名), which shows a 4-digit code that stays valid for 10 to 60 minutes. Students in the room type the code in their app to check in. The teacher sees who is present live and can tick or untick anyone by hand. Each student gets 5 wrong tries per class every 5 minutes. A check-in is recorded as attendance, counts toward billing, and counts toward the attendance streak just like an online class.
+- Schedules can be edited, duplicated, cancelled, deleted, or deleted in bulk.
 
 ### Quiz
 
@@ -94,6 +95,7 @@ Mandarin-Class-Receipt/
 ├── instance/                # Local SQLite database (created automatically, not committed)
 ├── migrate_db.py            # One-off migration for old SQLite databases
 ├── migrate_packet_type.py   # One-off migration: adds packet_type to student_fee
+├── migrate_offline_class.py # One-off migration: offline class and roll call columns on schedule
 ├── run.py                   # Local entry point
 ├── requirements.txt
 └── vercel.json
@@ -131,7 +133,7 @@ Open http://localhost:5000. With no `DATABASE_URL` set, the app uses SQLite and 
 2. In the project settings, add `SECRET_KEY` and `DATABASE_URL` (the Neon connection string).
 3. Deploy. `vercel.json` sends every request to `api/index.py`, which uses `ProductionConfig`.
 
-On every cold start, `api/index.py` creates any missing tables and adds the `packet_type` and `custom_qty` columns to existing tables, so the production database does not need a manual migration step.
+On every cold start, `api/index.py` creates any missing tables and adds the `packet_type`, `custom_qty` and offline class columns to existing tables, so the production database does not need a manual migration step.
 
 To run on another host with gunicorn instead:
 
@@ -145,10 +147,11 @@ gunicorn "run:app" --workers 2 --bind 0.0.0.0:8000
 ## Database migrations
 
 - Production (PostgreSQL): handled automatically by `api/index.py` as described above.
-- Local SQLite created by an older version: run `python migrate_db.py` and `python migrate_packet_type.py` once. Both can be run more than once safely.
+- Local SQLite created by an older version: run `python migrate_db.py`, `python migrate_packet_type.py` and `python migrate_offline_class.py` once. Both can be run more than once safely.
 
 ## Known limitations
 
+- The roll call code shows that a student was told the code, not that they are physically in the room, so the teacher can still correct the list by hand.
 - Login rate limiting is kept in process memory. On a serverless host it is per instance and resets on a cold start, so it slows down guessing but is not a strict limit.
 - Password recovery is handled by the teacher (reset a student's password). Self-service reset by email OTP is not wired up yet, although `services/email_otp.py` exists.
 - There are no automated tests yet.
