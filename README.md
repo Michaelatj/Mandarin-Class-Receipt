@@ -53,7 +53,7 @@ The app has two roles, chosen when registering: **teacher** and **student**. Eac
 - Passwords are hashed with PBKDF2-SHA256. Old hashes from earlier versions are upgraded automatically on the next login.
 - Failed logins are rate limited per IP address. All forms use CSRF protection.
 - The whole interface switches between English and 中文 instantly, without reloading the page.
-- Light and dark theme, plus an optional China skin (bright red, cream and gold, with lanterns, clouds, plum blossoms, a pagoda and a red frame as SVG ornaments, plus a panda on the login page) that works in both modes. The theme picker is in Settings.
+- Light and dark theme, plus an optional China skin (bright red and cream, with red lanterns, clouds, plum blossoms, a pagoda and a red frame as SVG ornaments, plus a panda on the login page) that works in both modes. The theme picker is in Settings.
 - The quiz pages use the same sidebar and bottom navigation as the dashboards, and page changes cross-fade instead of reloading from blank (browsers with cross-document view transitions).
 - Installable as an app on a phone (PWA): home-screen icon, full-screen window, and an offline page when there is no connection. Only static files are cached, never pages or user data.
 - Mobile-friendly layout with a bottom navigation bar, and times shown in WIB (UTC+7).

@@ -1849,20 +1849,21 @@ button.lb { cursor: pointer; font-size: .85rem; padding: 7px 14px; }
 .skin-btn { top: 54px; }
 
 [data-skin="china"] {
+  /* red and cream only: no orange or yellow in the interface itself */
   --red: #d4151c; --red-soft: #fde8e4;
-  --gold: #c98a14; --gold-soft: #fdf0cf;
+  --gold: #b3141b; --gold-soft: #fbe3de;
   --bg: #f6e7c8; --surface: #fffaf0; --surface2: #fbf0d9;
-  --border: #eed9a9; --border2: #e3c98a;
-  --text: #3a1713; --text2: #6b3d34; --text3: #9a7360;
-  --sidebar-bg: #d4151c; --sidebar-border: rgba(255,230,160,.28);
+  --border: #ecd5b8; --border2: #dfc29c;
+  --text: #2e120e; --text2: #5a3128; --text3: #7a5646;
+  --sidebar-bg: #d4151c; --sidebar-border: rgba(255,255,255,.22);
   --font-display: 'Noto Serif SC', 'Fraunces', Georgia, serif;
 }
 [data-skin="china"][data-theme="dark"] {
-  --red: #e5383d; --red-soft: #4a1e1c;
-  --gold-soft: #3d2f12;
+  --red: #ff6b70; --red-soft: #4a1e1c;
+  --gold: #ff6b70; --gold-soft: #4a1e1c;
   --bg: #241915; --surface: #31221d; --surface2: #3a2923;
   --border: #4f3830; --border2: #634638;
-  --text: #fbefd8; --text2: #dcc3a0; --text3: #a8917a;
+  --text: #fbefd8; --text2: #e6d2b3; --text3: #c2a98c;
   --sidebar-bg: #b3121a;
 }
 
@@ -1875,19 +1876,17 @@ button.lb { cursor: pointer; font-size: .85rem; padding: 7px 14px; }
   background-size: 44px 44px;
 }
 
-[data-skin="china"] .sidebar-brand-zh {
-  background: linear-gradient(180deg, #fff3c4, #ffd36a); -webkit-background-clip: text; background-clip: text; color: transparent;
-}
+[data-skin="china"] .sidebar-brand-zh { background: none; -webkit-text-fill-color: #fff; color: #fff; }
 [data-skin="china"] .snav-btn.active, [data-skin="china"] .snav-link.active {
-  background: rgba(255,236,170,.2); box-shadow: inset 3px 0 0 #ffd36a;
+  background: #fff; box-shadow: none; font-weight: 700;
 }
-[data-skin="china"] .card { border-top: 2px solid #e5a82a; }
+[data-skin="china"] .card { border-top: 2px solid var(--red); }
 [data-skin="china"] .page-title::after {
   content: ""; display: block; width: 56px; height: 3px; margin-top: 8px; border-radius: 2px;
   background: linear-gradient(90deg, var(--red), var(--gold));
 }
 [data-skin="china"] .auth-head { position: relative; background: linear-gradient(135deg, #e0242a 0%, #c8101a 100%); }
-[data-skin="china"] .auth-logo-dot { background: var(--gold); }
+[data-skin="china"] .auth-logo-dot { background: #fff; }
 
 /* lanterns and panda (login and register pages) */
 [data-skin="china"] .skin-deco { display: block; position: fixed; top: 0; left: 0; right: 0; height: 0; z-index: 1; pointer-events: none; }
@@ -1969,8 +1968,8 @@ body:has(.app-shell) .orn-pagoda { width: 240px; height: 200px; }
 }
 
 /* ── China skin touch-ups ── */
-[data-skin="china"] .auth-sub { color: rgba(255,240,200,.92); }
-[data-skin="china"] .auth-logo { color: #ffe9a8; }
+[data-skin="china"] .auth-sub { color: rgba(255,255,255,.92); }
+[data-skin="china"] .auth-logo { color: #fff; }
 
 /* a quiet pagoda scene fills the empty part of the sidebar */
 [data-skin="china"] .app-sidebar::after {
@@ -2044,3 +2043,52 @@ body:has(.app-shell) .orn-lanterns { width: 160px; height: 160px; }
 .rc-msg.ok { color: var(--green, #2f9e5b); }
 
 #rcStop { margin-top: 12px; }
+
+
+/* ── China skin: readable text on the red sidebar and bottom bar ──
+   The default sidebar is dark and uses faint white for inactive items. On bright red that
+   made the labels hard to read, so everything on red is solid white here. */
+[data-skin="china"] .sidebar-brand-tag { color: rgba(255,255,255,.92); }
+[data-skin="china"] .snav-btn, [data-skin="china"] .snav-link { color: #fff; opacity: 1; }
+[data-skin="china"] .snav-btn:hover, [data-skin="china"] .snav-link:hover { background: rgba(255,255,255,.14); color: #fff; }
+[data-skin="china"] .snav-icon { opacity: 1; }
+[data-skin="china"] .sidebar-name { color: #fff; }
+[data-skin="china"] .sidebar-logout { color: #fff; border-color: rgba(255,255,255,.6); }
+[data-skin="china"] .sidebar-logout:hover { background: rgba(255,255,255,.16); }
+[data-skin="china"] .sidebar-avatar { background: #fff; color: var(--red); }
+[data-skin="china"] .app-bottom-nav .bnav-btn { color: rgba(255,255,255,.92); }
+[data-skin="china"] .app-bottom-nav .bnav-btn.active { color: #fff; }
+[data-skin="china"] .app-bottom-nav .bnav-btn:last-child { color: #fff; }
+[data-skin="china"] .app-bottom-nav .bnav-btn span { color: inherit !important; }
+[data-skin="china"] .app-bottom-nav .bnav-btn .bnav-icon { color: inherit !important; }
+[data-skin="china"] .btn.bg, [data-skin="china"] .btn-gold, [data-skin="china"] .qz-btn-gold { color: #fff; }
+
+/* the active item is a white pill with red text, which reads clearly on the red bar */
+[data-skin="china"] .snav-btn.active, [data-skin="china"] .snav-btn.active:hover,
+[data-skin="china"] .snav-link.active, [data-skin="china"] .snav-link.active:hover { color: var(--red); }
+[data-skin="china"][data-theme="dark"] .snav-btn.active, [data-skin="china"][data-theme="dark"] .snav-link.active { color: #b3121a; }
+[data-skin="china"] .app-bottom-nav .bnav-btn.active { background: #fff; color: var(--red); border-radius: 12px; margin: 4px 2px; }
+
+/* ── China dark mode: a lighter red so red text stays readable, dark text on red buttons ── */
+[data-skin="china"][data-theme="dark"] .btn.br, [data-skin="china"][data-theme="dark"] .btn.bg,
+[data-skin="china"][data-theme="dark"] .btn-gold, [data-skin="china"][data-theme="dark"] .qz-btn-gold,
+[data-skin="china"][data-theme="dark"] .lb.on, [data-skin="china"][data-theme="dark"] .afb.active,
+[data-skin="china"][data-theme="dark"] .sc-fb.active { color: #2a0d0d; }
+[data-skin="china"][data-theme="dark"] .snav-btn.active, [data-skin="china"][data-theme="dark"] .snav-link.active { background: #fff; color: #b3121a; }
+[data-skin="china"][data-theme="dark"] .sidebar-avatar { background: #fff; color: #b3121a; }
+[data-skin="china"][data-theme="dark"] .app-bottom-nav .bnav-btn.active { color: #b3121a; }
+
+/* dark mode, any skin */
+.theme-btn { color: var(--text); }
+[data-theme="dark"] .sc-invites.open { color: #5fd08c; }
+[data-theme="dark"] { --green: #5fd08c; }
+
+/* ── China skin: last fixes ── */
+@media (max-width: 860px) {
+  body:has(.app-shell) .orn-lanterns { right: 6px; top: 8px; width: 78px; height: 78px; }
+  [data-skin="china"] .page-header { padding-right: 84px; }
+}
+[data-skin="china"] .app-bottom-nav a[href*="logout"],
+[data-skin="china"] .app-bottom-nav a[href*="logout"] span,
+[data-skin="china"] .app-bottom-nav a[href*="logout"] .bnav-icon { color: #fff !important; }
+[data-skin="china"] .streak-seal.none { background: #ead7d0; color: #7a5646; }
