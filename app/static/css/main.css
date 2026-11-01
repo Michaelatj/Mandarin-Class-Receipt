@@ -143,7 +143,7 @@ body {
     cursor: pointer;
     transition: transform 0.2s;
 }
-.btn-plus:hover { transform: scale(1.1); }s
+.btn-plus:hover { transform: scale(1.1); }
 
 /* Flash messages in auth */
 .auth-flashes { padding: 0 28px; margin-top: -4px; }
@@ -1752,3 +1752,178 @@ input:focus, select:focus, textarea:focus {
   padding: 9px 0; border-top: 1px solid var(--border);
   font-size: .85rem; line-height: 1.5; color: var(--text2);
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   v2 polish: seamless navigation, mobile fixes, optional China skin
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Page-to-page navigation: the sidebar and bottom nav stay put, only the content
+   cross-fades. Browsers without cross-document view transitions just swap pages. */
+@view-transition { navigation: auto; }
+.app-sidebar    { view-transition-name: app-sidebar; }
+.app-bottom-nav { view-transition-name: app-bottom-nav; }
+.app-content    { view-transition-name: app-content; }
+::view-transition-group(root) { animation-duration: .2s; }
+::view-transition-old(app-content) { animation: vt-out .14s ease both; }
+::view-transition-new(app-content) { animation: vt-in .34s cubic-bezier(.22,.61,.36,1) both; }
+@keyframes vt-out { to { opacity: 0; transform: translateY(-4px); } }
+@keyframes vt-in  { from { opacity: 0; transform: translateY(10px); } }
+
+/* the shell itself no longer re-animates on every page load */
+.app-shell   { animation: none; }
+.app-sidebar { animation: none; }
+
+/* a tab fades in each time it becomes visible */
+.app-page { animation: pageIn .38s cubic-bezier(.22,.61,.36,1) both; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* sidebar links on the quiz pages (anchors) behave like the dashboard buttons */
+.snav-link.active { background: rgba(255,255,255,.1); color: #fff; }
+.snav-link .snav-label { flex: 1; }
+
+/* cards and buttons: small, smooth feedback */
+.card { transition: transform .25s cubic-bezier(.22,.61,.36,1), box-shadow .25s ease, border-color .25s ease; }
+@media (hover: hover) { .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); } }
+.btn { transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, filter .2s ease; }
+
+/* short colour fade when the theme is switched */
+html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after {
+  transition: background-color .4s ease, border-color .4s ease, color .4s ease, box-shadow .4s ease !important;
+}
+
+/* ── Mobile fixes: modals and date/time fields ── */
+.modal-overlay, .rm-overlay, .cm-overlay { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.modal-box { max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); overflow-y: auto; margin: auto; }
+.rm-box { max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); }
+
+/* appearance:none on date inputs makes iOS and Android clip the value, so keep the native control */
+input[type=datetime-local], input[type=date], input[type=time], input[type=month] {
+  -webkit-appearance: auto; appearance: auto;
+  min-height: 42px; min-width: 0; max-width: 100%;
+  line-height: 1.3;
+}
+input[type=datetime-local]::-webkit-date-and-time-value { text-align: left; min-height: 1.4em; }
+@media (max-width: 860px) {
+  /* below 16px iOS zooms the page when a field is focused */
+  input[type=datetime-local], input[type=date], input[type=time], input[type=month] { font-size: 16px; }
+}
+@media (max-width: 640px) {
+  input[type=text], input[type=password], input[type=number], input[type=tel], input[type=email], input[type=url], select, textarea { font-size: 16px; }
+  .modal-box { padding: 20px 16px 16px; }
+  .modal-overlay, .rm-overlay, .cm-overlay { padding: 12px; align-items: flex-start; }
+}
+
+/* ── Streak badge ── */
+.streak-card {
+  display: flex; align-items: center; gap: 16px; padding: 16px 18px; margin-bottom: 18px;
+  border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.streak-seal {
+  width: 58px; height: 58px; flex-shrink: 0; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-zh); font-size: 1.9rem; font-weight: 700; line-height: 1;
+  color: #fff; background: var(--red); box-shadow: inset 0 0 0 3px rgba(255,255,255,.25);
+  transform: rotate(-4deg);
+}
+.streak-seal.none { background: var(--border2); color: var(--text3); box-shadow: none; }
+.streak-main { min-width: 0; }
+.streak-title { font-weight: 600; font-size: 1.05rem; color: var(--text); }
+.streak-sub { font-size: .9rem; color: var(--text3); margin-top: 2px; line-height: 1.5; }
+.streak-bar { height: 6px; border-radius: 100px; background: var(--border); margin-top: 8px; overflow: hidden; max-width: 240px; }
+.streak-bar > div { height: 100%; background: var(--gold); border-radius: 100px; transition: width .5s cubic-bezier(.22,.61,.36,1); }
+.streak-chip {
+  display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 100px;
+  background: var(--gold-soft); color: var(--gold); font-size: .72rem; font-weight: 600; vertical-align: 1px;
+}
+
+/* ── Theme picker in settings ── */
+.skin-switch { flex-wrap: wrap; }
+button.lb { cursor: pointer; font-size: .85rem; padding: 7px 14px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Optional China skin  (html[data-skin="china"]), works in light and dark
+   ═══════════════════════════════════════════════════════════════ */
+.skin-deco, .panda { display: none; }
+.skin-btn { top: 54px; }
+
+[data-skin="china"] {
+  --red: #b3202a; --red-soft: #fdeceb;
+  --gold: #b8892b; --gold-soft: #fbf3dc;
+  --bg: #f8f1e4; --surface: #fffdf7; --surface2: #fbf5e8;
+  --border: #eadfc7; --border2: #dccca8;
+  --text: #2b1a14; --text2: #5a4036; --text3: #8f7766;
+  --sidebar-bg: #5e1119; --sidebar-border: rgba(232,200,122,.18);
+  --font-display: 'Noto Serif SC', 'Fraunces', Georgia, serif;
+}
+[data-skin="china"][data-theme="dark"] {
+  --bg: #160c0a; --surface: #221310; --surface2: #2b1a15;
+  --border: #3b2620; --border2: #4b3129;
+  --text: #f6e9d6; --text2: #cdb594; --text3: #8f7a64;
+  --red-soft: #331411; --gold-soft: #2a210c;
+  --sidebar-bg: #2a0a0f;
+}
+
+/* faint coin-ring pattern behind everything */
+[data-skin="china"] body,
+[data-skin="china"] .auth-shell {
+  background-image:
+    radial-gradient(circle at 0 0,       transparent 0 13px, rgba(184,137,43,.14) 13px 14px, transparent 14px),
+    radial-gradient(circle at 22px 22px, transparent 0 13px, rgba(184,137,43,.14) 13px 14px, transparent 14px);
+  background-size: 44px 44px;
+}
+
+[data-skin="china"] .sidebar-brand-zh {
+  background: linear-gradient(180deg, #f5dc9a, #c9962f); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+[data-skin="china"] .snav-btn.active, [data-skin="china"] .snav-link.active { box-shadow: inset 3px 0 0 var(--gold); }
+[data-skin="china"] .card { border-top: 2px solid var(--gold); }
+[data-skin="china"] .page-title::after {
+  content: ""; display: block; width: 56px; height: 3px; margin-top: 8px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--red), var(--gold));
+}
+[data-skin="china"] .auth-head { position: relative; background: linear-gradient(135deg, #5e1119 0%, #8a1a24 100%); }
+[data-skin="china"] .auth-logo-dot { background: var(--gold); }
+
+/* lanterns and panda (login and register pages) */
+[data-skin="china"] .skin-deco { display: block; position: fixed; top: 0; left: 0; right: 0; height: 0; z-index: 1; pointer-events: none; }
+.lantern {
+  position: absolute; top: 44px; width: 42px; height: 54px; transform-origin: 50% -44px;
+  animation: lanternSway 4.6s ease-in-out infinite alternate;
+}
+.lantern.l1 { left: 7%; }
+.lantern.l2 { right: 19%; animation-delay: -2.3s; }
+.lantern::before { content: ""; position: absolute; left: 50%; top: -44px; width: 2px; height: 44px; background: #c9962f; transform: translateX(-50%); }
+.lantern .body {
+  display: block; width: 100%; height: 100%; position: relative;
+  background: radial-gradient(ellipse at 50% 35%, #e4473f 0%, #b3202a 72%);
+  border-radius: 46% / 40%; border-top: 5px solid #c9962f; border-bottom: 5px solid #c9962f;
+  box-shadow: 0 0 24px rgba(228,71,63,.35);
+}
+.lantern .body::after {
+  content: ""; position: absolute; left: 50%; bottom: -26px; width: 2px; height: 18px; background: #c9962f; transform: translateX(-50%);
+  box-shadow: -4px 6px 0 -0.5px #c9962f, 4px 6px 0 -0.5px #c9962f;
+}
+@keyframes lanternSway { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+
+[data-skin="china"] .panda { display: block; position: absolute; right: 20px; top: 14px; width: 64px; height: 64px; animation: pandaBob 3.2s ease-in-out infinite; }
+@keyframes pandaBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+@media (max-width: 700px) { .lantern { width: 32px; height: 42px; } .lantern.l1 { left: 5%; } .lantern.l2 { display: none; } }
+
+/* the floating skin button only belongs on the login and register pages */
+body:has(.app-shell) .skin-btn,
+body:has(.app-shell) .theme-btn,
+body:has(.app-shell) .lang-bar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* The toast was animating on every page load with fill-mode "both", so its last keyframe kept an
+   empty pill visible in the corner. Only animate while it is actually showing. */
+#toast { animation: none; }
+#toast.show { animation: toastSlide .35s cubic-bezier(.2,.8,.4,1) both; }
+#toast.show.toast-out { animation: toastOut .25s cubic-bezier(.4,0,1,1) both; }

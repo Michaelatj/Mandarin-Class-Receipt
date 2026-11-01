@@ -121,9 +121,11 @@ def dashboard():
     show_receipts_pip = unpaid_count   > 0 and _pip("receipts", unpaid_count)
 
     from flask import make_response
+    from ..services.streaks import attendance_streak
     fresh = session.pop("fresh_login", False)
     resp = make_response(render_template("student/dashboard.html",
         user=user, teachers=teachers, receipts=receipts,
+        streak=attendance_streak(user.id),
         unbilled=unbilled, total_sessions=total_sessions,
         schedules=schedules, new_count=new_count,
         unpaid_count=unpaid_count, unbilled_count=unbilled_count,

@@ -95,8 +95,12 @@ def dashboard():
     show_receipts_pip   = unpaid_cnt > 0 and _pip("receipts", unpaid_cnt)
     # ----------------------------------------------------
 
+    from ..services.streaks import compute_streaks
+    streaks = compute_streaks([s.id for s in all_students])
+
     return render_template("teacher/dashboard.html",
         user=teacher, receipts=receipts, all_students=all_students,
+        streaks=streaks,
         progress=progress, custom_fees=custom_fees, custom_fee_types=custom_fee_types,
         unbilled_records=unbilled_records, unpaid_cnt=unpaid_cnt, 
         schedules=schedules, up_count=up_count, attn_count=len(unbilled_records),
@@ -425,3 +429,43 @@ def cancel_receipt_route(receipt_id):
         flash('Gagal membatalkan receipt.', 'danger')
 
     return redirect(url_for('teacher.dashboard'))
+
+
+# ---------------------------------------------------------------------
+# Monthly recap (PDF + WhatsApp message)
+# ---------------------------------------------------------------------
+def _recap_for(student_id):
+    from ..services.recap import build_recap, parse_month
+    teacher = _get_teacher()
+    student = db.session.get(User, student_id)
+    if not student or student.role != "student":
+        return None, None
+    year, month = parse_month(request.args.get("month"))
+    return build_recap(teacher, student, year, month), teacher
+
+
+@teacher_bp.route("/teacher/recap/<int:student_id>.pdf")
+@teacher_required
+def recap_pdf(student_id):
+    from ..services.recap import render_pdf, pdf_filename
+    recap, _t = _recap_for(student_id)
+    if recap is None:
+        return jsonify(ok=False, msg="Student not found"), 404
+    resp = make_response(render_pdf(recap))
+    resp.headers["Content-Type"] = "application/pdf"
+    disposition = "attachment" if request.args.get("download") else "inline"
+    resp.headers["Content-Disposition"] = f'{disposition}; filename="{pdf_filename(recap)}"'
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+@teacher_bp.route("/teacher/recap/<int:student_id>/info")
+@teacher_required
+def recap_info(student_id):
+    from ..services.recap import whatsapp_text, pdf_filename, normalize_phone
+    recap, _t = _recap_for(student_id)
+    if recap is None:
+        return jsonify(ok=False, msg="Student not found"), 404
+    return jsonify(ok=True, text=whatsapp_text(recap), filename=pdf_filename(recap),
+                   phone=normalize_phone(recap["student"].phone),
+                   sessions=len(recap["sessions"]), outstanding=recap["outstanding"])

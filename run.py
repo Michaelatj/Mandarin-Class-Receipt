@@ -9,8 +9,10 @@ For production, use gunicorn instead:
 """
 import os
 from app import create_app
+from app.config import config_map
 
-app = create_app(os.environ.get("FLASK_ENV", "development"))
+# create_app menerima class konfigurasi, bukan string, jadi dicari dulu lewat config_map
+app = create_app(config_map.get(os.environ.get("FLASK_ENV", "development"), config_map["default"]))
 
 if __name__ == "__main__":
     app.run(

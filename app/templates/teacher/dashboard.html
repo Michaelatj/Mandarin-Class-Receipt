@@ -258,16 +258,19 @@
         </div>
         {% if all_students %}
         <div class="data-table" style="margin-bottom:24px">
-          <div class="dt-head" style="grid-template-columns: 1fr 100px 100px 80px 80px;">
+          <div class="dt-head" style="grid-template-columns: 1fr 100px 100px 80px 132px;">
             <span>Student</span><span>Joined</span><span>Sessions</span><span>Billing</span><span>Actions</span>
           </div>
           {% for s in all_students %}
           {% set ss = student_sessions.get(s.id, 0) %}
           {% set su = student_unbilled.get(s.id, 0) %}
-          <div class="dt-row" id="srow-{{ s.id }}" style="grid-template-columns: 1fr 100px 100px 80px 80px;">
+          <div class="dt-row" id="srow-{{ s.id }}" style="grid-template-columns: 1fr 100px 100px 80px 132px;">
             <div>
               <div class="dt-name">{{ s.name() }}</div>
-              <div class="dt-meta">@{{ s.username }}</div>
+              <div class="dt-meta">@{{ s.username }}
+                {% set st = streaks.get(s.id) %}
+                {% if st and st.current %}<span class="streak-chip" title="{{ st.current }} scheduled classes in a row">{{ st.tier.char if st.tier else '勤' }} {{ st.current }}</span>{% endif %}
+              </div>
             </div>
             <div class="dt-joined">{{ s.created_at.strftime('%d %b %Y') }}</div>
             <div>
@@ -283,6 +286,8 @@
             {# ------------------------------ #}
 
             <div style="display:flex; gap:4px;">
+              <button type="button" class="btn bgh bsm recap-btn" data-id="{{ s.id }}" data-name="{{ s.name() }}"
+                      data-phone="{{ s.phone or '' }}" title="Monthly recap (PDF)">PDF</button>
               <button class="btn bg bsm reset-pw-btn"
                       data-id="{{ s.id }}" data-name="{{ s.name() }}" title="Reset Password">🔑</button>
               <button class="btn bdel-outline bsm del-student-btn"
@@ -375,6 +380,14 @@
             </div>
           </div>
           <div class="card">
+            <div class="card-title"><span class="card-title-icon">🎨</span> {{ tr('theme_lbl', 'Theme') }}</div>
+            <div class="lang-switch skin-switch" id="skinSwitch">
+              <button type="button" class="lb" data-mode="light" data-no-i18n>Light</button>
+              <button type="button" class="lb" data-mode="dark" data-no-i18n>Dark</button>
+              <button type="button" class="lb" data-skin-toggle data-no-i18n>中国风</button>
+            </div>
+          </div>
+          <div class="card">
             <div class="card-title"><span class="card-title-icon">⚙️</span> {{ tr('payment_settings') }}</div>
             <form id="settingsForm" method="POST" action="{{ url_for('teacher.update_settings') }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -455,6 +468,25 @@
   </nav>
 
 </div>{# /app-shell #}
+
+{# ═══ MONTHLY RECAP ═══ #}
+<div class="modal-overlay hidden" id="recapModal" role="dialog" aria-modal="true" aria-labelledby="recapTitle">
+  <div class="modal-box">
+    <button type="button" class="modal-close" id="recapClose" aria-label="Close">&times;</button>
+    <h3 id="recapTitle">Monthly recap</h3>
+    <p id="recapWho" style="font-size:.95rem;color:var(--text2);margin:-8px 0 14px"></p>
+    <label for="recapMonth">Month</label>
+    <select id="recapMonth"></select>
+    <label for="recapPhone">WhatsApp number</label>
+    <input type="tel" id="recapPhone" inputmode="tel" placeholder="08xxxxxxxxxx" autocomplete="off">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="btn bgh bsm" id="recapDownload">Download PDF</button>
+      <button type="button" class="btn br bsm" id="recapShare" disabled>Send via WhatsApp</button>
+    </div>
+    <p id="recapHint" style="font-size:.85rem;color:var(--text3);margin-top:12px;line-height:1.5"></p>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/recap.js') }}?v=1"></script>
 
 {# ═══ MODALS ═══ #}
 <div class="rm-overlay hidden" id="receiptModal">

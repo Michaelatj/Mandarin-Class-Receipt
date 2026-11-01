@@ -23,6 +23,13 @@ from ..services import quiz_logic as ql
 logger = logging.getLogger(__name__)
 quiz_bp = Blueprint("quiz", __name__)
 
+
+@quiz_bp.context_processor
+def _shell_user():
+    # the quiz pages sit inside the same sidebar shell as the dashboards
+    uid = session.get("user_id")
+    return {"shell_user": db.session.get(User, uid) if uid else None}
+
 MAX_PAYLOAD_BYTES = 400_000
 MAX_TIME_LIMIT = 7200  # seconds
 
@@ -286,6 +293,34 @@ def api_delete(user, quiz_id):
 def _has_submitted(user, quiz):
     return (QuizAttempt.query.filter_by(quiz_id=quiz.id, student_id=user.id)
             .filter(QuizAttempt.submitted_at.isnot(None)).first() is not None)
+
+
+@quiz_bp.route("/quiz/<int:quiz_id>/cards")
+@guard()
+def cards(user, quiz_id):
+    """Flashcards built from the quiz questions: question on the front, correct answer on the back.
+    Students only get them after they have finished the quiz, so the answers are not given away."""
+    quiz = db.session.get(Quiz, quiz_id)
+    if not quiz:
+        return _not_found()
+    if user.role == "teacher":
+        if quiz.teacher_id != user.id:
+            return _not_found()
+    elif not (_visible_to(user, quiz) and _has_submitted(user, quiz)):
+        return _not_found()
+
+    deck = []
+    for q in quiz.questions or []:
+        front = q.get("question") or ""
+        if quiz.hide_pinyin:
+            front = ql.strip_pinyin(front)
+        deck.append({
+            "front": front,
+            "frontSub": q.get("questionMeaning") or "",
+            "back": ql.correct_text(q),
+            "why": q.get("explanation") or "",
+        })
+    return render_template("quiz/cards.html", home=url_for("quiz.index"), quiz=quiz, deck=deck)
 
 
 @quiz_bp.route("/quiz/<int:quiz_id>/play")

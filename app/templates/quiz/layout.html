@@ -1,13 +1,27 @@
 {% extends "base.html" %}
+{% from 'partials/quiz_shell_nav.html' import sidebar, bottomnav, script with context %}
 {% block title %}{% block qz_title %}Quiz{% endblock %}{% endblock %}
-{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') + '?v=1' }}">{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') + '?v=2' }}">
+{# Di dalam shell, kontrol bahasa/tema mengambang tidak dipakai (ada di Settings). #}
+<style>.lang-bar, .theme-btn { display: none; }</style>
+{% endblock %}
 
 {% block page_content %}
-<div class="qz-shell" {% block qz_attrs %}{% endblock %}>
-  <header class="qz-top">
-    <a class="qz-back" href="{{ home }}">&larr; {% block qz_back %}Back to dashboard{% endblock %}</a>
-  </header>
-  <div class="qz-flashes">{% include 'partials/flashes.html' %}</div>
-  {% block qz_body %}{% endblock %}
+<div class="app-shell">
+  {{ sidebar(shell_user) }}
+  <div class="app-main">
+    <div class="app-content qz-content">
+      <div class="qz-shell" {% block qz_attrs %}{% endblock %}>
+        <header class="qz-top">
+          <a class="qz-back" href="{{ home }}">&larr; {% block qz_back %}Back to dashboard{% endblock %}</a>
+        </header>
+        <div class="qz-flashes">{% include 'partials/flashes.html' %}</div>
+        {% block qz_body %}{% endblock %}
+      </div>
+    </div>
+  </div>
+  {{ bottomnav(shell_user) }}
 </div>
+{{ script(shell_user) }}
 {% endblock %}

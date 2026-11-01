@@ -4,29 +4,40 @@
 {% block body %}
 {% include 'partials/quote.html' %}
 <div class="form-title">{{ tr('login') }}</div>
-<form method="POST" action="{{ url_for('auth.login') }}" autocomplete="on">
+<form method="POST" action="{{ url_for('auth.login') }}" id="loginForm" autocomplete="on">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <label>{{ tr('username_lbl') }}</label>
-  <input type="text" name="username" list="knownUsers" placeholder="{{ tr('username_ph') }}"
-         required autocomplete="username">
-  <datalist id="knownUsers">
-    {% for name in known_users %}<option value="{{ name }}">{% endfor %}
-  </datalist>
-  <label>{{ tr('password_lbl') }}</label>
+
+  <label for="username">{{ tr('username_lbl') }}</label>
+  <input type="text" id="username" name="username" placeholder="{{ tr('username_ph') }}"
+         required autocomplete="username" autocapitalize="none" spellcheck="false">
+
+  <label for="password">{{ tr('password_lbl') }}</label>
   <div class="pw-wrap">
-    <input type="password" name="password" placeholder="{{ tr('password_ph') }}"
+    <input type="password" id="password" name="password" placeholder="{{ tr('password_ph') }}"
            required autocomplete="current-password">
     {% include 'partials/pw_toggle.html' %}
   </div>
+
   <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-weight:400;font-size:.85rem;color:var(--text2);letter-spacing:0;cursor:pointer;margin:2px 0 14px">
     <input type="checkbox" name="remember" value="1" style="width:15px;height:15px;margin:0;accent-color:var(--gold)">
     {{ tr('remember_me') }}
   </label>
-  <button class="btn br">{{ tr('login') }} →</button>
+  <button type="submit" class="btn br">{{ tr('login') }} →</button>
 </form>
 <div class="dvd"></div>
 <p style="text-align:center;font-size:.8rem;color:var(--text3);margin-bottom:10px">{{ tr('no_account') }}</p>
 <a href="{{ url_for('auth.register') }}" class="btn bgh" style="display:block;text-align:center">
   {{ tr('create_account') }}
 </a>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+// Kalau password sedang ditampilkan lewat tombol mata, kembalikan ke type=password
+// sebelum submit. Browser hanya menawarkan "simpan password" untuk field password.
+document.getElementById('loginForm').addEventListener('submit', function () {
+  const pw = document.getElementById('password');
+  if (pw.type !== 'password') pw.type = 'password';
+});
+</script>
 {% endblock %}

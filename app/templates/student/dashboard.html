@@ -69,6 +69,8 @@
           {% endif %}
         </div>
 
+        {% include 'partials/streak_card.html' %}
+
         <div class="stats-row">
           <div class="stat-card">
             <div class="stat-num">{{ unbilled|length }}</div>
@@ -200,6 +202,14 @@
             <div class="lang-switch">
               <a href="{{ url_for('auth.set_lang', code='en') }}" class="lb {% if get_lang()=='en' %}on{% endif %}">EN</a>
               <a href="{{ url_for('auth.set_lang', code='zh') }}" class="lb {% if get_lang()=='zh' %}on{% endif %}">中文</a>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="card-title-icon">🎨</span> {{ tr('theme_lbl', 'Theme') }}</div>
+            <div class="lang-switch skin-switch" id="skinSwitch">
+              <button type="button" class="lb" data-mode="light" data-no-i18n>Light</button>
+              <button type="button" class="lb" data-mode="dark" data-no-i18n>Dark</button>
+              <button type="button" class="lb" data-skin-toggle data-no-i18n>中国风</button>
             </div>
           </div>
           <div class="card">
