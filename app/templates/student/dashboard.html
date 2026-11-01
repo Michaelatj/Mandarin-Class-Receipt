@@ -678,4 +678,20 @@ function attachCardClick(card) {
 document.querySelectorAll('#receiptList .rc-card').forEach(attachCardClick);
 
 </script>
+{# ═══ 点名 CHECK-IN (offline classes) ═══ #}
+<div class="modal-overlay hidden" id="rcsModal" role="dialog" aria-modal="true" aria-labelledby="rcsHeading">
+  <div class="modal-box">
+    <button type="button" class="modal-close" id="rcsClose" aria-label="Close">&times;</button>
+    <h3 id="rcsHeading">点名 Check in</h3>
+    <p class="rc-sub" id="rcsTitle"></p>
+    <label for="rcsCode">Class code</label>
+    <input type="text" id="rcsCode" class="rc-input" inputmode="numeric" pattern="[0-9]*" maxlength="4"
+           autocomplete="off" placeholder="0000">
+    <p class="rc-msg" id="rcsMsg" role="status"></p>
+    <button type="button" class="btn br" id="rcsSubmit">Check in</button>
+    <p class="rc-hint" style="margin-top:12px">Your teacher shows a 4-digit code during the class.</p>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=1"></script>
+
 {% endblock %}

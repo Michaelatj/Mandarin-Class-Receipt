@@ -92,8 +92,21 @@
                   <input type="datetime-local" name="scheduled_at" id="scheduleAt" value="{{ now }}" required style="flex:1">
                   <button type="button" class="btn bgh bsm" id="clearScheduleDate" title="Clear date" aria-label="Clear date">✕</button>
                 </div>
-                <label>Google Meet Link <span class="lbl-opt">(optional)</span></label>
-                <input type="url" name="meet_link" placeholder="https://meet.google.com/…">
+                <label>Class type</label>
+                <div class="seg" id="modeSeg" role="group" aria-label="Class type">
+                  <button type="button" class="seg-btn on" data-mode="online">🎥 Online</button>
+                  <button type="button" class="seg-btn" data-mode="offline">📍 Offline</button>
+                </div>
+                <input type="hidden" name="mode" id="schedMode" value="online">
+                <div id="onlineFields">
+                  <label>Google Meet Link <span class="lbl-opt">(optional)</span></label>
+                  <input type="url" name="meet_link" placeholder="https://meet.google.com/…">
+                </div>
+                <div id="offlineFields" hidden>
+                  <label>Location <span class="lbl-opt">(optional)</span></label>
+                  <input type="text" name="location" id="schedLocation" maxlength="200" placeholder="e.g. Student's home, study room 2">
+                  <div class="seg-note">Students check in with a code you open during the class (点名).</div>
+                </div>
                 <label>Description <span class="lbl-opt">(optional)</span></label>
                 <input type="text" name="description" placeholder="Topics, materials, etc.">
                 <label>Invite Students <span class="lbl-opt">(leave empty = all students)</span></label>
@@ -469,6 +482,38 @@
 
 </div>{# /app-shell #}
 
+{# ═══ ROLL CALL (点名) FOR OFFLINE CLASSES ═══ #}
+<div class="modal-overlay hidden" id="rcModal" role="dialog" aria-modal="true" aria-labelledby="rcHeading">
+  <div class="modal-box rc-box">
+    <button type="button" class="modal-close" id="rcClose" aria-label="Close">&times;</button>
+    <h3 id="rcHeading">点名 Roll call</h3>
+    <p class="rc-sub" id="rcTitle"></p>
+
+    <div id="rcClosedBox">
+      <label for="rcMinutes">Keep it open for</label>
+      <select id="rcMinutes">
+        <option value="10">10 minutes</option>
+        <option value="20" selected>20 minutes</option>
+        <option value="30">30 minutes</option>
+        <option value="60">1 hour</option>
+      </select>
+      <button type="button" class="btn br" id="rcOpen">Open roll call</button>
+    </div>
+
+    <div id="rcOpenBox" hidden>
+      <div class="rc-code" id="rcCode" aria-live="polite">0000</div>
+      <div class="rc-timer" id="rcTimer"></div>
+      <p class="rc-hint">Show this code to the students in the room. They type it in their app to check in.</p>
+      <button type="button" class="btn bgh bsm" id="rcStop">Close roll call</button>
+    </div>
+
+    <div class="rc-listhead"><span>Students</span><span id="rcCount"></span></div>
+    <div class="rc-list" id="rcList"></div>
+    <p class="rc-hint" style="margin-top:10px">Tap a student to mark them present or take it back.</p>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=1"></script>
+
 {# ═══ MONTHLY RECAP ═══ #}
 <div class="modal-overlay hidden" id="recapModal" role="dialog" aria-modal="true" aria-labelledby="recapTitle">
   <div class="modal-box">
@@ -516,8 +561,20 @@
       <input type="text" name="title" id="editTitle" required>
       <label>Date &amp; Time</label>
       <input type="datetime-local" name="scheduled_at" id="editAt" required>
-      <label>Google Meet Link</label>
-      <input type="url" name="meet_link" id="editLink" placeholder="https://meet.google.com/…">
+      <label>Class type</label>
+      <div class="seg" id="editModeSeg" role="group" aria-label="Class type">
+        <button type="button" class="seg-btn on" data-mode="online">🎥 Online</button>
+        <button type="button" class="seg-btn" data-mode="offline">📍 Offline</button>
+      </div>
+      <input type="hidden" name="mode" id="editMode" value="online">
+      <div id="editOnlineFields">
+        <label>Google Meet Link</label>
+        <input type="url" name="meet_link" id="editLink" placeholder="https://meet.google.com/…">
+      </div>
+      <div id="editOfflineFields" hidden>
+        <label>Location</label>
+        <input type="text" name="location" id="editLocation" maxlength="200" placeholder="e.g. Student's home, study room 2">
+      </div>
       <label>Description</label>
       <input type="text" name="description" id="editDesc">
       <label>Invite Students <span class="lbl-opt">(leave empty = all students)</span></label>
@@ -687,12 +744,14 @@ document.querySelectorAll('.sc-card').forEach(card => {
     const footDiv = card.querySelector('.sc-foot > div:last-child');
     if (footDiv && !footDiv.querySelector('.dup-sc-btn')) {
         const editBtn = footDiv.querySelector('.edit-sc-btn');
-        let title = '', desc = '', link = '', at = '';
+        let title = '', desc = '', link = '', at = '', mode = 'online', location = '';
         if (editBtn) {
             title = editBtn.dataset.title || '';
             desc = editBtn.dataset.desc || '';
             link = editBtn.dataset.link || '';
             at = editBtn.dataset.at || '';
+            mode = editBtn.dataset.mode || 'online';
+            location = editBtn.dataset.location || '';
         }
         const dupBtn = document.createElement('button');
         dupBtn.className = 'btn bgh bsm dup-sc-btn';
@@ -701,6 +760,8 @@ document.querySelectorAll('.sc-card').forEach(card => {
         dupBtn.dataset.desc = desc;
         dupBtn.dataset.link = link;
         dupBtn.dataset.at = at;
+        dupBtn.dataset.mode = mode;
+        dupBtn.dataset.location = location;
         dupBtn.innerHTML = '📋 Duplicate';
         footDiv.insertBefore(dupBtn, footDiv.firstChild);
     }
@@ -796,6 +857,7 @@ function attachNewFeatures() {
                 cb.checked = r && r.invited_ids && r.invited_ids.includes(parseInt(cb.value));
             });
 
+            if (window.OffClass) OffClass.setCreate(this.dataset.mode, this.dataset.location);
             document.getElementById('scheduleForm').scrollIntoView({behavior: 'smooth', block: 'center'});
             
             const formEl = document.getElementById('scheduleForm');
@@ -996,6 +1058,7 @@ ajaxForm(document.getElementById('editScheduleForm'), function(data){
     if (timeEl) timeEl.textContent = '📅 '+data.dt_fmt;
     const descEl  = card.querySelector('.sc-desc');
     if (data.description && descEl) descEl.textContent = data.description;
+    if (window.OffClass) OffClass.afterEdit(card, data);
     const linkEl  = card.querySelector('.sc-link a');
     if (linkEl && data.meet_link) { linkEl.href = data.meet_link; linkEl.textContent = data.meet_link; }
     const invEl   = card.querySelector('.sc-invites');
@@ -1044,6 +1107,7 @@ function attachScBtns() {
         document.getElementById(id).value = [this.dataset.title,this.dataset.at,this.dataset.link,this.dataset.desc][i] || '';
       });
       document.getElementById('editScheduleForm').action = '/teacher/schedule/edit/'+this.dataset.id;
+      if (window.OffClass) OffClass.setEdit(this.dataset.mode, this.dataset.location);
       const sid = this.dataset.id;
       const r = await fetch('/teacher/schedule/invites/'+sid, {headers:{'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': window._CSRF}}).then(r=>r.json()).catch(()=>null);
       document.querySelectorAll('.edit-invite-cb').forEach(cb => {

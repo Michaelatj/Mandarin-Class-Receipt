@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 250">
+<defs><g id="c"><path d="M0 34 Q-4 16 12 14 Q12 -2 30 2 Q42 -10 56 4 Q74 0 74 20 Q86 28 72 38 H6 Q-4 38 0 34Z" fill="#f6b6a8" opacity=".55"/></g></defs>
+<circle cx="60" cy="70" r="30" fill="#ffd36a" opacity=".9"/>
+<use href="#c" transform="translate(190 30) scale(.9)"/>
+<use href="#c" transform="translate(0 150)"/>
+<line x1="150" y1="20" x2="150" y2="44" stroke="#ffe7a1" stroke-width="3"/>
+<path d="M112.0 60 Q128.0 58 150 42 Q172.0 58 188.0 60 Q164.0 66 150 66 Q136.0 66 112.0 60Z" fill="#ffe7a1"/><rect x="126.0" y="66" width="48" height="22" fill="#a60e15"/><rect x="132.0" y="71" width="8" height="12" rx="1" fill="#ffcf5a"/><rect x="146.0" y="71" width="8" height="12" rx="1" fill="#ffcf5a"/><rect x="160.0" y="71" width="8" height="12" rx="1" fill="#ffcf5a"/><path d="M98.0 104 Q114.0 102 150 86 Q186.0 102 202.0 104 Q171.0 110 150 110 Q129.0 110 98.0 104Z" fill="#ffe7a1"/><rect x="112.0" y="110" width="76" height="22" fill="#a60e15"/><rect x="118.0" y="115" width="8" height="12" rx="1" fill="#ffcf5a"/><rect x="146.0" y="115" width="8" height="12" rx="1" fill="#ffcf5a"/><rect x="174.0" y="115" width="8" height="12" rx="1" fill="#ffcf5a"/><path d="M84.0 148 Q100.0 146 150 130 Q200.0 146 216.0 148 Q178.0 154 150 154 Q122.0 154 84.0 148Z" fill="#ffe7a1"/><rect x="98.0" y="154" width="104" height="22" fill="#a60e15"/><rect x="104.0" y="159" width="8" height="12" rx="1" fill="#ffcf5a"/><rect x="146.0" y="159" width="8" height="12" rx="1" fill="#ffcf5a"/><rect x="188.0" y="159" width="8" height="12" rx="1" fill="#ffcf5a"/>
+<rect x="92" y="182" width="116" height="8" fill="#ffe7a1"/>
+<rect x="102" y="186" width="6" height="34" fill="#ffe7a1"/><rect x="122" y="186" width="6" height="34" fill="#ffe7a1"/><rect x="142" y="186" width="6" height="34" fill="#ffe7a1"/><rect x="162" y="186" width="6" height="34" fill="#ffe7a1"/><rect x="182" y="186" width="6" height="34" fill="#ffe7a1"/>
+<rect x="84" y="218" width="132" height="8" fill="#ffe7a1"/>
+<use href="#c" transform="translate(190 170)"/>
+<use href="#c" transform="translate(40 195) scale(.8)"/>
+</svg>

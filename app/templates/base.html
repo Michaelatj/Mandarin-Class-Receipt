@@ -23,7 +23,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=26" }}">
+<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=27" }}">
 {% block head_extra %}{% endblock %}
 </head>
 <body>
@@ -38,12 +38,16 @@
 
 <div id="toast"></div>
 
+<div class="orn" aria-hidden="true">
+  <div class="orn-frame"></div>
+  <div class="orn-lanterns"></div>
+  <div class="orn-fret"></div>
+  <div class="orn-fret bl"></div>
+  <div class="orn-pagoda"></div>
+</div>
 {% block page_content %}
 <div class="auth-shell">
-  <div class="skin-deco" aria-hidden="true">
-    <span class="lantern l1"><span class="body"></span></span>
-    <span class="lantern l2"><span class="body"></span></span>
-  </div>
+  
   <div class="auth-card">
     <div class="auth-head">
       <svg class="panda" viewBox="0 0 120 120" aria-hidden="true">
