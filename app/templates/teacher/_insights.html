@@ -1,0 +1,160 @@
+{# Insights fragment, loaded into the Insights tab. All money is in rupiah. #}
+{% macro delta(v) -%}
+  {%- if v is none -%}<span class="ins-delta flat">nothing to compare yet</span>
+  {%- elif v > 0 -%}<span class="ins-delta up">+{{ v }}% vs same days last month</span>
+  {%- elif v < 0 -%}<span class="ins-delta down">{{ v }}% vs same days last month</span>
+  {%- else -%}<span class="ins-delta flat">same as the same days last month</span>{%- endif -%}
+{%- endmacro %}
+
+{% set rv = d.revenue %}{% set cl = d.classes %}{% set st = d.students %}{% set qz = d.quiz %}
+
+<div class="ins-kpis">
+  <div class="ins-kpi">
+    <div class="ins-kpi-label">Collected this month</div>
+    <div class="ins-kpi-num">{{ idr(rv.collected_this) }}</div>
+    {{ delta(rv.collected_delta) }}
+  </div>
+  <div class="ins-kpi {% if rv.outstanding %}warn{% endif %}">
+    <div class="ins-kpi-label">Not yet paid</div>
+    <div class="ins-kpi-num">{{ idr(rv.outstanding) }}</div>
+    <span class="ins-delta flat">{{ rv.outstanding_count }} receipt{{ '' if rv.outstanding_count == 1 else 's' }}{% if rv.outstanding_count %} · oldest {{ rv.oldest_unpaid_days }} day{{ '' if rv.oldest_unpaid_days == 1 else 's' }}{% endif %}</span>
+  </div>
+  <div class="ins-kpi">
+    <div class="ins-kpi-label">Sessions this month</div>
+    <div class="ins-kpi-num">{{ cl.sessions_this }}</div>
+    {{ delta(cl.sessions_delta) }}
+  </div>
+  <div class="ins-kpi">
+    <div class="ins-kpi-label">Active students</div>
+    <div class="ins-kpi-num">{{ st.active }}<span class="ins-of"> / {{ st.total }}</span></div>
+    <span class="ins-delta flat">attended in the last 30 days</span>
+  </div>
+</div>
+
+<div class="ins-grid">
+
+  <section class="card ins-wide">
+    <div class="card-title"><span class="card-title-icon">💰</span> Revenue, last 6 months</div>
+    <div class="ins-legend"><span><i class="sw issued"></i>Billed</span><span><i class="sw collected"></i>Received</span><span class="ins-unit">Labels show money received, in rupiah (rb = thousand, jt = million)</span></div>
+    <div class="ins-chart" role="img" aria-label="Billed and received per month">
+      {% for r in rv.rows %}
+      <div class="ins-col">
+        <div class="ins-bars">
+          <div class="ins-bar issued" style="height:{{ r.issued_pct }}%" title="Billed {{ idr(r.issued) }}"></div>
+          <div class="ins-bar collected" style="height:{{ r.collected_pct }}%" title="Received {{ idr(r.collected) }}"></div>
+        </div>
+        <div class="ins-val">{{ idr_short(r.collected)|replace('Rp ', '') }}</div>
+        <div class="ins-lab">{{ r.label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="ins-facts">
+      <div><b>{{ idr(rv.total_collected) }}</b><span>received in total</span></div>
+      <div><b>{% if rv.paid_share is not none %}{{ rv.paid_share }}%{% else %}-{% endif %}</b><span>of billed money is paid</span></div>
+      <div><b>{{ idr(rv.avg_receipt) }}</b><span>average receipt ({{ rv.receipt_count }} issued)</span></div>
+    </div>
+    {% if rv.has_paid_at_gap %}
+    <p class="ins-note">Receipts paid before this tab existed are counted in the month they were issued. New payments use the day you press Paid.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card-title"><span class="card-title-icon">🧾</span> Who still owes</div>
+    {% if rv.owing %}
+    <div class="ins-list">
+      {% for o in rv.owing %}
+      <div class="ins-row">
+        <div class="ins-row-main"><b>{{ o.name }}</b><span>{{ o.count }} receipt{{ '' if o.count == 1 else 's' }} · oldest {{ o.oldest_days }} day{{ '' if o.oldest_days == 1 else 's' }}</span></div>
+        <div class="ins-row-val">{{ idr(o.amount) }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}<div class="ins-empty">Everything is paid. Nothing is outstanding.</div>{% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card-title"><span class="card-title-icon">📆</span> Sessions per month</div>
+    <div class="ins-chart small" role="img" aria-label="Sessions per month">
+      {% for i in range(cl.labels|length) %}
+      <div class="ins-col">
+        <div class="ins-bars"><div class="ins-bar sessions" style="height:{{ cl.sessions_pct[i] }}%" title="{{ cl.sessions[i] }} sessions"></div></div>
+        <div class="ins-val">{{ cl.sessions[i] }}</div>
+        <div class="ins-lab">{{ cl.labels[i] }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="ins-facts two">
+      <div><b>{{ cl.scheduled_total }}</b><span>scheduled classes held{% if cl.scheduled_offline %} ({{ cl.scheduled_offline }} offline){% endif %}</span></div>
+      <div><b>{% if cl.avg_attendees is not none %}{{ cl.avg_attendees }}{% else %}-{% endif %}</b><span>students per class on average</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-title"><span class="card-title-icon">🗓️</span> Busiest days</div>
+    <div class="ins-days">
+      {% for w in cl.weekday %}
+      <div class="ins-day"><div class="ins-day-bar"><i style="height:{{ w.pct }}%"></i></div><b>{{ w.n }}</b><span>{{ w.label }}</span></div>
+      {% endfor %}
+    </div>
+    {% if cl.busiest_day %}
+    <p class="ins-note">Most sessions fall on {{ cl.busiest_day }}{% if cl.top_hours %}, usually around {{ cl.top_hours|map(attribute='hour')|join(', ') }}{% endif %} (last 4 months, WIB).</p>
+    {% else %}<div class="ins-empty">No sessions recorded yet.</div>{% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card-title"><span class="card-title-icon">⚠️</span> Students who went quiet</div>
+    {% if st.at_risk %}
+    <div class="ins-list">
+      {% for s in st.at_risk %}
+      <div class="ins-row">
+        <div class="ins-row-main"><b>{{ s.name }}</b><span>last session {{ s.last.strftime('%d %b %Y') }}</span></div>
+        <div class="ins-row-val muted">{{ s.days }} days</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}<div class="ins-empty">{% if st.total %}Nobody has been away for more than 30 days.{% else %}No students yet.{% endif %}</div>{% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card-title"><span class="card-title-icon">🔥</span> Most consistent students</div>
+    {% if st.leaders %}
+    <div class="ins-list">
+      {% for s in st.leaders %}
+      <div class="ins-row">
+        <div class="ins-row-main"><b>{{ s.name }}</b><span>{{ s.attended }} of {{ s.total }} scheduled classes · best {{ s.best }}</span></div>
+        <div class="ins-row-val"><span class="streak-chip">{{ s.tier.char if s.tier else '勤' }} {{ s.current }}</span></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}<div class="ins-empty">Streaks appear once students join scheduled classes.</div>{% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card-title"><span class="card-title-icon">📝</span> Quizzes</div>
+    {% if qz.rows %}
+    <div class="ins-table-wrap">
+      <table class="ins-table">
+        <thead><tr><th>Quiz</th><th>Attempts</th><th>Students</th><th>Avg score</th></tr></thead>
+        <tbody>
+        {% for r in qz.rows %}
+          <tr><td>{{ r.title }}</td><td>{{ r.attempts }}</td><td>{{ r.students }}</td><td>{% if r.avg is not none %}{{ r.avg }}%{% else %}-{% endif %}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if qz.hardest %}
+    <div class="ins-sub">Questions students miss most</div>
+    <div class="ins-list">
+      {% for h in qz.hardest %}
+      <div class="ins-row">
+        <div class="ins-row-main"><b data-no-i18n>{{ h.text }}</b><span>{{ h.quiz }} · {{ h.seen }} answers</span></div>
+        <div class="ins-row-val {% if h.rate < 50 %}bad{% endif %}">{{ h.rate }}% correct</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% else %}<div class="ins-empty">No finished quizzes yet. Results show up here once students submit one.</div>{% endif %}
+  </section>
+
+</div>
+<p class="ins-foot">Updated {{ d.generated.strftime('%d %b %Y, %H:%M') }} WIB · only you can see this tab.</p>
