@@ -2,7 +2,21 @@
 {% block title %}{{ tr('login') }}{% endblock %}
 
 {% block body %}
+<!-- Floating Upper-Middle Theme Switcher Bar -->
+<div class="auth-theme-switcher" aria-label="Theme Selector">
+  <span class="ats-label">Theme:</span>
+  <button type="button" class="ats-btn active" onclick="setLoginTheme('default')" id="thm-default">
+    <span>☀️</span> Default
+  </button>
+
+  <!-- Added Requested Theme: Mountain Night with Moon -->
+  <button type="button" class="ats-btn thm-night-btn" onclick="setLoginTheme('mountain-night')" id="thm-mountain-night">
+    <span>🌙</span> Mountain Night
+  </button>
+</div>
+
 {% include 'partials/quote.html' %}
+
 <div class="form-title">{{ tr('login') }}</div>
 <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm" autocomplete="on">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -18,26 +32,58 @@
     {% include 'partials/pw_toggle.html' %}
   </div>
 
-  <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-weight:400;font-size:.85rem;color:var(--text2);letter-spacing:0;cursor:pointer;margin:2px 0 14px">
-    <input type="checkbox" name="remember" value="1" style="width:15px;height:15px;margin:0;accent-color:var(--gold)">
+  <label class="remember-label">
+    <input type="checkbox" name="remember" value="1" class="remember-checkbox">
     {{ tr('remember_me') }}
   </label>
+  
   <button type="submit" class="btn br">{{ tr('login') }} →</button>
 </form>
+
 <div class="dvd"></div>
-<p style="text-align:center;font-size:.8rem;color:var(--text3);margin-bottom:10px">{{ tr('no_account') }}</p>
-<a href="{{ url_for('auth.register') }}" class="btn bgh" style="display:block;text-align:center">
+
+<p class="no-account-text">{{ tr('no_account') }}</p>
+<a href="{{ url_for('auth.register') }}" class="btn bgh auth-register-btn">
   {{ tr('create_account') }}
 </a>
 {% endblock %}
 
 {% block page_scripts %}
 <script>
-// Kalau password sedang ditampilkan lewat tombol mata, kembalikan ke type=password
-// sebelum submit. Browser hanya menawarkan "simpan password" untuk field password.
+// Password reset guard before form submit
 document.getElementById('loginForm').addEventListener('submit', function () {
   const pw = document.getElementById('password');
   if (pw.type !== 'password') pw.type = 'password';
 });
+
+// Switcher logic for Login themes (default & Mountain Night with Moon)
+function setLoginTheme(themeName) {
+  const body = document.body;
+  const html = document.documentElement;
+  
+  // Remove existing login theme classes
+  body.classList.remove('theme-mountain-night');
+  html.removeAttribute('data-login-theme');
+  
+  document.querySelectorAll('.ats-btn').forEach(btn => btn.classList.remove('active'));
+
+  if (themeName === 'mountain-night') {
+    body.classList.add('theme-mountain-night');
+    html.setAttribute('data-login-theme', 'mountain-night');
+    document.getElementById('thm-mountain-night').classList.add('active');
+    localStorage.setItem('login_theme', 'mountain-night');
+  } else {
+    document.getElementById('thm-default').classList.add('active');
+    localStorage.setItem('login_theme', 'default');
+  }
+}
+
+// Restore saved login theme preference on load
+(function() {
+  const savedTheme = localStorage.getItem('login_theme');
+  if (savedTheme === 'mountain-night') {
+    setLoginTheme('mountain-night');
+  }
+})();
 </script>
 {% endblock %}

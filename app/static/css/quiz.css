@@ -337,3 +337,47 @@
   .fc-mid .btn { flex: 1; }
   .fc-actions .btn:not(.fc-mid .btn) { flex: 1; }
 }
+/* --- TAMBAHAN DI PALING BAWAH QUIZ_2.CSS --- */
+[data-theme="dark"] .qz-option {
+  background: var(--surface2);
+  border-color: var(--border2);
+  color: var(--text);
+}
+
+[data-theme="dark"] .qz-option:hover:not(.locked) {
+  border-color: var(--gold);
+  background: rgba(176,125,46,.12);
+}
+
+[data-theme="dark"] .qz-chip {
+  background: var(--surface2);
+  border-color: var(--border2);
+  color: var(--text);
+}
+
+[data-theme="dark"] .qz-chip:hover:not(.locked) {
+  border-color: var(--gold);
+  background: rgba(176,125,46,.15);
+}
+
+[data-theme="dark"] .qz-assembled {
+  background: var(--surface2);
+  border-color: var(--border2);
+}
+
+[data-theme="dark"] .qz-qnav button {
+  background: var(--surface2);
+  border-color: var(--border2);
+  color: var(--text2);
+}
+
+[data-theme="dark"] .qz-qblock,
+[data-theme="dark"] .qe-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme="dark"] .fc-card .fc-back {
+  background: var(--surface2);
+  border-color: var(--gold);
+}

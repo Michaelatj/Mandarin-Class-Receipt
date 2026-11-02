@@ -47,18 +47,19 @@
 }
 
 [data-theme="dark"] {
-  --bg:      #111009;
-  --surface: #1c1a14;
-  --surface2:#242018;
-  --border:  #2e2a22;
-  --border2: #3a352b;
-  --text:    #f0ece4;
-  --text2:   #b0a898;
-  --text3:   #6e6860;
-  --red-soft:#2a1210;
-  --gold-soft:#231e0a;
-  --green-soft:#0d1f14;
-  --sidebar-bg:#0e0c07;
+  --bg:          #0f1115;
+  --surface:     #171920;
+  --surface2:    #1e222d;
+  --border:      #2a2e3d;
+  --border2:     #383e52;
+  --text:        #f0f3f8;
+  --text2:       #a0a7b5;
+  --text3:       #666e7d;
+  --red-soft:    #2d1517;
+  --gold-soft:   #2b2413;
+  --green-soft:  #10281b;
+  --sidebar-bg:  #0a0b0e;
+  --sidebar-border: rgba(255,255,255,.08);
 }
 
 /* ── Base ── */
@@ -1070,6 +1071,37 @@ select {
 [data-theme="dark"] .sc-card.past { opacity: .55; }
 [data-theme="dark"] .cycle-cell.empty-cell { opacity: .4; }
 [data-theme="dark"] input, [data-theme="dark"] select { background: var(--surface2); }
+[data-theme="dark"] input[type=text],
+[data-theme="dark"] input[type=password],
+[data-theme="dark"] input[type=email],
+[data-theme="dark"] input[type=number],
+[data-theme="dark"] input[type=url],
+[data-theme="dark"] input[type=datetime-local],
+[data-theme="dark"] input[type=tel],
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--surface2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+[data-theme="dark"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a0a7b5' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+}
+
+[data-theme="dark"] .modal-box,
+[data-theme="dark"] .rm-box,
+[data-theme="dark"] .cm-box {
+  background: var(--surface);
+  border-color: var(--border2);
+  box-shadow: 0 24px 64px rgba(0,0,0,.6);
+}
+
+[data-theme="dark"] .attn-search-bar input[type="search"] {
+  background-color: var(--surface2);
+  color: var(--text);
+  border-color: var(--border2);
+}
 
 /* ── Theme toggle (floating) ── */
 .theme-btn {
