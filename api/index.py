@@ -52,15 +52,6 @@ with app.app_context():
                 except Exception as e:
                     print(f"⚠️ Column migration skipped (might exist): {e}")
 
-        # --- paid_at on receipt (for revenue by month in Insights) ---
-        if 'receipt' in table_names:
-            rcols = [col['name'] for col in inspector.get_columns('receipt')]
-            if 'paid_at' not in rcols:
-                print("Adding missing 'paid_at' column to receipt...")
-                with db.engine.connect() as conn:
-                    conn.execute(text("ALTER TABLE receipt ADD COLUMN paid_at TIMESTAMP"))
-                    conn.commit()
-
         # --- Offline classes and roll call columns on schedule ---
         if 'schedule' in table_names:
             columns = [col['name'] for col in inspector.get_columns('schedule')]

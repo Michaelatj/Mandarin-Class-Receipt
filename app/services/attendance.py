@@ -192,7 +192,6 @@ def mark_receipt_paid(receipt_id: int, teacher_id: int) -> bool:
     if not receipt or receipt.teacher_id != teacher_id:
         return False
     receipt.paid = True
-    receipt.paid_at = datetime.utcnow()
     db.session.commit()
     return True
 

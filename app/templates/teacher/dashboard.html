@@ -47,12 +47,8 @@
         <span class="snav-label">{{ tr('nav_receipts') }}</span>
         {% if show_receipts_pip %}<span class="snav-pip" data-tab="receipts" data-count="{{ unpaid_cnt }}">{{ unpaid_cnt }}</span>{% endif %}
       </button>
-      <button class="snav-btn" data-page="insights">
-      <span class="snav-icon">📈</span>
-      <span class="snav-label">{{ tr('nav_insights') }}</span>
-      </button>
       <a class="snav-link" href="{{ url_for('quiz.index') }}">
-      <span class="snav-icon">📝</span>
+        <span class="snav-icon">📝</span>
         <span class="snav-label">{{ tr('nav_quiz') }}</span>
       </a>
       <button class="snav-btn" data-page="settings">
@@ -381,17 +377,6 @@
       </div>
 
       {# ═══ SETTINGS ═══ #}
-      <div class="app-page" id="page-insights">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Insights</h1>
-          <p class="page-sub">How your classes, payments and students are doing. Amounts are in rupiah.</p>
-        </div>
-        <button type="button" class="btn bgh bsm" id="insightsRefresh">Refresh</button>
-      </div>
-      <div id="insightsBody"><div class="ins-loading">Loading your numbers...</div></div>
-      </div>
-
       <div class="app-page" id="page-settings">
         <div class="page-header">
           <div>
@@ -441,10 +426,6 @@
               <button class="btn br" type="submit">Change Password</button>
             </form>
           </div>
-          <div class="card">
-            <div class="card-title"><span class="card-title-icon">🚪</span> Account</div>
-            <a class="btn bgh" href="{{ url_for('auth.logout') }}" style="text-decoration:none;display:inline-block;width:auto">{{ tr('logout') }}</a>
-          </div>
           <div class="card danger-card">
             <div class="card-title" style="color:var(--red)"><span class="card-title-icon">⚠️</span> {{ tr('danger_zone') }}</div>
             <p style="font-size:.84rem;color:var(--text3);margin-bottom:14px">{{ tr('delete_account_warn') }}</p>
@@ -485,19 +466,18 @@
       </div>
       <span>{{ tr('nav_receipts') }}</span>
     </button>
-    <button class="bnav-btn" data-page="insights">
-    <div class="bnav-icon">📈</div>
-    <span>{{ tr('nav_insights') }}</span>
-    </button>
     <a class="bnav-btn" href="{{ url_for('quiz.index') }}" style="text-decoration:none">
-    <div class="bnav-icon">📝</div>
+      <div class="bnav-icon">📝</div>
       <span>{{ tr('nav_quiz') }}</span>
     </a>
     <button class="bnav-btn" data-page="settings">
       <div class="bnav-icon">⚙️</div>
       <span>{{ tr('nav_settings') }}</span>
     </button>
-    {# logout is in Settings on small screens, so the bar stays readable #}
+    <a class="bnav-btn" href="{{ url_for('auth.logout') }}" style="text-decoration:none;color:inherit">
+      <div class="bnav-icon" style="color:var(--red)">🚪</div>
+      <span style="color:var(--red)">{{ tr('logout') }}</span>
+    </a>
   </nav>
 
 </div>{# /app-shell #}
@@ -979,26 +959,13 @@ const NAV = (function(){
     }).catch(()=>{});
   }
 
-  let insightsLoaded = false;
-  function loadInsights(force) {
-    if (insightsLoaded && !force) return;
-    const box = document.getElementById('insightsBody');
-    box.innerHTML = '<div class="ins-loading">Loading your numbers...</div>';
-    fetch('/teacher/insights', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
-      .then(html => { box.innerHTML = html; insightsLoaded = true; })
-      .catch(() => { box.innerHTML = '<div class="ins-loading">Could not load the numbers. Check your connection and press Refresh.</div>'; });
-  }
-  document.addEventListener('click', (e) => { if (e.target.closest('#insightsRefresh')) loadInsights(true); });
-
   function show(id) {
     if (!document.getElementById('page-' + id)) id = DEFAULT;
     sideBtn.forEach(b => b.classList.toggle('active', b.dataset.page === id));
     botBtn.forEach(b  => b.classList.toggle('active', b.dataset.page === id));
     pages.forEach(p => p.style.display = p.id === 'page-' + id ? 'block' : 'none');
-    if (id === 'insights') loadInsights();
-    if (!visited.has(id) && id !== 'insights') {
-    clearPip(id);
+    if (!visited.has(id)) {
+      clearPip(id);
       markSeenCurrent(id);
       visited.add(id);
     }

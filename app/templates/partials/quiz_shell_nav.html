@@ -2,7 +2,7 @@
    between them feels like one app. On the dashboards the tabs switch in place; here they
    link back to the dashboard and remember which tab to open. #}
 
-{% set TEACHER_ITEMS = [('classes','📆','nav_classes','nav_classes'),('attendance','✅','nav_attendance','nav_attend_short'),('students','👥','nav_students','nav_students'),('receipts','🧾','nav_receipts','nav_receipts'),('insights','📈','nav_insights','nav_insights'),('quiz','📝','nav_quiz','nav_quiz'),('settings','⚙️','nav_settings','nav_settings')] %}
+{% set TEACHER_ITEMS = [('classes','📆','nav_classes','nav_classes'),('attendance','✅','nav_attendance','nav_attend_short'),('students','👥','nav_students','nav_students'),('receipts','🧾','nav_receipts','nav_receipts'),('quiz','📝','nav_quiz','nav_quiz'),('settings','⚙️','nav_settings','nav_settings')] %}
 {% set STUDENT_ITEMS = [('classes','📆','nav_classes','nav_classes'),('progress','📊','nav_progress','nav_progress'),('receipts','🧾','nav_receipts','nav_receipts'),('quiz','📝','nav_quiz','nav_quiz'),('settings','⚙️','nav_settings','nav_settings')] %}
 
 {% macro sidebar(user) %}
@@ -51,12 +51,10 @@
     </a>
     {% endif %}
   {% endfor %}
-  {% if role != 'teacher' %}
   <a class="bnav-btn" href="{{ url_for('auth.logout') }}" style="text-decoration:none;color:inherit">
     <div class="bnav-icon" style="color:var(--red)">🚪</div>
     <span style="color:var(--red)">{{ tr('logout') }}</span>
   </a>
-  {% endif %}
 </nav>
 {% endmacro %}
 
