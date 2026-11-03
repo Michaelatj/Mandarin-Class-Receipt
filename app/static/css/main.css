@@ -27,7 +27,7 @@
   /* Text */
   --text:    #1a1816;
   --text2:   #4a4540;
-  --text3:   #8c8680;
+  --text3:   #6f6a63;
 
   /* Sidebar */
   --sidebar-w: 228px;
@@ -54,7 +54,7 @@
   --border2: #3a352b;
   --text:    #f0ece4;
   --text2:   #b0a898;
-  --text3:   #6e6860;
+  --text3:   #9a9488;
   --red-soft:#2a1210;
   --gold-soft:#231e0a;
   --green-soft:#0d1f14;
@@ -2168,3 +2168,170 @@ body:has(.app-shell) .orn-lanterns { width: 160px; height: 160px; }
 
 .ins-unit { margin-left: auto; font-size: .78rem; color: var(--text3); }
 @media (max-width: 520px) { .ins-legend { flex-wrap: wrap; gap: 6px 14px; } .ins-unit { margin-left: 0; flex-basis: 100%; } }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Upfront payments and students without an account
+   ═══════════════════════════════════════════════════════════════ */
+.page-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.page-header:has(.page-actions) { gap: 12px; flex-wrap: wrap; }
+.chip-noacct { display: inline-block; padding: 1px 9px; border-radius: 100px; background: var(--red-soft); color: var(--red); font-size: .72rem; font-weight: 700; letter-spacing: .02em; }
+.rc-tag { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 100px; background: var(--gold-soft); color: var(--gold); font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; vertical-align: 2px; }
+.pp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pp-row > div { min-width: 0; }
+.pp-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.pp-actions .btn { width: 100%; text-align: center; }
+#prepayModal .modal-box { max-width: 480px; }
+@media (max-width: 520px) { .pp-row { grid-template-columns: 1fr; } }
+
+.streak-live { margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: var(--red-soft); color: var(--red); font-size: .88rem; font-weight: 600; line-height: 1.45; }
+.streak-rule { margin-top: 8px; font-size: .82rem; color: var(--text3); }
+.modal-box input[type=date] { width: 100%; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Theme dropdown (login page and Settings)
+   ═══════════════════════════════════════════════════════════════ */
+.theme-picker { display: flex; align-items: center; gap: 12px; }
+.theme-picker.center { justify-content: center; }
+.tp-label { font-size: .76rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); }
+.tp-wrap { position: relative; }
+.tp-btn {
+  display: inline-flex; align-items: center; gap: 12px; padding: 9px 18px; min-width: 150px; justify-content: space-between;
+  border-radius: 100px; background: var(--surface); border: 1px solid var(--border2); color: var(--text);
+  font: inherit; font-size: .96rem; font-weight: 600; cursor: pointer; box-shadow: var(--shadow);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+.tp-btn:hover { border-color: var(--gold); }
+.tp-btn:active { transform: scale(.98); }
+.tp-btn:focus-visible, .tp-list:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.tp-caret { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .2s ease; }
+.tp-btn[aria-expanded="true"] .tp-caret { transform: rotate(-135deg) translateY(-1px); }
+.tp-list {
+  position: absolute; z-index: 600; top: calc(100% + 10px); left: 0; width: 290px; max-width: calc(100vw - 32px);
+  margin: 0; padding: 6px; list-style: none; border-radius: 16px; background: var(--surface);
+  border: 1px solid var(--border2); box-shadow: 0 18px 50px rgba(0,0,0,.25);
+  animation: tpIn .18s cubic-bezier(.22,.61,.36,1) both;
+}
+.theme-picker.center .tp-list { left: 50%; margin-left: -145px; }
+.tp-list.up { top: auto; bottom: calc(100% + 10px); }
+@keyframes tpIn { from { opacity: 0; translate: 0 -6px; } to { opacity: 1; translate: 0 0; } }
+.tp-opt { position: relative; padding: 10px 16px; border-radius: 11px; cursor: pointer; display: flex; flex-direction: column; gap: 1px; }
+.tp-opt b { font-size: .98rem; color: var(--text); font-weight: 600; }
+.tp-opt span { font-size: .82rem; color: var(--text3); }
+.tp-opt.active { background: var(--surface2); }
+.tp-opt[aria-selected="true"] { background: var(--gold-soft); }
+.tp-opt[aria-selected="true"]::before { content: ""; position: absolute; left: 5px; top: 11px; bottom: 11px; width: 3px; border-radius: 2px; background: var(--gold); }
+.tp-hint { margin-top: 10px; font-size: .84rem; color: var(--text3); }
+
+/* login page: the theme dropdown sits centered above the card */
+.auth-col { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 16px; position: relative; z-index: 2; }
+.auth-col .auth-card { width: 100%; }
+.auth-theme { display: flex; justify-content: center; }
+.theme-btn, .skin-btn { display: none !important; }
+@media (prefers-reduced-motion: reduce) { .tp-list { animation: none; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   Night skin: blue dusk in the mountains, with a moon. Not the plain dark theme.
+   ═══════════════════════════════════════════════════════════════ */
+.orn-night { display: none; }
+[data-skin="night"] {
+  color-scheme: dark;
+  --red: #ff94a6; --red-soft: #4b2b4c;
+  --gold: #b2c8ff; --gold-soft: #36548f;
+  --green: #7fe3b0; --green-soft: #1d4a60;
+  --bg: #1f3059; --surface: #2b4274; --surface2: #34507f;
+  --border: #46629a; --border2: #5b78ad;
+  --text: #f1f5ff; --text2: #d3def8; --text3: #b4c4e6;
+  --sidebar-bg: #16224d; --sidebar-border: rgba(255,255,255,.14);
+  --shadow: 0 1px 3px rgba(5,10,30,.35), 0 6px 22px rgba(5,10,30,.28);
+  --shadow-md: 0 8px 30px rgba(5,10,30,.4);
+  --accent: #9db8ff; --on-accent: #0f1b3d;
+}
+[data-skin="night"] body {
+  background: linear-gradient(180deg, #2d467f 0%, #22385f 48%, #182549 100%); background-attachment: fixed;
+}
+[data-skin="night"] .auth-shell { background: transparent; }
+[data-skin="night"] .app-content, [data-skin="night"] .auth-col { position: relative; z-index: 1; }
+
+/* sky, moon and mountains sit behind the content */
+[data-skin="night"] .orn-night { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.n-stars::before, .n-stars::after { content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 2px; border-radius: 50%; }
+.n-stars::before { box-shadow: 80vw 33vh rgba(255,255,255,.65), 46vw 68vh rgba(255,255,255,.9), 60vw 32vh rgba(255,255,255,.65), 7vw 21vh rgba(255,255,255,.9), 48vw 61vh rgba(255,255,255,.9), 49vw 70vh rgba(255,255,255,.9), 74vw 32vh rgba(255,255,255,.9), 94vw 28vh rgba(214,228,255,.8), 36vw 24vh rgba(214,228,255,.8), 21vw 10vh rgba(255,255,255,.9), 80vw 57vh rgba(255,255,255,.9), 17vw 1vh rgba(255,255,255,.9), 27vw 28vh rgba(255,255,255,.9), 22vw 38vh rgba(214,228,255,.8), 26vw 70vh rgba(255,255,255,.65), 81vw 27vh rgba(255,255,255,.9), 89vw 26vh rgba(214,228,255,.8), 39vw 3vh rgba(214,228,255,.8), 54vw 22vh rgba(255,255,255,.9), 34vw 9vh rgba(214,228,255,.8), 39vw 1vh rgba(255,255,255,.65), 87vw 44vh rgba(255,255,255,.9), 40vw 46vh rgba(214,228,255,.8), 62vw 41vh rgba(255,255,255,.9), 62vw 61vh rgba(255,255,255,.65), 23vw 8vh rgba(214,228,255,.8), 3vw 46vh rgba(214,228,255,.8), 3vw 71vh rgba(214,228,255,.8), 47vw 49vh rgba(255,255,255,.65), 2vw 58vh rgba(255,255,255,.9), 91vw 24vh rgba(255,255,255,.65), 26vw 16vh rgba(255,255,255,.9), 60vw 45vh rgba(255,255,255,.65), 46vw 68vh rgba(214,228,255,.8), 60vw 14vh rgba(255,255,255,.65), 96vw 48vh rgba(214,228,255,.8), 5vw 56vh rgba(255,255,255,.9), 27vw 44vh rgba(255,255,255,.65), 79vw 47vh rgba(255,255,255,.9), 44vw 36vh rgba(255,255,255,.65), 70vw 12vh rgba(214,228,255,.8), 88vw 41vh rgba(214,228,255,.8), 23vw 11vh rgba(255,255,255,.65), 20vw 40vh rgba(214,228,255,.8), 21vw 7vh rgba(255,255,255,.9), 77vw 69vh rgba(214,228,255,.8), 5vw 31vh rgba(255,255,255,.65), 77vw 45vh rgba(214,228,255,.8), 59vw 54vh rgba(255,255,255,.9), 8vw 5vh rgba(214,228,255,.8), 43vw 27vh rgba(255,255,255,.9), 94vw 17vh rgba(255,255,255,.65), 53vw 14vh rgba(255,255,255,.9), 56vw 48vh rgba(255,255,255,.9), 8vw 54vh rgba(214,228,255,.8), 19vw 59vh rgba(255,255,255,.65), 22vw 67vh rgba(214,228,255,.8), 63vw 41vh rgba(214,228,255,.8), 36vw 38vh rgba(214,228,255,.8), 52vw 19vh rgba(255,255,255,.9), 49vw 69vh rgba(255,255,255,.9), 81vw 64vh rgba(214,228,255,.8), 24vw 12vh rgba(214,228,255,.8), 35vw 66vh rgba(255,255,255,.65), 65vw 47vh rgba(255,255,255,.9), 46vw 5vh rgba(214,228,255,.8), 47vw 72vh rgba(255,255,255,.65), 86vw 36vh rgba(214,228,255,.8), 34vw 38vh rgba(214,228,255,.8), 84vw 23vh rgba(255,255,255,.65), 2vw 61vh rgba(255,255,255,.65), 33vw 42vh rgba(255,255,255,.65), 36vw 60vh rgba(214,228,255,.8), 65vw 46vh rgba(214,228,255,.8), 36vw 45vh rgba(255,255,255,.65), 53vw 45vh rgba(255,255,255,.9), 89vw 58vh rgba(214,228,255,.8), 43vw 67vh rgba(255,255,255,.9), 68vw 22vh rgba(255,255,255,.9), 47vw 62vh rgba(214,228,255,.8), 89vw 11vh rgba(255,255,255,.65), 86vw 54vh rgba(255,255,255,.9), 79vw 67vh rgba(255,255,255,.65), 54vw 39vh rgba(255,255,255,.65), 71vw 35vh rgba(255,255,255,.65), 4vw 26vh rgba(255,255,255,.9), 76vw 57vh rgba(255,255,255,.65), 84vw 24vh rgba(255,255,255,.9), 98vw 24vh rgba(255,255,255,.65), 92vw 6vh rgba(214,228,255,.8); animation: twinkle 5s ease-in-out infinite alternate; }
+.n-stars::after  { width: 3px; height: 3px; box-shadow: 29vw 22vh rgba(255,255,255,.9), 18vw 15vh rgba(214,228,255,.8), 24vw 62vh rgba(255,255,255,.9), 71vw 5vh rgba(214,228,255,.8), 60vw 45vh rgba(214,228,255,.8), 85vw 10vh rgba(255,255,255,.65), 27vw 31vh rgba(255,255,255,.65), 48vw 1vh rgba(214,228,255,.8), 52vw 36vh rgba(214,228,255,.8), 15vw 71vh rgba(214,228,255,.8), 5vw 71vh rgba(255,255,255,.65), 39vw 13vh rgba(214,228,255,.8), 70vw 66vh rgba(214,228,255,.8), 75vw 38vh rgba(214,228,255,.8), 17vw 54vh rgba(214,228,255,.8), 73vw 69vh rgba(214,228,255,.8), 60vw 19vh rgba(255,255,255,.9), 77vw 49vh rgba(255,255,255,.65), 62vw 26vh rgba(255,255,255,.9), 78vw 12vh rgba(214,228,255,.8), 85vw 1vh rgba(214,228,255,.8), 14vw 42vh rgba(255,255,255,.65), 79vw 70vh rgba(255,255,255,.9), 42vw 49vh rgba(214,228,255,.8), 56vw 29vh rgba(214,228,255,.8), 38vw 62vh rgba(255,255,255,.65); animation: twinkle 7s ease-in-out -2.5s infinite alternate; }
+@keyframes twinkle { from { opacity: .35; } to { opacity: 1; } }
+.n-moon {
+  position: absolute; top: 4vh; right: 6vw; width: 210px; height: 210px;
+  background: url('/static/img/night/moon.svg') center / contain no-repeat;
+  animation: moonGlow 8s ease-in-out infinite alternate;
+}
+@keyframes moonGlow { from { transform: translateY(0); opacity: .92; } to { transform: translateY(6px); opacity: 1; } }
+.n-mount {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 34vh; max-height: 360px;
+  background: url('/static/img/night/mountains.svg') center bottom / cover no-repeat; opacity: .95;
+}
+body:has(.app-shell) .n-mount { left: var(--sidebar-w); height: 30vh; opacity: .75; }
+body:has(.app-shell) .n-moon { top: 62px; right: 36px; width: 120px; height: 120px; }
+@media (max-width: 860px) {
+  body:has(.app-shell) .n-mount { left: 0; bottom: var(--bottom-tab-h); height: 22vh; }
+  body:has(.app-shell) .n-moon { top: 10px; right: 8px; width: 76px; height: 76px; }
+}
+@media (max-width: 700px) { .n-moon { width: 130px; height: 130px; right: 4vw; } }
+
+/* the quiet scene in the sidebar */
+[data-skin="night"] .app-sidebar { overflow: hidden; }
+[data-skin="night"] .app-sidebar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 84px; height: 190px; pointer-events: none;
+  background: url('/static/img/night/mountains-side.svg') center bottom / contain no-repeat;
+}
+@media (max-height: 640px) { [data-skin="night"] .app-sidebar::after { display: none; } }
+
+/* blue accent in place of the brand red and gold */
+[data-skin="night"] .btn.br, [data-skin="night"] .btn.bg, [data-skin="night"] .qz-btn-gold,
+[data-skin="night"] .afb.active, [data-skin="night"] .sc-fb.active, [data-skin="night"] .lb.on, [data-skin="night"] .lb:hover {
+  background: var(--accent); border-color: var(--accent); color: var(--on-accent);
+}
+[data-skin="night"] .btn.br:hover, [data-skin="night"] .btn.bg:hover { filter: brightness(1.08); }
+[data-skin="night"] .auth-logo-dot, [data-skin="night"] .streak-seal, [data-skin="night"] .snav-pip, [data-skin="night"] .bnav-pip { background: var(--accent); color: var(--on-accent); }
+[data-skin="night"] .ins-bar.collected, [data-skin="night"] .sw.collected, [data-skin="night"] .ins-bar.sessions,
+[data-skin="night"] .ins-day-bar i, [data-skin="night"] .streak-bar > div { background: var(--accent); }
+[data-skin="night"] .ins-kpi.warn { border-color: var(--red); }
+[data-skin="night"] .auth-head { background: linear-gradient(135deg, #2f4c8d 0%, #1d2f66 100%); }
+[data-skin="night"] .auth-logo, [data-skin="night"] .auth-sub { color: #fff; }
+[data-skin="night"] .card { border-top: 2px solid var(--accent); }
+[data-skin="night"] .page-title::after { content: ""; display: block; width: 56px; height: 3px; margin-top: 8px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), transparent); }
+
+/* sidebar and bottom bar: solid light text on the blue */
+[data-skin="night"] .snav-btn, [data-skin="night"] .snav-link { color: rgba(255,255,255,.9); opacity: 1; }
+[data-skin="night"] .snav-btn:hover, [data-skin="night"] .snav-link:hover { background: rgba(255,255,255,.1); color: #fff; }
+[data-skin="night"] .snav-btn.active, [data-skin="night"] .snav-link.active { background: rgba(157,184,255,.24); color: #fff; box-shadow: inset 3px 0 0 var(--accent); }
+[data-skin="night"] .sidebar-brand-tag { color: rgba(255,255,255,.85); }
+[data-skin="night"] .sidebar-name, [data-skin="night"] .sidebar-logout { color: #fff; }
+[data-skin="night"] .sidebar-avatar { background: var(--accent); color: var(--on-accent); }
+[data-skin="night"] .app-bottom-nav { background: #16224d; }
+[data-skin="night"] .app-bottom-nav .bnav-btn { color: rgba(255,255,255,.88); }
+[data-skin="night"] .app-bottom-nav .bnav-btn.active { color: #fff; background: rgba(157,184,255,.22); border-radius: 12px; margin: 4px 2px; }
+[data-skin="night"] .app-bottom-nav a[href*="logout"], [data-skin="night"] .app-bottom-nav a[href*="logout"] span { color: #fff !important; }
+[data-skin="night"] .seg-btn.on { color: var(--text); }
+
+/* soft blue modals */
+[data-skin="night"] .modal-box, [data-skin="night"] .rm-box { background: var(--surface); color: var(--text); border: 1px solid var(--border2); }
+
+/* inside the app the moon lives in the sidebar scene, so the big one is only for the login page */
+body:has(.app-shell) .n-moon { display: none; }
+
+/* Night: small chips and the Redo button need lighter text on the blue */
+[data-skin="night"] .sc-mode.offline, [data-skin="night"] .streak-chip, [data-skin="night"] .rc-tag, [data-skin="night"] .chip-noacct { color: #e4ecff; }
+[data-skin="night"] .chip-noacct { background: #5a3158; color: #ffd3dc; }
+[data-skin="night"] .rc-card button[style*="220, 53, 69"], [data-skin="night"] .rc-card button[style*="#dc3545"] { color: #ffb3bf !important; border-color: #ffb3bf !important; }
+
+/* a little more weight for the faint sidebar text, in every theme */
+.sidebar-brand-tag { color: rgba(255,255,255,.62); }
+.sidebar-logout { color: rgba(255,255,255,.78); border-color: rgba(255,255,255,.35); }
+
+/* Chinese dark: dark text on the coral badges, lighter Redo */
+[data-skin="china"][data-theme="dark"] .snav-pip, [data-skin="china"][data-theme="dark"] .bnav-pip,
+[data-skin="china"][data-theme="dark"] .streak-seal { color: #2a0d0d; }
+[data-skin="china"][data-theme="dark"] .rc-card button[style*="220, 53, 69"], [data-skin="china"][data-theme="dark"] .rc-card button[style*="#dc3545"] { color: #ff9aa0 !important; border-color: #ff9aa0 !important; }
+
+@media (max-width: 700px) { .n-moon { right: auto; left: 3vw; top: 8px; width: 96px; height: 96px; } }

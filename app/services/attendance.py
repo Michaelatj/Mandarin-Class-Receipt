@@ -32,6 +32,9 @@ def get_student_progress(teacher_id: int) -> list[dict]:
 
 def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> list[Receipt]:
     new_receipts = []
+    # classes that were already paid for in advance are not billed again
+    from .prepaid import apply_prepaid_coverage
+    apply_prepaid_coverage(student_id, teacher_id)
     unbilled = (
         Attendance.query.filter_by(
             student_id=student_id, teacher_id=teacher_id, billed=False

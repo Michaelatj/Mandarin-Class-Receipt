@@ -333,3 +333,21 @@ def mark_seen():
         user.seen_pips = _json.dumps(seen)
         db.session.commit()
     return _j(ok=True)
+
+
+@student_bp.route("/receipt/<int:receipt_id>.pdf")
+@login_required
+def receipt_pdf(receipt_id):
+    """A student can download the PDF of their own receipts."""
+    from flask import make_response
+    from ..services.receipt_pdf import render_receipt_pdf, pdf_filename
+    user = _get_current_user()
+    receipt = db.session.get(Receipt, receipt_id)
+    if not user or not receipt or receipt.student_id != user.id:
+        return jsonify(ok=False, msg="Receipt not found"), 404
+    resp = make_response(render_receipt_pdf(receipt))
+    resp.headers["Content-Type"] = "application/pdf"
+    disposition = "attachment" if request.args.get("download") else "inline"
+    resp.headers["Content-Disposition"] = f'{disposition}; filename="{pdf_filename(receipt)}"'
+    resp.headers["Cache-Control"] = "no-store"
+    return resp

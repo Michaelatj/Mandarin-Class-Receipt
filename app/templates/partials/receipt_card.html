@@ -18,11 +18,15 @@
      data-cancel-url="{{ url_for('teacher.cancel_receipt_route', receipt_id=r.id) if show_paid_btn and r and not r.paid else '' }}"
      data-packet-type="{{ r.packet_type or '' }}" 
      data-custom-qty="{{ r.custom_qty if r.custom_qty is not none else '' }}"
+     data-kind="{{ r.kind or 'billing' }}"
+     data-covers="{{ r.covers or '' }}"
+     data-method="{{ r.method or '' }}"
      tabindex="0" role="button" aria-label="View receipt #{{ display_no }}">
   <div class="rc-mid">
     <div class="rc-top">
       <span class="rc-id">#{{ display_no }}</span>
       {% if r.student_name %}<span class="rc-name">{{ r.student_name }}</span>{% endif %}
+      {% if r.kind == 'prepaid' %}<span class="rc-tag">Prepaid</span>{% endif %}
       {% if r.teacher_name and not r.student_name %}<span class="rc-name">{{ r.teacher_name }}</span>{% endif %}
     </div>
     <div class="rc-bottom">

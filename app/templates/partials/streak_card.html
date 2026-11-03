@@ -16,6 +16,11 @@
       {% endif %}
     </div>
     {% if streak.total and streak.next_at %}<div class="streak-bar"><div style="width:{{ streak.progress }}%"></div></div>{% endif %}
+    {% if streak.live %}
+    <div class="streak-live">{{ streak.live[0].title }} is on now. Attend it to keep your streak ({{ streak.live[0].minutes_left }} min left before it counts as missed).</div>
+    {% elif streak.current %}
+    <div class="streak-rule">Missing a scheduled class resets your streak.</div>
+    {% endif %}
   </div>
 </div>
 {% endif %}

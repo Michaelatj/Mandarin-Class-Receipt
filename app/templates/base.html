@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% from 'partials/theme_picker.html' import theme_picker %}<!DOCTYPE html>
 <html lang="{{ get_lang() }}" data-theme="light">
 <head>
 <meta charset="UTF-8">
@@ -8,6 +8,7 @@
 (function () {
   try {
     var r = document.documentElement, t = localStorage.getItem('theme'), k = localStorage.getItem('skin');
+    if (!t && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) t = 'dark';
     if (t) r.setAttribute('data-theme', t);
     if (k) r.setAttribute('data-skin', k);
   } catch (e) {}
@@ -23,7 +24,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=27" }}">
+<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=28" }}">
 {% block head_extra %}{% endblock %}
 </head>
 <body>
@@ -33,10 +34,16 @@
   <a href="{{ url_for('auth.set_lang', code='en') }}" class="lb {% if get_lang()=='en' %}on{% endif %}">EN</a>
   <a href="{{ url_for('auth.set_lang', code='zh') }}" class="lb {% if get_lang()=='zh' %}on{% endif %}">中文</a>
 </div>
-<button class="theme-btn" id="dmToggle" title="Toggle theme" aria-label="Toggle theme">🌙</button>
-<button class="theme-btn skin-btn" id="skinToggle" title="Tema 中国风" aria-label="China theme" style="font-family:var(--font-zh);font-weight:700">中</button>
+<button class="theme-btn" id="dmToggle" hidden tabindex="-1" aria-hidden="true">🌙</button>
+<button class="theme-btn skin-btn" id="skinToggle" hidden tabindex="-1" aria-hidden="true">中</button>
 
 <div id="toast"></div>
+
+<div class="orn-night" aria-hidden="true">
+  <div class="n-stars"></div>
+  <div class="n-moon"></div>
+  <div class="n-mount"></div>
+</div>
 
 <div class="orn" aria-hidden="true">
   <div class="orn-frame"></div>
@@ -47,7 +54,8 @@
 </div>
 {% block page_content %}
 <div class="auth-shell">
-  
+  <div class="auth-col">
+    <div class="auth-theme">{{ theme_picker('auth', 'center') }}</div>
   <div class="auth-card">
     <div class="auth-head">
       <svg class="panda" viewBox="0 0 120 120" aria-hidden="true">
@@ -70,49 +78,14 @@
       {% block header %}{% endblock %}
       {% block body %}{% endblock %}
     </div>
-  </div>
-</div>
-{% endblock %}
+    </div>
+    </div>
+    </div>
+    {% endblock %}
 
 <script>
 /* ── Theme ── */
-const _html = document.documentElement;
-const _btn  = document.getElementById('dmToggle');
-function applyTheme(t) {
-  _html.setAttribute('data-theme', t);
-  _btn.textContent = t === 'dark' ? '☀️' : '🌙';
-  try { localStorage.setItem('theme', t); } catch(e){}
-}
-const _saved = (function(){ try { return localStorage.getItem('theme'); } catch(e){ return null; } })()
-  || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-applyTheme(_saved);
-_btn.addEventListener('click', () => withFade(() => applyTheme(_html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')));
-
-/* ── Optional China skin ── */
-function withFade(fn) {
-  _html.classList.add('theme-anim');
-  fn();
-  clearTimeout(window._fadeT);
-  window._fadeT = setTimeout(() => _html.classList.remove('theme-anim'), 450);
-}
-function applySkin(on) {
-  if (on) _html.setAttribute('data-skin', 'china'); else _html.removeAttribute('data-skin');
-  try { if (on) localStorage.setItem('skin', 'china'); else localStorage.removeItem('skin'); } catch(e){}
-  syncThemeControls();
-}
-function syncThemeControls() {
-  const th = _html.getAttribute('data-theme');
-  document.querySelectorAll('#skinSwitch [data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === th));
-  document.querySelectorAll('#skinSwitch [data-skin-toggle]').forEach(b => b.classList.toggle('on', _html.getAttribute('data-skin') === 'china'));
-}
-document.addEventListener('click', function(e) {
-  const mode = e.target.closest('#skinSwitch [data-mode]');
-  if (mode) { withFade(() => { applyTheme(mode.dataset.mode); syncThemeControls(); }); return; }
-  if (e.target.closest('#skinSwitch [data-skin-toggle]') || e.target.closest('#skinToggle')) {
-    withFade(() => applySkin(_html.getAttribute('data-skin') !== 'china'));
-  }
-});
-syncThemeControls();
+const _html = document.documentElement;   // the theme dropdown itself lives in static/js/theme-picker.js
 
 /* ── PWA: service worker ── */
 if ('serviceWorker' in navigator) {
@@ -210,6 +183,7 @@ document.addEventListener('click', function(e) {
 </script>
 <script src="{{ url_for('auth.i18n_data') }}?v={{ i18n_version }}"></script>
 <script src="{{ url_for('static', filename='js/i18n-live.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/theme-picker.js') }}?v=1"></script>
 {% block page_scripts %}{% endblock %}
 </body>
 </html>

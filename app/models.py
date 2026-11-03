@@ -23,6 +23,9 @@ class User(db.Model):
     email        = db.Column(db.String(200), default="")
     seen_pips    = db.Column(db.String(500), default="{}")    # JSON: {tab: last_seen_count}
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+    # a student added by a teacher who has no login yet (set to that teacher's id). Their
+    # records are linked to a real account once they register.
+    managed_by   = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
 
     def name(self) -> str:
         """Return display_name if set, otherwise username."""
@@ -85,6 +88,13 @@ class Receipt(db.Model):
     paid_at      = db.Column(db.DateTime)   # when the teacher marked it paid (older receipts have none)
     packet_type  = db.Column(db.String(20), nullable=True) # Override tipe paket: 'session' atau 'monthly'
     custom_qty   = db.Column(db.Integer, nullable=True)    # Override jumlah quantity
+
+    # 'billing' = issued after classes happened, 'prepaid' = paid up front before the classes
+    kind         = db.Column(db.String(10), default="billing")
+    covers       = db.Column(db.String(200), default="")   # what a prepaid receipt pays for
+    method       = db.Column(db.String(30), default="")    # cash, transfer, ...
+    period_start = db.Column(db.DateTime)                  # prepaid coverage starts here (UTC)
+    period_end   = db.Column(db.DateTime)                  # monthly prepaid coverage ends here (UTC)
 
     def get_dates(self):
         """Return a list of datetime objects parsed from raw_dates."""

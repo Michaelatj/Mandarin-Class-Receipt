@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'partials/theme_picker.html' import theme_picker %}
 {% from 'partials/receipt_card.html' import receipt_card with context %}
 {% from 'partials/schedule_cards.html' import student_card with context %}
 {% block title %}{{ tr('student_dash') }}{% endblock %}
@@ -206,11 +207,8 @@
           </div>
           <div class="card">
             <div class="card-title"><span class="card-title-icon">🎨</span> {{ tr('theme_lbl', 'Theme') }}</div>
-            <div class="lang-switch skin-switch" id="skinSwitch">
-              <button type="button" class="lb" data-mode="light" data-no-i18n>Light</button>
-              <button type="button" class="lb" data-mode="dark" data-no-i18n>Dark</button>
-              <button type="button" class="lb" data-skin-toggle data-no-i18n>中国风</button>
-            </div>
+            {{ theme_picker('settings', 'block') }}
+            <p class="tp-hint">Choose how the app looks. It is remembered on this device.</p>
           </div>
           <div class="card">
             <div class="card-title"><span class="card-title-icon">👤</span> Profile</div>
@@ -288,7 +286,7 @@
 {# ══ MODALS ══ #}
 {% if unpaid_count > 0 %}
 <div class="modal-overlay" id="paymentReminderModal" style="z-index: 9999; display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6);">
-  <div class="modal-box card" style="background: #fff; text-align: center; padding: 40px 24px; border-radius: 12px; max-width: 320px; position: relative;">
+  <div class="modal-box card" style="background: var(--surface); color: var(--text); text-align: center; padding: 40px 24px; border-radius: 12px; max-width: 320px; position: relative;">
     <button class="modal-close" id="closeReminderBtn" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text3);">✕</button>
     <div style="font-size: 3.5rem; margin-bottom: 12px;">👋</div>
     <h3>Friendly Reminder</h3>
@@ -660,6 +658,7 @@ function buildRcModal(card) {
 
 function openRcModal(card) {
   rcBox.innerHTML = buildRcModal(card);
+  rcBox.insertAdjacentHTML('beforeend', '<a href="/receipt/' + card.dataset.rid + '.pdf" target="_blank" rel="noopener" class="btn bgh bsm" style="margin-top:14px;text-decoration:none;display:inline-block;width:auto">Download PDF</a>');
   rcOverlay.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }

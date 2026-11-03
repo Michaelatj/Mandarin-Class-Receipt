@@ -356,7 +356,8 @@ def _own_offline(sid):
 def _class_students(s):
     """Students expected at this class: the invited ones, or every student when it is open to all."""
     ids = [i.student_id for i in ScheduleInvite.query.filter_by(schedule_id=s.id).all()]
-    q = User.query.filter_by(role="student")
+    from ..services.prepaid import visible_students
+    q = visible_students(s.teacher_id)
     if ids:
         q = q.filter(User.id.in_(ids))
     return sorted(q.all(), key=lambda u: u.name().lower())

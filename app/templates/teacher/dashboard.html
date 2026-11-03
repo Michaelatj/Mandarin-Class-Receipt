@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'partials/theme_picker.html' import theme_picker %}
 {% from 'partials/receipt_card.html' import receipt_card with context %}
 {% from 'partials/schedule_cards.html' import teacher_card with context %}
 {% block title %}{{ tr('teacher_dash') }}{% endblock %}
@@ -271,7 +272,11 @@
           <div>
             <h1 class="page-title">{{ tr('nav_students') }}</h1>
             <p class="page-sub">{{ (tr('student_count_one') if student_count == 1 else tr('student_count_many')).format(n=student_count) }}</p>
-          </div>
+            </div>
+            <div class="page-actions">
+              <button type="button" class="btn bgh bsm" id="addStudentBtn">+ Student without account</button>
+              <button type="button" class="btn br bsm open-prepay">Record upfront payment</button>
+            </div>
         </div>
         {% if all_students %}
         <div class="data-table" style="margin-bottom:24px">
@@ -284,7 +289,7 @@
           <div class="dt-row" id="srow-{{ s.id }}" style="grid-template-columns: 1fr 100px 100px 80px 132px;">
             <div>
               <div class="dt-name">{{ s.name() }}</div>
-              <div class="dt-meta">@{{ s.username }}
+              <div class="dt-meta">{% if s.managed_by %}<span class="chip-noacct">No account yet</span>{% else %}@{{ s.username }}{% endif %}
                 {% set st = streaks.get(s.id) %}
                 {% if st and st.current %}<span class="streak-chip" title="{{ st.current }} scheduled classes in a row">{{ st.tier.char if st.tier else '勤' }} {{ st.current }}</span>{% endif %}
               </div>
@@ -305,8 +310,13 @@
             <div style="display:flex; gap:4px;">
               <button type="button" class="btn bgh bsm recap-btn" data-id="{{ s.id }}" data-name="{{ s.name() }}"
                       data-phone="{{ s.phone or '' }}" title="Monthly recap (PDF)">PDF</button>
+              {% if s.managed_by %}
+              <button type="button" class="btn bg bsm link-student-btn"
+                      data-id="{{ s.id }}" data-name="{{ s.name() }}" title="Link to the account she registers">Link</button>
+              {% else %}
               <button class="btn bg bsm reset-pw-btn"
                       data-id="{{ s.id }}" data-name="{{ s.name() }}" title="Reset Password">🔑</button>
+              {% endif %}
               <button class="btn bdel-outline bsm del-student-btn"
                       data-id="{{ s.id }}" data-name="{{ s.name() }}" title="Delete Student">🗑</button>
             </div>
@@ -362,7 +372,10 @@
           <div>
             <h1 class="page-title">{{ tr('all_receipts') }}</h1>
             <p class="page-sub">{{ tr('receipts_summary').format(total=receipts|length, unpaid=unpaid_cnt) }}</p>
-          </div>
+            </div>
+            <div class="page-actions">
+              <button type="button" class="btn br bsm open-prepay">Record upfront payment</button>
+            </div>
         </div>
         {% if receipts %}
         <div id="receiptList">
@@ -409,11 +422,8 @@
           </div>
           <div class="card">
             <div class="card-title"><span class="card-title-icon">🎨</span> {{ tr('theme_lbl', 'Theme') }}</div>
-            <div class="lang-switch skin-switch" id="skinSwitch">
-              <button type="button" class="lb" data-mode="light" data-no-i18n>Light</button>
-              <button type="button" class="lb" data-mode="dark" data-no-i18n>Dark</button>
-              <button type="button" class="lb" data-skin-toggle data-no-i18n>中国风</button>
-            </div>
+            {{ theme_picker('settings', 'block') }}
+            <p class="tp-hint">Choose how the app looks. It is remembered on this device.</p>
           </div>
           <div class="card">
             <div class="card-title"><span class="card-title-icon">⚙️</span> {{ tr('payment_settings') }}</div>
@@ -501,6 +511,85 @@
   </nav>
 
 </div>{# /app-shell #}
+
+{# ═══ STUDENTS WITHOUT AN ACCOUNT, UPFRONT PAYMENT, LINKING ═══ #}
+<div class="modal-overlay hidden" id="addStudentModal" role="dialog" aria-modal="true" aria-labelledby="asHeading">
+  <div class="modal-box">
+    <button type="button" class="modal-close" data-close-modal aria-label="Close">&times;</button>
+    <h3 id="asHeading">Student without an account</h3>
+    <p class="rc-sub">For someone who has not registered yet. You can record her classes and payments now, and link them to her account later.</p>
+    <label for="asName">Name</label>
+    <input type="text" id="asName" maxlength="100" placeholder="Full name" autocomplete="off">
+    <label for="asPhone">WhatsApp number <span class="lbl-opt">(optional)</span></label>
+    <input type="tel" id="asPhone" inputmode="tel" placeholder="08xxxxxxxxxx" autocomplete="off">
+    <p class="rc-msg" id="asMsg" role="status"></p>
+    <button type="button" class="btn br" id="asSave">Add student</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="prepayModal" role="dialog" aria-modal="true" aria-labelledby="ppHeading">
+  <div class="modal-box">
+    <button type="button" class="modal-close" data-close-modal aria-label="Close">&times;</button>
+    <div id="ppForm">
+      <h3 id="ppHeading">Record upfront payment</h3>
+      <p class="rc-sub">Money you received before the classes. A paid receipt is made right away, and the classes it covers are not billed again.</p>
+      <label for="ppStudent">Student</label>
+      <select id="ppStudent">
+        {% for s in all_students %}<option value="{{ s.id }}">{{ s.name() }}{% if s.managed_by %} (no account yet){% endif %}</option>{% endfor %}
+      </select>
+      <label>Paying for</label>
+      <div class="seg" id="ppMode" role="group" aria-label="Packet">
+        <button type="button" class="seg-btn on" data-mode="monthly">Monthly packet</button>
+        <button type="button" class="seg-btn" data-mode="sessions">Number of sessions</button>
+      </div>
+      <div id="ppMonthly">
+        <div class="pp-row">
+          <div><label for="ppMonth">Starting month</label><select id="ppMonth"></select></div>
+          <div><label for="ppMonths">Months</label>
+            <select id="ppMonths"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="6">6</option><option value="12">12</option></select></div>
+        </div>
+      </div>
+      <div id="ppSessions" hidden>
+        <label for="ppCount">Sessions paid for</label>
+        <input type="number" id="ppCount" min="1" max="200" value="8" inputmode="numeric">
+      </div>
+      <label for="ppAmount">Amount received (Rp)</label>
+      <input type="number" id="ppAmount" min="1" step="1000" inputmode="numeric" placeholder="500000">
+      <div class="pp-row">
+        <div><label for="ppDate">Paid on</label><input type="date" id="ppDate"></div>
+        <div><label for="ppMethod">Method</label>
+          <select id="ppMethod"><option value="">-</option><option>Cash</option><option>Bank transfer</option><option>QRIS</option><option>E-wallet</option><option>Other</option></select></div>
+      </div>
+      <p class="rc-msg" id="ppMsg" role="status"></p>
+      <button type="button" class="btn br" id="ppSave">Record payment</button>
+    </div>
+    <div id="ppDone" hidden>
+      <h3>Payment recorded</h3>
+      <p class="rc-sub" id="ppDoneText"></p>
+      <div class="pp-actions">
+        <a class="btn br" id="ppOpenPdf" target="_blank" rel="noopener" style="text-decoration:none">Open receipt (PDF)</a>
+        <button type="button" class="btn bgh" id="ppShare">Share receipt</button>
+        <button type="button" class="btn bgh" id="ppFinish">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="linkModal" role="dialog" aria-modal="true" aria-labelledby="lkHeading">
+  <div class="modal-box">
+    <button type="button" class="modal-close" data-close-modal aria-label="Close">&times;</button>
+    <h3 id="lkHeading">Link to a registered account</h3>
+    <p class="rc-sub" id="lkWho"></p>
+    <label for="lkAccount">Her account</label>
+    <select id="lkAccount">
+      {% for s in all_students if not s.managed_by %}<option value="{{ s.id }}">{{ s.name() }} (@{{ s.username }})</option>{% endfor %}
+    </select>
+    <p class="rc-hint">Her classes, receipts and payments move onto that account, and this entry is removed.</p>
+    <p class="rc-msg" id="lkMsg" role="status"></p>
+    <button type="button" class="btn br" id="lkSave">Link account</button>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/prepaid.js') }}?v=1"></script>
 
 {# ═══ ROLL CALL (点名) FOR OFFLINE CLASSES ═══ #}
 <div class="modal-overlay hidden" id="rcModal" role="dialog" aria-modal="true" aria-labelledby="rcHeading">
@@ -1331,7 +1420,18 @@ document.querySelectorAll('.fee-form').forEach(f => {
     
     let tableRows = '';
     
-    if (packageType === 'monthly') {
+    if (card.dataset.kind === 'prepaid') {
+          const covers = card.dataset.covers || '';
+          const used = dates.length;
+          const sessionsPaid = packageType !== 'monthly' ? qty : 0;
+          tableRows = `
+            <tr style="border-bottom: 1px solid #eee;">
+              <td style="padding: 10px 4px; color: #333;">Mandarin course fee, paid in advance<br><small style="color:#777">${covers}${card.dataset.method ? ' · ' + card.dataset.method : ''}</small></td>
+              <td style="text-align: center; padding: 10px 4px; color: #333;">${sessionsPaid ? sessionsPaid + ' sessions' : '-'}</td>
+              <td style="text-align: right; padding: 10px 4px; color: #333;">${sessionsPaid ? used + ' used' : used + ' classes so far'}</td>
+              <td style="text-align: right; padding: 10px 4px; font-weight: bold; color: #333;">Rp ${fee.toLocaleString('id-ID')}</td>
+            </tr>`;
+        } else if (packageType === 'monthly') {
       const moQty = qty > 0 ? qty : 8; 
       tableRows = `
         <tr style="border-bottom: 1px solid #eee;">
@@ -1432,6 +1532,8 @@ document.querySelectorAll('.fee-form').forEach(f => {
         
         <div class="rm-actions" style="display:flex; gap:8px; margin-top:24px; border-top: 2px solid #f5f5f5; padding-top:16px;">
           ${actionBtns}
+                    <a class="btn bgh bsm" style="flex:none;text-decoration:none" href="/teacher/receipt/${rid}.pdf" target="_blank" rel="noopener" title="Open the printable PDF">PDF</a>
+                    <button type="button" class="btn bgh bsm" style="flex:none" data-share-receipt="${rid}" title="Share the PDF, for example through WhatsApp">Share</button>
         </div>
       </div>`;
   }

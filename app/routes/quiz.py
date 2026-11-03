@@ -161,7 +161,7 @@ def detail(user, quiz_id):
     if not quiz:
         return _not_found()
 
-    students = User.query.filter_by(role="student").order_by(User.username).all()
+    students = User.query.filter_by(role="student", managed_by=None).order_by(User.username).all()
     names = {s.id: s.name() for s in students}
     assigned_ids = {a.student_id for a in QuizAssign.query.filter_by(quiz_id=quiz.id).all()}
 
@@ -262,7 +262,7 @@ def api_update(user, quiz_id):
     if "student_ids" in data:
         raw = data["student_ids"] if isinstance(data["student_ids"], list) else []
         wanted = {int(x) for x in raw if str(x).isdigit()}
-        valid = {u.id for u in User.query.filter(User.id.in_(wanted or [-1]), User.role == "student").all()}
+        valid = {u.id for u in User.query.filter(User.id.in_(wanted or [-1]), User.role == "student", User.managed_by.is_(None)).all()}
         existing = {a.student_id: a for a in QuizAssign.query.filter_by(quiz_id=quiz.id).all()}
         for sid, row in existing.items():
             if sid not in valid:
