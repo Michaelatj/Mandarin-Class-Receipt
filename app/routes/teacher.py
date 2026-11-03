@@ -469,3 +469,16 @@ def recap_info(student_id):
     return jsonify(ok=True, text=whatsapp_text(recap), filename=pdf_filename(recap),
                    phone=normalize_phone(recap["student"].phone),
                    sessions=len(recap["sessions"]), outstanding=recap["outstanding"])
+
+
+# ---------------------------------------------------------------------
+# Insights tab (teachers only; every teacher sees only their own numbers)
+# ---------------------------------------------------------------------
+@teacher_bp.route("/teacher/insights")
+@teacher_required
+def insights():
+    from ..services.insights import build_insights, idr, idr_short
+    data = build_insights(_get_teacher())
+    resp = make_response(render_template("teacher/_insights.html", d=data, idr=idr, idr_short=idr_short))
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
