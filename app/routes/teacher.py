@@ -110,7 +110,7 @@ def dashboard():
         unbilled_records=unbilled_records, unpaid_cnt=unpaid_cnt, 
         schedules=schedules, up_count=up_count, attn_count=len(unbilled_records),
         student_sessions=student_sessions, student_unbilled=student_unbilled,
-        student_count=len(all_students), now=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+        student_count=len(all_students), now=(datetime.utcnow() + timedelta(hours=7)).strftime("%Y-%m-%dT%H:%M"),
         show_classes_pip=show_classes_pip, 
         show_attendance_pip=show_attendance_pip, 
         show_receipts_pip=show_receipts_pip,

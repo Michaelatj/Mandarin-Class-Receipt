@@ -2,14 +2,17 @@
 
 {% macro teacher_card(s) %}
 {% set now = now_dt() %}
-{% set is_past = s.scheduled_at < now %}
+{% set is_past = s.start_utc < now %}
 {% set status = 'cancelled' if s.cancelled else ('past' if is_past else 'upcoming') %}
 {% set offline = s.is_offline %}
 <div class="sc-card {{ status }}" id="sc-{{ s.id }}">
   <div class="sc-head">
-    <div style="min-width:0;flex:1">
-      <div class="sc-title">{{ s.title }}</div>
-      <div class="sc-time">{{ s.scheduled_at.strftime('%a, %d %b %Y · %H:%M') }}{% if offline %} <span class="sc-mode offline">Offline</span>{% endif %}</div>
+    <div class="sc-head-main">
+      <input type="checkbox" class="sc-check" value="{{ s.id }}" aria-label="Select class">
+      <div class="sc-head-text">
+        <div class="sc-title">{{ s.title }}</div>
+        <div class="sc-time">📅 {{ s.scheduled_at.strftime('%a, %d %b %Y · %H:%M') }}{% if offline %} <span class="sc-mode offline">Offline</span>{% endif %}</div>
+      </div>
     </div>
     <span class="sc-badge {{ status }}">
       {% if s.cancelled %}Cancelled{% elif is_past %}Ended{% else %}Upcoming{% endif %}
@@ -25,9 +28,9 @@
     <div class="sc-foot-left">
       <span class="sc-joined">👥 {{ s.join_count }} {{ 'student' if s.join_count==1 else 'students' }} {{ 'present' if offline else 'joined' }}</span>
       {% if s.invited_ids is defined and s.invited_ids %}
-        <span class="sc-invites specific">Specific students</span>
+        <span class="sc-invites specific">🎯 Specific students only</span>
       {% else %}
-        <span class="sc-invites open">All students</span>
+        <span class="sc-invites open">🌐 All students</span>
       {% endif %}
     </div>
     <div class="sc-foot-right">
@@ -44,9 +47,19 @@
               data-mode="{{ s.mode or 'online' }}"
               data-location="{{ s.location or '' }}"
               data-at="{{ s.scheduled_at.strftime('%Y-%m-%dT%H:%M') }}">✏️ Edit</button>
+      {% endif %}
+      <button class="btn bgh bsm dup-sc-btn"
+              data-id="{{ s.id }}"
+              data-title="{{ s.title }}"
+              data-desc="{{ s.description or '' }}"
+              data-link="{{ s.meet_link or '' }}"
+              data-mode="{{ s.mode or 'online' }}"
+              data-location="{{ s.location or '' }}"
+              data-at="{{ s.scheduled_at.strftime('%Y-%m-%dT%H:%M') }}">📋 Duplicate</button>
+      {% if not s.cancelled and not is_past %}
       <button class="btn bdel-outline bsm cancel-sc-btn" data-id="{{ s.id }}">✕ Cancel</button>
       {% endif %}
-      <button class="btn bdel bsm delete-sc-btn" data-id="{{ s.id }}">🗑</button>
+      <button class="btn bdel bsm delete-sc-btn" data-id="{{ s.id }}" aria-label="Delete class">🗑</button>
     </div>
   </div>
 </div>
@@ -54,7 +67,7 @@
 
 {% macro student_card(s, student_id) %}
 {% set now = now_dt() %}
-{% set is_past = s.scheduled_at < now %}
+{% set is_past = s.start_utc < now %}
 {% set joined = student_id in s.joined_by %}
 {% set offline = s.is_offline %}
 {% set status = 'cancelled' if s.cancelled else ('past' if is_past else 'upcoming') %}

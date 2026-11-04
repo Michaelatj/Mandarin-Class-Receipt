@@ -86,7 +86,7 @@ def dashboard():
         schedules.append(s)
 
     upcoming = [s for s in schedules
-                if not s.cancelled and s.scheduled_at > _dt.utcnow()
+                if not s.cancelled and s.start_utc > _dt.utcnow()
                 and not s.already_joined]
     new_count = len(upcoming)
     unpaid_count = sum(1 for r in receipts if not r.paid)

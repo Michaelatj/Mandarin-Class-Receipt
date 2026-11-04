@@ -73,9 +73,11 @@
       opts[activeIndex].scrollIntoView({ block: 'nearest' });
     }
     function isOpen() { return !list.hidden; }
+    const host = el.closest('.card');         // the settings card that holds this dropdown
     function open() {
       list.classList.remove('up');
       list.hidden = false;
+      if (host) host.classList.add('tp-host-open');
       btn.setAttribute('aria-expanded', 'true');
       const r = list.getBoundingClientRect();
       if (r.bottom > window.innerHeight - 8 && btn.getBoundingClientRect().top > r.height + 16) list.classList.add('up');
@@ -85,6 +87,7 @@
     }
     function close(focusBtn) {
       list.hidden = true;
+      if (host) host.classList.remove('tp-host-open');
       btn.setAttribute('aria-expanded', 'false');
       if (focusBtn) btn.focus();
     }

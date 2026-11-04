@@ -143,7 +143,7 @@ def build_insights(teacher, now=None):
     ses_vals = [sessions[k] for k in months]
 
     past = (Schedule.query.filter(Schedule.teacher_id == teacher.id, Schedule.cancelled.is_(False),
-                                  Schedule.scheduled_at >= start_utc, Schedule.scheduled_at <= now).all())
+                                  Schedule.scheduled_at >= start_utc + WIB, Schedule.scheduled_at <= now + WIB).all())   # class times are WIB wall-clock
     join_counts = {}
     if past:
         for sid, n in (db.session.query(ScheduleJoin.schedule_id, func.count(ScheduleJoin.id))
@@ -153,7 +153,7 @@ def build_insights(teacher, now=None):
     online = defaultdict(int)
     offline = defaultdict(int)
     for s in past:
-        (offline if s.is_offline else online)[_month_key(s.scheduled_at)] += 1
+        (offline if s.is_offline else online)[_month_key(s.start_utc)] += 1
     avg_attendees = round(sum(join_counts.get(s.id, 0) for s in past) / len(past), 1) if past else None
 
     recent = [a for a in att if a.date >= now - timedelta(days=120)]

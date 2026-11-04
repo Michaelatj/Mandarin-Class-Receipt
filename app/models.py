@@ -7,6 +7,8 @@ blueprints without circular imports.
 from datetime import datetime, timedelta
 from . import db
 
+WIB_OFFSET = timedelta(hours=7)   # Indonesia (WIB) is UTC+7, no daylight saving
+
 
 class User(db.Model):
     __tablename__ = "user"
@@ -130,6 +132,13 @@ class Schedule(db.Model):
     def is_offline(self):
         return (self.mode or "online") == "offline"
 
+    @property
+    def start_utc(self):
+        """When the class starts, in UTC. The teacher types the time as WIB wall-clock time and it is
+        stored as typed, while attendance and every "now" in the app are UTC, so any comparison
+        between a class time and a moment must go through this."""
+        return self.scheduled_at - WIB_OFFSET
+
     def rollcall_open(self, now=None):
         now = now or datetime.utcnow()
         return bool(self.rollcall_code and self.rollcall_until and self.rollcall_until > now)
@@ -138,13 +147,13 @@ class Schedule(db.Model):
         """Roll call only makes sense around the class: 3 hours before to 8 hours after it starts."""
         now = now or datetime.utcnow()
         return self.is_offline and not self.cancelled \
-            and self.scheduled_at - timedelta(hours=3) <= now <= self.scheduled_at + timedelta(hours=8)
+            and self.start_utc - timedelta(hours=3) <= now <= self.start_utc + timedelta(hours=8)
 
     def in_attend_window(self, now=None):
         """Students can submit attendance from 3 hours before the class to 8 hours after it starts."""
         now = now or datetime.utcnow()
         return not self.cancelled \
-            and self.scheduled_at - timedelta(hours=3) <= now <= self.scheduled_at + timedelta(hours=8)
+            and self.start_utc - timedelta(hours=3) <= now <= self.start_utc + timedelta(hours=8)
 
     def __repr__(self):
         return f"<Schedule #{self.id} '{self.title}' at {self.scheduled_at:%Y-%m-%d %H:%M}>"

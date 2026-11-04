@@ -233,6 +233,23 @@ def apply_prepaid_coverage(student_id, teacher_id):
     return covered
 
 
+def last_month_attendance(receipt):
+    """(label, [attendance datetimes in UTC]) for the calendar month (WIB) before the month this
+    prepaid receipt starts in. A pay-first student is billed ahead, so the receipt also shows what
+    they actually attended the month before. It is read from the attendance records, so no
+    schedule has to exist for that month."""
+    ref = receipt.period_start if (receipt.packet_type == "monthly" and receipt.period_start) \
+        else (receipt.issue_date or datetime.utcnow())
+    local = ref + WIB
+    py, pm = _add_months(local.year, local.month, -1)
+    rows = (Attendance.query
+            .filter(Attendance.student_id == receipt.student_id, Attendance.teacher_id == receipt.teacher_id,
+                    Attendance.date >= month_start_utc(py, pm),
+                    Attendance.date < month_start_utc(local.year, local.month))
+            .order_by(Attendance.date.asc()).all())
+    return f"{MONTHS_ID[pm - 1]} {py}", [a.date for a in rows]
+
+
 def prepaid_usage(receipt):
     """(used, total) for a prepaid receipt; total is None for a monthly packet."""
     used = len([d for d in (receipt.raw_dates or "").split("|") if d.strip()])

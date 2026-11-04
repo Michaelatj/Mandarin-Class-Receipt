@@ -12,7 +12,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-from .prepaid import prepaid_usage
+from .prepaid import last_month_attendance, prepaid_usage
 
 WIB = timedelta(hours=7)
 MONTHS_ID = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli",
@@ -158,6 +158,23 @@ def render_receipt_pdf(r):
         ]))
         story.append(g)
     if prepaid:
+        label, last = last_month_attendance(r)
+        story.append(Paragraph(f"Kehadiran bulan lalu ({label})", h2))
+        if last:
+            data = [["No", "Tanggal", "Jam (WIB)"]]
+            for i, d in enumerate(last, 1):
+                w = d + WIB
+                data.append([str(i), f"{DAYS_ID[w.weekday()]}, {w.day} {MONTHS_ID[w.month - 1]} {w.year}", f"{w.hour:02d}:{w.minute:02d}"])
+            g = Table(data, colWidths=[width * 0.1, width * 0.6, width * 0.3], repeatRows=1)
+            g.setStyle(TableStyle([
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"), ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("TEXTCOLOR", (0, 0), (-1, 0), INK), ("BACKGROUND", (0, 0), (-1, 0), SOFT),
+                ("LINEBELOW", (0, 0), (-1, -1), 0.4, LINE), ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+            ]))
+            story += [g, Spacer(1, 4), Paragraph(f"Total kehadiran {label}: {len(last)} pertemuan.", small)]
+        else:
+            story.append(Paragraph(f"Tidak ada kehadiran tercatat pada {label}.", small))
         used, total = prepaid_usage(r)
         if total:
             left = max(total - used, 0)

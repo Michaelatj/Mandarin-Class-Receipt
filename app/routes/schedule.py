@@ -8,7 +8,7 @@ import logging
 import secrets
 from datetime import datetime, timedelta
 from functools import wraps
-from flask import (Blueprint, render_template, redirect, url_for,
+from flask import (Blueprint, render_template, render_template_string, redirect, url_for,
                    request, session, flash, jsonify)
 from markupsafe import escape
 from .. import db
@@ -270,67 +270,11 @@ def join(sid):
     return redirect(url_for("student.dashboard"))
 
 def _render_schedule_card_teacher(s, teacher, invited_names=None):
-    dt      = s.scheduled_at
-    now     = datetime.utcnow()
-    is_past = dt < now
-    status  = "cancelled" if s.cancelled else ("past" if is_past else "upcoming")
-    dt_fmt  = dt.strftime("%a, %d %b %Y · %H:%M")
-    at_iso  = dt.strftime("%Y-%m-%dT%H:%M")
-    e       = lambda v: str(escape(v or ""))
-    offline = s.is_offline
-
-    desc_html = f'<div class="sc-desc">{e(s.description)}</div>' if s.description else ''
-    if offline:
-        link_html = f'<div class="sc-link sc-loc">📍 <span class="sc-loc-text">{e(s.location) or "Offline class"}</span></div>'
-    elif s.meet_link:
-        link_html = f'<div class="sc-link">🔗 <a href="{e(s.meet_link)}" target="_blank" rel="noopener">{e(s.meet_link)}</a></div>'
-    else:
-        link_html = ''
-
-    if invited_names is not None:
-        invite_html = '<span class="sc-invites specific">🎯 Specific students only</span>'
-    else:
-        inv_count = ScheduleInvite.query.filter_by(schedule_id=s.id).count()
-        invite_html = ('<span class="sc-invites specific">🎯 Specific students only</span>' if inv_count > 0
-                       else '<span class="sc-invites open">🌐 All students</span>')
-
-    data = (f'data-id="{s.id}" data-title="{e(s.title)}" data-desc="{e(s.description)}" data-link="{e(s.meet_link)}"'
-            f' data-at="{at_iso}" data-mode="{e(s.mode or "online")}" data-location="{e(s.location)}"')
-    action_btns = ''
-    if not s.cancelled:
-        label = '点名 Attendance' if offline else '👥 Attendance'
-        action_btns += (f'<button class="btn br bsm rollcall-btn" data-id="{s.id}" data-title="{e(s.title)}"'
-                        f' data-mode="{"offline" if offline else "online"}">{label}</button>')
-    if not s.cancelled and not is_past:
-        action_btns += (f'<button class="btn bgh bsm edit-sc-btn" {data}>✏️ Edit</button>'
-                        f'<button class="btn bdel-outline bsm cancel-sc-btn" data-id="{s.id}">✕ Cancel</button>')
-    action_btns += (f'<button class="btn bgh bsm dup-sc-btn" {data}>📋 Duplicate</button>'
-                    f'<button class="btn bdel bsm delete-sc-btn" data-id="{s.id}">🗑</button>')
-
-    badge_label = 'CANCELLED' if s.cancelled else ('ENDED' if is_past else 'UPCOMING')
-    mode_pill = '<span class="sc-mode offline">Offline</span>' if offline else ''
-    checkbox_html = (f'<input type="checkbox" class="sc-check" value="{s.id}" '
-                     'style="width:16px;height:16px;cursor:pointer;accent-color:var(--red);margin-top:2px;">')
-    joined_word = "present" if offline else "joined"
-
-    return (
-        f'<div class="sc-card {status}" id="sc-{s.id}">'
-        f'<div class="sc-head">'
-        f'<div style="display:flex;gap:12px;flex:1;min-width:0;">'
-        f'{checkbox_html}'
-        f'<div style="min-width:0;flex:1">'
-        f'<div class="sc-title">{e(s.title)}</div>'
-        f'<div class="sc-time">📅 {dt_fmt} {mode_pill}</div>'
-        f'</div></div>'
-        f'<span class="sc-badge {status}">{badge_label}</span>'
-        f'</div>{desc_html}{link_html}'
-        f'<div class="sc-foot">'
-        f'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">'
-        f'<span class="sc-joined">👥 {getattr(s, "join_count", 0)} students {joined_word}</span>'
-        f'{invite_html}</div>'
-        f'<div style="display:flex;gap:7px;flex-shrink:0;flex-wrap:wrap;">{action_btns}</div>'
-        f'</div></div>'
-    )
+    """The card for a class that was just created. It comes from the same template macro as the
+    cards on the page, so a new card and a reloaded one can never look different."""
+    _enrich([s])
+    return render_template_string(
+        "{% from 'partials/schedule_cards.html' import teacher_card with context %}{{ teacher_card(s) }}", s=s)
 
 @schedule_bp.route("/teacher/schedule/invites/<int:sid>", methods=["GET"])
 @teacher_required
@@ -385,7 +329,7 @@ def _rollcall_state(s):
         "title": s.title,
         "location": s.location or "",
         "offline": s.is_offline,
-        "started": s.scheduled_at <= now,
+        "started": s.start_utc <= now,
         "open": is_open,
         "code": s.rollcall_code if is_open else None,
         "seconds_left": int((s.rollcall_until - now).total_seconds()) if is_open else 0,
@@ -545,7 +489,7 @@ def attend(sid):
         return jsonify(ok=True, already=True, msg="Your attendance is already recorded")
     if ScheduleAbsent.query.filter_by(schedule_id=sid, student_id=student.id).first():
         return jsonify(ok=False, msg="Your teacher marked you absent for this class. Please ask them.")
-    if not s.in_attend_window(datetime.now()):      # same clock the class card uses
+    if not s.in_attend_window(datetime.utcnow()):
         return jsonify(ok=False, msg="Attendance for this class is closed")
     if s.is_offline and s.rollcall_open():
         return jsonify(ok=False, needs_code=True, msg="Enter the code your teacher shows")
