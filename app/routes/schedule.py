@@ -12,7 +12,7 @@ from flask import (Blueprint, render_template, redirect, url_for,
                    request, session, flash, jsonify)
 from markupsafe import escape
 from .. import db
-from ..models import User, Schedule, ScheduleJoin, ScheduleInvite, Attendance
+from ..models import User, Schedule, ScheduleJoin, ScheduleInvite, ScheduleAbsent, Attendance
 from ..services.attendance import add_attendance, delete_attendance
 from ..services.i18n import tr, fmt_date
 from ..services.security import is_rate_limited, record_failed_attempt, clear_attempts
@@ -182,6 +182,7 @@ def delete(sid):
         return redirect(url_for("teacher.dashboard"))
     ScheduleJoin.query.filter_by(schedule_id=sid).delete()
     ScheduleInvite.query.filter_by(schedule_id=sid).delete()
+    ScheduleAbsent.query.filter_by(schedule_id=sid).delete()
     db.session.delete(s)
     db.session.commit()
     if _is_ajax(): return jsonify(ok=True, msg="Deleted")
@@ -203,6 +204,7 @@ def bulk_delete():
     if valid_ids:
         ScheduleJoin.query.filter(ScheduleJoin.schedule_id.in_(valid_ids)).delete(synchronize_session=False)
         ScheduleInvite.query.filter(ScheduleInvite.schedule_id.in_(valid_ids)).delete(synchronize_session=False)
+        ScheduleAbsent.query.filter(ScheduleAbsent.schedule_id.in_(valid_ids)).delete(synchronize_session=False)
         Schedule.query.filter(Schedule.id.in_(valid_ids)).delete(synchronize_session=False)
         db.session.commit()
         
@@ -295,8 +297,10 @@ def _render_schedule_card_teacher(s, teacher, invited_names=None):
     data = (f'data-id="{s.id}" data-title="{e(s.title)}" data-desc="{e(s.description)}" data-link="{e(s.meet_link)}"'
             f' data-at="{at_iso}" data-mode="{e(s.mode or "online")}" data-location="{e(s.location)}"')
     action_btns = ''
-    if offline and s.in_rollcall_window(now):
-        action_btns += f'<button class="btn br bsm rollcall-btn" data-id="{s.id}" data-title="{e(s.title)}">点名 Roll call</button>'
+    if not s.cancelled:
+        label = '点名 Attendance' if offline else '👥 Attendance'
+        action_btns += (f'<button class="btn br bsm rollcall-btn" data-id="{s.id}" data-title="{e(s.title)}"'
+                        f' data-mode="{"offline" if offline else "online"}">{label}</button>')
     if not s.cancelled and not is_past:
         action_btns += (f'<button class="btn bgh bsm edit-sc-btn" {data}>✏️ Edit</button>'
                         f'<button class="btn bdel-outline bsm cancel-sc-btn" data-id="{s.id}">✕ Cancel</button>')
@@ -353,6 +357,14 @@ def _own_offline(sid):
     return t, s
 
 
+def _own_class(sid):
+    """Any class of this teacher that is not cancelled (online or offline)."""
+    t, s = _own_offline(sid)
+    if s and s.cancelled:
+        s = None
+    return t, s
+
+
 def _class_students(s):
     """Students expected at this class: the invited ones, or every student when it is open to all."""
     ids = [i.student_id for i in ScheduleInvite.query.filter_by(schedule_id=s.id).all()]
@@ -366,39 +378,63 @@ def _class_students(s):
 def _rollcall_state(s):
     now = datetime.utcnow()
     present = {j.student_id for j in ScheduleJoin.query.filter_by(schedule_id=s.id).all()}
-    is_open = s.rollcall_open(now)
+    absent = {a.student_id for a in ScheduleAbsent.query.filter_by(schedule_id=s.id).all()}
+    is_open = s.is_offline and s.rollcall_open(now)
     return {
         "ok": True,
         "title": s.title,
         "location": s.location or "",
+        "offline": s.is_offline,
+        "started": s.scheduled_at <= now,
         "open": is_open,
         "code": s.rollcall_code if is_open else None,
         "seconds_left": int((s.rollcall_until - now).total_seconds()) if is_open else 0,
-        "students": [{"id": u.id, "name": u.name(), "username": u.username, "present": u.id in present}
+        "students": [{"id": u.id, "name": u.name(), "username": u.username,
+                      "present": u.id in present, "absent": u.id in absent and u.id not in present}
                      for u in _class_students(s)],
         "present_count": len(present),
     }
 
 
-def _mark_present(s, student):
-    """Record attendance for one student at an offline class (idempotent)."""
+def _mark_present(s, student, source="rollcall", note=None):
+    """Record attendance for one student at a class (idempotent). Also lifts a manual absent mark."""
+    ScheduleAbsent.query.filter_by(schedule_id=s.id, student_id=student.id).delete()
     join = ScheduleJoin.query.filter_by(schedule_id=s.id, student_id=student.id).first()
     if join:
+        db.session.commit()
         return join
     att = add_attendance(student_id=student.id, teacher_id=s.teacher_id, date=datetime.utcnow(),
-                         note=f"Roll call: {s.title}", source="rollcall")
+                         note=note or f"Roll call: {s.title}", source=source)
     join = ScheduleJoin(schedule_id=s.id, student_id=student.id, attendance_id=att.id if att else None)
     db.session.add(join)
     db.session.commit()
     return join
 
 
+def _mark_absent(s, student, teacher):
+    """The teacher says this student did not attend. Takes back the attendance this class created
+    (when it is not billed yet and no other class uses it) and remembers the decision, so the
+    streak does not count the class even if the student submitted something close to its time."""
+    join = ScheduleJoin.query.filter_by(schedule_id=s.id, student_id=student.id).first()
+    if join:
+        att = db.session.get(Attendance, join.attendance_id) if join.attendance_id else None
+        shared = bool(att) and ScheduleJoin.query.filter(ScheduleJoin.attendance_id == att.id,
+                                                          ScheduleJoin.id != join.id).count() > 0
+        db.session.delete(join)
+        db.session.commit()
+        if att and not shared and att.source in ("rollcall", "schedule", "manual") and not att.billed:
+            delete_attendance(att.id, teacher.id)
+    if not ScheduleAbsent.query.filter_by(schedule_id=s.id, student_id=student.id).first():
+        db.session.add(ScheduleAbsent(schedule_id=s.id, student_id=student.id))
+    db.session.commit()
+
+
 @schedule_bp.route("/teacher/schedule/<int:sid>/rollcall", methods=["GET"])
 @teacher_required
 def rollcall_status(sid):
-    _t, s = _own_offline(sid)
-    if not s or not s.is_offline:
-        return jsonify(ok=False, msg="Not an offline class"), 404
+    _t, s = _own_class(sid)
+    if not s:
+        return jsonify(ok=False, msg="Class not found"), 404
     return jsonify(_rollcall_state(s))
 
 
@@ -435,25 +471,18 @@ def rollcall_close(sid):
 @schedule_bp.route("/teacher/schedule/<int:sid>/rollcall/mark", methods=["POST"])
 @teacher_required
 def rollcall_mark(sid):
-    t, s = _own_offline(sid)
-    if not s or not s.is_offline or s.cancelled:
-        return jsonify(ok=False, msg="Not an offline class"), 404
+    t, s = _own_class(sid)
+    if not s:
+        return jsonify(ok=False, msg="Class not found"), 404
     data = request.get_json(silent=True) or {}
     student = db.session.get(User, data.get("student_id"))
     if not student or student.role != "student" or student not in _class_students(s):
         return jsonify(ok=False, msg="Student not found"), 404
 
     if data.get("present"):
-        _mark_present(s, student)
+        _mark_present(s, student, source="manual", note=f"Marked by teacher: {s.title}")
     else:
-        join = ScheduleJoin.query.filter_by(schedule_id=s.id, student_id=student.id).first()
-        if join:
-            att = db.session.get(Attendance, join.attendance_id) if join.attendance_id else None
-            db.session.delete(join)
-            db.session.commit()
-            # only take back the attendance this roll call created, and only if it is not billed yet
-            if att and att.source == "rollcall" and not att.billed:
-                delete_attendance(att.id, t.id)
+        _mark_absent(s, student, t)
     return jsonify(_rollcall_state(s))
 
 
@@ -473,6 +502,8 @@ def rollcall_checkin(sid):
 
     if ScheduleJoin.query.filter_by(schedule_id=sid, student_id=student.id).first():
         return jsonify(ok=True, already=True, msg="You are already marked present")
+    if ScheduleAbsent.query.filter_by(schedule_id=sid, student_id=student.id).first():
+        return jsonify(ok=False, msg="Your teacher marked you absent for this class. Please ask them.")
 
     if not s.rollcall_open():
         return jsonify(ok=False, msg="Roll call is not open yet. Ask your teacher to open it.")
@@ -491,3 +522,33 @@ def rollcall_checkin(sid):
     clear_attempts(key)
     _mark_present(s, student)
     return jsonify(ok=True, already=False, msg="You are marked present. 谢谢!")
+
+
+@schedule_bp.route("/schedule/<int:sid>/attend", methods=["POST"])
+@login_required
+def attend(sid):
+    """One tap "I was there" on a class card, for online and offline classes.
+    When the teacher has opened a roll call code for an offline class, the code is asked for
+    instead (needs_code), because the teacher chose to verify the room."""
+    student = _user()
+    if not student or student.role != "student":
+        return jsonify(ok=False, msg="Only students can submit attendance"), 403
+    s = db.session.get(Schedule, sid)
+    if not s or s.cancelled:
+        return jsonify(ok=False, msg="Class not found or cancelled"), 404
+
+    invited = {i.student_id for i in ScheduleInvite.query.filter_by(schedule_id=sid).all()}
+    if invited and student.id not in invited:
+        return jsonify(ok=False, msg="You are not invited to this class"), 403
+
+    if ScheduleJoin.query.filter_by(schedule_id=sid, student_id=student.id).first():
+        return jsonify(ok=True, already=True, msg="Your attendance is already recorded")
+    if ScheduleAbsent.query.filter_by(schedule_id=sid, student_id=student.id).first():
+        return jsonify(ok=False, msg="Your teacher marked you absent for this class. Please ask them.")
+    if not s.in_attend_window(datetime.now()):      # same clock the class card uses
+        return jsonify(ok=False, msg="Attendance for this class is closed")
+    if s.is_offline and s.rollcall_open():
+        return jsonify(ok=False, needs_code=True, msg="Enter the code your teacher shows")
+
+    _mark_present(s, student, source="schedule", note=f"Submitted: {s.title}")
+    return jsonify(ok=True, already=False, msg="Attendance recorded. 谢谢!")

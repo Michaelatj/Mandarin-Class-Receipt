@@ -26,7 +26,7 @@
     <div class="rc-top">
       <span class="rc-id">#{{ display_no }}</span>
       {% if r.student_name %}<span class="rc-name">{{ r.student_name }}</span>{% endif %}
-      {% if r.kind == 'prepaid' %}<span class="rc-tag">Prepaid</span>{% endif %}
+      {% if r.kind == 'prepaid' and not r.paid %}<span class="rc-tag">Pay first</span>{% elif r.kind == 'prepaid' %}<span class="rc-tag">Prepaid</span>{% endif %}
       {% if r.teacher_name and not r.student_name %}<span class="rc-name">{{ r.teacher_name }}</span>{% endif %}
     </div>
     <div class="rc-bottom">

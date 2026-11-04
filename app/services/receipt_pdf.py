@@ -70,7 +70,8 @@ def render_receipt_pdf(r):
     width = A4[0] - 36 * mm
     story = []
 
-    title = "Kwitansi Pembayaran di Muka" if prepaid else "Kwitansi Pembayaran"
+    title = (("Kwitansi Pembayaran di Muka" if r.paid else "Tagihan Pembayaran di Muka")
+             if prepaid else "Kwitansi Pembayaran")
     head = Table([[
         Paragraph(f'<font color="white" size="17"><b>{title}</b></font><br/>'
                   '<font color="#ffe1dc" size="9.5">Payment receipt · Mandarin class</font>', body),

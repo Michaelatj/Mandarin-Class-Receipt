@@ -280,34 +280,36 @@
         </div>
         {% if all_students %}
         <div class="data-table" style="margin-bottom:24px">
-          <div class="dt-head" style="grid-template-columns: 1fr 100px 100px 80px 132px;">
+          <div class="dt-head stu-cols">
             <span>Student</span><span>Joined</span><span>Sessions</span><span>Billing</span><span>Actions</span>
           </div>
           {% for s in all_students %}
           {% set ss = student_sessions.get(s.id, 0) %}
           {% set su = student_unbilled.get(s.id, 0) %}
-          <div class="dt-row" id="srow-{{ s.id }}" style="grid-template-columns: 1fr 100px 100px 80px 132px;">
-            <div>
+          <div class="dt-row stu-cols" id="srow-{{ s.id }}">
+            <div class="stu-who">
               <div class="dt-name">{{ s.name() }}</div>
               <div class="dt-meta">{% if s.managed_by %}<span class="chip-noacct">No account yet</span>{% else %}@{{ s.username }}{% endif %}
                 {% set st = streaks.get(s.id) %}
-                {% if st and st.current %}<span class="streak-chip" title="{{ st.current }} scheduled classes in a row">{{ st.tier.char if st.tier else '勤' }} {{ st.current }}</span>{% endif %}
+                {% if st and st.current %}<span class="streak-chip tier-{{ st.tier.key }}" title="{{ st.current }} scheduled classes in a row · {{ st.tier.name }}">{{ st.tier.char }} {{ st.current }}</span>{% endif %}
+                {% if s.id in pay_first_ids %}<span class="chip-noacct">Pay first</span>{% endif %}
+                {% if s.id in invoice_due_ids %}<span class="chip-noacct chip-due">Invoice unpaid</span>{% endif %}
               </div>
             </div>
             <div class="dt-joined">{{ s.created_at.strftime('%d %b %Y') }}</div>
-            <div>
+            <div class="stu-sess">
               <div class="dt-sessions">{{ ss }}</div>
-              {% if su > 0 %}<div class="dt-pending">{{ su }} pending</div>{% endif %}
+              <div class="dt-pending-slot">{% if su > 0 %}<div class="dt-pending">{{ su }} pending</div>{% endif %}</div>
             </div>
             
             {# --- TOMBOL GENERATE MANUAL --- #}
-            <form class="force-rc-form" method="POST" action="{{ url_for('teacher.force_receipt', student_id=s.id) }}" style="margin:0;">
+            <form class="force-rc-form stu-bill" method="POST" action="{{ url_for('teacher.force_receipt', student_id=s.id) }}" style="margin:0;">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
               <button type="submit" class="btn bgh bsm" {% if su == 0 %}disabled{% endif %}>🧾 Print</button>
             </form>
             {# ------------------------------ #}
 
-            <div style="display:flex; gap:4px;">
+            <div class="stu-actions">
               <button type="button" class="btn bgh bsm recap-btn" data-id="{{ s.id }}" data-name="{{ s.name() }}"
                       data-phone="{{ s.phone or '' }}" title="Monthly recap (PDF)">PDF</button>
               {% if s.managed_by %}
@@ -353,6 +355,11 @@
               <option value="session" {% if custom_fee_types.get(s.id, 'session') == 'session' %}selected{% endif %}>📅 {{ tr('per_session', 'Per Session') }}</option>
               <option value="monthly" {% if custom_fee_types.get(s.id) == 'monthly' %}selected{% endif %}>📆 {{ tr('per_month', 'Per Month') }}</option>
             </select>
+            <label class="pay-first-opt" title="The student pays first, then has class. An invoice is issued up front.">
+              <input type="hidden" name="pay_first" value="0">
+              <input type="checkbox" name="pay_first" value="1" {% if s.id in pay_first_ids or s.id not in fee_row_ids %}checked{% endif %}>
+              <span>Pay first</span>
+            </label>
             <button class="btn bg bsm" type="submit">{{ tr('set_fee') }}</button>
           </form>
           {% endfor %}
@@ -595,7 +602,7 @@
 <div class="modal-overlay hidden" id="rcModal" role="dialog" aria-modal="true" aria-labelledby="rcHeading">
   <div class="modal-box rc-box">
     <button type="button" class="modal-close" id="rcClose" aria-label="Close">&times;</button>
-    <h3 id="rcHeading">点名 Roll call</h3>
+    <h3 id="rcHeading">Attendance</h3>
     <p class="rc-sub" id="rcTitle"></p>
 
     <div id="rcClosedBox">
@@ -618,10 +625,10 @@
 
     <div class="rc-listhead"><span>Students</span><span id="rcCount"></span></div>
     <div class="rc-list" id="rcList"></div>
-    <p class="rc-hint" style="margin-top:10px">Tap a student to mark them present or take it back.</p>
+    <p class="rc-hint" style="margin-top:10px">Tap a student to switch between present and absent. If a student forgot to submit, mark them present here. Absent breaks their streak.</p>
   </div>
 </div>
-<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=2"></script>
 
 {# ═══ MONTHLY RECAP ═══ #}
 <div class="modal-overlay hidden" id="recapModal" role="dialog" aria-modal="true" aria-labelledby="recapTitle">
@@ -1391,7 +1398,8 @@ document.querySelectorAll('.fee-form').forEach(f => {
       });
       const data = await res.json();
       if (data.ok) {
-        showToast('✓ Fee saved');
+        showToast(data.invoice ? data.msg : '✓ Fee saved');
+        if (data.reload) setTimeout(() => window.location.reload(), 1400);
       } else { showToast(data.msg||'Error saving fee','err'); }
     } catch { showToast('Network error','err'); }
     finally { if (btn) { btn.disabled=false; btn.classList.remove('loading'); } }

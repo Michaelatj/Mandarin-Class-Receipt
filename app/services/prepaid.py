@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash
 
 from .. import db
-from ..models import (Attendance, QuizAttempt, Receipt, ScheduleInvite, ScheduleJoin,
+from ..models import (Attendance, QuizAttempt, Receipt, ScheduleAbsent, ScheduleInvite, ScheduleJoin,
                       StudentFee, User)
 
 WIB = timedelta(hours=7)
@@ -123,6 +123,85 @@ def record_prepayment(teacher, student, *, mode, amount, paid_on=None, method=""
     return receipt
 
 
+SESSIONS_PER_INVOICE = 8      # a pay-first session packet is invoiced 8 classes at a time
+INVOICE_AHEAD_DAYS = 7        # a monthly packet is invoiced this many days before the month ends
+ACTIVE_DAYS = 60              # a student with no class for this long is not invoiced again by itself
+
+
+def ensure_upfront_invoice(student_id, teacher_id, force_first=False, now=None):
+    """For a pay-first student, issue the next unpaid prepaid receipt when the paid coverage
+    has run out (or, for a monthly packet, is about to). Returns the new receipt or None.
+
+    The very first invoice is only made on request (force_first, when the teacher turns on pay
+    first); after that invoices follow the student's classes, and stop for a student who has
+    gone quiet, so a deleted invoice does not come back for someone who left."""
+    fee = StudentFee.query.filter_by(teacher_id=teacher_id, student_id=student_id).first()
+    if not fee or not fee.pay_first or not fee.fee_idr or fee.fee_idr <= 0:
+        return None
+    now = now or datetime.utcnow()
+
+    q = Receipt.query.filter_by(student_id=student_id, teacher_id=teacher_id, kind="prepaid")
+    if q.filter_by(paid=False).first():
+        return None                                   # one is already waiting for payment
+    paid = q.filter_by(paid=True).order_by(Receipt.period_start.asc(), Receipt.id.asc()).all()
+    if not paid and not force_first:
+        return None
+    if paid and not force_first:
+        last_class = (db.session.query(db.func.max(Attendance.date))
+                      .filter(Attendance.student_id == student_id, Attendance.teacher_id == teacher_id).scalar())
+        if not last_class or last_class < now - timedelta(days=ACTIVE_DAYS):
+            return None
+
+    student = db.session.get(User, student_id)
+    teacher = db.session.get(User, teacher_id)
+    if not student or not teacher:
+        return None
+
+    if fee.packet_type == "monthly":
+        monthly = [r for r in paid if r.packet_type == "monthly" and r.period_end]
+        latest_end = max((r.period_end for r in monthly), default=None)
+        if latest_end and latest_end > now:
+            if latest_end - now > timedelta(days=INVOICE_AHEAD_DAYS):
+                return None                           # this month is still paid for
+            local = latest_end + WIB                  # the month after the paid one
+        else:
+            local = now + WIB                         # nothing paid for the current month
+        year, month = local.year, local.month
+        start = month_start_utc(year, month)
+        ey, em = _add_months(year, month, 1)
+        end = month_start_utc(ey, em)
+        covers = "Paket bulanan: " + _label(year, month, 1)
+        packet, qty, amount = "monthly", None, fee.fee_idr
+    else:
+        sessions = [r for r in paid if r.packet_type != "monthly"]
+        left = sum(max(0, (r.custom_qty or 0) - len([d for d in (r.raw_dates or "").split("|") if d.strip()]))
+                   for r in sessions)
+        if left > 0:
+            return None                               # paid sessions are still left
+        w = now + WIB
+        start = datetime(w.year, w.month, w.day) - WIB
+        # classes attended before the invoice was paid should be covered by it too
+        first_open = (Attendance.query.filter_by(student_id=student_id, teacher_id=teacher_id, billed=False)
+                      .order_by(Attendance.date.asc()).first())
+        if first_open and first_open.date < start:
+            start = first_open.date
+        end = None
+        covers = f"{SESSIONS_PER_INVOICE} sesi dibayar di muka"
+        packet, qty, amount = "session", SESSIONS_PER_INVOICE, fee.fee_idr * SESSIONS_PER_INVOICE
+
+    invoice = Receipt(
+        student_id=student.id, student_name=student.name(),
+        teacher_id=teacher.id, teacher_name=teacher.name(),
+        bank_account=teacher.bank_account or "N/A", bank_name=teacher.bank_name or "N/A",
+        total_fee=amount, raw_dates="", issue_date=now, paid=False, paid_at=None,
+        packet_type=packet, custom_qty=qty, kind="prepaid", covers=covers, method="",
+        period_start=start, period_end=end,
+    )
+    db.session.add(invoice)
+    db.session.commit()
+    return invoice
+
+
 def apply_prepaid_coverage(student_id, teacher_id):
     """Mark unbilled classes covered by a prepaid receipt as billed, and list them on that receipt.
     Returns how many classes were covered."""
@@ -176,7 +255,7 @@ def link_managed_student(teacher, managed, account):
             db.session.delete(fee)
         else:
             fee.student_id = account.id
-    for model in (ScheduleJoin, ScheduleInvite):
+    for model in (ScheduleJoin, ScheduleInvite, ScheduleAbsent):
         for row in model.query.filter_by(student_id=managed.id).all():
             if model.query.filter_by(schedule_id=row.schedule_id, student_id=account.id).first():
                 db.session.delete(row)

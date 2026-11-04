@@ -7,7 +7,7 @@ from functools import wraps
 from flask import (Blueprint, render_template, redirect, url_for,
                    request, session, flash, jsonify)
 from .. import db
-from ..models import User, Attendance, Receipt, Schedule, ScheduleJoin, ScheduleInvite
+from ..models import User, Attendance, Receipt, Schedule, ScheduleJoin, ScheduleInvite, ScheduleAbsent
 from ..services.attendance import add_attendance
 from ..services.i18n import tr, fmt_date, random_quote
 
@@ -67,6 +67,7 @@ def dashboard():
     all_schedules = (Schedule.query
                      .order_by(Schedule.scheduled_at.asc()).all())
 
+    absent_ids = {a.schedule_id for a in ScheduleAbsent.query.filter_by(student_id=user.id).all()}
     schedules = []
     for s in all_schedules:
         # Check if this student is invited (empty invite list = open to all)
@@ -79,6 +80,7 @@ def dashboard():
         s.joined_by      = {j.student_id for j in joins}
         s.join_count     = len(s.joined_by)
         s.already_joined = user.id in s.joined_by
+        s.marked_absent  = s.id in absent_ids and user.id not in s.joined_by
         teacher = db.session.get(User, s.teacher_id)
         s.teacher_name = teacher.name() if teacher else "?"
         schedules.append(s)
@@ -88,6 +90,8 @@ def dashboard():
                 and not s.already_joined]
     new_count = len(upcoming)
     unpaid_count = sum(1 for r in receipts if not r.paid)
+    # pay-first: an unpaid prepaid receipt means "pay this before the next class"
+    pay_first_due = [r for r in receipts if r.kind == "prepaid" and not r.paid]
     unbilled_count = len(unbilled)
 
     # ── Pip visibility: hanya tampilkan kalau ada PENAMBAHAN sejak terakhir dilihat ──
@@ -126,6 +130,7 @@ def dashboard():
     resp = make_response(render_template("student/dashboard.html",
         user=user, teachers=teachers, receipts=receipts,
         streak=attendance_streak(user.id),
+        pay_first_due=pay_first_due,
         unbilled=unbilled, total_sessions=total_sessions,
         schedules=schedules, new_count=new_count,
         unpaid_count=unpaid_count, unbilled_count=unbilled_count,

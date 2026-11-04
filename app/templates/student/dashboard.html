@@ -70,6 +70,21 @@
           {% endif %}
         </div>
 
+        {% if pay_first_due %}
+        <div class="payfirst-banner" role="status">
+          <div>
+            <div class="pf-title">Pay first, then class</div>
+            <div class="pf-sub">{% for r in pay_first_due %}Rp {{ fmt_idr(r.total_fee) }} for {{ r.covers or 'your next classes' }}{{ '' if loop.last else ' · ' }}{% endfor %} is waiting for payment. Please pay it before your next class.</div>
+          </div>
+          <button type="button" class="btn br bsm" id="goReceiptsBtn" style="width:auto">See invoice</button>
+        </div>
+        <script>
+        document.getElementById('goReceiptsBtn')?.addEventListener('click', function () {
+          (document.querySelector('#sideNav [data-page="receipts"]') || document.querySelector('#bottomNav [data-page="receipts"]'))?.click();
+        });
+        </script>
+        {% endif %}
+
         {% include 'partials/streak_card.html' %}
 
         <div class="stats-row">
@@ -691,6 +706,6 @@ document.querySelectorAll('#receiptList .rc-card').forEach(attachCardClick);
     <p class="rc-hint" style="margin-top:12px">Your teacher shows a 4-digit code during the class.</p>
   </div>
 </div>
-<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=2"></script>
 
 {% endblock %}

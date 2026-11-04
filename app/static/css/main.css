@@ -2335,3 +2335,95 @@ body:has(.app-shell) .n-moon { display: none; }
 [data-skin="china"][data-theme="dark"] .rc-card button[style*="220, 53, 69"], [data-skin="china"][data-theme="dark"] .rc-card button[style*="#dc3545"] { color: #ff9aa0 !important; border-color: #ff9aa0 !important; }
 
 @media (max-width: 700px) { .n-moon { right: auto; left: 3vw; top: 8px; width: 96px; height: 96px; } }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   Attendance, streak tiers, pay-first, mobile students list, login controls
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Login: language switch in the middle of the column, big enough to see ── */
+.lang-bar { display: none !important; }
+.auth-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 16px; width: 100%; }
+.lang-seg {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 4px 4px 12px;
+  border: 1px solid var(--border2); border-radius: 100px; background: var(--surface); box-shadow: var(--shadow);
+}
+.lang-seg-ico { font-size: 1.05rem; margin-right: 2px; }
+.lang-seg a {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 40px; min-width: 84px; padding: 0 18px;
+  border-radius: 100px; font-size: 1rem; font-weight: 700; color: var(--text2); text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.lang-seg a:hover { background: var(--surface2); }
+.lang-seg a.on { background: var(--gold); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+[data-skin="night"] .lang-seg a.on { background: var(--accent); color: var(--on-accent); }
+[data-skin="china"][data-theme="dark"] .lang-seg a.on { color: #2a0d0d; }
+
+.auth-logo { font-size: 1.6rem; line-height: 1.15; }
+.auth-brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.auth-brand-name { font-family: var(--font-body); font-weight: 800; letter-spacing: .2px; }
+.auth-brand-zh { font-family: var(--font-zh); font-weight: 700; letter-spacing: 1px; }
+
+/* ── Students list: one grid for header and rows on desktop, a stacked card on phones ── */
+.stu-cols { grid-template-columns: minmax(0, 1fr) 100px 100px 90px 150px; }
+.stu-actions { display: flex; gap: 6px; align-items: center; }
+.stu-actions .btn, .stu-bill .btn { width: auto; white-space: nowrap; }
+.chip-due { background: var(--red-soft); color: var(--red); }
+@media (max-width: 640px) {
+  .dt-row.stu-cols {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "who who" "sess bill" "act act";
+    gap: 10px 12px; padding: 14px 16px;
+  }
+  .stu-who { grid-area: who; }
+  .stu-sess { grid-area: sess; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .stu-sess::before { content: "Sessions"; font-size: .78rem; color: var(--text3); }
+  .stu-bill { grid-area: bill; justify-self: end; }
+  .stu-actions { grid-area: act; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .stu-actions .btn, .stu-bill .btn { width: 100%; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+  .dt-name { font-size: 1rem; }
+}
+
+/* ── Pay first ── */
+.pay-first-opt { display: inline-flex; align-items: center; gap: 6px; font-size: .84rem; font-weight: 600; color: var(--text2);
+  text-transform: none; letter-spacing: 0; margin: 0; cursor: pointer; white-space: nowrap; }
+.pay-first-opt input[type="checkbox"] { width: 16px; height: 16px; margin: 0; accent-color: var(--gold); }
+.fee-row { flex-wrap: wrap; }
+.payfirst-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 14px 16px; margin-bottom: 16px; border: 1px solid var(--gold); border-radius: var(--radius-lg);
+  background: var(--gold-soft);
+}
+.payfirst-banner .pf-title { font-weight: 700; color: var(--text); }
+.payfirst-banner .pf-sub { font-size: .88rem; color: var(--text2); margin-top: 2px; line-height: 1.5; }
+
+/* ── Attendance panel states ── */
+.rc-row.absent .rc-mark { color: var(--red); font-weight: 700; }
+
+/* ── Streak tiers: bronze, silver, gold, diamond, rainbow ── */
+.streak-ladder { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.streak-ladder .streak-chip { margin-left: 0; }
+:root .streak-seal.tier-bronze,  :root .streak-chip.tier-bronze  { background: linear-gradient(145deg, #e0a470, #a8642a 58%, #7a4219); color: #fff4e6; }
+:root .streak-seal.tier-silver,  :root .streak-chip.tier-silver  { background: linear-gradient(145deg, #f7f9fc, #b9c0cb 58%, #8a93a1); color: #2b3340; }
+:root .streak-seal.tier-gold,    :root .streak-chip.tier-gold    { background: linear-gradient(145deg, #ffe58f, #e0a915 58%, #b57d06); color: #4a3000; }
+:root .streak-seal.tier-diamond, :root .streak-chip.tier-diamond { background: linear-gradient(145deg, #e3f8ff, #5ec8f2 58%, #2a8fd0); color: #06324f; }
+:root .streak-seal.tier-rainbow, :root .streak-chip.tier-rainbow {
+  background: linear-gradient(120deg, #ff5fb8, #ff9a5c, #ffe14d, #5be37d, #4dc8ff, #8b6cff, #ff5fb8);
+  background-size: 300% 100%; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  animation: tier-shimmer 6s linear infinite;
+}
+:root .streak-seal[class*="tier-"] { box-shadow: inset 0 0 0 3px rgba(255,255,255,.35), 0 3px 10px rgba(0,0,0,.18); }
+:root .streak-seal.tier-rainbow { box-shadow: inset 0 0 0 3px rgba(255,255,255,.5), 0 0 16px rgba(255,95,184,.55); }
+:root .streak-chip[class*="tier-"] { font-weight: 700; }
+.streak-card.tier-bronze  { border-color: #d9a273; }
+.streak-card.tier-silver  { border-color: #b9c0cb; }
+.streak-card.tier-gold    { border-color: #e0a915; }
+.streak-card.tier-diamond { border-color: #5ec8f2; }
+.streak-card.tier-rainbow { border-color: #ff7fc8; box-shadow: 0 0 0 1px rgba(255,127,200,.35), var(--shadow); }
+:root .streak-bar.tier-bronze  > div { background: #a8642a; }
+:root .streak-bar.tier-silver  > div { background: #8a93a1; }
+:root .streak-bar.tier-gold    > div { background: #e0a915; }
+:root .streak-bar.tier-diamond > div { background: #2a8fd0; }
+@keyframes tier-shimmer { to { background-position: 300% 0; } }
+@media (prefers-reduced-motion: reduce) { :root .streak-seal.tier-rainbow, :root .streak-chip.tier-rainbow { animation: none; } }
+.fee-row .pay-first-opt input { flex: none; min-width: 0; max-width: none; width: 16px; }

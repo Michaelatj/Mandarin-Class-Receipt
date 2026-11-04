@@ -24,16 +24,12 @@
 <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=28" }}">
+<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=29" }}">
 {% block head_extra %}{% endblock %}
 </head>
 <body>
 
-{# Lang + theme controls — shown on auth pages, hidden on dashboards via JS #}
-<div class="lang-bar" id="langBar">
-  <a href="{{ url_for('auth.set_lang', code='en') }}" class="lb {% if get_lang()=='en' %}on{% endif %}">EN</a>
-  <a href="{{ url_for('auth.set_lang', code='zh') }}" class="lb {% if get_lang()=='zh' %}on{% endif %}">中文</a>
-</div>
+{# The language switch for the auth pages now sits inside the login column (see .auth-lang) #}
 <button class="theme-btn" id="dmToggle" hidden tabindex="-1" aria-hidden="true">🌙</button>
 <button class="theme-btn skin-btn" id="skinToggle" hidden tabindex="-1" aria-hidden="true">中</button>
 
@@ -55,7 +51,14 @@
 {% block page_content %}
 <div class="auth-shell">
   <div class="auth-col">
-    <div class="auth-theme">{{ theme_picker('auth', 'center') }}</div>
+    <div class="auth-controls">
+      <div class="lang-seg" role="group" aria-label="Language / 语言">
+        <span class="lang-seg-ico" aria-hidden="true">🌐</span>
+        <a href="{{ url_for('auth.set_lang', code='en') }}" class="{% if get_lang()=='en' %}on{% endif %}" hreflang="en" lang="en">English</a>
+        <a href="{{ url_for('auth.set_lang', code='zh') }}" class="{% if get_lang()=='zh' %}on{% endif %}" hreflang="zh" lang="zh">中文</a>
+      </div>
+      <div class="auth-theme">{{ theme_picker('auth', 'center') }}</div>
+    </div>
   <div class="auth-card">
     <div class="auth-head">
       <svg class="panda" viewBox="0 0 120 120" aria-hidden="true">
@@ -69,7 +72,7 @@
       </svg>
       <div class="auth-logo">
         <span class="auth-logo-dot"></span>
-        <span style="font-family:var(--font-zh)">中文课堂</span>
+        <span class="auth-brand"><span class="auth-brand-name">Michael</span><span class="auth-brand-zh">中文补习班</span></span>
       </div>
       <div class="auth-sub">Attendance &amp; Billing System</div>
     </div>

@@ -56,6 +56,9 @@ def dashboard():
     
     custom_fees = {sf.student_id: sf.fee_idr for sf in StudentFee.query.filter_by(teacher_id=teacher.id).all()}
     custom_fee_types = {sf.student_id: sf.packet_type for sf in StudentFee.query.filter_by(teacher_id=teacher.id).all()}
+    pay_first_ids = {sf.student_id for sf in StudentFee.query.filter_by(teacher_id=teacher.id).all() if sf.pay_first}
+    fee_row_ids = set(custom_fee_types)
+    invoice_due_ids = {r.student_id for r in receipts if r.kind == "prepaid" and not r.paid}
     
     unbilled_records = Attendance.query.filter_by(teacher_id=teacher.id, billed=False).order_by(Attendance.date.desc()).all()
     unpaid_cnt = sum(1 for r in receipts if not r.paid)
@@ -103,6 +106,7 @@ def dashboard():
         user=teacher, receipts=receipts, all_students=all_students,
         streaks=streaks,
         progress=progress, custom_fees=custom_fees, custom_fee_types=custom_fee_types,
+        pay_first_ids=pay_first_ids, fee_row_ids=fee_row_ids, invoice_due_ids=invoice_due_ids,
         unbilled_records=unbilled_records, unpaid_cnt=unpaid_cnt, 
         schedules=schedules, up_count=up_count, attn_count=len(unbilled_records),
         student_sessions=student_sessions, student_unbilled=student_unbilled,
@@ -132,9 +136,24 @@ def set_fee():
     student_id = request.form.get("student_id", type=int)
     fee_val = request.form.get("fee", type=int)
     packet_type = request.form.get("packet_type", "session")
+    if packet_type not in ("session", "monthly"):
+        packet_type = "session"
+    # the form sends a hidden "0" and, when ticked, a "1" as well
+    pay_first = "1" in request.form.getlist("pay_first")
     if student_id and fee_val is not None:
-        set_custom_fee(teacher.id, student_id, fee_val, packet_type)
-        return jsonify(ok=True, msg=tr("ok_saved"), fee_fmt=fmt_idr(fee_val))
+        from ..services.prepaid import visible_students, ensure_upfront_invoice, apply_prepaid_coverage
+        if not visible_students(teacher.id).filter(User.id == student_id).first():
+            return jsonify(ok=False, msg="Student not found"), 404
+        set_custom_fee(teacher.id, student_id, fee_val, packet_type, pay_first=pay_first)
+        invoice = None
+        if pay_first and fee_val > 0:
+            apply_prepaid_coverage(student_id, teacher.id)
+            invoice = ensure_upfront_invoice(student_id, teacher.id, force_first=True)
+        msg = tr("ok_saved")
+        if invoice:
+            msg += f" · Invoice Rp {fmt_idr(invoice.total_fee)} issued, to be paid before class."
+        return jsonify(ok=True, msg=msg, fee_fmt=fmt_idr(fee_val), pay_first=pay_first,
+                       invoice=bool(invoice), reload=bool(invoice))
     return jsonify(ok=False, msg="Invalid input"), 400
 
 @teacher_bp.route("/teacher/add_attendance", methods=["POST"])

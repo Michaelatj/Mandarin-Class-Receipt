@@ -93,5 +93,14 @@ with app.app_context():
                         conn.execute(text(f"ALTER TABLE schedule ADD COLUMN {name} {ddl}"))
                 conn.commit()
 
+        # --- pay-first billing flag on student_fee ---
+        if 'student_fee' in table_names:
+            fcols = [col['name'] for col in inspector.get_columns('student_fee')]
+            if 'pay_first' not in fcols:
+                print("Adding missing 'pay_first' column to student_fee...")
+                with db.engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE student_fee ADD COLUMN pay_first BOOLEAN DEFAULT FALSE"))
+                    conn.commit()
+
     except Exception as e:
         print(f"⚠️ Startup warning: {e}")

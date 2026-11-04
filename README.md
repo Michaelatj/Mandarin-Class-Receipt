@@ -135,6 +135,7 @@ Mandarin-Class-Receipt/
 ├── migrate_offline_class.py # One-off migration: offline class and roll call columns on schedule
 ├── migrate_paid_at.py       # One-off migration: receipt.paid_at for the Insights tab
 ├── migrate_prepaid.py       # One-off migration: prepaid receipt columns and managed students
+├── migrate_attendance_override.py # One-off migration: pay_first on student_fee, schedule_absent table
 ├── run.py                   # Local entry point
 ├── requirements.txt
 └── vercel.json
@@ -186,7 +187,7 @@ gunicorn "run:app" --workers 2 --bind 0.0.0.0:8000
 ## Database migrations
 
 - Production (PostgreSQL): handled automatically by `api/index.py` as described above.
-- Local SQLite created by an older version: run `python migrate_db.py`, `python migrate_packet_type.py` and `python migrate_offline_class.py`, `python migrate_paid_at.py` and `python migrate_prepaid.py` once. Both can be run more than once safely.
+- Local SQLite created by an older version: run `python migrate_db.py`, `python migrate_packet_type.py` and `python migrate_offline_class.py`, `python migrate_paid_at.py`, `python migrate_prepaid.py` and `python migrate_attendance_override.py` once. Both can be run more than once safely.
 
 ## Known limitations
 

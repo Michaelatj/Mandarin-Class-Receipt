@@ -44,6 +44,8 @@ class StudentFee(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     fee_idr    = db.Column(db.Integer, nullable=False)
     packet_type = db.Column(db.String(20), default="session")  # 'session' | 'monthly'
+    # True = the student pays first, then has class (an unpaid prepaid receipt is issued up front)
+    pay_first   = db.Column(db.Boolean, default=False)
 
     __table_args__ = (
         db.UniqueConstraint("teacher_id", "student_id", name="uq_teacher_student_fee"),
@@ -138,6 +140,12 @@ class Schedule(db.Model):
         return self.is_offline and not self.cancelled \
             and self.scheduled_at - timedelta(hours=3) <= now <= self.scheduled_at + timedelta(hours=8)
 
+    def in_attend_window(self, now=None):
+        """Students can submit attendance from 3 hours before the class to 8 hours after it starts."""
+        now = now or datetime.utcnow()
+        return not self.cancelled \
+            and self.scheduled_at - timedelta(hours=3) <= now <= self.scheduled_at + timedelta(hours=8)
+
     def __repr__(self):
         return f"<Schedule #{self.id} '{self.title}' at {self.scheduled_at:%Y-%m-%d %H:%M}>"
 
@@ -154,6 +162,20 @@ class ScheduleJoin(db.Model):
 
     __table_args__ = (
         db.UniqueConstraint("schedule_id", "student_id", name="uq_schedule_student"),
+    )
+
+
+class ScheduleAbsent(db.Model):
+    """The teacher set this student as absent for a class. It overrides any attendance record,
+    so the streak breaks even when the student submitted something near the class time."""
+    __tablename__ = "schedule_absent"
+
+    id          = db.Column(db.Integer, primary_key=True)
+    schedule_id = db.Column(db.Integer, db.ForeignKey("schedule.id"), nullable=False, index=True)
+    student_id  = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint("schedule_id", "student_id", name="uq_schedule_absent"),
     )
 
 
