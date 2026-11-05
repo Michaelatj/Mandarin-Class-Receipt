@@ -52,6 +52,22 @@ with app.app_context():
                 except Exception as e:
                     print(f"⚠️ Column migration skipped (might exist): {e}")
 
+        # --- prepaid receipts and students without an account ---
+        with db.engine.connect() as conn:
+            if 'user' in table_names:
+                ucols = [col['name'] for col in inspector.get_columns('user')]
+                if 'managed_by' not in ucols:
+                    print("Adding missing 'managed_by' column to user...")
+                    conn.execute(text('ALTER TABLE "user" ADD COLUMN managed_by INTEGER'))
+            if 'receipt' in table_names:
+                rcols2 = [col['name'] for col in inspector.get_columns('receipt')]
+                for name, ddl in {'kind': "VARCHAR(10) DEFAULT 'billing'", 'covers': "VARCHAR(200) DEFAULT ''",
+                                  'method': "VARCHAR(30) DEFAULT ''", 'period_start': "TIMESTAMP", 'period_end': "TIMESTAMP"}.items():
+                    if name not in rcols2:
+                        print(f"Adding missing '{name}' column to receipt...")
+                        conn.execute(text(f"ALTER TABLE receipt ADD COLUMN {name} {ddl}"))
+            conn.commit()
+
         # --- paid_at on receipt (for revenue by month in Insights) ---
         if 'receipt' in table_names:
             rcols = [col['name'] for col in inspector.get_columns('receipt')]
@@ -76,6 +92,15 @@ with app.app_context():
                         print(f"Adding missing '{name}' column to schedule...")
                         conn.execute(text(f"ALTER TABLE schedule ADD COLUMN {name} {ddl}"))
                 conn.commit()
+
+        # --- pay-first billing flag on student_fee ---
+        if 'student_fee' in table_names:
+            fcols = [col['name'] for col in inspector.get_columns('student_fee')]
+            if 'pay_first' not in fcols:
+                print("Adding missing 'pay_first' column to student_fee...")
+                with db.engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE student_fee ADD COLUMN pay_first BOOLEAN DEFAULT FALSE"))
+                    conn.commit()
 
     except Exception as e:
         print(f"⚠️ Startup warning: {e}")

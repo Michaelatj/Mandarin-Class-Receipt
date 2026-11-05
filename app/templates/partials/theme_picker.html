@@ -1,0 +1,12 @@
+{# Theme dropdown. Options are filled in by static/js/theme-picker.js. #}
+{% macro theme_picker(uid, variant='center') %}
+<div class="theme-picker {{ variant }}" data-theme-picker>
+  <span class="tp-label" id="tpl-{{ uid }}">Theme</span>
+  <div class="tp-wrap">
+    <button type="button" class="tp-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="tpl-{{ uid }} tpc-{{ uid }}">
+      <span class="tp-current" id="tpc-{{ uid }}">Light</span><span class="tp-caret" aria-hidden="true"></span>
+    </button>
+    <ul class="tp-list" role="listbox" aria-labelledby="tpl-{{ uid }}" tabindex="-1" hidden></ul>
+  </div>
+</div>
+{% endmacro %}

@@ -44,7 +44,8 @@ def _get_teacher():
 @teacher_required
 def dashboard():
     teacher = _get_teacher()
-    all_students = User.query.filter_by(role="student").all()
+    from ..services.prepaid import visible_students
+    all_students = visible_students(teacher.id).all()
     
     # 🔥 AUTO-GENERATE RECEIPT TRIGGER 🔥
     for s in all_students:
@@ -55,6 +56,9 @@ def dashboard():
     
     custom_fees = {sf.student_id: sf.fee_idr for sf in StudentFee.query.filter_by(teacher_id=teacher.id).all()}
     custom_fee_types = {sf.student_id: sf.packet_type for sf in StudentFee.query.filter_by(teacher_id=teacher.id).all()}
+    pay_first_ids = {sf.student_id for sf in StudentFee.query.filter_by(teacher_id=teacher.id).all() if sf.pay_first}
+    fee_row_ids = set(custom_fee_types)
+    invoice_due_ids = {r.student_id for r in receipts if r.kind == "prepaid" and not r.paid}
     
     unbilled_records = Attendance.query.filter_by(teacher_id=teacher.id, billed=False).order_by(Attendance.date.desc()).all()
     unpaid_cnt = sum(1 for r in receipts if not r.paid)
@@ -102,10 +106,11 @@ def dashboard():
         user=teacher, receipts=receipts, all_students=all_students,
         streaks=streaks,
         progress=progress, custom_fees=custom_fees, custom_fee_types=custom_fee_types,
+        pay_first_ids=pay_first_ids, fee_row_ids=fee_row_ids, invoice_due_ids=invoice_due_ids,
         unbilled_records=unbilled_records, unpaid_cnt=unpaid_cnt, 
         schedules=schedules, up_count=up_count, attn_count=len(unbilled_records),
         student_sessions=student_sessions, student_unbilled=student_unbilled,
-        student_count=len(all_students), now=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+        student_count=len(all_students), now=(datetime.utcnow() + timedelta(hours=7)).strftime("%Y-%m-%dT%H:%M"),
         show_classes_pip=show_classes_pip, 
         show_attendance_pip=show_attendance_pip, 
         show_receipts_pip=show_receipts_pip,
@@ -131,9 +136,24 @@ def set_fee():
     student_id = request.form.get("student_id", type=int)
     fee_val = request.form.get("fee", type=int)
     packet_type = request.form.get("packet_type", "session")
+    if packet_type not in ("session", "monthly"):
+        packet_type = "session"
+    # the form sends a hidden "0" and, when ticked, a "1" as well
+    pay_first = "1" in request.form.getlist("pay_first")
     if student_id and fee_val is not None:
-        set_custom_fee(teacher.id, student_id, fee_val, packet_type)
-        return jsonify(ok=True, msg=tr("ok_saved"), fee_fmt=fmt_idr(fee_val))
+        from ..services.prepaid import visible_students, ensure_upfront_invoice, apply_prepaid_coverage
+        if not visible_students(teacher.id).filter(User.id == student_id).first():
+            return jsonify(ok=False, msg="Student not found"), 404
+        set_custom_fee(teacher.id, student_id, fee_val, packet_type, pay_first=pay_first)
+        invoice = None
+        if pay_first and fee_val > 0:
+            apply_prepaid_coverage(student_id, teacher.id)
+            invoice = ensure_upfront_invoice(student_id, teacher.id, force_first=True)
+        msg = tr("ok_saved")
+        if invoice:
+            msg += f" · Invoice Rp {fmt_idr(invoice.total_fee)} issued, to be paid before class."
+        return jsonify(ok=True, msg=msg, fee_fmt=fmt_idr(fee_val), pay_first=pay_first,
+                       invoice=bool(invoice), reload=bool(invoice))
     return jsonify(ok=False, msg="Invalid input"), 400
 
 @teacher_bp.route("/teacher/add_attendance", methods=["POST"])
@@ -300,6 +320,10 @@ def delete_receipt(receipt_id):
     receipt = Receipt.query.get(receipt_id)
     teacher = _get_teacher()
     if receipt and receipt.teacher_id == teacher.id:
+        if receipt.kind == "prepaid":
+            # give the classes it covered back, so they can be billed normally
+            cancel_receipt(receipt_id, teacher.id)
+            return jsonify(ok=True)
         db.session.delete(receipt)
         db.session.commit()
         return jsonify(ok=True)
@@ -482,3 +506,99 @@ def insights():
     resp = make_response(render_template("teacher/_insights.html", d=data, idr=idr, idr_short=idr_short))
     resp.headers["Cache-Control"] = "no-store"
     return resp
+
+
+# ---------------------------------------------------------------------
+# Students without an account, paying up front, printable receipts
+# ---------------------------------------------------------------------
+@teacher_bp.route("/teacher/student/add", methods=["POST"])
+@teacher_required
+def add_managed_student():
+    from ..services.prepaid import create_managed_student, PrepaidError
+    data = request.get_json(silent=True) or request.form
+    try:
+        user = create_managed_student(_get_teacher(), data.get("name", ""), data.get("phone", ""))
+    except PrepaidError as e:
+        return jsonify(ok=False, msg=str(e)), 400
+    return jsonify(ok=True, id=user.id, name=user.name(), phone=user.phone or "")
+
+
+@teacher_bp.route("/teacher/prepay", methods=["POST"])
+@teacher_required
+def prepay():
+    from ..services.prepaid import record_prepayment, PrepaidError
+    teacher = _get_teacher()
+    data = request.get_json(silent=True) or request.form
+    try:
+        student_id = int(data.get("student_id"))
+    except (TypeError, ValueError):
+        student_id = 0
+    student = db.session.get(User, student_id)
+    if not student:
+        return jsonify(ok=False, msg="Pick a student."), 400
+    paid_on = None
+    raw = (data.get("paid_on") or "").strip()
+    if raw:
+        try:
+            d = datetime.strptime(raw[:10], "%Y-%m-%d")
+            paid_on = d + timedelta(hours=12) - timedelta(hours=7)      # noon WIB on that day, stored as UTC
+        except ValueError:
+            return jsonify(ok=False, msg="That payment date is not valid."), 400
+    try:
+        receipt = record_prepayment(
+            teacher, student, mode=data.get("mode"), amount=data.get("amount"), paid_on=paid_on,
+            method=data.get("method", ""), year=data.get("year"), month=data.get("month"),
+            months=data.get("months") or 1, sessions=data.get("sessions"))
+    except PrepaidError as e:
+        return jsonify(ok=False, msg=str(e)), 400
+    return jsonify(ok=True, receipt_id=receipt.id, pdf=url_for("teacher.receipt_pdf", receipt_id=receipt.id),
+                   student=student.name(), covers=receipt.covers)
+
+
+@teacher_bp.route("/teacher/student/<int:student_id>/link", methods=["POST"])
+@teacher_required
+def link_student(student_id):
+    from ..services.prepaid import link_managed_student, PrepaidError
+    teacher = _get_teacher()
+    data = request.get_json(silent=True) or request.form
+    managed = db.session.get(User, student_id)
+    try:
+        account_id = int(data.get("account_id"))
+    except (TypeError, ValueError):
+        account_id = 0
+    account = db.session.get(User, account_id)
+    if not managed or not account:
+        return jsonify(ok=False, msg="Student not found."), 404
+    try:
+        moved = link_managed_student(teacher, managed, account)
+    except PrepaidError as e:
+        return jsonify(ok=False, msg=str(e)), 400
+    return jsonify(ok=True, msg=f"Linked to {account.name()}", moved=moved)
+
+
+@teacher_bp.route("/teacher/receipt/<int:receipt_id>.pdf")
+@teacher_required
+def receipt_pdf(receipt_id):
+    from ..services.receipt_pdf import render_receipt_pdf, pdf_filename
+    receipt = db.session.get(Receipt, receipt_id)
+    if not receipt or receipt.teacher_id != _get_teacher().id:
+        return jsonify(ok=False, msg="Receipt not found"), 404
+    resp = make_response(render_receipt_pdf(receipt))
+    resp.headers["Content-Type"] = "application/pdf"
+    disposition = "attachment" if request.args.get("download") else "inline"
+    resp.headers["Content-Disposition"] = f'{disposition}; filename="{pdf_filename(receipt)}"'
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+@teacher_bp.route("/teacher/prepay/defaults")
+@teacher_required
+def prepay_defaults():
+    """Fee and packet type of a student, to pre-fill the upfront payment form."""
+    teacher = _get_teacher()
+    student = db.session.get(User, request.args.get("student_id", type=int) or 0)
+    if not student or student.role != "student":
+        return jsonify(ok=False), 404
+    fee = StudentFee.query.filter_by(teacher_id=teacher.id, student_id=student.id).first()
+    return jsonify(ok=True, fee=fee.fee_idr if fee else (teacher.fee_idr or 0),
+                   packet=(fee.packet_type if fee and fee.packet_type else "session"))

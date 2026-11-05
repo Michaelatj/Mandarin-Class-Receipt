@@ -7,7 +7,7 @@ from functools import wraps
 from flask import (Blueprint, render_template, redirect, url_for,
                    request, session, flash, jsonify)
 from .. import db
-from ..models import User, Attendance, Receipt, Schedule, ScheduleJoin, ScheduleInvite
+from ..models import User, Attendance, Receipt, Schedule, ScheduleJoin, ScheduleInvite, ScheduleAbsent
 from ..services.attendance import add_attendance
 from ..services.i18n import tr, fmt_date, random_quote
 
@@ -67,6 +67,7 @@ def dashboard():
     all_schedules = (Schedule.query
                      .order_by(Schedule.scheduled_at.asc()).all())
 
+    absent_ids = {a.schedule_id for a in ScheduleAbsent.query.filter_by(student_id=user.id).all()}
     schedules = []
     for s in all_schedules:
         # Check if this student is invited (empty invite list = open to all)
@@ -79,16 +80,23 @@ def dashboard():
         s.joined_by      = {j.student_id for j in joins}
         s.join_count     = len(s.joined_by)
         s.already_joined = user.id in s.joined_by
+        s.marked_absent  = s.id in absent_ids and user.id not in s.joined_by
         teacher = db.session.get(User, s.teacher_id)
         s.teacher_name = teacher.name() if teacher else "?"
         schedules.append(s)
 
     upcoming = [s for s in schedules
-                if not s.cancelled and s.scheduled_at > _dt.utcnow()
+                if not s.cancelled and s.start_utc > _dt.utcnow()
                 and not s.already_joined]
     new_count = len(upcoming)
     unpaid_count = sum(1 for r in receipts if not r.paid)
+    # pay-first: an unpaid prepaid receipt means "pay this before the next class"
+    pay_first_due = [r for r in receipts if r.kind == "prepaid" and not r.paid]
     unbilled_count = len(unbilled)
+
+    from ..services.streaks import attendance_streak
+    streak = attendance_streak(user.id)
+    badge_idx = streak["tier"]["index"] if streak else 0
 
     # ── Pip visibility: hanya tampilkan kalau ada PENAMBAHAN sejak terakhir dilihat ──
     import json as _json
@@ -103,7 +111,18 @@ def dashboard():
             "classes":  new_count,
             "progress": unbilled_count,
             "receipts": unpaid_count,
+            "profile":  badge_idx,
         }
+        try:
+            user.seen_pips = _json.dumps(seen)
+            db.session.commit()
+        except Exception:
+            pass
+
+    # Students who had no badge baseline yet start from the badge they hold now, so nobody gets a
+    # "new badge" message for a badge they already had before this feature existed.
+    if "profile" not in seen:
+        seen["profile"] = badge_idx
         try:
             user.seen_pips = _json.dumps(seen)
             db.session.commit()
@@ -119,13 +138,16 @@ def dashboard():
     show_classes_pip  = new_count      > 0 and _pip("classes",  new_count)
     show_progress_pip = unbilled_count > 0 and _pip("progress", unbilled_count)
     show_receipts_pip = unpaid_count   > 0 and _pip("receipts", unpaid_count)
+    # A higher badge than the highest one the student has seen. Only the fact is passed on, so the
+    # page can say "you got a new badge" without revealing anything about the badges still ahead.
+    show_profile_pip  = badge_idx > int(seen.get("profile", 0))
 
     from flask import make_response
-    from ..services.streaks import attendance_streak
     fresh = session.pop("fresh_login", False)
     resp = make_response(render_template("student/dashboard.html",
         user=user, teachers=teachers, receipts=receipts,
-        streak=attendance_streak(user.id),
+        streak=streak, badge_idx=badge_idx, show_profile_pip=show_profile_pip,
+        pay_first_due=pay_first_due,
         unbilled=unbilled, total_sessions=total_sessions,
         schedules=schedules, new_count=new_count,
         unpaid_count=unpaid_count, unbilled_count=unbilled_count,
@@ -323,13 +345,37 @@ def mark_seen():
     data  = _req.get_json(silent=True) or {}
     tab   = data.get("tab", "")
     count = data.get("count", 0)
-    if tab in ("classes", "progress", "receipts"):
+    if tab in ("classes", "progress", "receipts", "profile"):
         user = db.session.get(User, session["user_id"])
         try:
             seen = _json.loads(user.seen_pips or "{}")
         except Exception:
             seen = {}
+        try:
+            count = int(count)
+        except (TypeError, ValueError):
+            count = 0
+        if tab == "profile":
+            count = max(count, int(seen.get("profile", 0)))      # a badge once seen stays seen
         seen[tab] = count
         user.seen_pips = _json.dumps(seen)
         db.session.commit()
     return _j(ok=True)
+
+
+@student_bp.route("/receipt/<int:receipt_id>.pdf")
+@login_required
+def receipt_pdf(receipt_id):
+    """A student can download the PDF of their own receipts."""
+    from flask import make_response
+    from ..services.receipt_pdf import render_receipt_pdf, pdf_filename
+    user = _get_current_user()
+    receipt = db.session.get(Receipt, receipt_id)
+    if not user or not receipt or receipt.student_id != user.id:
+        return jsonify(ok=False, msg="Receipt not found"), 404
+    resp = make_response(render_receipt_pdf(receipt))
+    resp.headers["Content-Type"] = "application/pdf"
+    disposition = "attachment" if request.args.get("download") else "inline"
+    resp.headers["Content-Disposition"] = f'{disposition}; filename="{pdf_filename(receipt)}"'
+    resp.headers["Cache-Control"] = "no-store"
+    return resp

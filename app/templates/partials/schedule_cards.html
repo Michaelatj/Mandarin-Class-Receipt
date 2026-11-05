@@ -2,14 +2,17 @@
 
 {% macro teacher_card(s) %}
 {% set now = now_dt() %}
-{% set is_past = s.scheduled_at < now %}
+{% set is_past = s.start_utc < now %}
 {% set status = 'cancelled' if s.cancelled else ('past' if is_past else 'upcoming') %}
 {% set offline = s.is_offline %}
 <div class="sc-card {{ status }}" id="sc-{{ s.id }}">
   <div class="sc-head">
-    <div style="min-width:0;flex:1">
-      <div class="sc-title">{{ s.title }}</div>
-      <div class="sc-time">{{ s.scheduled_at.strftime('%a, %d %b %Y · %H:%M') }}{% if offline %} <span class="sc-mode offline">Offline</span>{% endif %}</div>
+    <div class="sc-head-main">
+      <input type="checkbox" class="sc-check" value="{{ s.id }}" aria-label="Select class">
+      <div class="sc-head-text">
+        <div class="sc-title">{{ s.title }}</div>
+        <div class="sc-time">📅 {{ s.scheduled_at.strftime('%a, %d %b %Y · %H:%M') }}{% if offline %} <span class="sc-mode offline">Offline</span>{% endif %}</div>
+      </div>
     </div>
     <span class="sc-badge {{ status }}">
       {% if s.cancelled %}Cancelled{% elif is_past %}Ended{% else %}Upcoming{% endif %}
@@ -25,14 +28,15 @@
     <div class="sc-foot-left">
       <span class="sc-joined">👥 {{ s.join_count }} {{ 'student' if s.join_count==1 else 'students' }} {{ 'present' if offline else 'joined' }}</span>
       {% if s.invited_ids is defined and s.invited_ids %}
-        <span class="sc-invites specific">Specific students</span>
+        <span class="sc-invites specific">🎯 Specific students only</span>
       {% else %}
-        <span class="sc-invites open">All students</span>
+        <span class="sc-invites open">🌐 All students</span>
       {% endif %}
     </div>
     <div class="sc-foot-right">
-      {% if offline and s.in_rollcall_window(now) %}
-      <button class="btn br bsm rollcall-btn" data-id="{{ s.id }}" data-title="{{ s.title }}">点名 Roll call</button>
+      {% if not s.cancelled %}
+      <button class="btn br bsm rollcall-btn" data-id="{{ s.id }}" data-title="{{ s.title }}"
+              data-mode="{{ 'offline' if offline else 'online' }}">{{ '点名 Attendance' if offline else '👥 Attendance' }}</button>
       {% endif %}
       {% if not s.cancelled and not is_past %}
       <button class="btn bgh bsm edit-sc-btn"
@@ -43,9 +47,19 @@
               data-mode="{{ s.mode or 'online' }}"
               data-location="{{ s.location or '' }}"
               data-at="{{ s.scheduled_at.strftime('%Y-%m-%dT%H:%M') }}">✏️ Edit</button>
+      {% endif %}
+      <button class="btn bgh bsm dup-sc-btn"
+              data-id="{{ s.id }}"
+              data-title="{{ s.title }}"
+              data-desc="{{ s.description or '' }}"
+              data-link="{{ s.meet_link or '' }}"
+              data-mode="{{ s.mode or 'online' }}"
+              data-location="{{ s.location or '' }}"
+              data-at="{{ s.scheduled_at.strftime('%Y-%m-%dT%H:%M') }}">📋 Duplicate</button>
+      {% if not s.cancelled and not is_past %}
       <button class="btn bdel-outline bsm cancel-sc-btn" data-id="{{ s.id }}">✕ Cancel</button>
       {% endif %}
-      <button class="btn bdel bsm delete-sc-btn" data-id="{{ s.id }}">🗑</button>
+      <button class="btn bdel bsm delete-sc-btn" data-id="{{ s.id }}" aria-label="Delete class">🗑</button>
     </div>
   </div>
 </div>
@@ -53,10 +67,11 @@
 
 {% macro student_card(s, student_id) %}
 {% set now = now_dt() %}
-{% set is_past = s.scheduled_at < now %}
+{% set is_past = s.start_utc < now %}
 {% set joined = student_id in s.joined_by %}
 {% set offline = s.is_offline %}
 {% set status = 'cancelled' if s.cancelled else ('past' if is_past else 'upcoming') %}
+{% set can_attend = s.in_attend_window(now) and not joined and not s.marked_absent %}
 <div class="sc-card {{ status }}" id="sc-{{ s.id }}">
   <div class="sc-head">
     <div style="min-width:0;flex:1">
@@ -68,7 +83,8 @@
     <span class="sc-badge {{ status }}">
       {% if s.cancelled %}Cancelled
       {% elif joined %}<span style="color:var(--green)">✓ {{ 'Present' if offline else 'Joined' }}</span>
-      {% elif is_past and not (offline and s.in_rollcall_window(now)) %}Ended
+      {% elif s.marked_absent %}<span style="color:var(--red)">Absent</span>
+      {% elif is_past and not can_attend %}Ended
       {% else %}Upcoming{% endif %}
     </span>
   </div>
@@ -83,24 +99,32 @@
         {% else %}
         <span style="font-size:.8rem;color:var(--text3);font-style:italic">✓ Attendance recorded</span>
         {% endif %}
+      {% elif s.marked_absent %}
+        <span style="font-size:.8rem;color:var(--red);font-style:italic">Your teacher marked you absent. Ask them if this is a mistake.</span>
       {% elif offline %}
-        {% if s.in_rollcall_window(now) %}
-        <button class="btn br bsm rollcall-checkin-btn" style="width:auto"
-                data-id="{{ s.id }}" data-title="{{ s.title }}">点名 Check in</button>
+        {% if can_attend %}
+        <button class="btn br bsm attend-btn" style="width:auto"
+                data-id="{{ s.id }}" data-title="{{ s.title }}">✅ Sudah hadir</button>
         {% elif is_past %}
         <span style="font-size:.8rem;color:var(--text3);font-style:italic">Class has ended</span>
         {% else %}
-        <span style="font-size:.8rem;color:var(--text3);font-style:italic">Check in opens on the day of the class</span>
+        <span style="font-size:.8rem;color:var(--text3);font-style:italic">Attendance opens 3 hours before the class</span>
         {% endif %}
-      {% elif is_past %}
-        <span style="font-size:.8rem;color:var(--text3);font-style:italic">Class has ended</span>
       {% else %}
+        {% if not is_past or can_attend %}
         <button class="btn br bsm join-btn" style="width:auto"
                 data-id="{{ s.id }}"
                 data-link="{{ s.meet_link or '' }}"
                 data-title="{{ s.title }}">
           🎥 Join Class
         </button>
+        {% endif %}
+        {% if can_attend %}
+        <button class="btn bgh bsm attend-btn" style="width:auto"
+                data-id="{{ s.id }}" data-title="{{ s.title }}">✅ Submit attendance</button>
+        {% elif is_past %}
+        <span style="font-size:.8rem;color:var(--text3);font-style:italic">Class has ended</span>
+        {% endif %}
       {% endif %}
     {% else %}
       <span style="font-size:.8rem;color:var(--red);font-style:italic">Cancelled by teacher</span>

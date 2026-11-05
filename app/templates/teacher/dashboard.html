@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'partials/theme_picker.html' import theme_picker %}
 {% from 'partials/receipt_card.html' import receipt_card with context %}
 {% from 'partials/schedule_cards.html' import teacher_card with context %}
 {% block title %}{{ tr('teacher_dash') }}{% endblock %}
@@ -94,7 +95,7 @@
                 <label>Date &amp; Time</label>
                 <div style="display:flex;gap:8px;align-items:center">
                   <input type="datetime-local" name="scheduled_at" id="scheduleAt" value="{{ now }}" required style="flex:1">
-                  <button type="button" class="btn bgh bsm" id="clearScheduleDate" title="Clear date" aria-label="Clear date">✕</button>
+                  <button type="button" class="x-btn" id="clearScheduleDate" title="Reset to now" aria-label="Reset date to now"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
                 </div>
                 <label>Class type</label>
                 <div class="seg" id="modeSeg" role="group" aria-label="Class type">
@@ -271,42 +272,53 @@
           <div>
             <h1 class="page-title">{{ tr('nav_students') }}</h1>
             <p class="page-sub">{{ (tr('student_count_one') if student_count == 1 else tr('student_count_many')).format(n=student_count) }}</p>
-          </div>
+            </div>
+            <div class="page-actions">
+              <button type="button" class="btn bgh bsm" id="addStudentBtn">+ Student without account</button>
+              <button type="button" class="btn br bsm open-prepay">Record upfront payment</button>
+            </div>
         </div>
         {% if all_students %}
         <div class="data-table" style="margin-bottom:24px">
-          <div class="dt-head" style="grid-template-columns: 1fr 100px 100px 80px 132px;">
+          <div class="dt-head stu-cols">
             <span>Student</span><span>Joined</span><span>Sessions</span><span>Billing</span><span>Actions</span>
           </div>
           {% for s in all_students %}
           {% set ss = student_sessions.get(s.id, 0) %}
           {% set su = student_unbilled.get(s.id, 0) %}
-          <div class="dt-row" id="srow-{{ s.id }}" style="grid-template-columns: 1fr 100px 100px 80px 132px;">
-            <div>
+          <div class="dt-row stu-cols" id="srow-{{ s.id }}">
+            <div class="stu-who">
               <div class="dt-name">{{ s.name() }}</div>
-              <div class="dt-meta">@{{ s.username }}
+              <div class="dt-meta">{% if s.managed_by %}<span class="chip-noacct">No account yet</span>{% else %}@{{ s.username }}{% endif %}
                 {% set st = streaks.get(s.id) %}
-                {% if st and st.current %}<span class="streak-chip" title="{{ st.current }} scheduled classes in a row">{{ st.tier.char if st.tier else '勤' }} {{ st.current }}</span>{% endif %}
+                {% if st and st.current %}<span class="streak-chip tier-{{ st.tier.key }}" title="{{ st.current }} scheduled classes in a row · {{ st.tier.name }}">{{ st.tier.char }} {{ st.current }}</span>{% endif %}
+                {% if s.id in pay_first_ids %}<span class="chip-noacct">Pay first</span>{% endif %}
+                {% if s.id in invoice_due_ids %}<span class="chip-noacct chip-due">Invoice unpaid</span>{% endif %}
               </div>
             </div>
             <div class="dt-joined">{{ s.created_at.strftime('%d %b %Y') }}</div>
-            <div>
+            <div class="stu-sess">
               <div class="dt-sessions">{{ ss }}</div>
-              {% if su > 0 %}<div class="dt-pending">{{ su }} pending</div>{% endif %}
+              <div class="dt-pending-slot">{% if su > 0 %}<div class="dt-pending">{{ su }} pending</div>{% endif %}</div>
             </div>
             
             {# --- TOMBOL GENERATE MANUAL --- #}
-            <form class="force-rc-form" method="POST" action="{{ url_for('teacher.force_receipt', student_id=s.id) }}" style="margin:0;">
+            <form class="force-rc-form stu-bill" method="POST" action="{{ url_for('teacher.force_receipt', student_id=s.id) }}" style="margin:0;">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
               <button type="submit" class="btn bgh bsm" {% if su == 0 %}disabled{% endif %}>🧾 Print</button>
             </form>
             {# ------------------------------ #}
 
-            <div style="display:flex; gap:4px;">
+            <div class="stu-actions">
               <button type="button" class="btn bgh bsm recap-btn" data-id="{{ s.id }}" data-name="{{ s.name() }}"
                       data-phone="{{ s.phone or '' }}" title="Monthly recap (PDF)">PDF</button>
+              {% if s.managed_by %}
+              <button type="button" class="btn bg bsm link-student-btn"
+                      data-id="{{ s.id }}" data-name="{{ s.name() }}" title="Link to the account she registers">Link</button>
+              {% else %}
               <button class="btn bg bsm reset-pw-btn"
                       data-id="{{ s.id }}" data-name="{{ s.name() }}" title="Reset Password">🔑</button>
+              {% endif %}
               <button class="btn bdel-outline bsm del-student-btn"
                       data-id="{{ s.id }}" data-name="{{ s.name() }}" title="Delete Student">🗑</button>
             </div>
@@ -343,6 +355,11 @@
               <option value="session" {% if custom_fee_types.get(s.id, 'session') == 'session' %}selected{% endif %}>📅 {{ tr('per_session', 'Per Session') }}</option>
               <option value="monthly" {% if custom_fee_types.get(s.id) == 'monthly' %}selected{% endif %}>📆 {{ tr('per_month', 'Per Month') }}</option>
             </select>
+            <label class="pay-first-opt" title="The student pays first, then has class. An invoice is issued up front.">
+              <input type="hidden" name="pay_first" value="0">
+              <input type="checkbox" name="pay_first" value="1" {% if s.id in pay_first_ids or s.id not in fee_row_ids %}checked{% endif %}>
+              <span>Pay first</span>
+            </label>
             <button class="btn bg bsm" type="submit">{{ tr('set_fee') }}</button>
           </form>
           {% endfor %}
@@ -362,7 +379,10 @@
           <div>
             <h1 class="page-title">{{ tr('all_receipts') }}</h1>
             <p class="page-sub">{{ tr('receipts_summary').format(total=receipts|length, unpaid=unpaid_cnt) }}</p>
-          </div>
+            </div>
+            <div class="page-actions">
+              <button type="button" class="btn br bsm open-prepay">Record upfront payment</button>
+            </div>
         </div>
         {% if receipts %}
         <div id="receiptList">
@@ -409,11 +429,8 @@
           </div>
           <div class="card">
             <div class="card-title"><span class="card-title-icon">🎨</span> {{ tr('theme_lbl', 'Theme') }}</div>
-            <div class="lang-switch skin-switch" id="skinSwitch">
-              <button type="button" class="lb" data-mode="light" data-no-i18n>Light</button>
-              <button type="button" class="lb" data-mode="dark" data-no-i18n>Dark</button>
-              <button type="button" class="lb" data-skin-toggle data-no-i18n>中国风</button>
-            </div>
+            {{ theme_picker('settings', 'block') }}
+            <p class="tp-hint">Choose how the app looks. It is remembered on this device.</p>
           </div>
           <div class="card">
             <div class="card-title"><span class="card-title-icon">⚙️</span> {{ tr('payment_settings') }}</div>
@@ -502,11 +519,90 @@
 
 </div>{# /app-shell #}
 
+{# ═══ STUDENTS WITHOUT AN ACCOUNT, UPFRONT PAYMENT, LINKING ═══ #}
+<div class="modal-overlay hidden" id="addStudentModal" role="dialog" aria-modal="true" aria-labelledby="asHeading">
+  <div class="modal-box">
+    <button type="button" class="modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 id="asHeading">Student without an account</h3>
+    <p class="rc-sub">For someone who has not registered yet. You can record her classes and payments now, and link them to her account later.</p>
+    <label for="asName">Name</label>
+    <input type="text" id="asName" maxlength="100" placeholder="Full name" autocomplete="off">
+    <label for="asPhone">WhatsApp number <span class="lbl-opt">(optional)</span></label>
+    <input type="tel" id="asPhone" inputmode="tel" placeholder="08xxxxxxxxxx" autocomplete="off">
+    <p class="rc-msg" id="asMsg" role="status"></p>
+    <button type="button" class="btn br" id="asSave">Add student</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="prepayModal" role="dialog" aria-modal="true" aria-labelledby="ppHeading">
+  <div class="modal-box">
+    <button type="button" class="modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div id="ppForm">
+      <h3 id="ppHeading">Record upfront payment</h3>
+      <p class="rc-sub">Money you received before the classes. A paid receipt is made right away, and the classes it covers are not billed again.</p>
+      <label for="ppStudent">Student</label>
+      <select id="ppStudent">
+        {% for s in all_students %}<option value="{{ s.id }}">{{ s.name() }}{% if s.managed_by %} (no account yet){% endif %}</option>{% endfor %}
+      </select>
+      <label>Paying for</label>
+      <div class="seg" id="ppMode" role="group" aria-label="Packet">
+        <button type="button" class="seg-btn on" data-mode="monthly">Monthly packet</button>
+        <button type="button" class="seg-btn" data-mode="sessions">Number of sessions</button>
+      </div>
+      <div id="ppMonthly">
+        <div class="pp-row">
+          <div><label for="ppMonth">Starting month</label><select id="ppMonth"></select></div>
+          <div><label for="ppMonths">Months</label>
+            <select id="ppMonths"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="6">6</option><option value="12">12</option></select></div>
+        </div>
+      </div>
+      <div id="ppSessions" hidden>
+        <label for="ppCount">Sessions paid for</label>
+        <input type="number" id="ppCount" min="1" max="200" value="8" inputmode="numeric">
+      </div>
+      <label for="ppAmount">Amount received (Rp)</label>
+      <input type="number" id="ppAmount" min="1" step="1000" inputmode="numeric" placeholder="500000">
+      <div class="pp-row">
+        <div><label for="ppDate">Paid on</label><input type="date" id="ppDate"></div>
+        <div><label for="ppMethod">Method</label>
+          <select id="ppMethod"><option value="">-</option><option>Cash</option><option>Bank transfer</option><option>QRIS</option><option>E-wallet</option><option>Other</option></select></div>
+      </div>
+      <p class="rc-msg" id="ppMsg" role="status"></p>
+      <button type="button" class="btn br" id="ppSave">Record payment</button>
+    </div>
+    <div id="ppDone" hidden>
+      <h3>Payment recorded</h3>
+      <p class="rc-sub" id="ppDoneText"></p>
+      <div class="pp-actions">
+        <a class="btn br" id="ppOpenPdf" target="_blank" rel="noopener" style="text-decoration:none">Open receipt (PDF)</a>
+        <button type="button" class="btn bgh" id="ppShare">Share receipt</button>
+        <button type="button" class="btn bgh" id="ppFinish">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="linkModal" role="dialog" aria-modal="true" aria-labelledby="lkHeading">
+  <div class="modal-box">
+    <button type="button" class="modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 id="lkHeading">Link to a registered account</h3>
+    <p class="rc-sub" id="lkWho"></p>
+    <label for="lkAccount">Her account</label>
+    <select id="lkAccount">
+      {% for s in all_students if not s.managed_by %}<option value="{{ s.id }}">{{ s.name() }} (@{{ s.username }})</option>{% endfor %}
+    </select>
+    <p class="rc-hint">Her classes, receipts and payments move onto that account, and this entry is removed.</p>
+    <p class="rc-msg" id="lkMsg" role="status"></p>
+    <button type="button" class="btn br" id="lkSave">Link account</button>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/prepaid.js') }}?v=1"></script>
+
 {# ═══ ROLL CALL (点名) FOR OFFLINE CLASSES ═══ #}
 <div class="modal-overlay hidden" id="rcModal" role="dialog" aria-modal="true" aria-labelledby="rcHeading">
   <div class="modal-box rc-box">
-    <button type="button" class="modal-close" id="rcClose" aria-label="Close">&times;</button>
-    <h3 id="rcHeading">点名 Roll call</h3>
+    <button type="button" class="modal-close" id="rcClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 id="rcHeading">Attendance</h3>
     <p class="rc-sub" id="rcTitle"></p>
 
     <div id="rcClosedBox">
@@ -529,15 +625,15 @@
 
     <div class="rc-listhead"><span>Students</span><span id="rcCount"></span></div>
     <div class="rc-list" id="rcList"></div>
-    <p class="rc-hint" style="margin-top:10px">Tap a student to mark them present or take it back.</p>
+    <p class="rc-hint" style="margin-top:10px">Tap a student to switch between present and absent. If a student forgot to submit, mark them present here. Absent breaks their streak.</p>
   </div>
 </div>
-<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=2"></script>
 
 {# ═══ MONTHLY RECAP ═══ #}
 <div class="modal-overlay hidden" id="recapModal" role="dialog" aria-modal="true" aria-labelledby="recapTitle">
   <div class="modal-box">
-    <button type="button" class="modal-close" id="recapClose" aria-label="Close">&times;</button>
+    <button type="button" class="modal-close" id="recapClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h3 id="recapTitle">Monthly recap</h3>
     <p id="recapWho" style="font-size:.95rem;color:var(--text2);margin:-8px 0 14px"></p>
     <label for="recapMonth">Month</label>
@@ -556,7 +652,7 @@
 {# ═══ MODALS ═══ #}
 <div class="rm-overlay hidden" id="receiptModal">
   <div class="rm-box">
-    <button class="rm-close" id="receiptModalClose" aria-label="Close">✕</button>
+    <button class="rm-close" id="receiptModalClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div id="receiptModalBox"></div>
   </div>
 </div>
@@ -573,7 +669,7 @@
 </div>
 <div class="modal-overlay hidden" id="editModal">
   <div class="modal-box">
-    <button class="modal-close" id="modalClose">✕</button>
+    <button class="modal-close" id="modalClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h3>Edit Class</h3>
     <form id="editScheduleForm" method="POST" action="">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -617,7 +713,7 @@
 {# ── Edit Attendance Time Modal ── #}
 <div class="modal-overlay hidden" id="editAttnModal">
   <div class="modal-box">
-    <button class="modal-close" id="editAttnClose">✕</button>
+    <button class="modal-close" id="editAttnClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h3>✏️ Edit Attendance Time</h3>
     <p style="font-size:.85rem;color:var(--text3);margin:4px 0 16px" id="editAttnSub"></p>
     <form id="editAttnForm" method="POST" action="">
@@ -632,7 +728,7 @@
 {# ── Edit Receipt Modal ── #}
 <div class="modal-overlay hidden" id="editReceiptModal">
   <div class="modal-box">
-    <button class="modal-close" id="editReceiptClose">✕</button>
+    <button class="modal-close" id="editReceiptClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h3>📝 Edit Detail Receipt</h3>
     <form id="editReceiptForm" method="POST" action="">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -657,7 +753,7 @@
 {# ── Reset Password Modal ── #}
 <div class="modal-overlay hidden" id="resetPwModal">
   <div class="modal-box">
-    <button class="modal-close" id="resetPwClose">✕</button>
+    <button class="modal-close" id="resetPwClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h3>🔑 Reset Student Password</h3>
     <p style="font-size:.85rem;color:var(--text3);margin:6px 0 16px" id="resetPwSubtitle"></p>
     <form id="resetPwForm" method="POST" action="">
@@ -734,58 +830,8 @@ fetch('/set_tz', {
   body: JSON.stringify({ tz_offset: -(new Date().getTimezoneOffset()) })
 });
 
-/* ════════════════════════════════════════════════════
-   FITUR BARU: INJECT TOMBOL CHECKBOX & DUPLICATE 
-   ════════════════════════════════════════════════════ */
-document.querySelectorAll('.sc-card').forEach(card => {
-    const id = card.id.replace('sc-', '');
-    
-    const head = card.querySelector('.sc-head');
-    if (head && !card.querySelector('.sc-check')) {
-        const titleEl = card.querySelector('.sc-title');
-        const timeEl = card.querySelector('.sc-time');
-        
-        const wrapper = document.createElement('div');
-        wrapper.style.display = 'flex';
-        wrapper.style.gap = '12px';
-        wrapper.style.flex = '1';
-        wrapper.style.minWidth = '0';
-        
-        wrapper.innerHTML = `<input type="checkbox" class="sc-check" value="${id}" style="width:16px;height:16px;cursor:pointer;accent-color:var(--red);margin-top:2px;">
-                             <div style="min-width:0;flex:1" class="inject-target"></div>`;
-                             
-        const target = wrapper.querySelector('.inject-target');
-        if (titleEl) target.appendChild(titleEl);
-        if (timeEl) target.appendChild(timeEl);
-        
-        head.insertBefore(wrapper, head.firstChild);
-    }
-
-    const footDiv = card.querySelector('.sc-foot > div:last-child');
-    if (footDiv && !footDiv.querySelector('.dup-sc-btn')) {
-        const editBtn = footDiv.querySelector('.edit-sc-btn');
-        let title = '', desc = '', link = '', at = '', mode = 'online', location = '';
-        if (editBtn) {
-            title = editBtn.dataset.title || '';
-            desc = editBtn.dataset.desc || '';
-            link = editBtn.dataset.link || '';
-            at = editBtn.dataset.at || '';
-            mode = editBtn.dataset.mode || 'online';
-            location = editBtn.dataset.location || '';
-        }
-        const dupBtn = document.createElement('button');
-        dupBtn.className = 'btn bgh bsm dup-sc-btn';
-        dupBtn.dataset.id = id;
-        dupBtn.dataset.title = title;
-        dupBtn.dataset.desc = desc;
-        dupBtn.dataset.link = link;
-        dupBtn.dataset.at = at;
-        dupBtn.dataset.mode = mode;
-        dupBtn.dataset.location = location;
-        dupBtn.innerHTML = '📋 Duplicate';
-        footDiv.insertBefore(dupBtn, footDiv.firstChild);
-    }
-});
+/* The checkbox and the Duplicate button are part of the card template itself
+   (partials/schedule_cards.html), so nothing needs to be injected here. */
 
 /* ════════════════════════════════════════════════════
    FITUR BARU: FILTER CLASSES & BULK DELETE
@@ -1302,7 +1348,8 @@ document.querySelectorAll('.fee-form').forEach(f => {
       });
       const data = await res.json();
       if (data.ok) {
-        showToast('✓ Fee saved');
+        showToast(data.invoice ? data.msg : '✓ Fee saved');
+        if (data.reload) setTimeout(() => window.location.reload(), 1400);
       } else { showToast(data.msg||'Error saving fee','err'); }
     } catch { showToast('Network error','err'); }
     finally { if (btn) { btn.disabled=false; btn.classList.remove('loading'); } }
@@ -1318,6 +1365,27 @@ document.querySelectorAll('.fee-form').forEach(f => {
 
   window.userPackageType = "{{ user.package_type if user.package_type is defined else 'session' }}"; 
 
+
+  /* Pay-first receipts also list what the student attended the month before (read from the
+     attendance records, so no schedule is needed for that month). */
+  function lastMonthSection(card) {
+    if (card.dataset.kind !== 'prepaid') return '';
+    const label = card.dataset.lastmonthLabel || 'last month';
+    const rows = (card.dataset.lastmonth || '').split('|').filter(Boolean).map((raw, i) => {
+      const dt = new Date(raw.endsWith('Z') ? raw : raw + 'Z');
+      const DA = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const hm = String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0');
+      return `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee;font-size:.88rem;">
+        <span style="color:#d4af37;font-weight:bold;min-width:25px;">#${i+1}</span>
+        <span style="flex:1;color:#333;">${DA[dt.getDay()]}, ${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}</span>
+        <span style="color:#666;font-family:monospace;">${hm}</span></div>`;
+    }).join('');
+    return `<div style="margin-top:24px;">
+      <h4 style="margin:0 0 10px 0;font-size:.95rem;color:#444;border-bottom:2px solid #f5f5f5;padding-bottom:6px;">📅 Last month attendance · ${label}</h4>
+      ${rows || '<p style="color:#999;font-style:italic;font-size:.9rem;padding:6px 0;">No attendance recorded last month.</p>'}
+    </div>`;
+  }
+
   function build(card) {
     const paid    = card.dataset.paid === '1';
     const fee     = parseInt(card.dataset.fee || 0);
@@ -1331,7 +1399,18 @@ document.querySelectorAll('.fee-form').forEach(f => {
     
     let tableRows = '';
     
-    if (packageType === 'monthly') {
+    if (card.dataset.kind === 'prepaid') {
+          const covers = card.dataset.covers || '';
+          const used = dates.length;
+          const sessionsPaid = packageType !== 'monthly' ? qty : 0;
+          tableRows = `
+            <tr style="border-bottom: 1px solid #eee;">
+              <td style="padding: 10px 4px; color: #333;">Mandarin course fee, paid in advance<br><small style="color:#777">${covers}${card.dataset.method ? ' · ' + card.dataset.method : ''}</small></td>
+              <td style="text-align: center; padding: 10px 4px; color: #333;">${sessionsPaid ? sessionsPaid + ' sessions' : '-'}</td>
+              <td style="text-align: right; padding: 10px 4px; color: #333;">${sessionsPaid ? used + ' used' : used + ' classes so far'}</td>
+              <td style="text-align: right; padding: 10px 4px; font-weight: bold; color: #333;">Rp ${fee.toLocaleString('id-ID')}</td>
+            </tr>`;
+        } else if (packageType === 'monthly') {
       const moQty = qty > 0 ? qty : 8; 
       tableRows = `
         <tr style="border-bottom: 1px solid #eee;">
@@ -1430,8 +1509,12 @@ document.querySelectorAll('.fee-form').forEach(f => {
           </form>
         </div>
         
+        ${lastMonthSection(card)}
+
         <div class="rm-actions" style="display:flex; gap:8px; margin-top:24px; border-top: 2px solid #f5f5f5; padding-top:16px;">
           ${actionBtns}
+                    <a class="btn bgh bsm" style="flex:none;text-decoration:none" href="/teacher/receipt/${rid}.pdf" target="_blank" rel="noopener" title="Open the printable PDF">PDF</a>
+                    <button type="button" class="btn bgh bsm" style="flex:none" data-share-receipt="${rid}" title="Share the PDF, for example through WhatsApp">Share</button>
         </div>
       </div>`;
   }

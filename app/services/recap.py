@@ -23,7 +23,7 @@ MONTHS_ID = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli",
 DAYS_ID = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
 
 RED = colors.HexColor("#8a1a24")
-GOLD = colors.HexColor("#b07d2e")
+GOLD = colors.HexColor("#5a3128")
 INK = colors.HexColor("#1a1816")
 MUTED = colors.HexColor("#6b655e")
 LINE = colors.HexColor("#ddd6c8")
@@ -190,7 +190,7 @@ def render_pdf(recap):
     rows = [["No", "Tanggal terbit", "Jumlah", "Status"]]
     for r in recap["issued"]:
         d = r.issue_date + WIB
-        rows.append([f"#{r.receipt_no}", f"{d.day} {MONTHS_ID[d.month - 1]} {d.year}", idr(r.total_fee),
+        rows.append([f"#{r.receipt_no or r.id}", f"{d.day} {MONTHS_ID[d.month - 1]} {d.year}", idr(r.total_fee),
                      "Lunas" if r.paid else "Belum dibayar"])
     if len(rows) > 1:
         story.append(grid(rows, [width * 0.14, width * 0.36, width * 0.26, width * 0.24], right_cols=(2,)))

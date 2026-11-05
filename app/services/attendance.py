@@ -32,6 +32,9 @@ def get_student_progress(teacher_id: int) -> list[dict]:
 
 def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> list[Receipt]:
     new_receipts = []
+    # classes that were already paid for in advance are not billed again
+    from .prepaid import apply_prepaid_coverage
+    apply_prepaid_coverage(student_id, teacher_id)
     unbilled = (
         Attendance.query.filter_by(
             student_id=student_id, teacher_id=teacher_id, billed=False
@@ -40,12 +43,19 @@ def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> 
         .all()
     )
 
-    if not unbilled:
-        return new_receipts
-
     fee_obj = StudentFee.query.filter_by(
         teacher_id=teacher_id, student_id=student_id
     ).first()
+
+    # Pay-first students are never billed after the fact: a prepaid receipt is issued up front
+    # instead (see prepaid.ensure_upfront_invoice), and classes are covered once it is paid.
+    if fee_obj and fee_obj.pay_first:
+        from .prepaid import ensure_upfront_invoice
+        ensure_upfront_invoice(student_id, teacher_id)
+        return new_receipts
+
+    if not unbilled:
+        return new_receipts
     teacher = User.query.get(teacher_id)
     student = User.query.get(student_id)
 
@@ -158,7 +168,8 @@ def add_attendance(
 
 
 def set_custom_fee(
-    teacher_id: int, student_id: int, fee_idr: int, packet_type: str = "session"
+    teacher_id: int, student_id: int, fee_idr: int, packet_type: str = "session",
+    pay_first: Optional[bool] = None,
 ) -> StudentFee:
     fee = StudentFee.query.filter_by(
         teacher_id=teacher_id, student_id=student_id
@@ -166,12 +177,15 @@ def set_custom_fee(
     if fee:
         fee.fee_idr = fee_idr
         fee.packet_type = packet_type
+        if pay_first is not None:
+            fee.pay_first = pay_first
     else:
         fee = StudentFee(
             teacher_id=teacher_id,
             student_id=student_id,
             fee_idr=fee_idr,
             packet_type=packet_type,
+            pay_first=bool(pay_first),
         )
         db.session.add(fee)
     db.session.commit()
@@ -194,6 +208,10 @@ def mark_receipt_paid(receipt_id: int, teacher_id: int) -> bool:
     receipt.paid = True
     receipt.paid_at = datetime.utcnow()
     db.session.commit()
+    if receipt.kind == "prepaid":
+        # an up-front invoice that has just been paid now covers the classes in its period
+        from .prepaid import apply_prepaid_coverage
+        apply_prepaid_coverage(receipt.student_id, teacher_id)
     return True
 
 def cancel_receipt(receipt_id: int, teacher_id: int) -> bool:

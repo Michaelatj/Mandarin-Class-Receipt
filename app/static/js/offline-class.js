@@ -113,8 +113,9 @@
 
     const els = {
       title: $('rcTitle'), closedBox: $('rcClosedBox'), openBox: $('rcOpenBox'), code: $('rcCode'),
-      timer: $('rcTimer'), list: $('rcList'), count: $('rcCount'),
+      timer: $('rcTimer'), list: $('rcList'), count: $('rcCount'), heading: $('rcHeading'),
     };
+    let isOffline = false;
 
     function fmt(sec) {
       const m = Math.floor(sec / 60), s = sec % 60;
@@ -131,8 +132,11 @@
     function render(state) {
       if (!state || !state.ok) return;
       els.title.textContent = state.title + (state.location ? ' · ' + state.location : '');
-      els.closedBox.hidden = state.open;
-      els.openBox.hidden = !state.open;
+      isOffline = !!state.offline;
+      els.heading.textContent = isOffline ? '点名 Roll call' : 'Attendance';
+      // the roll call code only exists for in-person classes
+      els.closedBox.hidden = !isOffline || state.open;
+      els.openBox.hidden = !isOffline || !state.open;
       if (state.open) {
         els.code.textContent = state.code;
         secondsLeft = state.seconds_left;
@@ -143,7 +147,7 @@
       state.students.forEach((s) => {
         const row = document.createElement('button');
         row.type = 'button';
-        row.className = 'rc-row' + (s.present ? ' on' : '');
+        row.className = 'rc-row' + (s.present ? ' on' : '') + (s.absent ? ' absent' : '');
         row.dataset.id = s.id;
         row.setAttribute('aria-pressed', s.present ? 'true' : 'false');
         const name = document.createElement('span');
@@ -151,7 +155,7 @@
         name.textContent = s.name;
         const mark = document.createElement('span');
         mark.className = 'rc-mark';
-        mark.textContent = s.present ? 'Present' : 'Not yet';
+        mark.textContent = s.present ? 'Present' : (s.absent ? 'Absent' : (state.started ? 'Not marked' : 'Not yet'));
         row.append(name, mark);
         els.list.append(row);
       });
@@ -175,7 +179,9 @@
       sid = btn.dataset.id;
       els.title.textContent = btn.dataset.title || '';
       els.list.textContent = '';
-      els.closedBox.hidden = false; els.openBox.hidden = true;
+      isOffline = btn.dataset.mode === 'offline';
+      els.heading.textContent = isOffline ? '点名 Roll call' : 'Attendance';
+      els.closedBox.hidden = !isOffline; els.openBox.hidden = true;
       rc.classList.remove('hidden');
       refresh();
       timer = setInterval(tick, 1000);
@@ -210,6 +216,25 @@
       if (state && state.ok) render(state); else toast((state && state.msg) || 'Could not update', 'err');
     });
   }
+
+  /* ───────── student: one tap "sudah hadir" on a class card ───────── */
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.attend-btn');
+    if (!btn || btn.disabled) return;
+    const label = btn.textContent;
+    btn.disabled = true; btn.textContent = '…';
+    const data = await post('/schedule/' + btn.dataset.id + '/attend');
+    if (data.ok) {
+      toast(data.msg);
+      setTimeout(() => window.location.reload(), 700);   // streak, counts and the card all update
+    } else if (data.needs_code && window.OffClass.openCheckin) {
+      btn.disabled = false; btn.textContent = label;
+      window.OffClass.openCheckin(btn);
+    } else {
+      toast(data.msg || 'Could not submit attendance', 'err');
+      btn.disabled = false; btn.textContent = label;
+    }
+  });
 
   /* ───────── student: check-in box ───────── */
   const cs = $('rcsModal');
@@ -247,6 +272,7 @@
       const btn = e.target.closest('.rollcall-checkin-btn');
       if (btn) open(btn);
     });
+    window.OffClass.openCheckin = open;
     $('rcsClose').addEventListener('click', close);
     cs.addEventListener('click', (e) => { if (e.target === cs) close(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !cs.classList.contains('hidden')) close(); });

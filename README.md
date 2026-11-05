@@ -41,6 +41,12 @@ The app has two roles, chosen when registering: **teacher** and **student**. Eac
 - From the Students tab the teacher opens a recap for any of the last six months: attendance dates, receipts issued, and what is still unpaid, as a one-page PDF (generated with ReportLab).
 - On a phone, the Send button opens the share sheet with the PDF already attached, so the teacher only picks WhatsApp and the chat. Where file sharing is not available, the PDF is downloaded and a WhatsApp chat opens with the message filled in. WhatsApp does not allow a website to send files on its own without the paid Business API, so the last tap is manual.
 
+### Paying upfront, and students without an account
+
+- A student can be added by the teacher before she has registered (Students tab, "Student without account"). Classes, roll call and payments can be recorded for her right away, and when she registers the teacher links her records to the new account.
+- "Record upfront payment" creates a receipt that is already paid, the moment the money is received. It can pay for one or more calendar months (monthly packet) or a number of sessions. Classes inside the paid period, or the next classes until the sessions run out, are covered and are not billed again; their dates are listed on the prepaid receipt, which also shows how much of it is used. When the coverage ends, normal billing continues.
+- Every receipt, prepaid or not, has a printable PDF (Kwitansi) with the amount, what it covers, the method, and a PAID stamp. The teacher can open it, share it (WhatsApp share sheet on a phone), and students can download their own.
+
 ### Insights (teachers only)
 
 - An Insights tab shows how the business is doing, with all money in rupiah: received this month compared with the same days last month, what is still unpaid and for how long, billed versus received for the last 6 months, and who owes the most.
@@ -50,7 +56,7 @@ The app has two roles, chosen when registering: **teacher** and **student**. Eac
 
 ### Streaks and flashcards
 
-- Students earn an attendance streak badge (勤, 恒, 毅, 卓 at 3, 5, 10, 20 classes) for joining scheduled classes in a row. Cancelled classes and classes the student was not invited to do not count. The teacher sees each student's streak in the Students tab.
+- Students earn an attendance streak badge (勤, 恒, 毅, 卓 at 3, 5, 10, 20 classes) for attending scheduled classes in a row. A class counts as attended if the student joined it, checked in to its roll call, or submitted attendance close to the class time (from an hour before to four hours after it starts). **Missing a class resets the streak to zero** (the best streak is kept as history). A class that started less than an hour ago is not counted yet, and the student sees a reminder to attend it. Cancelled classes and classes the student was not invited to do not count. The teacher sees each student's streak in the Students tab.
 - After a student finishes a quiz, the questions become flashcards (question on the front, correct answer on the back) with Got it / Still learning tracking. The teacher can preview the cards of their own quizzes.
 
 ### Accounts and interface
@@ -60,7 +66,7 @@ The app has two roles, chosen when registering: **teacher** and **student**. Eac
 - Passwords are hashed with PBKDF2-SHA256. Old hashes from earlier versions are upgraded automatically on the next login.
 - Failed logins are rate limited per IP address. All forms use CSRF protection.
 - The whole interface switches between English and 中文 instantly, without reloading the page.
-- Light and dark theme, plus an optional China skin (bright red and cream, with red lanterns, clouds, plum blossoms, a pagoda and a red frame as SVG ornaments, plus a panda on the login page) that works in both modes. The theme picker is in Settings.
+- Five themes, chosen from a dropdown on the login page (centered, text only) and in Settings: Light, Dark, **Night** (a blue dusk with stars, a moon and mountains, not plain dark), **Chinese** (bright red and cream with red lanterns, a pagoda and a red frame, plus a panda on the login page) and Chinese (dark). The choice is remembered on the device.
 - The quiz pages use the same sidebar and bottom navigation as the dashboards, and page changes cross-fade instead of reloading from blank (browsers with cross-document view transitions).
 - Installable as an app on a phone (PWA): home-screen icon, full-screen window, and an offline page when there is no connection. Only static files are cached, never pages or user data.
 - Mobile-friendly layout with a bottom navigation bar, and times shown in WIB (UTC+7).
@@ -103,6 +109,8 @@ Mandarin-Class-Receipt/
 │   │   ├── streaks.py       # Attendance streaks and badge tiers
 │   │   ├── recap.py         # Monthly recap data, PDF, WhatsApp message
 │   │   ├── insights.py      # Revenue, class, student and quiz numbers for the Insights tab
+│   │   ├── prepaid.py       # Upfront payments, students without an account, linking
+│   │   ├── receipt_pdf.py   # Printable PDF for any receipt
 │   │   ├── security.py      # Password hashing, login rate limiting
 │   │   ├── i18n.py          # English / Chinese strings, date and currency formatting
 │   │   ├── i18n_live.py     # Serves the dictionary for instant language switching
@@ -110,7 +118,7 @@ Mandarin-Class-Receipt/
 │   │   └── email_otp.py     # Email OTP helper (not connected to a route yet)
 │   ├── static/
 │   │   ├── css/             # main.css, quiz.css
-│   │   ├── js/              # i18n-live.js, quiz-*.js, flashcards.js, recap.js, offline-class.js
+│   │   ├── js/              # i18n-live.js, quiz-*.js, flashcards.js, recap.js, offline-class.js, prepaid.js, theme-picker.js
 │   │   ├── icons/           # App icons for the home screen
 │   │   └── sw.js            # Service worker
 │   └── templates/
@@ -126,6 +134,8 @@ Mandarin-Class-Receipt/
 ├── migrate_packet_type.py   # One-off migration: adds packet_type to student_fee
 ├── migrate_offline_class.py # One-off migration: offline class and roll call columns on schedule
 ├── migrate_paid_at.py       # One-off migration: receipt.paid_at for the Insights tab
+├── migrate_prepaid.py       # One-off migration: prepaid receipt columns and managed students
+├── migrate_attendance_override.py # One-off migration: pay_first on student_fee, schedule_absent table
 ├── run.py                   # Local entry point
 ├── requirements.txt
 └── vercel.json
@@ -177,7 +187,7 @@ gunicorn "run:app" --workers 2 --bind 0.0.0.0:8000
 ## Database migrations
 
 - Production (PostgreSQL): handled automatically by `api/index.py` as described above.
-- Local SQLite created by an older version: run `python migrate_db.py`, `python migrate_packet_type.py` and `python migrate_offline_class.py` and `python migrate_paid_at.py` once. Both can be run more than once safely.
+- Local SQLite created by an older version: run `python migrate_db.py`, `python migrate_packet_type.py` and `python migrate_offline_class.py`, `python migrate_paid_at.py`, `python migrate_prepaid.py` and `python migrate_attendance_override.py` once. Both can be run more than once safely.
 
 ## Known limitations
 

@@ -122,7 +122,7 @@
       {% for s in st.leaders %}
       <div class="ins-row">
         <div class="ins-row-main"><b>{{ s.name }}</b><span>{{ s.attended }} of {{ s.total }} scheduled classes · best {{ s.best }}</span></div>
-        <div class="ins-row-val"><span class="streak-chip">{{ s.tier.char if s.tier else '勤' }} {{ s.current }}</span></div>
+        <div class="ins-row-val"><span class="streak-chip tier-{{ s.tier.key }}" title="{{ s.tier.name }}">{{ s.tier.char }} {{ s.current }}</span></div>
       </div>
       {% endfor %}
     </div>
