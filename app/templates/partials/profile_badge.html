@@ -1,0 +1,44 @@
+{# The student's big badge. Expects `streak` (services.streaks) and `user`.
+   Only the badge the student holds is named here. Badges that are still ahead are never listed:
+   the page only says that a new one is waiting once it has been earned. #}
+{% set tier = streak.tier if streak else {'key': 'bronze', 'char': '铜', 'name': 'Bronze', 'zh': '青铜'} %}
+<div class="card badge-hero tier-{{ tier.key }}" id="badgeHero" data-tier="{{ tier.key }}">
+  <div class="badge-who">
+    <span class="badge-avatar">{{ user.name()[0] }}</span>
+    <span class="badge-who-name">{{ user.name() }}</span>
+  </div>
+
+  <div class="badge-stage" id="badgeStage">
+    <span class="badge-aura" aria-hidden="true"></span>
+    <button type="button" class="badge-seal tier-{{ tier.key }}" id="badgeSeal" data-tier="{{ tier.key }}"
+            aria-label="{{ tr('Your badge', 'Your badge') }}: {{ tier.zh if get_lang() == 'zh' else tier.name }}">
+      <span class="badge-char">{{ tier.char }}</span>
+      <i class="badge-shine" aria-hidden="true"></i>
+    </button>
+    <div class="badge-fx" id="badgeFx" aria-hidden="true"></div>
+  </div>
+
+  <div class="badge-name">{{ tier.zh if get_lang() == 'zh' else tier.name }}</div>
+  <div class="badge-tap" data-i18n-skip>✨ {{ tr('Tap the badge', 'Tap the badge') }}</div>
+
+  <div class="badge-stats">
+    <div><b>{{ streak.current if streak else 0 }}</b><span>{{ tr('Current streak', 'Current streak') }}</span></div>
+    <div><b>{{ streak.best if streak else 0 }}</b><span>{{ tr('Best streak', 'Best streak') }}</span></div>
+    <div><b>{{ streak.attended if streak else 0 }}<small>/{{ streak.total if streak else 0 }}</small></b><span>{{ tr('Attended', 'Attended') }}</span></div>
+  </div>
+
+  {% if streak and streak.total == 0 %}
+  <p class="badge-note">Your streak starts with the first scheduled class.</p>
+  {% elif streak and streak.next_at %}
+  <div class="badge-next">
+    <div class="badge-next-bar tier-{{ tier.key }}"><div style="width:{{ streak.progress }}%"></div></div>
+    <div class="badge-next-txt">🔒 {{ streak.next_at - streak.current }} {{ tr('more classes in a row to unlock a new badge', 'more classes in a row to unlock a new badge') }}</div>
+  </div>
+  {% elif streak %}
+  <p class="badge-note">🏆 {{ tr('You hold the highest badge', 'You hold the highest badge') }}</p>
+  {% endif %}
+
+  {% if streak and streak.current %}
+  <p class="badge-rule">Missing a scheduled class takes your streak back to 0 and to Bronze. It never resets by month.</p>
+  {% endif %}
+</div>

@@ -2413,30 +2413,148 @@ body:has(.app-shell) .n-moon { display: none; }
 /* ── Attendance panel states ── */
 .rc-row.absent .rc-mark { color: var(--red); font-weight: 700; }
 
-/* ── Streak tiers: bronze, silver, gold, diamond, rainbow ── */
-.streak-ladder { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-.streak-ladder .streak-chip { margin-left: 0; }
-:root .streak-seal.tier-bronze,  :root .streak-chip.tier-bronze  { background: linear-gradient(145deg, #e0a470, #a8642a 58%, #7a4219); color: #fff4e6; }
-:root .streak-seal.tier-silver,  :root .streak-chip.tier-silver  { background: linear-gradient(145deg, #f7f9fc, #b9c0cb 58%, #8a93a1); color: #2b3340; }
-:root .streak-seal.tier-gold,    :root .streak-chip.tier-gold    { background: linear-gradient(145deg, #ffe58f, #e0a915 58%, #b57d06); color: #4a3000; }
-:root .streak-seal.tier-diamond, :root .streak-chip.tier-diamond { background: linear-gradient(145deg, #e3f8ff, #5ec8f2 58%, #2a8fd0); color: #06324f; }
-:root .streak-seal.tier-rainbow, :root .streak-chip.tier-rainbow {
-  background: linear-gradient(120deg, #ff5fb8, #ff9a5c, #ffe14d, #5be37d, #4dc8ff, #8b6cff, #ff5fb8);
-  background-size: 300% 100%; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35);
+/* ── Badge tiers: Bronze, Silver, Gold, Jade, Dragon ──
+   One colour per tier, shared by the small chips (teacher lists) and the big badge (Profile). */
+:root .streak-chip.tier-bronze, :root .badge-seal.tier-bronze { background: linear-gradient(145deg, #e0a470, #a8642a 58%, #7a4219); color: #fff4e6; }
+:root .streak-chip.tier-silver, :root .badge-seal.tier-silver { background: linear-gradient(145deg, #f7f9fc, #b9c0cb 58%, #8a93a1); color: #2b3340; }
+:root .streak-chip.tier-gold,   :root .badge-seal.tier-gold   { background: linear-gradient(145deg, #ffe58f, #e0a915 58%, #b57d06); color: #4a3000; }
+:root .streak-chip.tier-jade,   :root .badge-seal.tier-jade   { background: linear-gradient(145deg, #d6fbe6, #43c98f 55%, #157a55); color: #04331f; }
+:root .streak-chip.tier-dragon, :root .badge-seal.tier-dragon {
+  background: linear-gradient(120deg, #ff5a36, #d61f26, #ffb347, #d61f26, #ff5a36);
+  background-size: 300% 100%; color: #fff0c2; text-shadow: 0 1px 3px rgba(80,0,0,.55);
   animation: tier-shimmer 6s linear infinite;
 }
-:root .streak-seal[class*="tier-"] { box-shadow: inset 0 0 0 3px rgba(255,255,255,.35), 0 3px 10px rgba(0,0,0,.18); }
-:root .streak-seal.tier-rainbow { box-shadow: inset 0 0 0 3px rgba(255,255,255,.5), 0 0 16px rgba(255,95,184,.55); }
 :root .streak-chip[class*="tier-"] { font-weight: 700; }
-.streak-card.tier-bronze  { border-color: #d9a273; }
-.streak-card.tier-silver  { border-color: #b9c0cb; }
-.streak-card.tier-gold    { border-color: #e0a915; }
-.streak-card.tier-diamond { border-color: #5ec8f2; }
-.streak-card.tier-rainbow { border-color: #ff7fc8; box-shadow: 0 0 0 1px rgba(255,127,200,.35), var(--shadow); }
-:root .streak-bar.tier-bronze  > div { background: #a8642a; }
-:root .streak-bar.tier-silver  > div { background: #8a93a1; }
-:root .streak-bar.tier-gold    > div { background: #e0a915; }
-:root .streak-bar.tier-diamond > div { background: #2a8fd0; }
+:root .streak-bar.tier-bronze > div, :root .badge-next-bar.tier-bronze > div { background: #a8642a; }
+:root .streak-bar.tier-silver > div, :root .badge-next-bar.tier-silver > div { background: #8a93a1; }
+:root .streak-bar.tier-gold   > div, :root .badge-next-bar.tier-gold   > div { background: #e0a915; }
+:root .streak-bar.tier-jade   > div, :root .badge-next-bar.tier-jade   > div { background: #2fb67f; }
 @keyframes tier-shimmer { to { background-position: 300% 0; } }
-@media (prefers-reduced-motion: reduce) { :root .streak-seal.tier-rainbow, :root .streak-chip.tier-rainbow { animation: none; } }
+@media (prefers-reduced-motion: reduce) { :root .streak-chip.tier-dragon, :root .badge-seal.tier-dragon { animation: none; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   Student Profile: the big badge
+   ═══════════════════════════════════════════════════════════════ */
+.profile-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .profile-grid { grid-template-columns: 1fr; } }
+
+.badge-hero { text-align: center; padding: 22px 20px 24px; overflow: hidden; }
+.badge-who { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 4px; color: var(--text2); font-weight: 600; }
+.badge-avatar { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--gold-soft); color: var(--gold); font-size: .85rem; font-weight: 700; }
+
+.badge-stage { position: relative; width: 100%; max-width: 340px; height: 270px; margin: 6px auto 0; display: grid; place-items: center; perspective: 700px; }
+.badge-aura { position: absolute; width: 230px; height: 230px; border-radius: 50%; opacity: .55; filter: blur(6px); pointer-events: none; }
+.tier-bronze .badge-aura { background: radial-gradient(circle, rgba(224,164,112,.55), transparent 68%); }
+.tier-silver .badge-aura { background: radial-gradient(circle, rgba(207,214,226,.7), transparent 68%); }
+.tier-gold   .badge-aura { background: radial-gradient(circle, rgba(255,213,74,.6), transparent 68%); animation: aura-breathe 3.4s ease-in-out infinite; }
+.tier-jade   .badge-aura { background: radial-gradient(circle, rgba(67,201,143,.6), transparent 68%); animation: aura-breathe 4s ease-in-out infinite; }
+.tier-dragon .badge-aura { background: conic-gradient(from 0deg, rgba(255,90,54,.7), rgba(255,179,71,.35), rgba(214,31,38,.7), rgba(255,179,71,.35), rgba(255,90,54,.7)); animation: aura-spin 7s linear infinite; }
+@keyframes aura-breathe { 50% { transform: scale(1.12); opacity: .8; } }
+@keyframes aura-spin { to { transform: rotate(360deg); } }
+
+.badge-seal {
+  position: relative; z-index: 2; width: 168px; height: 168px; border-radius: 42px; border: 0; padding: 0; cursor: pointer;
+  display: grid; place-items: center; overflow: hidden; transform: rotate(-4deg);
+  box-shadow: inset 0 0 0 5px rgba(255,255,255,.38), inset 0 0 0 9px rgba(0,0,0,.08), 0 10px 26px rgba(0,0,0,.28);
+  transition: transform .2s ease, box-shadow .2s ease; -webkit-tap-highlight-color: transparent;
+}
+.badge-seal:hover { transform: rotate(-4deg) scale(1.05); }
+.badge-seal:focus-visible { outline: 3px solid var(--gold); outline-offset: 5px; }
+.badge-char { font-family: var(--font-zh); font-size: 5.6rem; font-weight: 700; line-height: 1; position: relative; z-index: 1; }
+.badge-shine { position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.75) 50%, transparent 65%); transform: translateX(-130%); pointer-events: none; }
+.tier-silver .badge-shine { animation: idle-sheen 5s ease-in-out infinite 1.5s; }
+.tier-gold .badge-seal   { box-shadow: inset 0 0 0 5px rgba(255,255,255,.4), 0 0 28px rgba(255,200,40,.5), 0 10px 26px rgba(0,0,0,.28); }
+.tier-jade .badge-seal   { box-shadow: inset 0 0 0 5px rgba(255,255,255,.4), 0 0 28px rgba(67,201,143,.55), 0 10px 26px rgba(0,0,0,.28); }
+.tier-dragon .badge-seal { box-shadow: inset 0 0 0 5px rgba(255,236,170,.55), 0 0 34px rgba(255,90,54,.7), 0 10px 26px rgba(0,0,0,.3); }
+@keyframes idle-sheen { 0%, 70%, 100% { transform: translateX(-130%); } 85% { transform: translateX(130%); } }
+
+.badge-name { font-family: var(--font-display); font-size: 1.7rem; font-weight: 700; color: var(--text); margin-top: 2px; }
+.badge-tap { font-size: .82rem; color: var(--text3); margin-top: 2px; }
+.badge-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0 4px; }
+.badge-stats > div { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 10px 6px; }
+.badge-stats b { display: block; font-size: 1.35rem; color: var(--text); }
+.badge-stats b small { font-size: .85rem; color: var(--text3); font-weight: 600; }
+.badge-stats span { font-size: .72rem; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; }
+.badge-next { margin-top: 14px; }
+.badge-next-bar { height: 7px; border-radius: 100px; background: var(--border); overflow: hidden; max-width: 280px; margin: 0 auto; }
+.badge-next-bar > div { height: 100%; border-radius: 100px; background: var(--gold); transition: width .6s cubic-bezier(.22,.61,.36,1); }
+.badge-next-txt { margin-top: 8px; font-size: .88rem; color: var(--text2); }
+.badge-note { margin-top: 14px; font-size: .9rem; color: var(--text2); }
+.badge-rule { margin-top: 10px; font-size: .78rem; color: var(--text3); }
+
+/* ── effects ── */
+.badge-fx { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.bfx { position: absolute; left: 50%; top: 50%; display: block; font-style: normal; will-change: transform, opacity; }
+
+.bfx-ring { width: calc(170px * var(--s, 1)); height: calc(170px * var(--s, 1)); margin: calc(-85px * var(--s, 1)) 0 0 calc(-85px * var(--s, 1));
+  border-radius: 44px; border: 3px solid var(--c); opacity: 0; animation: bfx-ring 1.1s ease-out var(--delay, 0s) both; }
+@keyframes bfx-ring { 0% { transform: scale(.7) rotate(-4deg); opacity: .9; } 100% { transform: scale(1.55) rotate(-4deg); opacity: 0; } }
+
+.bfx-dust { width: var(--size); height: var(--size); margin: calc(var(--size) / -2); border-radius: 50%; background: var(--c); animation: bfx-dust .8s ease-out var(--delay) both; }
+@keyframes bfx-dust { 0% { transform: translate(0, 60px) scale(.4); opacity: 0; } 20% { opacity: .9; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(1.2); opacity: 0; } }
+
+.bfx-star { margin: -.5em 0 0 -.5em; font-size: var(--size); color: var(--c); text-shadow: 0 0 8px rgba(255,255,255,.9);
+  transform: translate(var(--x), var(--y)) scale(0); animation: bfx-star 1s ease-in-out var(--delay) both; }
+@keyframes bfx-star { 0% { transform: translate(var(--x), var(--y)) scale(0) rotate(0); opacity: 0; } 40% { opacity: 1; transform: translate(var(--x), var(--y)) scale(1.2) rotate(90deg); }
+  100% { transform: translate(var(--x), var(--y)) scale(0) rotate(180deg); opacity: 0; } }
+
+.bfx-coin { width: var(--size); height: calc(var(--size) * 1.35); margin: calc(var(--size) / -2); border-radius: var(--r, 50%); background: var(--c); box-shadow: 0 0 6px rgba(255,200,40,.8);
+  animation: bfx-coin 1.5s cubic-bezier(.2,.7,.4,1) var(--delay) both; }
+@keyframes bfx-coin { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 8% { opacity: 1; }
+  45% { transform: translate(calc(var(--dx) * .8), var(--up)) rotate(calc(var(--rot) * .5)); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--fall)) rotate(var(--rot)); opacity: 0; } }
+
+.bfx-orb { width: var(--size); height: var(--size); margin: calc(var(--size) / -2); border-radius: 50% 50% 50% 8%; background: var(--c); box-shadow: 0 0 12px var(--c);
+  animation: bfx-orb 2s ease-out var(--delay) both; }
+@keyframes bfx-orb { 0% { transform: translate(var(--x), 50px) scale(.3); opacity: 0; } 25% { opacity: .95; }
+  60% { transform: translate(calc(var(--x) + var(--sway)), calc(var(--rise) * .6)) scale(1) rotate(25deg); }
+  100% { transform: translate(calc(var(--x) - var(--sway)), var(--rise)) scale(.6) rotate(-20deg); opacity: 0; } }
+
+.bfx-ember { width: var(--size); height: calc(var(--size) * 1.6); margin: calc(var(--size) / -2); border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%; background: var(--c); box-shadow: 0 0 10px var(--c);
+  animation: bfx-ember 1.5s ease-out var(--delay) both; }
+@keyframes bfx-ember { 0% { transform: translate(0, 0) scale(.3); opacity: 0; } 15% { opacity: 1; }
+  100% { transform: translate(var(--x), var(--y)) scale(.2); opacity: 0; } }
+
+/* seal motion, one per tier */
+.badge-seal.fx-bronze { animation: seal-stamp .8s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes seal-stamp { 0% { transform: rotate(-4deg) scale(1.35) translateY(-30px); } 42% { transform: rotate(-4deg) scale(.82) translateY(6px); }
+  62% { transform: rotate(-2deg) scale(1.06); } 100% { transform: rotate(-4deg) scale(1); } }
+
+.badge-seal.fx-silver { animation: seal-tilt 1.1s ease-in-out both; }
+.badge-seal.fx-silver .badge-shine { animation: shine-sweep .9s ease-in-out .1s both; }
+@keyframes seal-tilt { 0%, 100% { transform: rotate(-4deg) scale(1); } 35% { transform: rotate(5deg) scale(1.1); } 65% { transform: rotate(-8deg) scale(1.06); } }
+@keyframes shine-sweep { from { transform: translateX(-130%); } to { transform: translateX(130%); } }
+
+.badge-seal.fx-gold { animation: seal-coin 1.3s cubic-bezier(.3,.7,.3,1) both; }
+@keyframes seal-coin { 0% { transform: rotate(-4deg) rotateY(0) scale(1); } 45% { transform: rotate(-4deg) rotateY(540deg) scale(1.22); }
+  100% { transform: rotate(-4deg) rotateY(720deg) scale(1); } }
+
+.badge-seal.fx-jade { animation: seal-bloom 2s ease-in-out both; }
+@keyframes seal-bloom { 0%, 100% { transform: rotate(-4deg) translateY(0) scale(1); filter: brightness(1); }
+  30% { transform: rotate(-1deg) translateY(-16px) scale(1.08); filter: brightness(1.25) saturate(1.2); }
+  70% { transform: rotate(-6deg) translateY(-10px) scale(1.05); filter: brightness(1.15); } }
+
+.badge-seal.fx-dragon { animation: seal-roar 1.4s ease-out both; }
+@keyframes seal-roar { 0% { transform: rotate(-4deg) scale(1); }
+  8% { transform: rotate(-9deg) translateX(-8px) scale(1.04); } 16% { transform: rotate(1deg) translateX(8px) scale(1.07); }
+  24% { transform: rotate(-9deg) translateX(-7px) scale(1.1); } 32% { transform: rotate(1deg) translateX(7px) scale(1.12); }
+  50% { transform: rotate(-4deg) scale(1.3); filter: brightness(1.45) saturate(1.3); }
+  100% { transform: rotate(-4deg) scale(1); filter: none; } }
+.badge-stage.fx-dragon .badge-aura { animation: aura-spin .9s linear infinite; opacity: 1; }
+.badge-stage.fx-gold .badge-aura   { animation: aura-breathe .5s ease-in-out 2; opacity: .95; }
+.badge-stage.fx-jade .badge-aura   { opacity: .95; transform: scale(1.25); transition: transform .6s, opacity .6s; }
+
+/* a freshly earned badge: a soft halo behind the stage while its effect plays */
+.badge-stage.fx-celebrate::after { content: ""; position: absolute; inset: -20px; border-radius: 50%; pointer-events: none; z-index: 1;
+  background: radial-gradient(circle, rgba(255,255,255,.55), transparent 60%); animation: celebrate-halo 1.4s ease-out both; }
+@keyframes celebrate-halo { 0% { opacity: 0; transform: scale(.4); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.5); } }
+
+.badge-seal.fx-reduced { animation: seal-quiet .6s ease both; }
+@keyframes seal-quiet { 50% { transform: rotate(-4deg) scale(1.06); } }
+@media (prefers-reduced-motion: reduce) {
+  .badge-aura, .tier-silver .badge-shine { animation: none !important; }
+  .badge-seal { transition: none; }
+}
+
 .fee-row .pay-first-opt input { flex: none; min-width: 0; max-width: none; width: 16px; }

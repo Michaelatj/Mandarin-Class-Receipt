@@ -27,6 +27,10 @@
         <span class="snav-icon">📝</span>
         <span class="snav-label">{{ tr('nav_quiz') }}</span>
       </a>
+      <button class="snav-btn" data-page="profile" data-count="{{ badge_idx }}">
+        <span class="snav-icon">🏅</span><span class="snav-label">{{ tr('nav_profile') }}</span>
+        {% if show_profile_pip %}<span class="snav-pip gold">★</span>{% endif %}
+      </button>
       <button class="snav-btn" data-page="settings" data-count="0">
         <span class="snav-icon">⚙️</span><span class="snav-label">{{ tr('nav_settings') }}</span>
       </button>
@@ -85,7 +89,9 @@
         </script>
         {% endif %}
 
-        {% include 'partials/streak_card.html' %}
+        {% if streak and streak.live %}
+        <div class="streak-live">{{ streak.live[0].title }} is on now. Attend it to keep your streak ({{ streak.live[0].minutes_left }} min left before it counts as missed).</div>
+        {% endif %}
 
         <div class="stats-row">
           <div class="stat-card">
@@ -204,6 +210,29 @@
         </div>
       </div>
 
+      {# ═══ PROFILE ═══ #}
+      <div class="app-page" id="page-profile">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">{{ tr('nav_profile') }}</h1>
+            <p class="page-sub">Your badge and your details.</p>
+          </div>
+        </div>
+        <div class="profile-grid">
+          {% include 'partials/profile_badge.html' %}
+          <div class="card">
+            <div class="card-title"><span class="card-title-icon">👤</span> Profile</div>
+            <form id="profileForm" method="POST" action="{{ url_for('student.update_profile') }}">
+              <label>Display Name</label>
+              <input type="text" name="display_name" value="{{ user.display_name }}" placeholder="Your name">
+              <label>Email <span class="lbl-opt">(untuk reset password)</span></label>
+              <input type="email" name="email" value="{{ user.email }}" placeholder="contoh@gmail.com">
+              <button class="btn bg" type="submit">Save Profile</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
       {# ═══ SETTINGS ═══ #}
       <div class="app-page" id="page-settings">
         <div class="page-header">
@@ -225,17 +254,7 @@
             {{ theme_picker('settings', 'block') }}
             <p class="tp-hint">Choose how the app looks. It is remembered on this device.</p>
           </div>
-          <div class="card">
-            <div class="card-title"><span class="card-title-icon">👤</span> Profile</div>
-            <form id="profileForm" method="POST" action="{{ url_for('student.update_profile') }}">
-              <label>Display Name</label>
-              <input type="text" name="display_name" value="{{ user.display_name }}" placeholder="Your name">
-              <label>Email <span class="lbl-opt">(untuk reset password)</span></label>
-              <input type="email" name="email" value="{{ user.email }}" placeholder="contoh@gmail.com">
-              <button class="btn bg" type="submit">Save Profile</button>
-            </form>
-          </div>
-          <div class="card">
+<div class="card">
             <div class="card-title"><span class="card-title-icon">🔒</span> Change Password</div>
             <form id="changePwForm" method="POST" action="{{ url_for('auth.change_password') }}">
               <label>Current Password</label>
@@ -288,6 +307,12 @@
     <div class="bnav-icon">📝</div>
     <span>{{ tr('nav_quiz') }}</span>
   </a>
+  <button class="bnav-btn" data-page="profile" data-count="{{ badge_idx }}">
+    <div class="bnav-icon">🏅
+      {% if show_profile_pip %}<span class="bnav-pip">★</span>{% endif %}
+    </div>
+    <span>{{ tr('nav_profile') }}</span>
+  </button>
   <button class="bnav-btn" data-page="settings" data-count="0">
     <div class="bnav-icon">⚙️</div>
     <span>{{ tr('nav_settings') }}</span>
@@ -323,6 +348,7 @@
 {% endblock %}
 
 {% block page_scripts %}
+<script src="{{ url_for('static', filename='js/badge-fx.js') }}?v=1"></script>
 <script>
 /* These two controls are not on every page. Without the null guard the missing one threw an
    error here, which stopped the rest of this script, so no button on the page worked. */
@@ -374,6 +400,12 @@ if (_attnForm) {
   }, true); 
 }
 
+/* ── New badge: say that one was earned, without naming anything ── */
+window.__newBadge = {{ 'true' if show_profile_pip else 'false' }};
+if (window.__newBadge) {
+  setTimeout(() => showToast('🏅 ' + (window.I18N ? I18N.t('You got a new badge! Open Profile to see it.') : 'You got a new badge! Open Profile to see it.')), 900);
+}
+
 /* ── Navigation ── */
 (function(){
   const KEY='student_page', DEF='classes';
@@ -387,6 +419,7 @@ if (_attnForm) {
       classes:  parseInt('{{ new_count }}') || 0,
       progress: parseInt('{{ unbilled_count }}') || 0,
       receipts: parseInt('{{ unpaid_count }}') || 0,
+      profile:  parseInt('{{ badge_idx }}') || 0,
     };
     const count = countMap[page];
     fetch('/mark_seen', {
@@ -410,6 +443,11 @@ if (_attnForm) {
     pg.forEach(p=>p.style.display=p.id==='page-'+id?'block':'none');
     if (isNew) markSeen(id); 
     visited.add(id);
+    // first time the Profile page opens after a new badge was earned: play its unlock effect
+    if (id === 'profile' && window.__newBadge && window.BadgeFX) {
+      window.__newBadge = false;
+      setTimeout(() => window.BadgeFX.play(document.getElementById('badgeSeal'), true), 350);
+    }
     try{sessionStorage.setItem(KEY,id);}catch(e){}
   }
   sB.forEach(b=>b.addEventListener('click',()=>show(b.dataset.page)));

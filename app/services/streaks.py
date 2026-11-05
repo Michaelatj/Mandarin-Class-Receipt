@@ -40,8 +40,8 @@ TIERS = [
     (0,  "bronze",  "铜", "Bronze",  "青铜"),
     (5,  "silver",  "银", "Silver",  "白银"),
     (11, "gold",    "金", "Gold",    "黄金"),
-    (18, "diamond", "钻", "Diamond", "钻石"),
-    (26, "rainbow", "虹", "Rainbow Diamond", "虹彩钻石"),
+    (18, "jade",    "翠", "Jade",    "翡翠"),
+    (26, "dragon",  "龙", "Dragon",  "神龙"),
 ]
 
 
@@ -52,7 +52,7 @@ def tier_for(n):
         if n >= t[0]:
             reached = t
     need, key, char, name, zh = reached
-    return {"min": need, "key": key, "char": char, "name": name, "zh": zh}
+    return {"min": need, "key": key, "char": char, "name": name, "zh": zh, "index": TIERS.index(reached)}
 
 
 def _next_tier(n):
