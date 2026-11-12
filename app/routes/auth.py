@@ -182,6 +182,8 @@ def delete_account():
         Schedule.query.filter(Schedule.id.in_(my_schedule_ids)).delete(synchronize_session=False)
     ScheduleJoin.query.filter_by(student_id=user.id).delete(synchronize_session=False)
     ScheduleInvite.query.filter_by(student_id=user.id).delete(synchronize_session=False)
+    from ..models import StreakEntry
+    StreakEntry.query.filter_by(student_id=user.id).delete(synchronize_session=False)
 
     # Delete all related data first (no cascade set up, so manual)
     Attendance.query.filter(

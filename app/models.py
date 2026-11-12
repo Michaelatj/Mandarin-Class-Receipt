@@ -188,6 +188,27 @@ class ScheduleAbsent(db.Model):
     )
 
 
+class StreakEntry(db.Model):
+    """One class in a student's streak history, kept for good.
+
+    The streak is read from these rows, not from the Schedule table, so deleting a finished class
+    never changes anybody's streak. schedule_id is deliberately NOT a foreign key: when the
+    teacher deletes a class it is set to NULL and the row stays as a frozen record."""
+    __tablename__ = "streak_entry"
+
+    id          = db.Column(db.Integer, primary_key=True)
+    student_id  = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    schedule_id = db.Column(db.Integer, nullable=True, index=True)   # NULL once the class is deleted
+    class_at    = db.Column(db.DateTime, nullable=False, index=True) # Schedule.scheduled_at (WIB wall-clock)
+    title       = db.Column(db.String(200), default="")
+    attended    = db.Column(db.Boolean, nullable=False, default=False)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("student_id", "schedule_id", name="uq_streak_student_schedule"),
+    )
+
+
 class ScheduleInvite(db.Model):
     """Maps which students are invited to a specific schedule."""
     __tablename__ = "schedule_invite"

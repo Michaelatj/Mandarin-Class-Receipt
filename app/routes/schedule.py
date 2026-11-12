@@ -145,6 +145,8 @@ def edit(sid):
         except (ValueError, TypeError):
             pass
 
+    from ..services.streaks import forget_class
+    forget_class(sid)                      # time or invited students may have changed: work it out again
     db.session.commit()
     if _is_ajax():
         dt_fmt = s.scheduled_at.strftime("%a, %d %b %Y · %H:%M")
@@ -167,6 +169,8 @@ def cancel(sid):
         if _is_ajax(): return jsonify(ok=False, msg="Not found")
         return redirect(url_for("teacher.dashboard"))
     s.cancelled = True
+    from ..services.streaks import forget_class
+    forget_class(sid)                      # a cancelled class never counts for any streak
     db.session.commit()
     if _is_ajax(): return jsonify(ok=True, msg="Class cancelled")
     flash("Class cancelled", "ok")
@@ -180,6 +184,8 @@ def delete(sid):
     if not s:
         if _is_ajax(): return jsonify(ok=False, msg="Not found")
         return redirect(url_for("teacher.dashboard"))
+    from ..services.streaks import preserve_before_delete
+    preserve_before_delete([sid])          # keep every student's streak result for this class
     ScheduleJoin.query.filter_by(schedule_id=sid).delete()
     ScheduleInvite.query.filter_by(schedule_id=sid).delete()
     ScheduleAbsent.query.filter_by(schedule_id=sid).delete()
@@ -202,6 +208,8 @@ def bulk_delete():
     valid_ids = [s.id for s in schedules]
     
     if valid_ids:
+        from ..services.streaks import preserve_before_delete
+        preserve_before_delete(valid_ids)  # keep every student's streak result for these classes
         ScheduleJoin.query.filter(ScheduleJoin.schedule_id.in_(valid_ids)).delete(synchronize_session=False)
         ScheduleInvite.query.filter(ScheduleInvite.schedule_id.in_(valid_ids)).delete(synchronize_session=False)
         ScheduleAbsent.query.filter(ScheduleAbsent.schedule_id.in_(valid_ids)).delete(synchronize_session=False)
@@ -342,16 +350,19 @@ def _rollcall_state(s):
 
 def _mark_present(s, student, source="rollcall", note=None):
     """Record attendance for one student at a class (idempotent). Also lifts a manual absent mark."""
+    from ..services.streaks import set_result
     ScheduleAbsent.query.filter_by(schedule_id=s.id, student_id=student.id).delete()
     join = ScheduleJoin.query.filter_by(schedule_id=s.id, student_id=student.id).first()
     if join:
         db.session.commit()
+        set_result(s.id, student.id, True)
         return join
     att = add_attendance(student_id=student.id, teacher_id=s.teacher_id, date=datetime.utcnow(),
                          note=note or f"Roll call: {s.title}", source=source)
     join = ScheduleJoin(schedule_id=s.id, student_id=student.id, attendance_id=att.id if att else None)
     db.session.add(join)
     db.session.commit()
+    set_result(s.id, student.id, True)     # also fixes a class already frozen as missed
     return join
 
 
@@ -371,6 +382,8 @@ def _mark_absent(s, student, teacher):
     if not ScheduleAbsent.query.filter_by(schedule_id=s.id, student_id=student.id).first():
         db.session.add(ScheduleAbsent(schedule_id=s.id, student_id=student.id))
     db.session.commit()
+    from ..services.streaks import set_result
+    set_result(s.id, student.id, False)
 
 
 @schedule_bp.route("/teacher/schedule/<int:sid>/rollcall", methods=["GET"])
