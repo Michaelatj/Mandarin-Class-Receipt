@@ -1,0 +1,49 @@
+{% extends "quiz/layout.html" %}
+{% block qz_title %}HSK 1{% endblock %}
+{% block qz_back %}Kembali ke dashboard{% endblock %}
+{% block qz_attrs %}data-page="hsk-index"{% endblock %}
+{% block head_extra %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=1' }}">
+{% endblock %}
+
+{% block qz_body %}
+<div id="hsk-app" data-page="index" data-uid="{{ uid }}">
+  <div class="qz-head">
+    <div>
+      <h1 class="qz-h1">HSK 1 · 汉语水平考试一级</h1>
+      <p class="qz-sub">{{ total }} kata, dikelompokkan per tema. Buka satu tema, baca penjelasannya, lalu latihan dengan kartu.</p>
+    </div>
+  </div>
+
+  <div class="card hk-searchcard">
+    <input type="search" id="hk-search" class="hk-input" placeholder="Cari kata: 爱, ai, atau “cinta”" autocomplete="off" aria-label="Cari kata">
+    <div id="hk-results" class="hk-results" hidden></div>
+  </div>
+
+  <div class="hk-overall" id="hk-overall" data-all="{{ all_ns|join(',') }}">
+    <span id="hk-overall-text">Hafal 0 dari {{ total }} kata</span>
+    <div class="fc-progress"><div id="hk-overall-bar" style="width:0"></div></div>
+  </div>
+
+  <div class="hk-grid">
+    <a class="hk-theme hk-theme-all" href="{{ url_for('hsk.theme', theme_id='semua') }}">
+      <span class="hk-theme-ico">📚</span>
+      <span class="hk-theme-name">Semua {{ total }} kata</span>
+      <span class="hk-theme-sub">Urut seperti di daftar</span>
+    </a>
+    {% for t in themes %}
+    <a class="hk-theme" href="{{ url_for('hsk.theme', theme_id=t.id) }}" data-ns="{{ t.ns|join(',') }}">
+      <span class="hk-theme-ico">{{ t.icon }}</span>
+      <span class="hk-theme-name">{{ t.label }}</span>
+      <span class="hk-theme-zh" lang="zh">{{ t.preview }}</span>
+      <span class="hk-theme-sub"><span class="hk-theme-done">0</span>/{{ t.count }} hafal</span>
+      <span class="hk-theme-bar"><i style="width:0"></i></span>
+    </a>
+    {% endfor %}
+  </div>
+  <p class="qz-hint-text hk-foot">Tanda “hafal” tersimpan di browser perangkat ini.</p>
+</div>
+{% endblock %}
+
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=1' }}"></script>{% endblock %}

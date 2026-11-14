@@ -56,6 +56,10 @@
       <span class="snav-icon">📝</span>
         <span class="snav-label">{{ tr('nav_quiz') }}</span>
       </a>
+      <a class="snav-link" href="{{ url_for('hsk.index') }}">
+      <span class="snav-icon">📖</span>
+        <span class="snav-label">{{ tr('nav_hsk') }}</span>
+      </a>
       <button class="snav-btn" data-page="settings">
         <span class="snav-icon">⚙️</span>
         <span class="snav-label">{{ tr('nav_settings') }}</span>
@@ -95,7 +99,7 @@
                 <label>Date &amp; Time</label>
                 <div style="display:flex;gap:8px;align-items:center">
                   <input type="datetime-local" name="scheduled_at" id="scheduleAt" value="{{ now }}" required style="flex:1">
-                  <button type="button" class="x-btn" id="clearScheduleDate" title="Reset to now" aria-label="Reset date to now"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+                  <button type="button" class="btn bgh bsm" id="clearScheduleDate" title="Clear date" aria-label="Clear date">✕</button>
                 </div>
                 <label>Class type</label>
                 <div class="seg" id="modeSeg" role="group" aria-label="Class type">
@@ -510,6 +514,10 @@
     <div class="bnav-icon">📝</div>
       <span>{{ tr('nav_quiz') }}</span>
     </a>
+    <a class="bnav-btn" href="{{ url_for('hsk.index') }}" style="text-decoration:none">
+    <div class="bnav-icon">📖</div>
+      <span>{{ tr('nav_hsk') }}</span>
+    </a>
     <button class="bnav-btn" data-page="settings">
       <div class="bnav-icon">⚙️</div>
       <span>{{ tr('nav_settings') }}</span>
@@ -522,7 +530,7 @@
 {# ═══ STUDENTS WITHOUT AN ACCOUNT, UPFRONT PAYMENT, LINKING ═══ #}
 <div class="modal-overlay hidden" id="addStudentModal" role="dialog" aria-modal="true" aria-labelledby="asHeading">
   <div class="modal-box">
-    <button type="button" class="modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button type="button" class="modal-close" data-close-modal aria-label="Close">&times;</button>
     <h3 id="asHeading">Student without an account</h3>
     <p class="rc-sub">For someone who has not registered yet. You can record her classes and payments now, and link them to her account later.</p>
     <label for="asName">Name</label>
@@ -536,7 +544,7 @@
 
 <div class="modal-overlay hidden" id="prepayModal" role="dialog" aria-modal="true" aria-labelledby="ppHeading">
   <div class="modal-box">
-    <button type="button" class="modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button type="button" class="modal-close" data-close-modal aria-label="Close">&times;</button>
     <div id="ppForm">
       <h3 id="ppHeading">Record upfront payment</h3>
       <p class="rc-sub">Money you received before the classes. A paid receipt is made right away, and the classes it covers are not billed again.</p>
@@ -584,7 +592,7 @@
 
 <div class="modal-overlay hidden" id="linkModal" role="dialog" aria-modal="true" aria-labelledby="lkHeading">
   <div class="modal-box">
-    <button type="button" class="modal-close" data-close-modal aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button type="button" class="modal-close" data-close-modal aria-label="Close">&times;</button>
     <h3 id="lkHeading">Link to a registered account</h3>
     <p class="rc-sub" id="lkWho"></p>
     <label for="lkAccount">Her account</label>
@@ -601,7 +609,7 @@
 {# ═══ ROLL CALL (点名) FOR OFFLINE CLASSES ═══ #}
 <div class="modal-overlay hidden" id="rcModal" role="dialog" aria-modal="true" aria-labelledby="rcHeading">
   <div class="modal-box rc-box">
-    <button type="button" class="modal-close" id="rcClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button type="button" class="modal-close" id="rcClose" aria-label="Close">&times;</button>
     <h3 id="rcHeading">Attendance</h3>
     <p class="rc-sub" id="rcTitle"></p>
 
@@ -633,7 +641,7 @@
 {# ═══ MONTHLY RECAP ═══ #}
 <div class="modal-overlay hidden" id="recapModal" role="dialog" aria-modal="true" aria-labelledby="recapTitle">
   <div class="modal-box">
-    <button type="button" class="modal-close" id="recapClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button type="button" class="modal-close" id="recapClose" aria-label="Close">&times;</button>
     <h3 id="recapTitle">Monthly recap</h3>
     <p id="recapWho" style="font-size:.95rem;color:var(--text2);margin:-8px 0 14px"></p>
     <label for="recapMonth">Month</label>
@@ -652,7 +660,7 @@
 {# ═══ MODALS ═══ #}
 <div class="rm-overlay hidden" id="receiptModal">
   <div class="rm-box">
-    <button class="rm-close" id="receiptModalClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="rm-close" id="receiptModalClose" aria-label="Close">✕</button>
     <div id="receiptModalBox"></div>
   </div>
 </div>
@@ -669,7 +677,7 @@
 </div>
 <div class="modal-overlay hidden" id="editModal">
   <div class="modal-box">
-    <button class="modal-close" id="modalClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="modal-close" id="modalClose">✕</button>
     <h3>Edit Class</h3>
     <form id="editScheduleForm" method="POST" action="">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -713,7 +721,7 @@
 {# ── Edit Attendance Time Modal ── #}
 <div class="modal-overlay hidden" id="editAttnModal">
   <div class="modal-box">
-    <button class="modal-close" id="editAttnClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="modal-close" id="editAttnClose">✕</button>
     <h3>✏️ Edit Attendance Time</h3>
     <p style="font-size:.85rem;color:var(--text3);margin:4px 0 16px" id="editAttnSub"></p>
     <form id="editAttnForm" method="POST" action="">
@@ -728,7 +736,7 @@
 {# ── Edit Receipt Modal ── #}
 <div class="modal-overlay hidden" id="editReceiptModal">
   <div class="modal-box">
-    <button class="modal-close" id="editReceiptClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="modal-close" id="editReceiptClose">✕</button>
     <h3>📝 Edit Detail Receipt</h3>
     <form id="editReceiptForm" method="POST" action="">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -753,7 +761,7 @@
 {# ── Reset Password Modal ── #}
 <div class="modal-overlay hidden" id="resetPwModal">
   <div class="modal-box">
-    <button class="modal-close" id="resetPwClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="modal-close" id="resetPwClose">✕</button>
     <h3>🔑 Reset Student Password</h3>
     <p style="font-size:.85rem;color:var(--text3);margin:6px 0 16px" id="resetPwSubtitle"></p>
     <form id="resetPwForm" method="POST" action="">
@@ -830,8 +838,58 @@ fetch('/set_tz', {
   body: JSON.stringify({ tz_offset: -(new Date().getTimezoneOffset()) })
 });
 
-/* The checkbox and the Duplicate button are part of the card template itself
-   (partials/schedule_cards.html), so nothing needs to be injected here. */
+/* ════════════════════════════════════════════════════
+   FITUR BARU: INJECT TOMBOL CHECKBOX & DUPLICATE 
+   ════════════════════════════════════════════════════ */
+document.querySelectorAll('.sc-card').forEach(card => {
+    const id = card.id.replace('sc-', '');
+    
+    const head = card.querySelector('.sc-head');
+    if (head && !card.querySelector('.sc-check')) {
+        const titleEl = card.querySelector('.sc-title');
+        const timeEl = card.querySelector('.sc-time');
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.gap = '12px';
+        wrapper.style.flex = '1';
+        wrapper.style.minWidth = '0';
+        
+        wrapper.innerHTML = `<input type="checkbox" class="sc-check" value="${id}" style="width:16px;height:16px;cursor:pointer;accent-color:var(--red);margin-top:2px;">
+                             <div style="min-width:0;flex:1" class="inject-target"></div>`;
+                             
+        const target = wrapper.querySelector('.inject-target');
+        if (titleEl) target.appendChild(titleEl);
+        if (timeEl) target.appendChild(timeEl);
+        
+        head.insertBefore(wrapper, head.firstChild);
+    }
+
+    const footDiv = card.querySelector('.sc-foot > div:last-child');
+    if (footDiv && !footDiv.querySelector('.dup-sc-btn')) {
+        const editBtn = footDiv.querySelector('.edit-sc-btn');
+        let title = '', desc = '', link = '', at = '', mode = 'online', location = '';
+        if (editBtn) {
+            title = editBtn.dataset.title || '';
+            desc = editBtn.dataset.desc || '';
+            link = editBtn.dataset.link || '';
+            at = editBtn.dataset.at || '';
+            mode = editBtn.dataset.mode || 'online';
+            location = editBtn.dataset.location || '';
+        }
+        const dupBtn = document.createElement('button');
+        dupBtn.className = 'btn bgh bsm dup-sc-btn';
+        dupBtn.dataset.id = id;
+        dupBtn.dataset.title = title;
+        dupBtn.dataset.desc = desc;
+        dupBtn.dataset.link = link;
+        dupBtn.dataset.at = at;
+        dupBtn.dataset.mode = mode;
+        dupBtn.dataset.location = location;
+        dupBtn.innerHTML = '📋 Duplicate';
+        footDiv.insertBefore(dupBtn, footDiv.firstChild);
+    }
+});
 
 /* ════════════════════════════════════════════════════
    FITUR BARU: FILTER CLASSES & BULK DELETE
@@ -1365,27 +1423,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
 
   window.userPackageType = "{{ user.package_type if user.package_type is defined else 'session' }}"; 
 
-
-  /* Pay-first receipts also list what the student attended the month before (read from the
-     attendance records, so no schedule is needed for that month). */
-  function lastMonthSection(card) {
-    if (card.dataset.kind !== 'prepaid') return '';
-    const label = card.dataset.lastmonthLabel || 'last month';
-    const rows = (card.dataset.lastmonth || '').split('|').filter(Boolean).map((raw, i) => {
-      const dt = new Date(raw.endsWith('Z') ? raw : raw + 'Z');
-      const DA = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const hm = String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0');
-      return `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #eee;font-size:.88rem;">
-        <span style="color:#d4af37;font-weight:bold;min-width:25px;">#${i+1}</span>
-        <span style="flex:1;color:#333;">${DA[dt.getDay()]}, ${dt.getDate()} ${MO[dt.getMonth()]} ${dt.getFullYear()}</span>
-        <span style="color:#666;font-family:monospace;">${hm}</span></div>`;
-    }).join('');
-    return `<div style="margin-top:24px;">
-      <h4 style="margin:0 0 10px 0;font-size:.95rem;color:#444;border-bottom:2px solid #f5f5f5;padding-bottom:6px;">📅 Last month attendance · ${label}</h4>
-      ${rows || '<p style="color:#999;font-style:italic;font-size:.9rem;padding:6px 0;">No attendance recorded last month.</p>'}
-    </div>`;
-  }
-
   function build(card) {
     const paid    = card.dataset.paid === '1';
     const fee     = parseInt(card.dataset.fee || 0);
@@ -1509,8 +1546,6 @@ document.querySelectorAll('.fee-form').forEach(f => {
           </form>
         </div>
         
-        ${lastMonthSection(card)}
-
         <div class="rm-actions" style="display:flex; gap:8px; margin-top:24px; border-top: 2px solid #f5f5f5; padding-top:16px;">
           ${actionBtns}
                     <a class="btn bgh bsm" style="flex:none;text-decoration:none" href="/teacher/receipt/${rid}.pdf" target="_blank" rel="noopener" title="Open the printable PDF">PDF</a>

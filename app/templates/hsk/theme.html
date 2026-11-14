@@ -1,0 +1,84 @@
+{% extends "quiz/layout.html" %}
+{% block qz_title %}{{ label }}{% endblock %}
+{% block qz_back %}Kembali ke daftar tema{% endblock %}
+{% block qz_attrs %}data-page="hsk-theme"{% endblock %}
+{% block head_extra %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=1' }}">
+{% endblock %}
+
+{% block qz_body %}
+<div id="hsk-app" data-page="theme" data-uid="{{ uid }}">
+  <div class="qz-head">
+    <div>
+      <h1 class="qz-h1">{{ icon }} {{ label }}</h1>
+      <p class="qz-sub"><span id="hk-count">{{ items|length }}</span> kata · <span id="hk-known-count">0</span> sudah hafal</p>
+    </div>
+  </div>
+
+  <div class="hk-tabs" role="tablist">
+    <button type="button" class="hk-tab on" id="tab-list" role="tab" aria-selected="true">Daftar kata</button>
+    <button type="button" class="hk-tab" id="tab-practice" role="tab" aria-selected="false">Latihan kartu</button>
+  </div>
+
+  <section id="view-list">
+    <div class="hk-tools">
+      <input type="search" id="hk-filter" class="hk-input" placeholder="Cari di tema ini" autocomplete="off" aria-label="Cari di tema ini">
+      <label class="hk-check"><input type="checkbox" id="hk-only-unknown"> Hanya yang belum hafal</label>
+    </div>
+    <div id="hk-list" class="hk-list"></div>
+    <div id="hk-empty" class="card" hidden><div class="empty-state"><div class="empty-title">Tidak ada kata yang cocok</div></div></div>
+  </section>
+
+  <section id="view-practice" hidden>
+    <div class="hk-tools">
+      <label class="hk-check">Mode
+        <select id="hk-mode" class="hk-select">
+          <option value="zh">Hanzi → arti</option>
+          <option value="id">Arti → hanzi</option>
+        </select>
+      </label>
+      <label class="hk-check"><input type="checkbox" id="hk-practice-unknown" checked> Hanya yang belum hafal</label>
+      <button type="button" class="qz-link" id="hk-shuffle" style="margin:0">Acak</button>
+    </div>
+
+    <div class="fc-wrap" id="fc">
+      <div class="fc-bar"><span id="fc-count"></span></div>
+      <div class="fc-progress"><div id="fc-prog" style="width:0"></div></div>
+      <div class="fc-stage">
+        <div class="fc-card" id="fc-card" tabindex="0" role="button" aria-label="Balik kartu">
+          <div class="fc-face fc-front">
+            <div class="fc-text" id="fc-front" lang="zh"></div>
+            <div class="fc-hint">Ketuk untuk membalik</div>
+          </div>
+          <div class="fc-face fc-back">
+            <div class="fc-text" id="fc-back"></div>
+            <div class="fc-sub" id="fc-back-sub"></div>
+            <div class="fc-why" id="fc-back-why"></div>
+          </div>
+        </div>
+      </div>
+      <div class="fc-actions">
+        <button type="button" class="btn bgh qz-btn-sm" id="fc-prev">Sebelumnya</button>
+        <div class="fc-mid">
+          <button type="button" class="btn bgh qz-btn-sm" id="fc-again">Belum hafal</button>
+          <button type="button" class="btn qz-btn-gold qz-btn-sm" id="fc-know">Hafal</button>
+        </div>
+        <button type="button" class="btn bgh qz-btn-sm" id="fc-next">Berikutnya</button>
+      </div>
+      <button type="button" class="qz-link hk-speak" id="fc-speak" hidden>🔊 Dengarkan</button>
+      <div class="card" id="fc-done" hidden style="margin-top:18px;text-align:center">
+        <div class="qz-section-title" id="fc-done-title"></div>
+        <p class="qz-hint-text" id="fc-done-sub"></p>
+        <div class="qz-actions-row" style="justify-content:center">
+          <button type="button" class="btn qz-btn-gold qz-btn-sm" id="fc-redo">Ulangi</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="fc-none" hidden><div class="empty-state"><div class="empty-icon">🎉</div><div class="empty-title">Semua kata di tema ini sudah hafal</div><div class="empty-sub">Matikan “Hanya yang belum hafal” untuk mengulang semuanya.</div></div></div>
+  </section>
+</div>
+<script type="application/json" id="hsk-data">{{ items|tojson }}</script>
+{% endblock %}
+
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=1' }}"></script>{% endblock %}

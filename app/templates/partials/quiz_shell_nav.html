@@ -2,8 +2,8 @@
    between them feels like one app. On the dashboards the tabs switch in place; here they
    link back to the dashboard and remember which tab to open. #}
 
-{% set TEACHER_ITEMS = [('classes','📆','nav_classes','nav_classes'),('attendance','✅','nav_attendance','nav_attend_short'),('students','👥','nav_students','nav_students'),('receipts','🧾','nav_receipts','nav_receipts'),('insights','📈','nav_insights','nav_insights'),('quiz','📝','nav_quiz','nav_quiz'),('settings','⚙️','nav_settings','nav_settings')] %}
-{% set STUDENT_ITEMS = [('classes','📆','nav_classes','nav_classes'),('progress','📊','nav_progress','nav_progress'),('receipts','🧾','nav_receipts','nav_receipts'),('quiz','📝','nav_quiz','nav_quiz'),('settings','⚙️','nav_settings','nav_settings')] %}
+{% set TEACHER_ITEMS = [('classes','📆','nav_classes','nav_classes'),('attendance','✅','nav_attendance','nav_attend_short'),('students','👥','nav_students','nav_students'),('receipts','🧾','nav_receipts','nav_receipts'),('insights','📈','nav_insights','nav_insights'),('quiz','📝','nav_quiz','nav_quiz'),('hsk','📖','nav_hsk','nav_hsk'),('settings','⚙️','nav_settings','nav_settings')] %}
+{% set STUDENT_ITEMS = [('classes','📆','nav_classes','nav_classes'),('progress','📊','nav_progress','nav_progress'),('receipts','🧾','nav_receipts','nav_receipts'),('quiz','📝','nav_quiz','nav_quiz'),('hsk','📖','nav_hsk','nav_hsk'),('settings','⚙️','nav_settings','nav_settings')] %}
 
 {% macro sidebar(user) %}
 {% set role = user.role %}
@@ -15,8 +15,9 @@
   </div>
   <nav class="sidebar-nav" id="sideNav">
     {% for key, icon, label, short in (TEACHER_ITEMS if role == 'teacher' else STUDENT_ITEMS) %}
-      {% if key == 'quiz' %}
-      <a class="snav-link active" href="{{ url_for('quiz.index') }}" aria-current="page">
+      {% if key in ('quiz', 'hsk') %}
+      {% set cur = active_nav|default('quiz') %}
+      <a class="snav-link{% if key == cur %} active{% endif %}" href="{{ url_for('quiz.index') if key == 'quiz' else url_for('hsk.index') }}"{% if key == cur %} aria-current="page"{% endif %}>
         <span class="snav-icon">{{ icon }}</span><span class="snav-label">{{ tr(label) }}</span>
       </a>
       {% else %}
@@ -41,8 +42,9 @@
 {% set dash = url_for('teacher.dashboard') if role == 'teacher' else url_for('student.dashboard') %}
 <nav class="app-bottom-nav" id="bottomNav">
   {% for key, icon, label, short in (TEACHER_ITEMS if role == 'teacher' else STUDENT_ITEMS) %}
-    {% if key == 'quiz' %}
-    <a class="bnav-btn active" href="{{ url_for('quiz.index') }}" aria-current="page" style="text-decoration:none">
+    {% if key in ('quiz', 'hsk') %}
+    {% set cur = active_nav|default('quiz') %}
+    <a class="bnav-btn{% if key == cur %} active{% endif %}" href="{{ url_for('quiz.index') if key == 'quiz' else url_for('hsk.index') }}"{% if key == cur %} aria-current="page"{% endif %} style="text-decoration:none">
       <div class="bnav-icon">{{ icon }}</div><span>{{ tr(short) }}</span>
     </a>
     {% else %}

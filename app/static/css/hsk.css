@@ -1,0 +1,70 @@
+/* HSK 1 pages - builds on quiz.css (qz-*, fc-*) and the theme variables in main.css */
+.hk-input, .hk-select {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text); font: inherit; font-size: 1rem;
+}
+.hk-select { width: auto; padding: 7px 10px; margin-left: 6px; }
+.hk-input:focus, .hk-select:focus { outline: none; border-color: var(--gold); }
+.hk-searchcard { padding: 14px; margin-bottom: 14px; }
+.hk-results { margin-top: 10px; display: flex; flex-direction: column; gap: 2px; }
+.hk-hit { display: flex; align-items: baseline; gap: 10px; padding: 9px 8px; border-radius: 8px; text-decoration: none; color: var(--text); }
+.hk-hit:hover { background: var(--gold-soft); }
+.hk-hit-zh { font-family: var(--font-zh), var(--font-body); font-size: 1.35rem; min-width: 3.2em; }
+.hk-hit-py { color: var(--text3); font-style: italic; min-width: 6em; }
+.hk-hit-id { color: var(--text2); }
+.hk-nohit { padding: 8px; color: var(--text3); }
+
+.hk-overall { margin: 0 0 16px; font-size: .95rem; color: var(--text3); }
+.hk-overall .fc-progress { margin: 6px 0 0; }
+
+.hk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.hk-theme {
+  display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; text-decoration: none; color: var(--text);
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow);
+  transition: transform .15s, border-color .15s;
+}
+.hk-theme:hover { border-color: var(--gold); transform: translateY(-2px); }
+.hk-theme-all { background: var(--gold-soft); border-color: var(--gold); }
+.hk-theme-ico { font-size: 1.6rem; line-height: 1; }
+.hk-theme-name { font-weight: 600; }
+.hk-theme-zh { font-family: var(--font-zh), var(--font-body); color: var(--text2); font-size: 1.05rem; letter-spacing: .08em; }
+.hk-theme-sub { font-size: .85rem; color: var(--text3); }
+.hk-theme-bar { height: 4px; border-radius: 100px; background: var(--border); overflow: hidden; margin-top: 4px; }
+.hk-theme-bar i { display: block; height: 100%; background: var(--green); transition: width .3s; }
+.hk-foot { margin-top: 16px; text-align: center; }
+
+.hk-tabs { display: flex; gap: 6px; margin-bottom: 14px; border-bottom: 1.5px solid var(--border); }
+.hk-tab { background: none; border: 0; padding: 10px 14px; font: inherit; font-weight: 600; color: var(--text3); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1.5px; }
+.hk-tab.on { color: var(--text); border-bottom-color: var(--gold); }
+.hk-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
+.hk-tools .hk-input { flex: 1 1 220px; }
+.hk-check { display: inline-flex; align-items: center; gap: 6px; font-size: .95rem; color: var(--text2); cursor: pointer; }
+
+.hk-list { display: flex; flex-direction: column; gap: 8px; }
+.hk-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; scroll-margin-top: 70px; }
+.hk-item[hidden] { display: none; }
+.hk-item.open { border-color: var(--gold); }
+.hk-row { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 16px; background: none; border: 0; text-align: left; color: var(--text); font: inherit; cursor: pointer; }
+.hk-zh { font-family: var(--font-zh), var(--font-body); font-size: 1.8rem; min-width: 3.4em; line-height: 1.2; }
+.hk-mid { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.hk-py { color: var(--text3); font-style: italic; }
+.hk-id { color: var(--text); overflow-wrap: anywhere; }
+.hk-flag { visibility: hidden; color: var(--green); font-weight: 700; }
+.hk-item.known .hk-flag { visibility: visible; }
+.hk-detail { padding: 4px 16px 16px; display: flex; flex-direction: column; gap: 12px; border-top: 1px dashed var(--border); }
+.hk-sec-label { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); margin: 10px 0 3px; }
+.hk-sec-text { line-height: 1.55; color: var(--text); }
+.hk-note { background: var(--gold-soft); border-radius: var(--radius); padding: 2px 12px 10px; }
+.hk-words { display: flex; flex-direction: column; gap: 4px; }
+.hk-word { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.hk-word-zh { font-family: var(--font-zh), var(--font-body); font-size: 1.15rem; }
+.hk-word-py { color: var(--text3); font-style: italic; }
+.hk-word-id { color: var(--text2); }
+.hk-sen-zh { font-family: var(--font-zh), var(--font-body); font-size: 1.25rem; }
+.hk-sen-py { color: var(--text3); font-style: italic; }
+.hk-sen-id { color: var(--text2); }
+.hk-act { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.fc-text.hk-small { font-size: 1.5rem; }
+.fc-back .fc-why { font-size: .9rem; white-space: pre-line; }
+.hk-speak { display: block; margin: 12px auto 0; }
+@media (max-width: 520px) { .hk-zh { font-size: 1.55rem; min-width: 2.8em; } .hk-grid { grid-template-columns: 1fr 1fr; } .hk-theme { padding: 12px; } }
