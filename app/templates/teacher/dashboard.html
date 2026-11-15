@@ -56,7 +56,7 @@
       <span class="snav-icon">📝</span>
         <span class="snav-label">{{ tr('nav_quiz') }}</span>
       </a>
-      <a class="snav-link" href="{{ url_for('hsk.index') }}">
+      <a class="snav-link" href="{{ url_for('hsk.index', level=1) }}">
       <span class="snav-icon">📖</span>
         <span class="snav-label">{{ tr('nav_hsk') }}</span>
       </a>
@@ -514,7 +514,7 @@
     <div class="bnav-icon">📝</div>
       <span>{{ tr('nav_quiz') }}</span>
     </a>
-    <a class="bnav-btn" href="{{ url_for('hsk.index') }}" style="text-decoration:none">
+    <a class="bnav-btn" href="{{ url_for('hsk.index', level=1) }}" style="text-decoration:none">
     <div class="bnav-icon">📖</div>
       <span>{{ tr('nav_hsk') }}</span>
     </a>

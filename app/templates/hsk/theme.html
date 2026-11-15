@@ -1,18 +1,18 @@
 {% extends "quiz/layout.html" %}
-{% block qz_title %}{{ label }}{% endblock %}
+{% block qz_title %}{{ level_name }} · {{ label }}{% endblock %}
 {% block qz_back %}Kembali ke daftar tema{% endblock %}
 {% block qz_attrs %}data-page="hsk-theme"{% endblock %}
 {% block head_extra %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=1' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=2' }}">
 {% endblock %}
 
 {% block qz_body %}
-<div id="hsk-app" data-page="theme" data-uid="{{ uid }}">
+<div id="hsk-app" data-page="theme" data-uid="{{ uid }}" data-level="{{ level }}">
   <div class="qz-head">
     <div>
       <h1 class="qz-h1">{{ icon }} {{ label }}</h1>
-      <p class="qz-sub"><span id="hk-count">{{ items|length }}</span> kata · <span id="hk-known-count">0</span> sudah hafal</p>
+      <p class="qz-sub">{{ level_name }} · <span id="hk-count">{{ items|length }}</span> kata · <span id="hk-known-count">0</span> sudah hafal</p>
     </div>
   </div>
 
@@ -81,4 +81,4 @@
 <script type="application/json" id="hsk-data">{{ items|tojson }}</script>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=1' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=2' }}"></script>{% endblock %}

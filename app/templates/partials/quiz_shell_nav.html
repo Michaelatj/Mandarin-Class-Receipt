@@ -17,7 +17,7 @@
     {% for key, icon, label, short in (TEACHER_ITEMS if role == 'teacher' else STUDENT_ITEMS) %}
       {% if key in ('quiz', 'hsk') %}
       {% set cur = active_nav|default('quiz') %}
-      <a class="snav-link{% if key == cur %} active{% endif %}" href="{{ url_for('quiz.index') if key == 'quiz' else url_for('hsk.index') }}"{% if key == cur %} aria-current="page"{% endif %}>
+      <a class="snav-link{% if key == cur %} active{% endif %}" href="{{ url_for('quiz.index') if key == 'quiz' else url_for('hsk.index', level=1) }}"{% if key == cur %} aria-current="page"{% endif %}>
         <span class="snav-icon">{{ icon }}</span><span class="snav-label">{{ tr(label) }}</span>
       </a>
       {% else %}
@@ -44,7 +44,7 @@
   {% for key, icon, label, short in (TEACHER_ITEMS if role == 'teacher' else STUDENT_ITEMS) %}
     {% if key in ('quiz', 'hsk') %}
     {% set cur = active_nav|default('quiz') %}
-    <a class="bnav-btn{% if key == cur %} active{% endif %}" href="{{ url_for('quiz.index') if key == 'quiz' else url_for('hsk.index') }}"{% if key == cur %} aria-current="page"{% endif %} style="text-decoration:none">
+    <a class="bnav-btn{% if key == cur %} active{% endif %}" href="{{ url_for('quiz.index') if key == 'quiz' else url_for('hsk.index', level=1) }}"{% if key == cur %} aria-current="page"{% endif %} style="text-decoration:none">
       <div class="bnav-icon">{{ icon }}</div><span>{{ tr(short) }}</span>
     </a>
     {% else %}

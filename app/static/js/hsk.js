@@ -4,7 +4,8 @@
   const root = document.getElementById('hsk-app');
   if (!root) return;
   const $ = (id) => document.getElementById(id);
-  const KEY = 'hsk1_known_v1_' + (root.dataset.uid || '0');
+  const LEVEL = root.dataset.level || '1';
+  const KEY = 'hsk' + LEVEL + '_known_v1_' + (root.dataset.uid || '0');
 
   let known = new Set();
   try { known = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) {}
@@ -53,7 +54,7 @@
       if (!hits.length) { box.appendChild(el('div', 'hk-nohit', 'Tidak ditemukan')); return; }
       hits.forEach((e) => {
         const a = el('a', 'hk-hit');
-        a.href = '/hsk1/' + e.theme + '#w' + e.n;
+        a.href = '/hsk' + LEVEL + '/' + e.theme + '#w' + e.n;
         a.appendChild(el('span', 'hk-hit-zh', e.hanzi));
         a.appendChild(el('span', 'hk-hit-py', e.pinyin));
         a.appendChild(el('span', 'hk-hit-id', e.arti));
@@ -64,7 +65,7 @@
       if (!all && !loading) {
         loading = true;
         try {
-          const r = await fetch('/hsk1/data.json', { credentials: 'same-origin' });
+          const r = await fetch('/hsk' + LEVEL + '/data.json', { credentials: 'same-origin' });
           all = r.ok ? await r.json() : [];
         } catch (e) { all = []; }
         loading = false;

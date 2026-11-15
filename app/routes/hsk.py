@@ -1,51 +1,76 @@
 """
-routes/hsk.py - HSK 1 study material (300 words) for enrolled students.
+routes/hsk.py - HSK study material (HSK 1: 300 words, HSK 2: 200 new words) for enrolled students.
 
 Only logged-in accounts that belong to the class can open it: teachers, and
 students the teacher has actually enrolled (a fee set, an attendance, a receipt
 or a schedule invite). Someone who just registered an account and is not part of
 the class yet sees a short "ask your teacher" page. Nothing here is public.
+
+URLs: /hsk1/, /hsk2/ (theme list) - /hsk<level>/<theme> - /hsk<level>/data.json
 """
 import json
 import logging
 from functools import lru_cache, wraps
 from pathlib import Path
 
-from flask import (Blueprint, abort, jsonify, redirect, render_template,
-                   session, url_for)
+from flask import (Blueprint, abort, jsonify, make_response, redirect,
+                   render_template, session, url_for)
 
 from .. import db
 from ..models import Attendance, Receipt, ScheduleInvite, StudentFee, User
 
 logger = logging.getLogger(__name__)
-hsk_bp = Blueprint("hsk", __name__, url_prefix="/hsk1")
+hsk_bp = Blueprint("hsk", __name__)
 
-DATA_FILE = Path(__file__).resolve().parent.parent / "data" / "hsk1.json"
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+LEVELS = {
+    1: {"name": "HSK 1", "zh": "汉语水平考试一级",
+        "intro": "300 kata, dikelompokkan per tema. Buka satu tema, baca penjelasannya, lalu latihan dengan kartu."},
+    2: {"name": "HSK 2", "zh": "汉语水平考试二级",
+        "intro": "200 kata baru yang melanjutkan HSK 1, dikelompokkan per tema. Contoh kalimatnya hanya memakai kata HSK 1 dan HSK 2."},
+}
 
 # (id, icon, label) - the order students see them in
-THEMES = [
-    ("sapaan",     "🙏", "Sapaan & sopan santun"),
-    ("orang",      "🧑", "Kata ganti & orang"),
-    ("keluarga",   "👨‍👩‍👧", "Keluarga"),
-    ("angka",      "🔢", "Angka & hitungan"),
-    ("waktu",      "🕒", "Waktu & tanggal"),
-    ("makanan",    "🍜", "Makanan & minuman"),
-    ("belanja",    "🛍️", "Belanja & uang"),
-    ("tempat",     "📍", "Tempat & arah"),
-    ("transport",  "🚆", "Transportasi"),
-    ("sekolah",    "🎓", "Sekolah & belajar"),
-    ("kerja",      "🏃", "Kata kerja sehari-hari"),
-    ("sifat",      "🌡️", "Sifat & keadaan"),
-    ("tanya",      "❓", "Kata tanya & penunjuk"),
-    ("tatabahasa", "🧩", "Tata bahasa & partikel"),
-    ("benda",      "📦", "Benda, hewan & alam"),
-]
-THEME_MAP = {t[0]: t for t in THEMES}
+THEMES = {
+    1: [
+        ("sapaan",     "🙏", "Sapaan & sopan santun"),
+        ("orang",      "🧑", "Kata ganti & orang"),
+        ("keluarga",   "👨‍👩‍👧", "Keluarga"),
+        ("angka",      "🔢", "Angka & hitungan"),
+        ("waktu",      "🕒", "Waktu & tanggal"),
+        ("makanan",    "🍜", "Makanan & minuman"),
+        ("belanja",    "🛍️", "Belanja & uang"),
+        ("tempat",     "📍", "Tempat & arah"),
+        ("transport",  "🚆", "Transportasi"),
+        ("sekolah",    "🎓", "Sekolah & belajar"),
+        ("kerja",      "🏃", "Kata kerja sehari-hari"),
+        ("sifat",      "🌡️", "Sifat & keadaan"),
+        ("tanya",      "❓", "Kata tanya & penunjuk"),
+        ("tatabahasa", "🧩", "Tata bahasa & partikel"),
+        ("benda",      "📦", "Benda, hewan & alam"),
+    ],
+    2: [
+        ("tatabahasa", "🧩", "Partikel, kata sambung & penghitung"),
+        ("gerak",      "🧭", "Kata kerja arah"),
+        ("tempat",     "🚇", "Tempat & perjalanan"),
+        ("sekolah",    "🎓", "Sekolah & belajar"),
+        ("orang",      "👵", "Keluarga & orang"),
+        ("tubuh",      "🩺", "Tubuh & kesehatan"),
+        ("makanan",    "☕", "Makanan & minuman"),
+        ("benda",      "🎨", "Warna, benda & cuaca"),
+        ("olahraga",   "⚽", "Olahraga & hobi"),
+        ("waktu",      "🕒", "Waktu & frekuensi"),
+        ("kerja",      "🏃", "Kata kerja sehari-hari"),
+        ("sifat",      "🌡️", "Sifat & perasaan"),
+    ],
+}
+LEVEL_LIST = [(lv, LEVELS[lv]["name"]) for lv in sorted(LEVELS)]
 
 
-@lru_cache(maxsize=1)
-def _entries():
-    with open(DATA_FILE, encoding="utf-8") as f:
+@lru_cache(maxsize=4)
+def _entries(level):
+    with open(DATA_DIR / f"hsk{level}.json", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -72,7 +97,9 @@ def _is_enrolled(user):
 def guard(json_response=False):
     def decorator(fn):
         @wraps(fn)
-        def wrapper(*args, **kwargs):
+        def wrapper(level, *args, **kwargs):
+            if level not in LEVELS:
+                abort(404)
             uid = session.get("user_id")
             user = db.session.get(User, uid) if uid else None
             if not user:
@@ -83,56 +110,59 @@ def guard(json_response=False):
                 if json_response:
                     return jsonify(ok=False, msg="not enrolled"), 403
                 return render_template("hsk/locked.html", home=_home(user)), 403
-            return fn(user, *args, **kwargs)
+            return fn(user, level, *args, **kwargs)
         return wrapper
     return decorator
 
 
-def _no_store(resp):
+def _page(template, user, level, back=None, **ctx):
+    resp = make_response(render_template(
+        template, home=back or _home(user), uid=user.id, level=level,
+        level_name=LEVELS[level]["name"], levels=LEVEL_LIST, **ctx))
     resp.headers["Cache-Control"] = "no-store"
     return resp
 
 
-@hsk_bp.route("/")
+@hsk_bp.route("/hsk<int:level>/")
 @guard()
-def index(user):
-    entries = _entries()
+def index(user, level):
+    entries = _entries(level)
     themes = []
-    for tid, icon, label in THEMES:
+    for tid, icon, label in THEMES[level]:
         items = [e for e in entries if e["theme"] == tid]
         themes.append({
             "id": tid, "icon": icon, "label": label, "count": len(items),
             "preview": " ".join(e["hanzi"] for e in items[:5]),
             "ns": [e["n"] for e in items],
         })
-    return _no_store(app_render("hsk/index.html", user, themes=themes, total=len(entries),
-                                all_ns=[e["n"] for e in entries]))
+    return _page("hsk/index.html", user, level, themes=themes, total=len(entries),
+                 all_ns=[e["n"] for e in entries], level_zh=LEVELS[level]["zh"],
+                 intro=LEVELS[level]["intro"])
 
 
-@hsk_bp.route("/<theme_id>")
+@hsk_bp.route("/hsk<int:level>/<theme_id>")
 @guard()
-def theme(user, theme_id):
-    entries = _entries()
+def theme(user, level, theme_id):
+    entries = _entries(level)
+    known = {t[0]: t for t in THEMES[level]}
     if theme_id == "semua":
-        meta = ("semua", "📚", "Semua 300 kata")
+        meta = ("semua", "📚", f"Semua {len(entries)} kata")
         items = entries
-    elif theme_id in THEME_MAP:
-        meta = THEME_MAP[theme_id]
+    elif theme_id in known:
+        meta = known[theme_id]
         items = [e for e in entries if e["theme"] == theme_id]
     else:
         abort(404)
-    return _no_store(app_render("hsk/theme.html", user, theme_id=meta[0], icon=meta[1],
-                                label=meta[2], items=items))
+    # the "back" link of this page goes to the theme list, not the dashboard
+    return _page("hsk/theme.html", user, level, back=url_for("hsk.index", level=level),
+                 theme_id=meta[0], icon=meta[1], label=meta[2], items=items)
 
 
-@hsk_bp.route("/data.json")
+@hsk_bp.route("/hsk<int:level>/data.json")
 @guard(json_response=True)
-def data(user):
+def data(user, level):
     slim = [{"n": e["n"], "hanzi": e["hanzi"], "pinyin": e["pinyin"],
-             "arti": e["arti"], "theme": e["theme"]} for e in _entries()]
-    return _no_store(jsonify(slim))
-
-
-def app_render(template, user, **ctx):
-    from flask import make_response
-    return make_response(render_template(template, home=_home(user), uid=user.id, **ctx))
+             "arti": e["arti"], "theme": e["theme"]} for e in _entries(level)]
+    resp = jsonify(slim)
+    resp.headers["Cache-Control"] = "no-store"
+    return resp

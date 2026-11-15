@@ -68,3 +68,8 @@
 .fc-back .fc-why { font-size: .9rem; white-space: pre-line; }
 .hk-speak { display: block; margin: 12px auto 0; }
 @media (max-width: 520px) { .hk-zh { font-size: 1.55rem; min-width: 2.8em; } .hk-grid { grid-template-columns: 1fr 1fr; } .hk-theme { padding: 12px; } }
+
+.hk-levels { display: flex; gap: 8px; margin: 0 0 16px; }
+.hk-level { padding: 8px 18px; border-radius: 100px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); text-decoration: none; font-weight: 600; }
+.hk-level:hover { border-color: var(--gold); }
+.hk-level.on { background: var(--gold-soft); border-color: var(--gold); color: var(--text); }
