@@ -1,11 +1,13 @@
-/* HSK 1 study pages. Everything runs in the browser; "hafal" marks live in
-   localStorage per account on this device. All text goes in with textContent. */
+/* HSK study pages. UI text is English; the lesson content itself (meanings, tricks, notes)
+   stays Indonesian. Everything runs in the browser; "mastered" marks live in localStorage
+   per account and level on this device. All text goes in with textContent. */
 (function () {
   const root = document.getElementById('hsk-app');
   if (!root) return;
   const $ = (id) => document.getElementById(id);
   const LEVEL = root.dataset.level || '1';
   const KEY = 'hsk' + LEVEL + '_known_v1_' + (root.dataset.uid || '0');
+  const SVGNS = 'http://www.w3.org/2000/svg';
 
   let known = new Set();
   try { known = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) {}
@@ -16,6 +18,14 @@
     if (cls) n.className = cls;
     if (text !== undefined && text !== null) n.textContent = text;
     return n;
+  }
+  function icon(name) {                       // <svg><use href="#i-name"/></svg> from the page sprite
+    const s = document.createElementNS(SVGNS, 'svg');
+    s.setAttribute('class', 'hk-i');
+    const u = document.createElementNS(SVGNS, 'use');
+    u.setAttribute('href', '#i-' + name);
+    s.appendChild(u);
+    return s;
   }
   const norm = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
@@ -38,7 +48,7 @@
       });
       const all = $('hk-overall').dataset.all.split(',').map(Number);
       const k = countKnown(all);
-      $('hk-overall-text').textContent = 'Hafal ' + k + ' dari ' + all.length + ' kata';
+      $('hk-overall-text').textContent = 'Mastered ' + k + ' of ' + all.length + ' words';
       $('hk-overall-bar').style.width = (k / all.length * 100) + '%';
     }
     paint();
@@ -51,13 +61,12 @@
       if (!nq) { box.hidden = true; return; }
       const hits = all.filter((e) => e.hanzi.includes(q.trim()) || norm(e.pinyin).replace(/\s/g, '').includes(nq.replace(/\s/g, '')) || norm(e.arti).includes(nq)).slice(0, 12);
       box.hidden = false;
-      if (!hits.length) { box.appendChild(el('div', 'hk-nohit', 'Tidak ditemukan')); return; }
+      if (!hits.length) { box.appendChild(el('div', 'hk-nohit', 'No words found')); return; }
       hits.forEach((e) => {
         const a = el('a', 'hk-hit');
         a.href = '/hsk' + LEVEL + '/' + e.theme + '#w' + e.n;
-        a.appendChild(el('span', 'hk-hit-zh', e.hanzi));
-        a.appendChild(el('span', 'hk-hit-py', e.pinyin));
-        a.appendChild(el('span', 'hk-hit-id', e.arti));
+        const zh = el('span', 'hk-hit-zh', e.hanzi); zh.lang = 'zh';
+        a.append(zh, el('span', 'hk-hit-py', e.pinyin), el('span', 'hk-hit-id', e.arti));
         box.appendChild(a);
       });
     }
@@ -77,10 +86,7 @@
 
   /* ───────────── theme page ───────────── */
   const entries = JSON.parse($('hsk-data').textContent);
-
-  function updateKnownCount() {
-    $('hk-known-count').textContent = entries.filter((e) => known.has(e.n)).length;
-  }
+  const updateKnownCount = () => { $('hk-known-count').textContent = entries.filter((e) => known.has(e.n)).length; };
 
   /* tabs */
   const tabList = $('tab-list'), tabPrac = $('tab-practice');
@@ -89,34 +95,35 @@
     $('view-list').hidden = !list; $('view-practice').hidden = list;
     tabList.classList.toggle('on', list); tabPrac.classList.toggle('on', !list);
     tabList.setAttribute('aria-selected', list); tabPrac.setAttribute('aria-selected', !list);
-    if (!list) startPractice(true);
+    if (!list) startPractice();
   }
   tabList.addEventListener('click', () => showTab('list'));
   tabPrac.addEventListener('click', () => showTab('practice'));
 
   /* word list */
   const listEl = $('hk-list');
-  function section(label, content, cls) {
+  function section(ic, label, content, cls) {
     const s = el('div', 'hk-sec' + (cls ? ' ' + cls : ''));
-    s.appendChild(el('div', 'hk-sec-label', label));
+    const h = el('div', 'hk-sec-label'); h.append(icon(ic), document.createTextNode(label));
+    s.appendChild(h);
     if (typeof content === 'string') s.appendChild(el('div', 'hk-sec-text', content));
     else s.appendChild(content);
     return s;
   }
   function buildItem(e) {
-    const item = el('div', 'hk-item'); item.id = 'w' + e.n; item.dataset.n = e.n;
+    const item = el('div', 'hk-item'); item.id = 'w' + e.n;
     const row = el('button', 'hk-row'); row.type = 'button'; row.setAttribute('aria-expanded', 'false');
     const zh = el('span', 'hk-zh', e.hanzi); zh.lang = 'zh';
     const mid = el('span', 'hk-mid');
-    mid.appendChild(el('span', 'hk-py', e.pinyin));
-    mid.appendChild(el('span', 'hk-id', e.arti));
-    const flag = el('span', 'hk-flag', '✓');
-    row.append(zh, mid, flag);
+    mid.append(el('span', 'hk-py', e.pinyin), el('span', 'hk-id', e.arti));
+    const flag = el('span', 'hk-flag'); flag.appendChild(icon('check'));
+    const chev = el('span', 'hk-chev'); chev.appendChild(icon('down'));
+    row.append(zh, mid, flag, chev);
 
     const det = el('div', 'hk-detail'); det.hidden = true;
-    det.appendChild(section('Komponen', e.parts));
-    det.appendChild(section('Trik mengingat', e.trick));
-    if (e.history) det.appendChild(section('Asal-usul', e.history));
+    det.appendChild(section('parts', 'Components', e.parts));
+    det.appendChild(section('bulb', 'Memory trick', e.trick));
+    if (e.history) det.appendChild(section('history', 'Origin', e.history));
     if (e.words && e.words.length) {
       const ul = el('div', 'hk-words');
       e.words.forEach((w) => {
@@ -125,24 +132,29 @@
         li.append(wz, el('span', 'hk-word-py', w[1]), el('span', 'hk-word-id', w[2]));
         ul.appendChild(li);
       });
-      det.appendChild(section('Kata contoh', ul));
+      det.appendChild(section('words', 'Example words', ul));
     }
     const sen = el('div', 'hk-sen');
     const s0 = el('div', 'hk-sen-zh', e.sentence[0]); s0.lang = 'zh';
     sen.append(s0, el('div', 'hk-sen-py', e.sentence[1]), el('div', 'hk-sen-id', e.sentence[2]));
-    det.appendChild(section('Contoh kalimat', sen));
-    if (e.note) det.appendChild(section('Catatan', e.note, 'hk-note'));
+    det.appendChild(section('quote', 'Example sentence', sen));
+    if (e.note) det.appendChild(section('info', 'Note', e.note, 'hk-note'));
 
     const act = el('div', 'hk-act');
-    if (canSpeak) {
-      const sp = el('button', 'btn bgh qz-btn-sm', '🔊 Dengarkan'); sp.type = 'button';
-      sp.addEventListener('click', () => speak(e.hanzi));
-      const sp2 = el('button', 'btn bgh qz-btn-sm', '🔊 Kalimat'); sp2.type = 'button';
-      sp2.addEventListener('click', () => speak(e.sentence[0]));
-      act.append(sp, sp2);
+    function pill(ic, text, fn, cls) {
+      const b = el('button', 'hk-pill' + (cls ? ' ' + cls : '')); b.type = 'button';
+      b.append(icon(ic), document.createTextNode(text)); b.addEventListener('click', fn); return b;
     }
-    const kb = el('button', 'btn qz-btn-gold qz-btn-sm'); kb.type = 'button';
-    function paintKb() { kb.textContent = known.has(e.n) ? 'Tandai belum hafal' : 'Tandai hafal'; item.classList.toggle('known', known.has(e.n)); }
+    if (canSpeak) {
+      act.appendChild(pill('volume', 'Word', () => speak(e.hanzi)));
+      act.appendChild(pill('volume', 'Sentence', () => speak(e.sentence[0])));
+    }
+    const kb = el('button', 'hk-pill hk-pill-main'); kb.type = 'button';
+    function paintKb() {
+      const k = known.has(e.n);
+      kb.replaceChildren(icon(k ? 'x' : 'check'), document.createTextNode(k ? 'Mark as not mastered' : 'Mark as mastered'));
+      item.classList.toggle('known', k);
+    }
     kb.addEventListener('click', () => {
       if (known.has(e.n)) known.delete(e.n); else known.add(e.n);
       save(); paintKb(); updateKnownCount();
@@ -155,6 +167,7 @@
       const open = det.hidden;
       det.hidden = !open; row.setAttribute('aria-expanded', open); item.classList.toggle('open', open);
     });
+    item._paint = paintKb;
     item.append(row, det);
     return item;
   }
@@ -177,58 +190,56 @@
   onlyUnknown.addEventListener('change', applyFilter);
   updateKnownCount();
 
-  /* open the word a search result pointed at (#w123) */
-  if (location.hash && /^#w\d+$/.test(location.hash)) {
+  if (location.hash && /^#w\d+$/.test(location.hash)) {      // open the word a search result pointed at
     const t = document.querySelector(location.hash + ' .hk-row');
     if (t) { t.click(); t.scrollIntoView({ block: 'center' }); }
   }
 
   /* flashcards */
   const card = $('fc-card');
-  let deck = [], pos = 0, seen = 0, gotIt = 0;
-  function buildDeck() {
-    let d = entries.slice();
-    if ($('hk-practice-unknown').checked) d = d.filter((e) => !known.has(e.n));
-    return d;
-  }
-  function startPractice(keepOrder) {
-    deck = buildDeck(); pos = 0; seen = 0; gotIt = 0;
+  let deck = [], pos = 0, gotIt = 0, mode = 'zh', onlyNew = true;
+
+  function buildDeck() { return onlyNew ? entries.filter((e) => !known.has(e.n)) : entries.slice(); }
+  function showDeck(on) { $('fc').hidden = !on; }
+  function startPractice(shuffle) {
+    deck = buildDeck();
+    if (shuffle) for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+    pos = 0; gotIt = 0;
     $('fc-done').hidden = true;
     const none = deck.length === 0;
-    $('fc-none').hidden = !none; $('fc').hidden = none;
+    $('fc-none').hidden = !none; showDeck(!none);
     if (!none) render();
   }
   function render() {
-    const e = deck[pos], zhMode = $('hk-mode').value === 'zh';
+    const e = deck[pos], zhMode = mode === 'zh';
     card.classList.remove('flipped');
-    const f = $('fc-front'), b = $('fc-back'), bs = $('fc-back-sub'), bw = $('fc-back-why');
-    if (zhMode) {
-      f.textContent = e.hanzi; f.lang = 'zh'; f.classList.remove('hk-small');
-      b.textContent = e.arti; b.removeAttribute('lang');
-      bs.textContent = e.pinyin;
-      bw.textContent = e.sentence[0] + '\n' + e.sentence[1] + '\n' + e.sentence[2];
-    } else {
-      f.textContent = e.arti; f.removeAttribute('lang'); f.classList.add('hk-small');
-      b.textContent = e.hanzi; b.lang = 'zh';
-      bs.textContent = e.pinyin;
-      bw.textContent = e.sentence[0] + '\n' + e.sentence[1] + '\n' + e.sentence[2];
-    }
-    $('fc-count').textContent = 'Kartu ' + (pos + 1) + ' dari ' + deck.length;
+    const f = $('fc-front'), b = $('fc-back');
+    f.textContent = zhMode ? e.hanzi : e.arti;
+    f.classList.toggle('is-zh', zhMode); if (zhMode) f.lang = 'zh'; else f.removeAttribute('lang');
+    b.textContent = zhMode ? e.arti : e.hanzi;
+    b.classList.toggle('is-zh', !zhMode); if (!zhMode) b.lang = 'zh'; else b.removeAttribute('lang');
+    $('fc-back-sub').textContent = e.pinyin;
+    $('fc-sen-zh').textContent = e.sentence[0];
+    $('fc-sen-py').textContent = e.sentence[1];
+    $('fc-sen-id').textContent = e.sentence[2];
+    $('fc-count').textContent = 'Card ' + (pos + 1) + ' of ' + deck.length;
+    $('fc-known').textContent = known.size ? entries.filter((x) => known.has(x.n)).length + ' mastered' : '';
     $('fc-prog').style.width = ((pos + 1) / deck.length * 100) + '%';
     $('fc-prev').disabled = pos === 0;
     $('fc-speak').hidden = !canSpeak;
   }
-  function advance() {
-    if (pos + 1 >= deck.length) { finish(); return; }
-    pos++; render();
-  }
+  function advance() { if (pos + 1 >= deck.length) finish(); else { pos++; render(); } }
   function finish() {
-    $('fc').querySelector('.fc-stage').hidden = true;
-    $('fc-done').hidden = false;
-    $('fc-done-title').textContent = 'Selesai!';
-    $('fc-done-sub').textContent = 'Kamu menandai ' + gotIt + ' dari ' + deck.length + ' kartu sebagai hafal.';
+    showDeck(false); $('fc-done').hidden = false;
+    $('fc-done-title').textContent = 'Nice work!';
+    $('fc-done-sub').textContent = 'You marked ' + gotIt + ' of ' + deck.length + ' cards as mastered.';
   }
-  function flip() { card.classList.toggle('flipped'); }
+  function setKnown(n, on) {
+    if (on) known.add(n); else known.delete(n);
+    save(); updateKnownCount();
+    const it = document.getElementById('w' + n); if (it && it._paint) it._paint();
+  }
+  const flip = () => card.classList.toggle('flipped');
   card.addEventListener('click', flip);
   card.addEventListener('keydown', (ev) => {
     if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); flip(); }
@@ -237,27 +248,19 @@
   });
   $('fc-next').addEventListener('click', advance);
   $('fc-prev').addEventListener('click', () => { if (pos > 0) { pos--; render(); } });
-  $('fc-know').addEventListener('click', () => { known.add(deck[pos].n); gotIt++; save(); updateKnownCount(); refreshItem(deck[pos].n); advance(); });
-  $('fc-again').addEventListener('click', () => { known.delete(deck[pos].n); save(); updateKnownCount(); refreshItem(deck[pos].n); advance(); });
-  $('fc-speak').addEventListener('click', () => speak(deck[pos].hanzi));
-  $('fc-redo').addEventListener('click', () => { $('fc').querySelector('.fc-stage').hidden = false; startPractice(); });
-  $('hk-mode').addEventListener('change', () => { if (deck.length) render(); });
-  $('hk-practice-unknown').addEventListener('change', () => { $('fc').querySelector('.fc-stage').hidden = false; startPractice(); });
-  $('hk-shuffle').addEventListener('click', () => {
-    $('fc').querySelector('.fc-stage').hidden = false;
-    deck = buildDeck();
-    for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
-    pos = 0; seen = 0; gotIt = 0;
-    $('fc-done').hidden = true;
-    const none = deck.length === 0; $('fc-none').hidden = !none; $('fc').hidden = none;
-    if (!none) render();
+  $('fc-know').addEventListener('click', () => { setKnown(deck[pos].n, true); gotIt++; advance(); });
+  $('fc-again').addEventListener('click', () => { setKnown(deck[pos].n, false); advance(); });
+  $('fc-speak').addEventListener('click', (ev) => { ev.stopPropagation(); speak(deck[pos].hanzi); });
+  $('fc-redo').addEventListener('click', () => startPractice());
+  $('hk-shuffle').addEventListener('click', () => startPractice(true));
+  document.querySelectorAll('.hk-seg-btn').forEach((b) => b.addEventListener('click', () => {
+    mode = b.dataset.mode;
+    document.querySelectorAll('.hk-seg-btn').forEach((x) => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    if (deck.length && !$('fc').hidden) render();
+  }));
+  const chip = $('hk-practice-unknown');
+  chip.addEventListener('click', () => {
+    onlyNew = !onlyNew; chip.classList.toggle('on', onlyNew); chip.setAttribute('aria-pressed', onlyNew);
+    startPractice();
   });
-  /* keep the list's "known" styling in sync when marking from the cards */
-  function refreshItem(n) {
-    const it = document.getElementById('w' + n);
-    if (!it) return;
-    it.classList.toggle('known', known.has(n));
-    const btn = it.querySelector('.hk-act .qz-btn-gold');
-    if (btn) btn.textContent = known.has(n) ? 'Tandai belum hafal' : 'Tandai hafal';
-  }
 })();

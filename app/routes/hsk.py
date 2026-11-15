@@ -26,43 +26,43 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 LEVELS = {
     1: {"name": "HSK 1", "zh": "汉语水平考试一级",
-        "intro": "300 kata, dikelompokkan per tema. Buka satu tema, baca penjelasannya, lalu latihan dengan kartu."},
+        "intro": "300 words grouped by theme. Open a theme, read the explanations, then practise with flashcards."},
     2: {"name": "HSK 2", "zh": "汉语水平考试二级",
-        "intro": "200 kata baru yang melanjutkan HSK 1, dikelompokkan per tema. Contoh kalimatnya hanya memakai kata HSK 1 dan HSK 2."},
+        "intro": "200 new words that continue HSK 1, grouped by theme. Example sentences only use HSK 1 and HSK 2 words."},
 }
 
 # (id, icon, label) - the order students see them in
 THEMES = {
     1: [
-        ("sapaan",     "🙏", "Sapaan & sopan santun"),
-        ("orang",      "🧑", "Kata ganti & orang"),
-        ("keluarga",   "👨‍👩‍👧", "Keluarga"),
-        ("angka",      "🔢", "Angka & hitungan"),
-        ("waktu",      "🕒", "Waktu & tanggal"),
-        ("makanan",    "🍜", "Makanan & minuman"),
-        ("belanja",    "🛍️", "Belanja & uang"),
-        ("tempat",     "📍", "Tempat & arah"),
-        ("transport",  "🚆", "Transportasi"),
-        ("sekolah",    "🎓", "Sekolah & belajar"),
-        ("kerja",      "🏃", "Kata kerja sehari-hari"),
-        ("sifat",      "🌡️", "Sifat & keadaan"),
-        ("tanya",      "❓", "Kata tanya & penunjuk"),
-        ("tatabahasa", "🧩", "Tata bahasa & partikel"),
-        ("benda",      "📦", "Benda, hewan & alam"),
+        ("sapaan",     "🙏", "Greetings & manners"),
+        ("orang",      "🧑", "Pronouns & people"),
+        ("keluarga",   "👨‍👩‍👧", "Family"),
+        ("angka",      "🔢", "Numbers & counting"),
+        ("waktu",      "🕒", "Time & dates"),
+        ("makanan",    "🍜", "Food & drink"),
+        ("belanja",    "🛍️", "Shopping & money"),
+        ("tempat",     "📍", "Places & directions"),
+        ("transport",  "🚆", "Transport"),
+        ("sekolah",    "🎓", "School & study"),
+        ("kerja",      "🏃", "Everyday verbs"),
+        ("sifat",      "🌡️", "Adjectives & states"),
+        ("tanya",      "❓", "Question & pointing words"),
+        ("tatabahasa", "🧩", "Grammar & particles"),
+        ("benda",      "📦", "Things, animals & nature"),
     ],
     2: [
-        ("tatabahasa", "🧩", "Partikel, kata sambung & penghitung"),
-        ("gerak",      "🧭", "Kata kerja arah"),
-        ("tempat",     "🚇", "Tempat & perjalanan"),
-        ("sekolah",    "🎓", "Sekolah & belajar"),
-        ("orang",      "👵", "Keluarga & orang"),
-        ("tubuh",      "🩺", "Tubuh & kesehatan"),
-        ("makanan",    "☕", "Makanan & minuman"),
-        ("benda",      "🎨", "Warna, benda & cuaca"),
-        ("olahraga",   "⚽", "Olahraga & hobi"),
-        ("waktu",      "🕒", "Waktu & frekuensi"),
-        ("kerja",      "🏃", "Kata kerja sehari-hari"),
-        ("sifat",      "🌡️", "Sifat & perasaan"),
+        ("tatabahasa", "🧩", "Particles, conjunctions & measure words"),
+        ("gerak",      "🧭", "Directional verbs"),
+        ("tempat",     "🚇", "Places & travel"),
+        ("sekolah",    "🎓", "School & study"),
+        ("orang",      "👵", "Family & people"),
+        ("tubuh",      "🩺", "Body & health"),
+        ("makanan",    "☕", "Food & drink"),
+        ("benda",      "🎨", "Colors, objects & weather"),
+        ("olahraga",   "⚽", "Sports & hobbies"),
+        ("waktu",      "🕒", "Time & frequency"),
+        ("kerja",      "🏃", "Everyday verbs"),
+        ("sifat",      "🌡️", "Adjectives & feelings"),
     ],
 }
 LEVEL_LIST = [(lv, LEVELS[lv]["name"]) for lv in sorted(LEVELS)]
@@ -146,7 +146,7 @@ def theme(user, level, theme_id):
     entries = _entries(level)
     known = {t[0]: t for t in THEMES[level]}
     if theme_id == "semua":
-        meta = ("semua", "📚", f"Semua {len(entries)} kata")
+        meta = ("semua", "📚", f"All {len(entries)} words")
         items = entries
     elif theme_id in known:
         meta = known[theme_id]

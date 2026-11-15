@@ -1,15 +1,11 @@
-# Memasang halaman HSK 1 + HSK 2
+# Update HSK v3 (bug fix + new UI + English buttons)
 
-Zip ini menggantikan paket HSK 1 sebelumnya. Aman dipasang di atas project, baik yang sudah memasang paket lama maupun belum.
+1. Extract this zip into the project root (the folder that contains `app/`). Choose Merge and Replace.
+2. No database migration, no new libraries. Restart the app as usual.
+3. Hard-refresh the browser once (Ctrl+Shift+R) so the new CSS/JS load.
 
-1. Extract zip ini langsung ke root project (folder yang berisi `app/`). Pilih "Merge/Gabungkan folder" dan "Replace" file yang sama.
-2. Tidak ada migrasi database dan tidak ada library baru. Jalankan seperti biasa.
-3. Buka `/hsk1/` atau `/hsk2/`. Menu "HSK" muncul di sidebar guru dan murid.
-4. Kalau di-deploy (Vercel dll), commit dan push file barunya.
-
-File baru: app/routes/hsk.py, app/data/hsk1.json, app/data/hsk2.json, app/templates/hsk/{index,theme,locked}.html, app/static/js/hsk.js, app/static/css/hsk.css
-File lama yang diubah sedikit: app/__init__.py (daftarkan blueprint), app/services/i18n.py (label menu "HSK"), app/templates/partials/quiz_shell_nav.html, app/templates/student/dashboard.html, app/templates/teacher/dashboard.html (tautan menu)
-
-Akses: harus login. Guru selalu boleh. Murid boleh jika sudah terdaftar di kelas (guru sudah mengatur fee, atau ada absensi, kwitansi, atau undangan jadwal).
-Tanda "hafal" tersimpan di browser tiap murid (per level), bukan di database.
-Perubahan dari paket pertama: halaman HSK 2, pilihan level HSK 1/HSK 2, dan tombol "Kembali" di halaman tema kini benar-benar kembali ke daftar tema (sebelumnya ke dashboard).
+What changed
+- BUG FIX (student/dashboard.html): the dashboard script tried to hide `#langBar`, which does not exist in base.html. That raised an error and left every tab (Classes, Schedule, ...) hidden. The code is now null-safe, so Classes shows again right after login.
+- New flashcard UI: equal-height pill buttons, one centred control row, a 3D flip card, SVG icons, a segmented mode switch.
+- All HSK buttons and labels are English. Lesson material (meanings, memory tricks, notes, translations) stays Indonesian.
+- New file: app/templates/hsk/_sprite.html (icon set).

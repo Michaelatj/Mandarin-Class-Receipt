@@ -332,8 +332,10 @@
 
 {% block page_scripts %}
 <script>
-document.getElementById('langBar').style.display  = 'none';
-document.getElementById('dmToggle').style.display = 'none';
+['langBar', 'dmToggle'].forEach(function (id) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = 'none';   // either element may be absent in base.html; must never stop the script
+});
 
 document.addEventListener("DOMContentLoaded", function() {
     // Sync Timezone

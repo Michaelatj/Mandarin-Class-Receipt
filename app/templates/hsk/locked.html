@@ -1,12 +1,15 @@
 {% extends "quiz/layout.html" %}
-{% block qz_title %}HSK 1{% endblock %}
-{% block qz_back %}Kembali ke dashboard{% endblock %}
+{% block qz_title %}HSK{% endblock %}
+{% block qz_back %}Back to dashboard{% endblock %}
+{% block head_extra %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=3' }}">
+{% endblock %}
 {% block qz_body %}
-<div class="card">
-  <div class="empty-state">
-    <div class="empty-icon">🔒</div>
-    <div class="empty-title">Materi ini untuk murid kelas</div>
-    <div class="empty-sub">Akunmu belum terhubung dengan kelas. Minta gurumu untuk menambahkanmu, lalu buka halaman ini lagi.</div>
-  </div>
+{% include 'hsk/_sprite.html' %}
+<div class="card hk-locked">
+  <span class="hk-locked-ico"><svg class="hk-i"><use href="#i-lock"/></svg></span>
+  <div class="hk-locked-title">This material is for class students</div>
+  <p class="hk-locked-sub">Your account isn't linked to a class yet. Ask your teacher to add you, then open this page again.</p>
 </div>
 {% endblock %}

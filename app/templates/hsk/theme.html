@@ -1,84 +1,98 @@
 {% extends "quiz/layout.html" %}
 {% block qz_title %}{{ level_name }} · {{ label }}{% endblock %}
-{% block qz_back %}Kembali ke daftar tema{% endblock %}
+{% block qz_back %}Back to themes{% endblock %}
 {% block qz_attrs %}data-page="hsk-theme"{% endblock %}
 {% block head_extra %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=2' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=3' }}">
 {% endblock %}
 
 {% block qz_body %}
+{% include 'hsk/_sprite.html' %}
 <div id="hsk-app" data-page="theme" data-uid="{{ uid }}" data-level="{{ level }}">
-  <div class="qz-head">
+  <div class="hk-head">
+    <span class="hk-head-ico">{{ icon }}</span>
     <div>
-      <h1 class="qz-h1">{{ icon }} {{ label }}</h1>
-      <p class="qz-sub">{{ level_name }} · <span id="hk-count">{{ items|length }}</span> kata · <span id="hk-known-count">0</span> sudah hafal</p>
+      <h1 class="qz-h1">{{ label }}</h1>
+      <p class="qz-sub">{{ level_name }} · <span id="hk-count">{{ items|length }}</span> words · <span id="hk-known-count">0</span> mastered</p>
     </div>
   </div>
 
   <div class="hk-tabs" role="tablist">
-    <button type="button" class="hk-tab on" id="tab-list" role="tab" aria-selected="true">Daftar kata</button>
-    <button type="button" class="hk-tab" id="tab-practice" role="tab" aria-selected="false">Latihan kartu</button>
+    <button type="button" class="hk-tab on" id="tab-list" role="tab" aria-selected="true"><svg class="hk-i"><use href="#i-list"/></svg>Word list</button>
+    <button type="button" class="hk-tab" id="tab-practice" role="tab" aria-selected="false"><svg class="hk-i"><use href="#i-cards"/></svg>Flashcards</button>
   </div>
 
   <section id="view-list">
     <div class="hk-tools">
-      <input type="search" id="hk-filter" class="hk-input" placeholder="Cari di tema ini" autocomplete="off" aria-label="Cari di tema ini">
-      <label class="hk-check"><input type="checkbox" id="hk-only-unknown"> Hanya yang belum hafal</label>
+      <label class="hk-searchbox">
+        <svg class="hk-i"><use href="#i-search"/></svg>
+        <input type="search" id="hk-filter" class="hk-input" placeholder="Search in this theme" autocomplete="off" aria-label="Search in this theme">
+      </label>
+      <label class="hk-check"><input type="checkbox" id="hk-only-unknown"> Not mastered only</label>
     </div>
     <div id="hk-list" class="hk-list"></div>
-    <div id="hk-empty" class="card" hidden><div class="empty-state"><div class="empty-title">Tidak ada kata yang cocok</div></div></div>
+    <div id="hk-empty" class="hk-empty" hidden>No matching words</div>
   </section>
 
   <section id="view-practice" hidden>
-    <div class="hk-tools">
-      <label class="hk-check">Mode
-        <select id="hk-mode" class="hk-select">
-          <option value="zh">Hanzi → arti</option>
-          <option value="id">Arti → hanzi</option>
-        </select>
-      </label>
-      <label class="hk-check"><input type="checkbox" id="hk-practice-unknown" checked> Hanya yang belum hafal</label>
-      <button type="button" class="qz-link" id="hk-shuffle" style="margin:0">Acak</button>
+    <div class="hk-pbar">
+      <div class="hk-seg" role="group" aria-label="Card mode">
+        <button type="button" class="hk-seg-btn on" data-mode="zh" aria-pressed="true">Hanzi → Meaning</button>
+        <button type="button" class="hk-seg-btn" data-mode="id" aria-pressed="false">Meaning → Hanzi</button>
+      </div>
+      <div class="hk-pbar-r">
+        <button type="button" class="hk-chip on" id="hk-practice-unknown" aria-pressed="true"><svg class="hk-i"><use href="#i-check"/></svg>Not mastered only</button>
+        <button type="button" class="hk-iconbtn" id="hk-shuffle" aria-label="Shuffle" title="Shuffle"><svg class="hk-i"><use href="#i-shuffle"/></svg></button>
+      </div>
     </div>
 
-    <div class="fc-wrap" id="fc">
-      <div class="fc-bar"><span id="fc-count"></span></div>
-      <div class="fc-progress"><div id="fc-prog" style="width:0"></div></div>
-      <div class="fc-stage">
-        <div class="fc-card" id="fc-card" tabindex="0" role="button" aria-label="Balik kartu">
-          <div class="fc-face fc-front">
-            <div class="fc-text" id="fc-front" lang="zh"></div>
-            <div class="fc-hint">Ketuk untuk membalik</div>
+    <div class="hk-deck" id="fc">
+      <div class="hk-pmeta"><span id="fc-count"></span><span id="fc-known"></span></div>
+      <div class="hk-prog"><i id="fc-prog" style="width:0"></i></div>
+
+      <div class="hk-stage" id="fc-stage">
+        <button type="button" class="hk-listen" id="fc-speak" hidden aria-label="Listen" title="Listen"><svg class="hk-i"><use href="#i-volume"/></svg></button>
+        <div class="hk-card" id="fc-card" tabindex="0" role="button" aria-label="Flip card">
+          <div class="hk-face hk-front">
+            <div class="hk-face-main" id="fc-front"></div>
+            <div class="hk-hint"><svg class="hk-i"><use href="#i-flip"/></svg>Tap to flip</div>
           </div>
-          <div class="fc-face fc-back">
-            <div class="fc-text" id="fc-back"></div>
-            <div class="fc-sub" id="fc-back-sub"></div>
-            <div class="fc-why" id="fc-back-why"></div>
+          <div class="hk-face hk-back">
+            <div class="hk-face-main" id="fc-back"></div>
+            <div class="hk-face-sub" id="fc-back-sub"></div>
+            <div class="hk-divider"></div>
+            <div class="hk-cardsen">
+              <div class="hk-sen-zh" id="fc-sen-zh" lang="zh"></div>
+              <div class="hk-sen-py" id="fc-sen-py"></div>
+              <div class="hk-sen-id" id="fc-sen-id"></div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="fc-actions">
-        <button type="button" class="btn bgh qz-btn-sm" id="fc-prev">Sebelumnya</button>
-        <div class="fc-mid">
-          <button type="button" class="btn bgh qz-btn-sm" id="fc-again">Belum hafal</button>
-          <button type="button" class="btn qz-btn-gold qz-btn-sm" id="fc-know">Hafal</button>
-        </div>
-        <button type="button" class="btn bgh qz-btn-sm" id="fc-next">Berikutnya</button>
-      </div>
-      <button type="button" class="qz-link hk-speak" id="fc-speak" hidden>🔊 Dengarkan</button>
-      <div class="card" id="fc-done" hidden style="margin-top:18px;text-align:center">
-        <div class="qz-section-title" id="fc-done-title"></div>
-        <p class="qz-hint-text" id="fc-done-sub"></p>
-        <div class="qz-actions-row" style="justify-content:center">
-          <button type="button" class="btn qz-btn-gold qz-btn-sm" id="fc-redo">Ulangi</button>
-        </div>
+
+      <div class="hk-controls">
+        <button type="button" class="hk-round" id="fc-prev" aria-label="Previous card" title="Previous"><svg class="hk-i"><use href="#i-left"/></svg></button>
+        <button type="button" class="hk-ans hk-ans-no" id="fc-again"><svg class="hk-i"><use href="#i-x"/></svg>Not yet</button>
+        <button type="button" class="hk-ans hk-ans-yes" id="fc-know"><svg class="hk-i"><use href="#i-check"/></svg>Got it</button>
+        <button type="button" class="hk-round" id="fc-next" aria-label="Next card" title="Next"><svg class="hk-i"><use href="#i-right"/></svg></button>
       </div>
     </div>
-    <div class="card" id="fc-none" hidden><div class="empty-state"><div class="empty-icon">🎉</div><div class="empty-title">Semua kata di tema ini sudah hafal</div><div class="empty-sub">Matikan “Hanya yang belum hafal” untuk mengulang semuanya.</div></div></div>
+
+    <div class="hk-panel" id="fc-done" hidden>
+      <span class="hk-panel-ico"><svg class="hk-i"><use href="#i-done"/></svg></span>
+      <div class="hk-panel-title" id="fc-done-title"></div>
+      <p class="hk-panel-sub" id="fc-done-sub"></p>
+      <button type="button" class="hk-ans hk-ans-yes hk-ans-solo" id="fc-redo"><svg class="hk-i"><use href="#i-flip"/></svg>Practise again</button>
+    </div>
+    <div class="hk-panel" id="fc-none" hidden>
+      <span class="hk-panel-ico"><svg class="hk-i"><use href="#i-done"/></svg></span>
+      <div class="hk-panel-title">Everything in this theme is mastered</div>
+      <p class="hk-panel-sub">Turn off “Not mastered only” to review all the cards.</p>
+    </div>
   </section>
 </div>
 <script type="application/json" id="hsk-data">{{ items|tojson }}</script>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=2' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=3' }}"></script>{% endblock %}
