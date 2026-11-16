@@ -51,8 +51,9 @@ def create_app(config_class=None):
             'fmt_date': lambda dt: __import__('app.services.i18n', fromlist=['fmt_date']).fmt_date(dt),
             'fmt_idr': lambda amt: __import__('app.services.i18n', fromlist=['fmt_idr']).fmt_idr(amt),
             'to_wib': lambda dt: to_wib(dt),
-            'now_dt': lambda: datetime.now(),
+            'now_dt': lambda: datetime.utcnow(),
             'random_quote': random_quote,
+            'last_month_attendance': lambda r: __import__('app.services.prepaid', fromlist=['x']).last_month_attendance(r),
             'parse_raw_dates': lambda dates: __import__('app.services.i18n', fromlist=['parse_raw_dates']).parse_raw_dates(dates),
             'local_dt': lambda dt: dt - timedelta(minutes=session.get('tz_offset', -420)),
         }

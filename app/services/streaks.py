@@ -10,13 +10,13 @@ cancelled, and it was held after the student registered.
 The teacher can override a class by hand: marked present counts as attended, marked absent
 (a ScheduleAbsent row) never counts, even if the student submitted attendance near that time.
 
-A student attended a class when any of these is true:
+A student attended a class when either of these is true:
   * they pressed Join for it (online) or checked in to its roll call (offline),
-  * they submitted attendance with the normal attendance button, or the teacher recorded it,
-    close to the class time or on the same day (WIB) as the class.
-That way a student who shows up and is recorded through the normal attendance button is not
-punished, and a student who does none of these loses the streak. One plain attendance counts for
-one class only, so two classes in a day need two attendances.
+  * the teacher recorded their attendance by hand, close to the class time or on the same day
+    (WIB) as the class.
+Students can no longer submit attendance by hand: an old attendance with source 'student' no
+longer counts for a class (MANUAL_SOURCES). One teacher-recorded attendance counts for one class
+only, so two classes in a day need two attendances.
 
 Class times are WIB wall-clock times and attendance is stored in UTC, so classes are always
 compared through Schedule.start_utc.
@@ -35,6 +35,8 @@ rows so they are worked out again from the live data.
 from bisect import bisect_left
 from datetime import datetime, timedelta
 
+from sqlalchemy import or_
+
 from .. import db
 from ..models import (WIB_OFFSET, Attendance, Schedule, ScheduleAbsent, ScheduleInvite, ScheduleJoin,
                       StreakEntry, User)
@@ -42,6 +44,7 @@ from ..models import (WIB_OFFSET, Attendance, Schedule, ScheduleAbsent, Schedule
 GRACE_MINUTES = 60          # after this long, a class nobody attended counts as missed
 BEFORE = timedelta(minutes=60)   # attendance this early before the class still counts for it
 AFTER = timedelta(hours=4)       # and this long after it starts
+MANUAL_SOURCES = ("student",)        # attendance a student typed in by hand: no longer counts for streaks
 SETTLE_AFTER = timedelta(hours=36)   # after this long a class result is final and gets frozen
                                      # (until then a late attendance can still change it)
 
@@ -121,11 +124,13 @@ def make_matcher(sid, marks, joined, absent):
     return attended
 
 
-def compute_streaks(student_ids, now=None, grace_minutes=GRACE_MINUTES, freeze_ids=()):
+def compute_streaks(student_ids, now=None, grace_minutes=GRACE_MINUTES, freeze_ids=(), strict=False):
     """Return {student_id: info} for many students with a handful of queries.
 
     freeze_ids: schedule ids to freeze right now whatever their age (used just before they are
-    deleted). Any class older than SETTLE_AFTER is frozen automatically."""
+    deleted). Any class older than SETTLE_AFTER is frozen automatically.
+    strict: let a failed save raise instead of being ignored. preserve_before_delete uses it, so
+    a class is never deleted when its history could not be saved."""
     now = now or datetime.utcnow()
     student_ids = list(student_ids)
     if not student_ids:
@@ -180,7 +185,9 @@ def compute_streaks(student_ids, now=None, grace_minutes=GRACE_MINUTES, freeze_i
     marks = {}
     for att_id, stu_id, teacher_id, when in (db.session.query(Attendance.id, Attendance.student_id,
                                                               Attendance.teacher_id, Attendance.date)
-                                             .filter(Attendance.student_id.in_(student_ids), Attendance.date >= earliest)
+                                             .filter(Attendance.student_id.in_(student_ids), Attendance.date >= earliest,
+                                                     or_(Attendance.source.is_(None),
+                                                         Attendance.source.notin_(MANUAL_SOURCES)))
                                              .order_by(Attendance.date.asc())):
         if att_id not in claimed:
             marks.setdefault((stu_id, teacher_id), []).append(when)
@@ -246,6 +253,8 @@ def compute_streaks(student_ids, now=None, grace_minutes=GRACE_MINUTES, freeze_i
             db.session.commit()
         except Exception:                  # e.g. two requests froze the same class at once
             db.session.rollback()
+            if strict:
+                raise
     return result
 
 
@@ -262,7 +271,7 @@ def preserve_before_delete(schedule_ids):
     if not ids:
         return
     student_ids = [u.id for u in User.query.filter_by(role="student").all()]
-    compute_streaks(student_ids, freeze_ids=ids)
+    compute_streaks(student_ids, freeze_ids=ids, strict=True)   # raises if it could not be saved
     (StreakEntry.query.filter(StreakEntry.schedule_id.in_(ids))
      .update({StreakEntry.schedule_id: None}, synchronize_session=False))
     db.session.commit()

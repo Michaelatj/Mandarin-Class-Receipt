@@ -185,7 +185,14 @@ def delete(sid):
         if _is_ajax(): return jsonify(ok=False, msg="Not found")
         return redirect(url_for("teacher.dashboard"))
     from ..services.streaks import preserve_before_delete
-    preserve_before_delete([sid])          # keep every student's streak result for this class
+    try:
+        preserve_before_delete([sid])      # keep every student's streak result for this class
+    except Exception:
+        db.session.rollback()              # history could not be saved: do NOT delete the class
+        msg = "Could not save the streak history, so the class was not deleted. Please try again."
+        if _is_ajax(): return jsonify(ok=False, msg=msg)
+        flash(msg, "err")
+        return redirect(url_for("teacher.dashboard"))
     ScheduleJoin.query.filter_by(schedule_id=sid).delete()
     ScheduleInvite.query.filter_by(schedule_id=sid).delete()
     ScheduleAbsent.query.filter_by(schedule_id=sid).delete()
@@ -209,7 +216,11 @@ def bulk_delete():
     
     if valid_ids:
         from ..services.streaks import preserve_before_delete
-        preserve_before_delete(valid_ids)  # keep every student's streak result for these classes
+        try:
+            preserve_before_delete(valid_ids)  # keep every student's streak result for these classes
+        except Exception:
+            db.session.rollback()              # history could not be saved: do NOT delete anything
+            return jsonify(ok=False, msg="Could not save the streak history, so nothing was deleted. Please try again.")
         ScheduleJoin.query.filter(ScheduleJoin.schedule_id.in_(valid_ids)).delete(synchronize_session=False)
         ScheduleInvite.query.filter(ScheduleInvite.schedule_id.in_(valid_ids)).delete(synchronize_session=False)
         ScheduleAbsent.query.filter(ScheduleAbsent.schedule_id.in_(valid_ids)).delete(synchronize_session=False)

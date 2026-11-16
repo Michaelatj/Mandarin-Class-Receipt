@@ -29,6 +29,8 @@ LEVELS = {
         "intro": "300 words grouped by theme. Open a theme, read the explanations, then practise with flashcards."},
     2: {"name": "HSK 2", "zh": "汉语水平考试二级",
         "intro": "200 new words that continue HSK 1, grouped by theme. Example sentences only use HSK 1 and HSK 2 words."},
+    3: {"name": "HSK 3", "zh": "汉语水平考试三级",
+        "intro": "500 new words that continue HSK 2, grouped by theme. Example sentences only use HSK 1, 2 and 3 words."},
 }
 
 # (id, icon, label) - the order students see them in
@@ -63,6 +65,21 @@ THEMES = {
         ("waktu",      "🕒", "Time & frequency"),
         ("kerja",      "🏃", "Everyday verbs"),
         ("sifat",      "🌡️", "Adjectives & feelings"),
+    ],
+    3: [
+        ("tatabahasa", "🧩", "Grammar words & patterns"),
+        ("kerja",      "🏃", "Everyday verbs"),
+        ("sifat",      "🌡️", "Adjectives & feelings"),
+        ("tempat",     "📍", "Places, travel & directions"),
+        ("sekolah",    "🎓", "School & language"),
+        ("kantor",     "💼", "Work, business & tech"),
+        ("benda",      "🏠", "Things, clothes & home"),
+        ("waktu",      "🕒", "Time & frequency"),
+        ("alam",       "🌳", "Nature, weather & animals"),
+        ("orang",      "🧑", "People & relationships"),
+        ("hobi",       "🎨", "Hobbies, sport & arts"),
+        ("tubuh",      "🫀", "Body & health"),
+        ("makanan",    "🍲", "Food & cooking"),
     ],
 }
 LEVEL_LIST = [(lv, LEVELS[lv]["name"]) for lv in sorted(LEVELS)]
