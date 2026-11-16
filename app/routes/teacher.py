@@ -99,12 +99,13 @@ def dashboard():
     show_receipts_pip   = unpaid_cnt > 0 and _pip("receipts", unpaid_cnt)
     # ----------------------------------------------------
 
-    from ..services.streaks import compute_streaks
+    from ..services.streaks import TIERS, compute_streaks
     streaks = compute_streaks([s.id for s in all_students])
+    streak_tiers = [{"min": t[0], "key": t[1], "char": t[2], "name": t[3], "zh": t[4]} for t in TIERS]
 
     return render_template("teacher/dashboard.html",
         user=teacher, receipts=receipts, all_students=all_students,
-        streaks=streaks,
+        streaks=streaks, streak_tiers=streak_tiers,
         progress=progress, custom_fees=custom_fees, custom_fee_types=custom_fee_types,
         pay_first_ids=pay_first_ids, fee_row_ids=fee_row_ids, invoice_due_ids=invoice_due_ids,
         unbilled_records=unbilled_records, unpaid_cnt=unpaid_cnt, 

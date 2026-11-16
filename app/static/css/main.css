@@ -2558,3 +2558,22 @@ body:has(.app-shell) .n-moon { display: none; }
 }
 
 .fee-row .pay-first-opt input { flex: none; min-width: 0; max-width: none; width: 16px; }
+
+/* ── Teacher: student badge + streak card ── */
+.stu-info-btn { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-align: left; }
+button.dt-name.stu-info-btn { color: var(--text); font-size: .9rem; font-weight: 600; }
+button.dt-name.stu-info-btn:hover { color: var(--gold); text-decoration: underline; }
+.stu-badge-link { font-size: .78rem; color: var(--gold); font-weight: 600; }
+.stu-badge-link:hover { text-decoration: underline; }
+.sbm-box { max-width: 460px; width: calc(100vw - 24px); max-height: 92vh; overflow-y: auto; padding: 8px 14px 18px; }
+.sbm-box .badge-hero { padding-top: 14px; }
+.sbm-rate { margin-top: 10px; font-size: .88rem; color: var(--text2); }
+.sbm-ladder { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border); }
+.sbm-step { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .72rem; color: var(--text3); }
+.sbm-step b { color: var(--text); font-size: .78rem; }
+.sbm-step.ahead { opacity: .42; }
+.sbm-step.now b { color: var(--gold); }
+.sbm-step.done .sbm-mini::after { content: "✓"; position: absolute; right: -4px; bottom: -4px; font-size: .62rem; background: var(--green); color: #fff; border-radius: 50%; width: 15px; height: 15px; display: grid; place-items: center; }
+.sbm-mini { position: relative; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-zh); font-size: 1.3rem; padding: 0; }
+.sbm-step.now .sbm-mini { box-shadow: 0 0 0 3px var(--gold-soft), 0 0 0 5px var(--gold); }
+@media (max-width: 480px) { .sbm-ladder { gap: 2px; } .sbm-step small { font-size: .64rem; } }
