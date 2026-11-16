@@ -2577,3 +2577,65 @@ button.dt-name.stu-info-btn:hover { color: var(--gold); text-decoration: underli
 .sbm-mini { position: relative; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-zh); font-size: 1.3rem; padding: 0; }
 .sbm-step.now .sbm-mini { box-shadow: 0 0 0 3px var(--gold-soft), 0 0 0 5px var(--gold); }
 @media (max-width: 480px) { .sbm-ladder { gap: 2px; } .sbm-step small { font-size: .64rem; } }
+
+/* ═══ Menu drawer (burger) - phones AND computers ═══
+   The sidebar becomes a drawer that slides in from the left; the bottom tab bar is not used any more. */
+:root { --bottom-tab-h: 0px; --topbar-h: 54px; }
+.app-bottom-nav { display: none !important; }
+.app-main { margin-left: 0 !important; }
+.app-content { padding-bottom: 60px; }
+.app-sidebar {
+  display: flex !important;
+  width: min(280px, 84vw);
+  z-index: 90;
+  transform: translateX(-102%);
+  transition: transform .28s cubic-bezier(.22,.61,.36,1), box-shadow .28s;
+  visibility: hidden;
+}
+body.nav-open .app-sidebar { transform: none; visibility: visible; box-shadow: 8px 0 40px rgba(0,0,0,.35); }
+.app-sidebar { transition: transform .28s cubic-bezier(.22,.61,.36,1), box-shadow .28s, visibility 0s linear .28s; }
+body.nav-open .app-sidebar { transition-delay: 0s; }
+.nav-scrim { position: fixed; inset: 0; background: rgba(10,8,4,.5); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 85; }
+body.nav-open .nav-scrim { opacity: 1; pointer-events: auto; }
+body.nav-open { overflow: hidden; }
+.drawer-close { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.08); border: 0; color: rgba(255,255,255,.75); cursor: pointer; }
+.drawer-close:hover { background: rgba(255,255,255,.16); color: #fff; }
+.sidebar-nav { overflow-y: auto; }
+
+.app-topbar {
+  position: sticky; top: 0; z-index: 40; height: var(--topbar-h);
+  display: flex; align-items: center; gap: 12px; padding: 0 14px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.burger-btn { position: relative; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: transparent; border: 1.5px solid var(--border); color: var(--text); cursor: pointer; transition: background .15s, border-color .15s; }
+.burger-btn:hover { background: var(--gold-soft); border-color: var(--gold); }
+.burger-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.burger-btn path { transform-origin: center; transition: transform .25s, opacity .2s; }
+body.nav-open .burger-btn .b1 { transform: translateY(5px) rotate(45deg); }
+body.nav-open .burger-btn .b2 { opacity: 0; }
+body.nav-open .burger-btn .b3 { transform: translateY(-5px) rotate(-45deg); }
+.burger-dot { position: absolute; top: 5px; right: 5px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); border: 2px solid var(--surface); }
+.burger-dot[hidden] { display: none; }
+.topbar-brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.topbar-zh { font-family: var(--font-zh); font-weight: 700; font-size: 1.1rem; color: var(--text); letter-spacing: .06em; }
+.topbar-tag { font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 860px) { .app-content { padding: 18px 16px 40px; } .app-topbar { padding: 0 12px; } }
+body:has(.app-shell) .orn-frame { left: 10px; }
+.hk-item, .hk-card { scroll-margin-top: calc(var(--topbar-h) + 16px); }
+@media (prefers-reduced-motion: reduce) { .app-sidebar, .nav-scrim, .burger-btn path { transition: none !important; } }
+
+/* ── Teacher: Bonus Courses access matrix ── */
+.bonus-cols { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 104px); align-items: center; gap: 8px; }
+.bonus-head { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.bonus-bulk { font-size: .68rem; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--text3); }
+.bonus-all { background: none; border: 0; padding: 0; font: inherit; color: var(--gold); cursor: pointer; font-weight: 600; }
+.bonus-all:hover { text-decoration: underline; }
+.bonus-cell { display: flex; justify-content: center; cursor: pointer; padding: 6px 0; }
+.bonus-chk { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.bonus-switch { position: relative; width: 42px; height: 24px; border-radius: 100px; background: var(--border2, var(--border)); transition: background .2s; }
+.bonus-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s; }
+.bonus-chk:checked + .bonus-switch { background: var(--green); }
+.bonus-chk:checked + .bonus-switch::after { transform: translateX(18px); }
+.bonus-chk:focus-visible + .bonus-switch { outline: 3px solid var(--gold); outline-offset: 2px; }
+.bonus-chk:disabled + .bonus-switch { opacity: .5; }
+@media (max-width: 520px) { .bonus-cols { grid-template-columns: minmax(0, 1fr) repeat(3, 62px); gap: 4px; } .bonus-bulk { display: none; } }

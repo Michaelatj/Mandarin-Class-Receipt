@@ -1,0 +1,41 @@
+{% extends "quiz/layout.html" %}
+{% block qz_title %}Bonus Courses{% endblock %}
+{% block qz_back %}Back to dashboard{% endblock %}
+{% block qz_attrs %}data-page="hsk-lobby"{% endblock %}
+{% block head_extra %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=4' }}">
+{% endblock %}
+
+{% block qz_body %}
+{% include 'hsk/_sprite.html' %}
+<div class="qz-head">
+  <div>
+    <h1 class="qz-h1">Bonus Courses</h1>
+    <p class="qz-sub">Extra study material for your Mandarin class. Your teacher unlocks the levels for you.</p>
+  </div>
+</div>
+
+<div class="hk-lobby">
+  {% for c in cards %}
+  {% if c.open %}
+  <a class="card hk-course" href="{{ url_for('hsk.index', level=c.level) }}">
+    <span class="hk-course-badge">{{ c.name }}</span>
+    <span class="hk-course-zh" lang="zh">{{ c.zh }}</span>
+    <span class="hk-course-intro">{{ c.intro }}</span>
+    <span class="hk-course-foot"><span>{{ c.words }} words</span><span class="hk-course-go">Open <svg class="hk-i"><use href="#i-down"/></svg></span></span>
+  </a>
+  {% else %}
+  <div class="card hk-course is-locked" aria-disabled="true">
+    <span class="hk-course-badge">{{ c.name }}</span>
+    <span class="hk-course-zh" lang="zh">{{ c.zh }}</span>
+    <span class="hk-course-intro">{{ c.intro }}</span>
+    <span class="hk-course-foot"><span class="hk-course-lock"><svg class="hk-i"><use href="#i-lock"/></svg> Locked</span><span>Ask your teacher to unlock it</span></span>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% if not any_open %}
+<p class="qz-hint-text hk-foot">Nothing is unlocked for your account yet.</p>
+{% endif %}
+{% endblock %}

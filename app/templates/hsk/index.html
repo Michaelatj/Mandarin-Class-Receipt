@@ -1,10 +1,10 @@
 {% extends "quiz/layout.html" %}
 {% block qz_title %}{{ level_name }}{% endblock %}
-{% block qz_back %}Back to dashboard{% endblock %}
+{% block qz_back %}Bonus Courses{% endblock %}
 {% block qz_attrs %}data-page="hsk-index"{% endblock %}
 {% block head_extra %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=3' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=4' }}">
 {% endblock %}
 
 {% block qz_body %}
@@ -18,7 +18,7 @@
   </div>
 
   <nav class="hk-levels" aria-label="Choose level">
-    {% for lv, name in levels %}<a class="hk-level{% if lv == level %} on{% endif %}" href="{{ url_for('hsk.index', level=lv) }}"{% if lv == level %} aria-current="page"{% endif %}>{{ name }}</a>{% endfor %}
+    {% for lv, name in levels %}{% if lv in allowed %}<a class="hk-level{% if lv == level %} on{% endif %}" href="{{ url_for('hsk.index', level=lv) }}"{% if lv == level %} aria-current="page"{% endif %}>{{ name }}</a>{% else %}<span class="hk-level locked" title="Locked. Ask your teacher to unlock it."><svg class="hk-i"><use href="#i-lock"/></svg> {{ name }}</span>{% endif %}{% endfor %}
   </nav>
 
   <div class="card hk-searchcard">

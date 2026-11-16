@@ -27,8 +27,8 @@
         <span class="snav-icon">📝</span>
         <span class="snav-label">{{ tr('nav_quiz') }}</span>
       </a>
-      <a class="snav-link" href="{{ url_for('hsk.index', level=1) }}">
-        <span class="snav-icon">📖</span>
+      <a class="snav-link" href="{{ url_for('hsk.lobby') }}">
+        <span class="snav-icon">🎁</span>
         <span class="snav-label">{{ tr('nav_hsk') }}</span>
       </a>
       <button class="snav-btn" data-page="profile" data-count="{{ badge_idx }}">
@@ -296,8 +296,8 @@
     <div class="bnav-icon">📝</div>
     <span>{{ tr('nav_quiz') }}</span>
   </a>
-  <a class="bnav-btn" href="{{ url_for('hsk.index', level=1) }}" style="text-decoration:none">
-    <div class="bnav-icon">📖</div>
+  <a class="bnav-btn" href="{{ url_for('hsk.lobby') }}" style="text-decoration:none">
+    <div class="bnav-icon">🎁</div>
     <span>{{ tr('nav_hsk') }}</span>
   </a>
   <button class="bnav-btn" data-page="profile" data-count="{{ badge_idx }}">

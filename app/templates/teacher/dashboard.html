@@ -56,8 +56,8 @@
       <span class="snav-icon">📝</span>
         <span class="snav-label">{{ tr('nav_quiz') }}</span>
       </a>
-      <a class="snav-link" href="{{ url_for('hsk.index', level=1) }}">
-        <span class="snav-icon">📖</span>
+      <a class="snav-link" href="{{ url_for('hsk.lobby') }}">
+        <span class="snav-icon">🎁</span>
         <span class="snav-label">{{ tr('nav_hsk') }}</span>
       </a>
       <button class="snav-btn" data-page="settings">
@@ -331,6 +331,28 @@
           {% endfor %}
         </div>
 
+        <p class="section-title">Bonus Courses access</p>
+        <p style="font-size:.82rem;color:var(--text3);margin-bottom:14px">Choose which levels each student can open. Everything is locked until you unlock it. You always have access to all levels.</p>
+        <div class="data-table bonus-table" id="bonusTable" style="margin-bottom:24px">
+          <div class="dt-head bonus-cols">
+            <span>Student</span>
+            {% for lv in (1, 2, 3) %}
+            <span class="bonus-head">HSK {{ lv }}
+              <span class="bonus-bulk"><button type="button" class="bonus-all" data-level="{{ lv }}" data-on="1">All</button> · <button type="button" class="bonus-all" data-level="{{ lv }}" data-on="0">None</button></span>
+            </span>
+            {% endfor %}
+          </div>
+          {% for s in all_students %}
+          {% set got = bonus_grants.get(s.id, []) %}
+          <div class="dt-row bonus-cols">
+            <div class="dt-name">{{ s.name() }}</div>
+            {% for lv in (1, 2, 3) %}
+            <label class="bonus-cell"><input type="checkbox" class="bonus-chk" data-sid="{{ s.id }}" data-level="{{ lv }}"{% if lv in got %} checked{% endif %} aria-label="{{ s.name() }}: HSK {{ lv }}"><span class="bonus-switch" aria-hidden="true"></span></label>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+
         <p class="section-title">{{ tr('custom_fees') }}</p>
         <p style="font-size:.82rem;color:var(--text3);margin-bottom:14px">{{ tr('custom_fees_info') }}</p>
         
@@ -515,8 +537,8 @@
     <div class="bnav-icon">📝</div>
       <span>{{ tr('nav_quiz') }}</span>
     </a>
-    <a class="bnav-btn" href="{{ url_for('hsk.index', level=1) }}" style="text-decoration:none">
-      <div class="bnav-icon">📖</div>
+    <a class="bnav-btn" href="{{ url_for('hsk.lobby') }}" style="text-decoration:none">
+      <div class="bnav-icon">🎁</div>
       <span>{{ tr('nav_hsk') }}</span>
     </a>
     <button class="bnav-btn" data-page="settings">
@@ -819,6 +841,7 @@
 <script id="stuTierData" type="application/json">{{ streak_tiers|tojson }}</script>
 <script src="{{ url_for('static', filename='js/badge-fx.js') }}?v=1"></script>
 <script src="{{ url_for('static', filename='js/student-badge.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/bonus-access.js') }}?v=1"></script>
 {% endblock %}
 
 {% block page_scripts %}

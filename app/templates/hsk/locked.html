@@ -1,15 +1,16 @@
 {% extends "quiz/layout.html" %}
-{% block qz_title %}HSK{% endblock %}
+{% block qz_title %}Bonus Courses{% endblock %}
 {% block qz_back %}Back to dashboard{% endblock %}
 {% block head_extra %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=3' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=4' }}">
 {% endblock %}
 {% block qz_body %}
 {% include 'hsk/_sprite.html' %}
 <div class="card hk-locked">
   <span class="hk-locked-ico"><svg class="hk-i"><use href="#i-lock"/></svg></span>
-  <div class="hk-locked-title">This material is for class students</div>
-  <p class="hk-locked-sub">Your account isn't linked to a class yet. Ask your teacher to add you, then open this page again.</p>
+  <div class="hk-locked-title">{{ level_name|default('This course') }} is locked</div>
+  <p class="hk-locked-sub">Your teacher has not unlocked it for your account yet. Ask your teacher, then open it again.</p>
+  <p><a class="hk-pill hk-pill-main" style="display:inline-flex;margin:14px 0 0" href="{{ url_for('hsk.lobby') }}">Back to Bonus Courses</a></p>
 </div>
 {% endblock %}

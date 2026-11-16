@@ -164,5 +164,19 @@
   .hk-pbar-r { justify-content: space-between; }
   .hk-card { min-height: 360px; }
   .hk-ans { padding: 0 8px; }
-  #view-practice, #view-list { padding-bottom: 88px; }
 }
+
+/* ── Bonus Courses lobby + locked level pills ── */
+.hk-level.locked { display: inline-flex; align-items: center; gap: 6px; opacity: .55; cursor: not-allowed; }
+.hk-lobby { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.hk-course { display: flex; flex-direction: column; gap: 8px; padding: 20px; text-decoration: none; color: var(--text); }
+a.hk-course:hover { border-color: var(--gold); }
+.hk-course-badge { align-self: flex-start; padding: 4px 12px; border-radius: 100px; background: var(--gold-soft); border: 1px solid var(--gold); font-weight: 700; font-size: .95rem; }
+.hk-course-zh { font-family: var(--font-zh), var(--font-body); font-size: 1.5rem; letter-spacing: .06em; }
+.hk-course-intro { color: var(--text2); font-size: .92rem; line-height: 1.5; flex: 1; }
+.hk-course-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--text3); font-size: .85rem; margin-top: 4px; }
+.hk-course-go { display: inline-flex; align-items: center; gap: 4px; color: var(--green); font-weight: 700; }
+.hk-course-go .hk-i { transform: rotate(-90deg); }
+.hk-course.is-locked { opacity: .62; background: var(--surface2); }
+.hk-course.is-locked .hk-course-badge { background: transparent; border-color: var(--border); color: var(--text3); }
+.hk-course-lock { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--text2); }

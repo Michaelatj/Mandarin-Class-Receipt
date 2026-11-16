@@ -1,12 +1,11 @@
 """
 routes/hsk.py - HSK study material (HSK 1: 300 words, HSK 2: 200 new words) for enrolled students.
 
-Only logged-in accounts that belong to the class can open it: teachers, and
-students the teacher has actually enrolled (a fee set, an attendance, a receipt
-or a schedule invite). Someone who just registered an account and is not part of
-the class yet sees a short "ask your teacher" page. Nothing here is public.
+Bonus Courses. Teachers can open every level; a student only the levels the teacher
+unlocked for them (table bonus_access, set from the Students tab). Everything else
+shows a lock page. Nothing here is public.
 
-URLs: /hsk1/, /hsk2/ (theme list) - /hsk<level>/<theme> - /hsk<level>/data.json
+URLs: /bonus/ (start page) - /hsk1/, /hsk2/, /hsk3/ (theme list) - /hsk<level>/<theme> - /hsk<level>/data.json
 """
 import json
 import logging
@@ -17,7 +16,7 @@ from flask import (Blueprint, abort, jsonify, make_response, redirect,
                    render_template, session, url_for)
 
 from .. import db
-from ..models import Attendance, Receipt, ScheduleInvite, StudentFee, User
+from ..models import BonusAccess, User
 
 logger = logging.getLogger(__name__)
 hsk_bp = Blueprint("hsk", __name__)
@@ -102,13 +101,11 @@ def _home(user):
     return url_for("teacher.dashboard" if user.role == "teacher" else "student.dashboard")
 
 
-def _is_enrolled(user):
+def _allowed_levels(user):
+    """Levels this account may open: a teacher all of them, a student only what the teacher unlocked."""
     if user.role == "teacher":
-        return True
-    for model in (StudentFee, Attendance, Receipt, ScheduleInvite):
-        if model.query.filter_by(student_id=user.id).first():
-            return True
-    return False
+        return set(LEVELS)
+    return {a.level for a in BonusAccess.query.filter_by(student_id=user.id).all()} & set(LEVELS)
 
 
 def guard(json_response=False):
@@ -123,19 +120,36 @@ def guard(json_response=False):
                 if json_response:
                     return jsonify(ok=False, msg="login required"), 401
                 return redirect(url_for("auth.login"))
-            if not _is_enrolled(user):
+            if level not in _allowed_levels(user):
                 if json_response:
-                    return jsonify(ok=False, msg="not enrolled"), 403
-                return render_template("hsk/locked.html", home=_home(user)), 403
+                    return jsonify(ok=False, msg="not unlocked"), 403
+                return render_template("hsk/locked.html", home=url_for("hsk.lobby"),
+                                       level_name=LEVELS[level]["name"]), 403
             return fn(user, level, *args, **kwargs)
         return wrapper
     return decorator
 
 
+@hsk_bp.route("/bonus/")
+def lobby():
+    """Bonus Courses start page: every level, unlocked ones open, the others show a lock."""
+    uid = session.get("user_id")
+    user = db.session.get(User, uid) if uid else None
+    if not user:
+        return redirect(url_for("auth.login"))
+    allowed = _allowed_levels(user)
+    cards = [{"level": lv, "name": LEVELS[lv]["name"], "zh": LEVELS[lv]["zh"], "intro": LEVELS[lv]["intro"],
+              "open": lv in allowed, "words": len(_entries(lv))} for lv in sorted(LEVELS)]
+    resp = make_response(render_template("hsk/lobby.html", home=_home(user), cards=cards,
+                                         any_open=bool(allowed)))
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
 def _page(template, user, level, back=None, **ctx):
     resp = make_response(render_template(
         template, home=back or _home(user), uid=user.id, level=level,
-        level_name=LEVELS[level]["name"], levels=LEVEL_LIST, **ctx))
+        level_name=LEVELS[level]["name"], levels=LEVEL_LIST, allowed=_allowed_levels(user), **ctx))
     resp.headers["Cache-Control"] = "no-store"
     return resp
 
@@ -152,7 +166,7 @@ def index(user, level):
             "preview": " ".join(e["hanzi"] for e in items[:5]),
             "ns": [e["n"] for e in items],
         })
-    return _page("hsk/index.html", user, level, themes=themes, total=len(entries),
+    return _page("hsk/index.html", user, level, back=url_for("hsk.lobby"), themes=themes, total=len(entries),
                  all_ns=[e["n"] for e in entries], level_zh=LEVELS[level]["zh"],
                  intro=LEVELS[level]["intro"])
 

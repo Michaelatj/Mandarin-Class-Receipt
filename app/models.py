@@ -209,6 +209,21 @@ class StreakEntry(db.Model):
     )
 
 
+class BonusAccess(db.Model):
+    """The teacher unlocked one Bonus Course level (HSK 1, 2 or 3) for one student.
+    No row = locked. The table is created automatically on start-up."""
+    __tablename__ = "bonus_access"
+
+    id         = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
+    level      = db.Column(db.Integer, nullable=False)              # 1, 2 or 3 (HSK level)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("student_id", "level", name="uq_bonus_student_level"),
+    )
+
+
 class ScheduleInvite(db.Model):
     """Maps which students are invited to a specific schedule."""
     __tablename__ = "schedule_invite"
