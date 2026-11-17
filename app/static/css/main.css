@@ -2639,3 +2639,26 @@ body:has(.app-shell) .orn-frame { left: 10px; }
 .bonus-chk:focus-visible + .bonus-switch { outline: 3px solid var(--gold); outline-offset: 2px; }
 .bonus-chk:disabled + .bonus-switch { opacity: .5; }
 @media (max-width: 520px) { .bonus-cols { grid-template-columns: minmax(0, 1fr) repeat(3, 62px); gap: 4px; } .bonus-bulk { display: none; } }
+
+/* ═══ China skin + the top bar (burger) ═══
+   The top bar takes over the red band the sidebar used to give. The frame starts under it and the
+   lanterns hang from its lower edge, so nothing is cut off. (Night and plain themes are untouched.) */
+[data-skin="china"] { --bar-a: #e0242a; --bar-b: #c8101a; }
+[data-skin="china"][data-theme="dark"] { --bar-a: #c4161d; --bar-b: #8f0f15; }
+[data-skin="china"] .app-topbar {
+  background: linear-gradient(135deg, var(--bar-a) 0%, var(--bar-b) 100%);
+  border-bottom: 2px solid #d9a441; box-shadow: 0 2px 10px rgba(120,10,14,.25);
+}
+[data-skin="china"] .topbar-zh { color: #fff; }
+[data-skin="china"] .topbar-tag { color: rgba(255,255,255,.92); }
+[data-skin="china"] .burger-btn { color: #fff; border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.08); }
+[data-skin="china"] .burger-btn:hover { background: rgba(255,255,255,.2); border-color: #fff; }
+[data-skin="china"] .burger-btn:focus-visible { outline-color: #fff; }
+[data-skin="china"] .burger-dot { background: #ffe7a1; border-color: var(--bar-b); }
+[data-skin="china"] body:has(.app-shell) .orn-frame { top: calc(var(--topbar-h) + 10px); left: 10px; right: 10px; bottom: 10px; }
+[data-skin="china"] body:has(.app-shell) .orn-lanterns { top: calc(var(--topbar-h) + 2px); right: 24px; left: auto; width: 150px; height: 150px; }
+[data-skin="china"] body:has(.app-shell) .orn-fret.bl { left: 10px; bottom: 10px; }
+@media (max-width: 860px) {
+  [data-skin="china"] body:has(.app-shell) .orn-frame { top: calc(var(--topbar-h) + 8px); left: 8px; right: 8px; bottom: 8px; }
+  [data-skin="china"] body:has(.app-shell) .orn-lanterns { top: calc(var(--topbar-h) + 2px); right: 12px; width: 84px; height: 84px; }
+}
