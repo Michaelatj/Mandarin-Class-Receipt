@@ -56,6 +56,10 @@
       <span class="snav-icon">📝</span>
         <span class="snav-label">{{ tr('nav_quiz') }}</span>
       </a>
+      <a class="snav-link" href="{{ url_for('hsk.lobby') }}">
+        <span class="snav-icon">🎁</span>
+        <span class="snav-label">{{ tr('nav_hsk') }}</span>
+      </a>
       <button class="snav-btn" data-page="settings">
         <span class="snav-icon">⚙️</span>
         <span class="snav-label">{{ tr('nav_settings') }}</span>
@@ -288,9 +292,10 @@
           {% set su = student_unbilled.get(s.id, 0) %}
           <div class="dt-row stu-cols" id="srow-{{ s.id }}">
             <div class="stu-who">
-              <div class="dt-name">{{ s.name() }}</div>
+              <button type="button" class="dt-name stu-info-btn" data-id="{{ s.id }}" title="Badge and streak">{{ s.name() }}</button>
               <div class="dt-meta">{% if s.managed_by %}<span class="chip-noacct">No account yet</span>{% else %}@{{ s.username }}{% endif %}
                 {% set st = streaks.get(s.id) %}
+                <button type="button" class="stu-badge-link stu-info-btn" data-id="{{ s.id }}">🏅 Badge &amp; streak</button>
                 {% if st and st.current %}<span class="streak-chip tier-{{ st.tier.key }}" title="{{ st.current }} scheduled classes in a row · {{ st.tier.name }}">{{ st.tier.char }} {{ st.current }}</span>{% endif %}
                 {% if s.id in pay_first_ids %}<span class="chip-noacct">Pay first</span>{% endif %}
                 {% if s.id in invoice_due_ids %}<span class="chip-noacct chip-due">Invoice unpaid</span>{% endif %}
@@ -322,6 +327,28 @@
               <button class="btn bdel-outline bsm del-student-btn"
                       data-id="{{ s.id }}" data-name="{{ s.name() }}" title="Delete Student">🗑</button>
             </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <p class="section-title">Bonus Courses access</p>
+        <p style="font-size:.82rem;color:var(--text3);margin-bottom:14px">Choose which levels each student can open. Everything is locked until you unlock it. You always have access to all levels.</p>
+        <div class="data-table bonus-table" id="bonusTable" style="margin-bottom:24px">
+          <div class="dt-head bonus-cols">
+            <span>Student</span>
+            {% for lv in (1, 2, 3) %}
+            <span class="bonus-head">HSK {{ lv }}
+              <span class="bonus-bulk"><button type="button" class="bonus-all" data-level="{{ lv }}" data-on="1">All</button> · <button type="button" class="bonus-all" data-level="{{ lv }}" data-on="0">None</button></span>
+            </span>
+            {% endfor %}
+          </div>
+          {% for s in all_students %}
+          {% set got = bonus_grants.get(s.id, []) %}
+          <div class="dt-row bonus-cols">
+            <div class="dt-name">{{ s.name() }}</div>
+            {% for lv in (1, 2, 3) %}
+            <label class="bonus-cell"><input type="checkbox" class="bonus-chk" data-sid="{{ s.id }}" data-level="{{ lv }}"{% if lv in got %} checked{% endif %} aria-label="{{ s.name() }}: HSK {{ lv }}"><span class="bonus-switch" aria-hidden="true"></span></label>
+            {% endfor %}
           </div>
           {% endfor %}
         </div>
@@ -509,6 +536,10 @@
     <a class="bnav-btn" href="{{ url_for('quiz.index') }}" style="text-decoration:none">
     <div class="bnav-icon">📝</div>
       <span>{{ tr('nav_quiz') }}</span>
+    </a>
+    <a class="bnav-btn" href="{{ url_for('hsk.lobby') }}" style="text-decoration:none">
+      <div class="bnav-icon">🎁</div>
+      <span>{{ tr('nav_hsk') }}</span>
     </a>
     <button class="bnav-btn" data-page="settings">
       <div class="bnav-icon">⚙️</div>
@@ -771,6 +802,46 @@
     </form>
   </div>
 </div>
+
+{# ═══ STUDENT BADGE + STREAK (big view, opened from the Students list) ═══ #}
+<div class="modal-overlay hidden" id="stuBadgeModal" role="dialog" aria-modal="true" aria-labelledby="sbmName">
+  <div class="modal-box sbm-box">
+    <button type="button" class="modal-close" id="sbmClose" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="badge-hero" id="sbmHero">
+      <div class="badge-who"><span class="badge-avatar" id="sbmAvatar"></span><span class="badge-who-name" id="sbmName"></span></div>
+      <div class="badge-stage" id="sbmStage">
+        <span class="badge-aura" aria-hidden="true"></span>
+        <button type="button" class="badge-seal" id="sbmSeal" aria-label="Badge"><span class="badge-char" id="sbmChar"></span><i class="badge-shine" aria-hidden="true"></i></button>
+        <div class="badge-fx" aria-hidden="true"></div>
+      </div>
+      <div class="badge-name" id="sbmTier"></div>
+      <div class="badge-tap">✨ Tap the badge</div>
+      <div class="badge-stats">
+        <div><b id="sbmCur">0</b><span>Current streak</span></div>
+        <div><b id="sbmBest">0</b><span>Best streak</span></div>
+        <div><b id="sbmAtt">0</b><span>Attended</span></div>
+      </div>
+      <div class="sbm-rate"><span id="sbmRate"></span></div>
+      <div class="badge-next" id="sbmNext">
+        <div class="badge-next-bar" id="sbmNextBar"><div></div></div>
+        <div class="badge-next-txt" id="sbmNextTxt"></div>
+      </div>
+      <div class="sbm-ladder" id="sbmLadder" aria-label="All badges"></div>
+    </div>
+  </div>
+</div>
+<script id="stuBadgeData" type="application/json">{
+{%- for s in all_students %}{% set st = streaks.get(s.id) %}"{{ s.id }}": {{ {
+  "name": s.name(), "user": ('' if s.managed_by else s.username),
+  "cur": st.current if st else 0, "best": st.best if st else 0, "att": st.attended if st else 0, "tot": st.total if st else 0,
+  "tier": (st.tier.index if st else 0), "next_at": (st.next_at if st else 5), "next_name": (st.next_name if st else 'Silver'),
+  "progress": (st.progress if st else 0)
+}|tojson }}{{ "," if not loop.last }}{% endfor %}
+}</script>
+<script id="stuTierData" type="application/json">{{ streak_tiers|tojson }}</script>
+<script src="{{ url_for('static', filename='js/badge-fx.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/student-badge.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/bonus-access.js') }}?v=1"></script>
 {% endblock %}
 
 {% block page_scripts %}

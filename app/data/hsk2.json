@@ -1,0 +1,4664 @@
+[
+ {
+  "n": 1,
+  "hanzi": "啊",
+  "pinyin": "a",
+  "arti": "ah; ya (partikel seru/penghalus)",
+  "theme": "tatabahasa",
+  "parts": "口 (mulut) + 阿 (penanda bunyi)",
+  "trick": "Anggap saja seperti 'ya!' atau 'wah!' di akhir kalimat. Mulut (口) yang bunyinya 'a~'.",
+  "words": [],
+  "sentence": [
+   "今天天气真好啊！",
+   "Jīntiān tiānqì zhēn hǎo a!",
+   "Cuaca hari ini bagus sekali, ya!"
+  ],
+  "note": "啊 dipakai di akhir kalimat untuk melembutkan atau menunjukkan rasa kagum. Bunyinya bisa berubah mengikuti suku kata sebelumnya (ya, wa, na), tetapi tulisannya tetap 啊."
+ },
+ {
+  "n": 2,
+  "hanzi": "爱好",
+  "pinyin": "àihào",
+  "arti": "hobi; menyukai",
+  "theme": "olahraga",
+  "parts": "爱 (cinta) + 好 (suka; baik)",
+  "trick": "Yang kamu cintai (爱) dan kamu anggap baik (好) = hobimu.",
+  "words": [
+   [
+    "兴趣",
+    "xìngqù",
+    "minat"
+   ]
+  ],
+  "sentence": [
+   "你的爱好是什么？",
+   "Nǐ de àihào shì shénme?",
+   "Apa hobimu?"
+  ],
+  "note": "Dalam percakapan sehari-hari 爱好 paling sering dipakai sebagai kata benda 'hobi'."
+ },
+ {
+  "n": 3,
+  "hanzi": "白色",
+  "pinyin": "báisè",
+  "arti": "putih",
+  "theme": "benda",
+  "parts": "白 (putih) + 色 (warna)",
+  "trick": "白 (putih) + 色 (warna) = warna putih. Mudah, kan?",
+  "words": [
+   [
+    "白天",
+    "báitiān",
+    "siang hari"
+   ]
+  ],
+  "sentence": [
+   "我喜欢白色的衣服。",
+   "Wǒ xǐhuan báisè de yīfu.",
+   "Aku suka baju berwarna putih."
+  ]
+ },
+ {
+  "n": 4,
+  "hanzi": "班",
+  "pinyin": "bān",
+  "arti": "kelas; regu; (penghitung untuk kelompok)",
+  "theme": "sekolah",
+  "parts": "王 (raja/giok) + 刂 (pisau) + 王",
+  "trick": "Bayangkan satu kelas: dua 'raja kecil' (王) dibagi oleh guru yang memegang pisau (刂). Kelas = kelompok yang dipisah-pisah.",
+  "words": [
+   [
+    "上班",
+    "shàngbān",
+    "masuk kerja"
+   ],
+   [
+    "同班",
+    "tóngbān",
+    "sekelas"
+   ]
+  ],
+  "sentence": [
+   "我们班有二十个学生。",
+   "Wǒmen bān yǒu èrshí ge xuésheng.",
+   "Kelas kami punya dua puluh murid."
+  ],
+  "note": "班 juga dipakai untuk 'shift kerja' (上班) dan penghitung untuk bus/penerbangan terjadwal."
+ },
+ {
+  "n": 5,
+  "hanzi": "帮",
+  "pinyin": "bāng",
+  "arti": "membantu",
+  "theme": "kerja",
+  "parts": "邦 (negara; penanda bunyi) + 巾 (kain)",
+  "trick": "Ingat 'bang' = 'bantu'. Mirip bunyi 'bang' dalam kata 'abang' yang selalu siap membantu adiknya.",
+  "words": [
+   [
+    "帮助",
+    "bāngzhù",
+    "bantuan; membantu"
+   ]
+  ],
+  "sentence": [
+   "你能帮我吗？",
+   "Nǐ néng bāng wǒ ma?",
+   "Bisakah kamu membantuku?"
+  ],
+  "note": "帮 langsung diikuti orang: 帮我, 帮你. Bandingkan 帮忙 (no. 6) yang sudah berisi objek 'bantuan', jadi tidak langsung diikuti orang: 帮个忙, 帮我一个忙."
+ },
+ {
+  "n": 6,
+  "hanzi": "帮忙",
+  "pinyin": "bāngmáng",
+  "arti": "membantu; tolong",
+  "theme": "kerja",
+  "parts": "帮 (membantu) + 忙 (sibuk)",
+  "trick": "Membantu (帮) orang yang sedang sibuk (忙). Orang sibuk memang butuh bantuan!",
+  "words": [
+   [
+    "帮个忙",
+    "bāng ge máng",
+    "tolong sedikit"
+   ]
+  ],
+  "sentence": [
+   "你能帮个忙吗？",
+   "Nǐ néng bāng ge máng ma?",
+   "Bisa tolong sebentar?"
+  ],
+  "note": "帮忙 = kata kerja + objek (membantu + bantuan), jadi pisahkan bila perlu: 帮我一个忙 / 帮了很多忙. Jangan bilang 帮忙我. Bandingkan 帮 (no. 5): 帮我。"
+ },
+ {
+  "n": 7,
+  "hanzi": "包",
+  "pinyin": "bāo",
+  "arti": "membungkus; tas; (penghitung bungkusan)",
+  "theme": "kerja",
+  "parts": "勹 (membungkus) + 巳 (janin)",
+  "trick": "Seperti ibu yang membungkus bayi dalam gendongan: 勹 melingkupi 巳. Dari situ muncul 'bungkus' dan 'tas'.",
+  "words": [
+   [
+    "书包",
+    "shūbāo",
+    "tas sekolah"
+   ],
+   [
+    "包子",
+    "bāozi",
+    "bakpao"
+   ]
+  ],
+  "sentence": [
+   "我的包在桌子上。",
+   "Wǒ de bāo zài zhuōzi shang.",
+   "Tasku ada di atas meja."
+  ],
+  "note": "包 bisa kata kerja (membungkus: 包饺子), kata benda (tas) dan penghitung (一包 = sebungkus)."
+ },
+ {
+  "n": 8,
+  "hanzi": "本子",
+  "pinyin": "běnzi",
+  "arti": "buku tulis",
+  "theme": "sekolah",
+  "parts": "本 (buku; pangkal) + 子 (akhiran benda kecil)",
+  "trick": "本 sudah kita kenal sebagai 'buku'; tambah 子 menjadi 'buku kecil' alias buku tulis.",
+  "words": [
+   [
+    "本",
+    "běn",
+    "buku (penghitung)"
+   ]
+  ],
+  "sentence": [
+   "这个本子很便宜。",
+   "Zhège běnzi hěn piányi.",
+   "Buku tulis ini murah sekali."
+  ],
+  "note": "Bunyi 子 di sini ringan (netral): běnzi."
+ },
+ {
+  "n": 9,
+  "hanzi": "比",
+  "pinyin": "bǐ",
+  "arti": "membandingkan; lebih ... daripada",
+  "theme": "tatabahasa",
+  "parts": "匕 + 匕 (dua orang berdampingan)",
+  "trick": "Dua orang berdiri berdampingan untuk dibandingkan tinggi badannya. Pola: A 比 B + sifat.",
+  "history": "Bentuk 比 menggambarkan dua orang berdampingan (dua 匕, bentuk kuno 人 menghadap sama).",
+  "words": [
+   [
+    "比赛",
+    "bǐsài",
+    "pertandingan"
+   ]
+  ],
+  "sentence": [
+   "今天比昨天冷。",
+   "Jīntiān bǐ zuótiān lěng.",
+   "Hari ini lebih dingin daripada kemarin."
+  ],
+  "note": "Pola 比: A 比 B + kata sifat. Jangan tambah 很 sebelum kata sifat (✗ 比 B 很冷). Boleh tambah 更 atau 还 (比昨天更冷). Negatifnya memakai 没有: 今天没有昨天冷."
+ },
+ {
+  "n": 10,
+  "hanzi": "笔",
+  "pinyin": "bǐ",
+  "arti": "pena; (penghitung alat tulis / jumlah uang)",
+  "theme": "sekolah",
+  "parts": "⺮ (bambu) + 毛 (bulu)",
+  "trick": "Pena kuno dibuat dari batang bambu (⺮) dengan ujung bulu (毛), yaitu kuas. Sekarang jadi pena apa saja.",
+  "words": [
+   [
+    "笔记本",
+    "bǐjìběn",
+    "buku catatan; laptop"
+   ]
+  ],
+  "sentence": [
+   "你有笔吗？",
+   "Nǐ yǒu bǐ ma?",
+   "Kamu punya pena?"
+  ],
+  "note": "Jangan tertukar dengan 比 (bǐ) yang bunyinya sama. Tulisan dan artinya berbeda."
+ },
+ {
+  "n": 11,
+  "hanzi": "别",
+  "pinyin": "bié",
+  "arti": "jangan",
+  "theme": "tatabahasa",
+  "parts": "别 = 另 + 刂 (pisau)",
+  "trick": "别 bunyinya 'bié': bayangkan guru yang berkata 'Bie!' untuk melarang. Jangan!",
+  "words": [
+   [
+    "别客气",
+    "bié kèqi",
+    "jangan sungkan"
+   ],
+   [
+    "别忘了",
+    "bié wàng le",
+    "jangan lupa"
+   ]
+  ],
+  "sentence": [
+   "别说话！老师来了。",
+   "Bié shuōhuà! Lǎoshī lái le.",
+   "Jangan bicara! Guru datang."
+  ],
+  "note": "别 + kata kerja = larangan, sepadan dengan 不要 (búyào), lebih lisan. Beda dengan 不 yang berarti 'tidak' (menyangkal). 别 juga dipakai di 别人 'orang lain' (bié, bukan biè)."
+ },
+ {
+  "n": 12,
+  "hanzi": "不错",
+  "pinyin": "búcuò",
+  "arti": "lumayan; bagus",
+  "theme": "sifat",
+  "parts": "不 (tidak) + 错 (salah)",
+  "trick": "'Tidak salah' = lumayan bagus. Mirip 'not bad' tapi sudah kita pakai sehari-hari: 'boleh juga'.",
+  "words": [
+   [
+    "不错吧",
+    "búcuò ba",
+    "lumayan, kan?"
+   ]
+  ],
+  "sentence": [
+   "这个饭馆的菜不错。",
+   "Zhège fànguǎn de cài búcuò.",
+   "Masakan di restoran ini lumayan."
+  ],
+  "note": "不 berubah jadi nada kedua sebelum 错 (nada 4): bú cuò. 不错 bukan 'salah', melainkan pujian."
+ },
+ {
+  "n": 13,
+  "hanzi": "不好意思",
+  "pinyin": "bù hǎoyìsi",
+  "arti": "maaf; malu; sungkan",
+  "theme": "tatabahasa",
+  "parts": "不 (tidak) + 好 (baik) + 意思 (maksud; perasaan)",
+  "trick": "'Tidak enak hati' = 'nggak enak' dalam bahasa Indonesia. Pas sekali untuk meminta maaf kecil atau menolak dengan sopan.",
+  "words": [
+   [
+    "对不起",
+    "duìbuqǐ",
+    "maaf"
+   ]
+  ],
+  "sentence": [
+   "不好意思，我来晚了。",
+   "Bù hǎoyìsi, wǒ lái wǎn le.",
+   "Maaf, aku datang terlambat."
+  ],
+  "note": "Lebih ringan dari 对不起: dipakai untuk kesalahan kecil, memanggil orang ('Permisi...'), atau saat merasa malu atau sungkan. Kata sifat yang bisa pula berarti 'malu': 我不好意思说."
+ },
+ {
+  "n": 14,
+  "hanzi": "长",
+  "pinyin": "cháng",
+  "arti": "panjang",
+  "theme": "sifat",
+  "parts": "长 (bentuk sederhana dari 長: orang berambut panjang)",
+  "trick": "Garis-garis panjang melintang dan satu goresan menyapu ke bawah: seperti rambut yang menjuntai. Panjang!",
+  "words": [
+   [
+    "长城",
+    "Chángchéng",
+    "Tembok Besar"
+   ]
+  ],
+  "sentence": [
+   "这条路很长。",
+   "Zhè tiáo lù hěn cháng.",
+   "Jalan ini panjang sekali."
+  ],
+  "note": "Karakter 长 punya dua bunyi: cháng (panjang) dan zhǎng (tumbuh; ketua; 长大 zhǎngdà 'tumbuh besar'). Di entri ini bunyinya cháng."
+ },
+ {
+  "n": 15,
+  "hanzi": "车站",
+  "pinyin": "chēzhàn",
+  "arti": "stasiun; halte",
+  "theme": "tempat",
+  "parts": "车 (kendaraan) + 站 (berdiri; pos)",
+  "trick": "Tempat kendaraan (车) berdiri/berhenti (站) = stasiun atau halte.",
+  "words": [
+   [
+    "火车站",
+    "huǒchēzhàn",
+    "stasiun kereta"
+   ]
+  ],
+  "sentence": [
+   "车站离这儿很近。",
+   "Chēzhàn lí zhèr hěn jìn.",
+   "Stasiun dekat dari sini."
+  ],
+  "note": "站 sendiri bisa berarti 'berdiri' juga. 车站 mencakup stasiun, terminal, dan halte."
+ },
+ {
+  "n": 16,
+  "hanzi": "出",
+  "pinyin": "chū",
+  "arti": "keluar",
+  "theme": "gerak",
+  "parts": "屮 (tunas) + 凵 (wadah)",
+  "trick": "Tunas (屮) yang menyembul keluar dari wadah (凵). Keluar!",
+  "words": [
+   [
+    "出去",
+    "chūqù",
+    "keluar (menjauh)"
+   ],
+   [
+    "出来",
+    "chūlái",
+    "keluar (mendekat)"
+   ]
+  ],
+  "sentence": [
+   "他出了教室。",
+   "Tā chū le jiàoshì.",
+   "Dia keluar dari kelas."
+  ],
+  "note": "出 jarang berdiri sendiri. Biasanya muncul di kata majemuk (出国, 出门) atau sebagai arah di belakang kata kerja: 走出, 说出, 拿出."
+ },
+ {
+  "n": 17,
+  "hanzi": "出国",
+  "pinyin": "chūguó",
+  "arti": "pergi ke luar negeri",
+  "theme": "tempat",
+  "parts": "出 (keluar) + 国 (negara)",
+  "trick": "Keluar (出) dari negara (国) = pergi ke luar negeri.",
+  "words": [
+   [
+    "回国",
+    "huíguó",
+    "pulang ke negara asal"
+   ]
+  ],
+  "sentence": [
+   "我想明年出国学习。",
+   "Wǒ xiǎng míngnián chūguó xuéxí.",
+   "Tahun depan aku ingin belajar ke luar negeri."
+  ]
+ },
+ {
+  "n": 18,
+  "hanzi": "出来",
+  "pinyin": "chūlái",
+  "arti": "keluar (menuju pembicara)",
+  "theme": "gerak",
+  "parts": "出 (keluar) + 来 (datang)",
+  "trick": "Keluar (出) lalu datang (来) ke arahku, karena aku yang berbicara.",
+  "words": [
+   [
+    "走出来",
+    "zǒu chūlái",
+    "berjalan keluar"
+   ]
+  ],
+  "sentence": [
+   "你快出来！",
+   "Nǐ kuài chūlái!",
+   "Cepat keluar ke sini!"
+  ],
+  "note": "来 = arah menuju pembicara; 出去 (no. 20) = menjauh dari pembicara. Contoh: kamu di dalam kamar dan temanmu memanggil dari luar: 你出来吧!"
+ },
+ {
+  "n": 19,
+  "hanzi": "出门",
+  "pinyin": "chūmén",
+  "arti": "keluar rumah; pergi keluar",
+  "theme": "kerja",
+  "parts": "出 (keluar) + 门 (pintu)",
+  "trick": "Keluar (出) lewat pintu (门) = keluar rumah.",
+  "words": [
+   [
+    "出门",
+    "chūmén",
+    "keluar rumah"
+   ]
+  ],
+  "sentence": [
+   "他每天早上七点出门。",
+   "Tā měitiān zǎoshang qī diǎn chūmén.",
+   "Dia keluar rumah jam tujuh setiap pagi."
+  ],
+  "note": "出门 sering berarti 'pergi bepergian/keluar rumah', juga dipakai untuk 'bepergian jauh'."
+ },
+ {
+  "n": 20,
+  "hanzi": "出去",
+  "pinyin": "chūqù",
+  "arti": "keluar (menjauh dari pembicara)",
+  "theme": "gerak",
+  "parts": "出 (keluar) + 去 (pergi)",
+  "trick": "Keluar (出) lalu pergi (去) menjauh dariku.",
+  "words": [
+   [
+    "出去玩儿",
+    "chūqù wánr",
+    "pergi bermain"
+   ]
+  ],
+  "sentence": [
+   "我们出去玩儿吧。",
+   "Wǒmen chūqù wánr ba.",
+   "Ayo kita pergi bermain."
+  ],
+  "note": "Bandingkan dengan 出来 (no. 18): 去 menjauh dari pembicara, 来 mendekat."
+ },
+ {
+  "n": 21,
+  "hanzi": "床",
+  "pinyin": "chuáng",
+  "arti": "ranjang",
+  "theme": "benda",
+  "parts": "广 (rumah beratap) + 木 (kayu)",
+  "trick": "Ranjang kayu (木) di dalam rumah (广) tempat kamu tidur nyenyak.",
+  "words": [
+   [
+    "起床",
+    "qǐchuáng",
+    "bangun tidur"
+   ]
+  ],
+  "sentence": [
+   "我的床很大。",
+   "Wǒ de chuáng hěn dà.",
+   "Ranjangku besar."
+  ],
+  "note": "Bentuk sederhana dan tradisional sama (床). Penghitungnya 张, mis. 一张床."
+ },
+ {
+  "n": 22,
+  "hanzi": "词",
+  "pinyin": "cí",
+  "arti": "kata; istilah",
+  "theme": "sekolah",
+  "parts": "讠 (ucapan) + 司 (mengurus)",
+  "trick": "Kata adalah hal yang kita ucapkan (讠). Bagian 司 menunjukkan bunyinya (sī/cí).",
+  "words": [
+   [
+    "生词",
+    "shēngcí",
+    "kosakata baru"
+   ]
+  ],
+  "sentence": [
+   "这个词是什么意思？",
+   "Zhège cí shì shénme yìsi?",
+   "Apa arti kata ini?"
+  ],
+  "note": "词 = satu kata (bisa terdiri dari satu atau beberapa karakter). 字 = karakter."
+ },
+ {
+  "n": 23,
+  "hanzi": "次",
+  "pinyin": "cì",
+  "arti": "kali; (urutan berikutnya)",
+  "theme": "tatabahasa",
+  "parts": "冫 (es) + 欠 (kurang; menguap)",
+  "trick": "Setiap kali (次) kamu menguap (欠) di dingin (冫)... itulah 'sekali lagi'. Anggap saja: kali itu dihitung satu-satu.",
+  "words": [
+   [
+    "第一次",
+    "dì yī cì",
+    "pertama kali"
+   ],
+   [
+    "下次",
+    "xià cì",
+    "lain kali"
+   ]
+  ],
+  "sentence": [
+   "我去过中国一次。",
+   "Wǒ qùguo Zhōngguó yí cì.",
+   "Aku pernah ke Tiongkok satu kali."
+  ],
+  "note": "次 adalah penghitung kejadian (一次, 两次). Letaknya setelah kata kerja: 去一次. Kadang berarti 'kedua/berikutnya' (次日 'keesokan harinya')."
+ },
+ {
+  "n": 24,
+  "hanzi": "从",
+  "pinyin": "cóng",
+  "arti": "dari; sejak",
+  "theme": "tatabahasa",
+  "parts": "人 + 人 (dua orang berjalan beriringan)",
+  "trick": "Dua orang berjalan: yang satu mengikuti yang lain, berangkat 'dari' satu titik.",
+  "words": [
+   [
+    "从小",
+    "cóngxiǎo",
+    "sejak kecil"
+   ],
+   [
+    "从来",
+    "cónglái",
+    "selama ini (sampai sekarang)"
+   ]
+  ],
+  "sentence": [
+   "我从北京来。",
+   "Wǒ cóng Běijīng lái.",
+   "Aku datang dari Beijing."
+  ],
+  "note": "从 + tempat/waktu = titik awal: 从八点到十点. Bandingkan 离 (no. 89) yang mengukur jarak antara dua titik: 学校离我家很近."
+ },
+ {
+  "n": 25,
+  "hanzi": "从小",
+  "pinyin": "cóngxiǎo",
+  "arti": "sejak kecil",
+  "theme": "waktu",
+  "parts": "从 (sejak) + 小 (kecil)",
+  "trick": "Sejak (从) kecil (小): kata ini tinggal diucapkan saja.",
+  "words": [
+   [
+    "从小到大",
+    "cóngxiǎo dào dà",
+    "dari kecil hingga besar"
+   ]
+  ],
+  "sentence": [
+   "他从小就喜欢踢足球。",
+   "Tā cóngxiǎo jiù xǐhuan tī zúqiú.",
+   "Dia suka main sepak bola sejak kecil."
+  ]
+ },
+ {
+  "n": 26,
+  "hanzi": "错",
+  "pinyin": "cuò",
+  "arti": "salah",
+  "theme": "sifat",
+  "parts": "钅 (logam) + 昔 (dahulu; penanda bunyi)",
+  "trick": "Logam (钅) kuno bisa salah ditempa. 错 adalah kebalikan dari 对 (benar).",
+  "words": [
+   [
+    "对错",
+    "duìcuò",
+    "benar-salah"
+   ]
+  ],
+  "sentence": [
+   "你说得对，我错了。",
+   "Nǐ shuō de duì, wǒ cuò le.",
+   "Kamu benar, aku yang salah."
+  ],
+  "note": "错 = salah. Waspada: 不错 (no. 12) bukan 'tidak salah' secara harfiah saja, tapi 'lumayan bagus'."
+ },
+ {
+  "n": 27,
+  "hanzi": "打",
+  "pinyin": "dǎ",
+  "arti": "memukul; bermain (bola); mengerjakan",
+  "theme": "kerja",
+  "parts": "扌 (tangan) + 丁 (paku)",
+  "trick": "Tangan (扌) memukul paku (丁) dengan palu. Dari 'memukul' artinya melebar ke banyak aktivitas.",
+  "words": [
+   [
+    "打电话",
+    "dǎ diànhuà",
+    "menelepon"
+   ],
+   [
+    "打球",
+    "dǎ qiú",
+    "bermain bola"
+   ]
+  ],
+  "sentence": [
+   "他喜欢打篮球。",
+   "Tā xǐhuan dǎ lánqiú.",
+   "Dia suka main basket."
+  ],
+  "note": "打 sangat serbaguna: 打电话 (menelepon), 打车 (naik taksi), 打球 (main bola), 打开 (membuka). Hafal sebagai kombinasi kata, bukan satu arti saja."
+ },
+ {
+  "n": 28,
+  "hanzi": "打车",
+  "pinyin": "dǎchē",
+  "arti": "naik taksi; memanggil taksi",
+  "theme": "tempat",
+  "parts": "打 (memanggil; menyewa) + 车 (kendaraan)",
+  "trick": "Seperti 'order ojek online' sekarang: 打车 = pesan taksi.",
+  "words": [
+   [
+    "打的",
+    "dǎdī",
+    "naik taksi"
+   ]
+  ],
+  "sentence": [
+   "太晚了，我们打车回家吧。",
+   "Tài wǎn le, wǒmen dǎchē huí jiā ba.",
+   "Sudah malam, ayo pulang naik taksi."
+  ]
+ },
+ {
+  "n": 29,
+  "hanzi": "打开",
+  "pinyin": "dǎkāi",
+  "arti": "membuka; menyalakan",
+  "theme": "kerja",
+  "parts": "打 (memukul; mengerjakan) + 开 (membuka)",
+  "trick": "打 + 开: melakukan sesuatu sampai terbuka.",
+  "words": [
+   [
+    "打开门",
+    "dǎkāi mén",
+    "membuka pintu"
+   ]
+  ],
+  "sentence": [
+   "请打开书。",
+   "Qǐng dǎkāi shū.",
+   "Silakan buka buku."
+  ],
+  "note": "打开 dipakai untuk membuka pintu, buku, jendela, dan juga menyalakan alat (打开电视). Kata 开 saja juga berarti 'membuka'."
+ },
+ {
+  "n": 30,
+  "hanzi": "但",
+  "pinyin": "dàn",
+  "arti": "tetapi",
+  "theme": "tatabahasa",
+  "parts": "亻 (orang) + 旦 (fajar)",
+  "trick": "Orang (亻) menunggu fajar (旦) tapi ternyata... 'tetapi' belum datang!",
+  "words": [
+   [
+    "但是",
+    "dànshì",
+    "tetapi"
+   ]
+  ],
+  "sentence": [
+   "我很想去，但没有时间。",
+   "Wǒ hěn xiǎng qù, dàn méiyǒu shíjiān.",
+   "Aku sangat ingin pergi, tetapi tidak ada waktu."
+  ],
+  "note": "但 lebih singkat dan agak tulis dari 但是. Pola 虽然…但…: 虽然他很忙，但他还是来了."
+ },
+ {
+  "n": 31,
+  "hanzi": "但是",
+  "pinyin": "dànshì",
+  "arti": "tetapi",
+  "theme": "tatabahasa",
+  "parts": "但 (tetapi) + 是 (adalah)",
+  "trick": "但 + 是: tambahkan 'adalah' agar lebih lisan dan jelas.",
+  "words": [
+   [
+    "可是",
+    "kěshì",
+    "tetapi"
+   ]
+  ],
+  "sentence": [
+   "这个菜很好吃，但是太贵了。",
+   "Zhège cài hěn hǎochī, dànshì tài guì le.",
+   "Masakan ini enak, tetapi terlalu mahal."
+  ],
+  "note": "Dalam Mandarin, 虽然…但是… dipakai berpasangan dan kedua kata boleh muncul sekaligus (beda dari bahasa Indonesia yang cukup satu)."
+ },
+ {
+  "n": 32,
+  "hanzi": "得",
+  "pinyin": "de",
+  "arti": "partikel penghubung hasil/derajat",
+  "theme": "tatabahasa",
+  "parts": "彳 (langkah) + 旦 + 寸 (tangan)",
+  "trick": "Singkatnya: 得 menghubungkan kata kerja dengan 'seberapa baik'. 说得很好 = 'berbicara dengan baik'.",
+  "words": [
+   [
+    "说得好",
+    "shuō de hǎo",
+    "berbicara dengan baik"
+   ]
+  ],
+  "sentence": [
+   "他说汉语说得很好。",
+   "Tā shuō Hànyǔ shuō de hěn hǎo.",
+   "Dia berbicara bahasa Mandarin dengan sangat baik."
+  ],
+  "note": "Tiga 'de': 的 (milik; bentuk kata sifat sebelum benda), 得 (setelah kata kerja untuk menjelaskan hasil/derajat), 地 (no. 33, sebelum kata kerja untuk menjelaskan cara). 得 juga bisa dibaca dé (mendapat) dan děi (harus)."
+ },
+ {
+  "n": 33,
+  "hanzi": "地",
+  "pinyin": "de",
+  "arti": "partikel keterangan cara (-nya; secara ...)",
+  "theme": "tatabahasa",
+  "parts": "土 (tanah) + 也",
+  "trick": "Anggap 地 sebagai 'tempat' sebelum kata kerja: kata sifat + 地 + kata kerja menjelaskan caranya.",
+  "words": [
+   [
+    "慢慢地",
+    "mànmàn de",
+    "pelan-pelan"
+   ]
+  ],
+  "sentence": [
+   "请慢慢地说。",
+   "Qǐng mànmàn de shuō.",
+   "Tolong bicara pelan-pelan."
+  ],
+  "note": "Pola: sifat + 地 + kata kerja (高兴地说 'berkata dengan gembira'). Bandingkan 的 dan 得 (no. 32). Pada 地方 dan 地铁, 地 dibaca dì dan berarti 'tanah/tempat'."
+ },
+ {
+  "n": 34,
+  "hanzi": "等",
+  "pinyin": "děng",
+  "arti": "menunggu; dan seterusnya",
+  "theme": "kerja",
+  "parts": "⺮ (bambu) + 寺 (kuil)",
+  "trick": "Menunggu di depan kuil (寺) sambil menganyam bambu (⺮). Sabar...",
+  "words": [
+   [
+    "等一下",
+    "děng yíxià",
+    "tunggu sebentar"
+   ]
+  ],
+  "sentence": [
+   "请等一下。",
+   "Qǐng děng yíxià.",
+   "Mohon tunggu sebentar."
+  ],
+  "note": "等 juga berarti 'dan lain-lain' (苹果、水果等). Waspada 等于 yang artinya 'sama dengan' (belum perlu dihafal)."
+ },
+ {
+  "n": 35,
+  "hanzi": "地铁",
+  "pinyin": "dìtiě",
+  "arti": "kereta bawah tanah; MRT",
+  "theme": "tempat",
+  "parts": "地 (tanah) + 铁 (besi)",
+  "trick": "Kereta besi (铁) di bawah tanah (地) = MRT/subway.",
+  "words": [
+   [
+    "地铁站",
+    "dìtiězhàn",
+    "stasiun MRT"
+   ]
+  ],
+  "sentence": [
+   "我每天坐地铁上班。",
+   "Wǒ měitiān zuò dìtiě shàngbān.",
+   "Setiap hari aku naik MRT ke kantor."
+  ]
+ },
+ {
+  "n": 36,
+  "hanzi": "点",
+  "pinyin": "diǎn",
+  "arti": "memesan (makanan); menyalakan",
+  "theme": "kerja",
+  "parts": "占 (menempati) + 灬 (api)",
+  "trick": "Api (灬) kecil di titik: menyalakan. Memesan makanan = 'menunjuk' (点) menu dengan jari.",
+  "words": [
+   [
+    "点菜",
+    "diǎn cài",
+    "memesan makanan"
+   ]
+  ],
+  "sentence": [
+   "我们点两个菜吧。",
+   "Wǒmen diǎn liǎng ge cài ba.",
+   "Ayo kita pesan dua hidangan."
+  ],
+  "note": "Di HSK 1 kamu belajar 点 sebagai 'jam' dan 一点儿 'sedikit'. Di sini 点 adalah kata kerja: 点菜 (pesan makanan), 点头 (mengangguk)."
+ },
+ {
+  "n": 37,
+  "hanzi": "懂",
+  "pinyin": "dǒng",
+  "arti": "mengerti",
+  "theme": "kerja",
+  "parts": "忄 (hati) + 董 (penanda bunyi)",
+  "trick": "Pengertian lahir dari hati (忄). Ingat: 懂 = 'dong' dalam bahasa Indonesia 'paham, dong!'.",
+  "words": [
+   [
+    "听懂",
+    "tīngdǒng",
+    "mengerti (yang didengar)"
+   ],
+   [
+    "看不懂",
+    "kàn bu dǒng",
+    "tidak paham (yang dibaca)"
+   ]
+  ],
+  "sentence": [
+   "你听懂了吗？",
+   "Nǐ tīngdǒng le ma?",
+   "Apa kamu sudah mengerti (yang kudengar)?"
+  ],
+  "note": "懂 sering dipakai sebagai komplemen hasil: 听懂, 看懂, 听不懂. Jawaban pendek: 我懂了 / 我不懂."
+ },
+ {
+  "n": 38,
+  "hanzi": "动",
+  "pinyin": "dòng",
+  "arti": "bergerak; bertindak",
+  "theme": "gerak",
+  "parts": "云 + 力 (tenaga)",
+  "trick": "Butuh tenaga (力) agar awan (云) bergerak. Kalau tidak ada tenaga, diam.",
+  "words": [
+   [
+    "运动",
+    "yùndòng",
+    "olahraga"
+   ]
+  ],
+  "sentence": [
+   "别动！",
+   "Bié dòng!",
+   "Jangan bergerak!"
+  ],
+  "note": "动 jarang berdiri sendiri; biasanya muncul di 运动, 动作, atau sebagai komplemen (走不动 'tak sanggup berjalan lagi')."
+ },
+ {
+  "n": 39,
+  "hanzi": "饭馆",
+  "pinyin": "fànguǎn",
+  "arti": "restoran",
+  "theme": "makanan",
+  "parts": "饭 (nasi) + 馆 (gedung; kedai)",
+  "trick": "Kedai (馆) tempat orang makan nasi (饭) = restoran.",
+  "words": [
+   [
+    "饭店",
+    "fàndiàn",
+    "restoran; hotel"
+   ]
+  ],
+  "sentence": [
+   "这个饭馆的鱼很好吃。",
+   "Zhège fànguǎn de yú hěn hǎochī.",
+   "Ikan di restoran ini enak sekali."
+  ],
+  "note": "饭馆 untuk restoran kecil-sedang; 饭店 bisa berarti restoran besar atau hotel; 酒店 (no. 75) kini paling umum untuk 'hotel'."
+ },
+ {
+  "n": 40,
+  "hanzi": "飞",
+  "pinyin": "fēi",
+  "arti": "terbang",
+  "theme": "gerak",
+  "parts": "飞 (bentuk sederhana dari 飛: sayap)",
+  "trick": "Goresan-goresan miring seperti sayap yang mengepak. Pesawat (飞机) pun terbang.",
+  "words": [
+   [
+    "飞机",
+    "fēijī",
+    "pesawat"
+   ]
+  ],
+  "sentence": [
+   "飞机飞得很快。",
+   "Fēijī fēi de hěn kuài.",
+   "Pesawat terbang sangat cepat."
+  ]
+ },
+ {
+  "n": 41,
+  "hanzi": "高",
+  "pinyin": "gāo",
+  "arti": "tinggi; (tinggi badan)",
+  "theme": "sifat",
+  "parts": "亠 + 口 + 冋 (bangunan bertingkat)",
+  "trick": "Seperti menara bertingkat dengan atap dan jendela. Tinggi!",
+  "history": "Bentuk kuno 高 menggambarkan bangunan atau menara bertingkat.",
+  "words": [
+   [
+    "高兴",
+    "gāoxìng",
+    "senang"
+   ],
+   [
+    "很高",
+    "hěn gāo",
+    "tinggi sekali"
+   ]
+  ],
+  "sentence": [
+   "他比我高。",
+   "Tā bǐ wǒ gāo.",
+   "Dia lebih tinggi dariku."
+  ],
+  "note": "高 dipakai untuk benda dan orang, 高兴 'senang' (HSK 1) berasal dari 高 'tinggi' + 兴 'semangat'."
+ },
+ {
+  "n": 42,
+  "hanzi": "高中",
+  "pinyin": "gāozhōng",
+  "arti": "SMA",
+  "theme": "sekolah",
+  "parts": "高 (tinggi) + 中 (tengah)",
+  "trick": "SMA = sekolah menengah (中) tingkat atas (高).",
+  "words": [
+   [
+    "初中",
+    "chūzhōng",
+    "SMP"
+   ],
+   [
+    "高中生",
+    "gāozhōngshēng",
+    "siswa SMA"
+   ]
+  ],
+  "sentence": [
+   "我哥哥在高中学习。",
+   "Wǒ gēge zài gāozhōng xuéxí.",
+   "Kakakku belajar di SMA."
+  ],
+  "note": "Urutan sekolah Tiongkok: 小学 (SD), 初中 (SMP), 高中 (SMA), 大学 (universitas)."
+ },
+ {
+  "n": 43,
+  "hanzi": "告诉",
+  "pinyin": "gàosu",
+  "arti": "memberitahu",
+  "theme": "kerja",
+  "parts": "告 (memberi tahu) + 诉 (menyampaikan)",
+  "trick": "Dua karakter yang artinya sama-sama 'menyampaikan'. Gunakan ketika memberi kabar.",
+  "words": [
+   [
+    "告诉我",
+    "gàosu wǒ",
+    "beri tahu aku"
+   ]
+  ],
+  "sentence": [
+   "请告诉我你的名字。",
+   "Qǐng gàosu wǒ nǐ de míngzi.",
+   "Tolong beri tahu aku namamu."
+  ],
+  "note": "Pola: 告诉 + orang + isi: 告诉我一件事. Suku kata kedua 诉 diucapkan ringan: gàosu."
+ },
+ {
+  "n": 44,
+  "hanzi": "个子",
+  "pinyin": "gèzi",
+  "arti": "tinggi badan; postur",
+  "theme": "tubuh",
+  "parts": "个 (satuan) + 子 (akhiran)",
+  "trick": "个子 = 'tubuhmu satu ukuran', yaitu tinggi badan.",
+  "words": [
+   [
+    "高个子",
+    "gāo gèzi",
+    "orang yang tinggi"
+   ]
+  ],
+  "sentence": [
+   "他个子很高。",
+   "Tā gèzi hěn gāo.",
+   "Badannya tinggi."
+  ],
+  "note": "个子 hanya untuk tinggi badan/postur. Kata sifatnya langsung: 个子高 / 个子小."
+ },
+ {
+  "n": 45,
+  "hanzi": "跟",
+  "pinyin": "gēn",
+  "arti": "dengan; dan; mengikuti",
+  "theme": "tatabahasa",
+  "parts": "足 (kaki) + 艮 (penanda bunyi)",
+  "trick": "Kaki (足) berjalan di belakang seseorang = mengikuti = 'bersama dengan'.",
+  "words": [
+   [
+    "跟我来",
+    "gēn wǒ lái",
+    "ikut aku"
+   ],
+   [
+    "跟…一起",
+    "gēn … yìqǐ",
+    "bersama ..."
+   ]
+  ],
+  "sentence": [
+   "我跟朋友一起去。",
+   "Wǒ gēn péngyou yìqǐ qù.",
+   "Aku pergi bersama temanku."
+  ],
+  "note": "跟 seperti 和: 'dengan; dan'. 跟你说 = 'berkata kepadamu'. Pola umum: 跟 + orang + 一起 + kata kerja."
+ },
+ {
+  "n": 46,
+  "hanzi": "公交车",
+  "pinyin": "gōngjiāochē",
+  "arti": "bus",
+  "theme": "tempat",
+  "parts": "公 (umum) + 交 (bergantian) + 车 (kendaraan)",
+  "trick": "Kendaraan (车) umum (公) yang membawa orang bergantian naik dan turun (交).",
+  "words": [
+   [
+    "公共汽车",
+    "gōnggòng qìchē",
+    "bus umum"
+   ]
+  ],
+  "sentence": [
+   "我坐公交车去学校。",
+   "Wǒ zuò gōngjiāochē qù xuéxiào.",
+   "Aku naik bus ke sekolah."
+  ],
+  "note": "Kata lengkapnya 公共汽车; bentuk 公交车 lebih ringkas dan umum dipakai sekarang."
+ },
+ {
+  "n": 47,
+  "hanzi": "过",
+  "pinyin": "guò",
+  "arti": "melewati; melintasi; terlalu (berlebihan)",
+  "theme": "gerak",
+  "parts": "辶 (jalan) + 寸 (ukuran)",
+  "trick": "辶 (jalan) + ukuran (寸) = melewati sebuah jarak.",
+  "words": [
+   [
+    "过去",
+    "guòqù",
+    "pergi ke sana"
+   ],
+   [
+    "过年",
+    "guònián",
+    "merayakan Tahun Baru"
+   ]
+  ],
+  "sentence": [
+   "过了这条路，你就看见我家了。",
+   "Guò le zhè tiáo lù, nǐ jiù kànjiàn wǒ jiā le.",
+   "Setelah melewati jalan ini, kamu akan melihat rumahku."
+  ],
+  "note": "过 di sini kata kerja dibaca guò (melewati; juga 'berlebih', mis. 过大). Berbeda dari 过 partikel pengalaman (no. 51) yang dibaca ringan: guo."
+ },
+ {
+  "n": 48,
+  "hanzi": "过来",
+  "pinyin": "guòlái",
+  "arti": "datang ke sini (menyeberang)",
+  "theme": "gerak",
+  "parts": "过 (melewati) + 来 (datang)",
+  "trick": "Menyeberang (过) lalu datang (来) ke arahku.",
+  "words": [
+   [
+    "走过来",
+    "zǒu guòlái",
+    "berjalan menghampiri"
+   ]
+  ],
+  "sentence": [
+   "你过来一下。",
+   "Nǐ guòlái yíxià.",
+   "Kemarilah sebentar."
+  ]
+ },
+ {
+  "n": 49,
+  "hanzi": "过年",
+  "pinyin": "guònián",
+  "arti": "merayakan Tahun Baru",
+  "theme": "waktu",
+  "parts": "过 (melewati) + 年 (tahun)",
+  "trick": "Melewati (过) pergantian tahun (年) = merayakan Tahun Baru Imlek.",
+  "words": [
+   [
+    "过生日",
+    "guò shēngrì",
+    "merayakan ulang tahun"
+   ]
+  ],
+  "sentence": [
+   "过年的时候，我们都回家。",
+   "Guònián de shíhou, wǒmen dōu huí jiā.",
+   "Saat Tahun Baru, kami semua pulang ke rumah."
+  ],
+  "note": "过年 sering dipakai untuk Tahun Baru Imlek (春节). Pola serupa: 过生日 (merayakan ulang tahun)."
+ },
+ {
+  "n": 50,
+  "hanzi": "过去",
+  "pinyin": "guòqù",
+  "arti": "pergi ke sana (menyeberang)",
+  "theme": "gerak",
+  "parts": "过 (melewati) + 去 (pergi)",
+  "trick": "Menyeberang (过) lalu pergi (去) menjauh dariku.",
+  "words": [
+   [
+    "走过去",
+    "zǒu guòqù",
+    "berjalan ke sana"
+   ]
+  ],
+  "sentence": [
+   "我们过去看看。",
+   "Wǒmen guòqù kànkan.",
+   "Ayo kita ke sana dan lihat-lihat."
+  ],
+  "note": "过去 juga berarti 'masa lalu' (kata benda), yang kamu akan temui di HSK berikutnya."
+ },
+ {
+  "n": 51,
+  "hanzi": "过",
+  "pinyin": "guo",
+  "arti": "partikel pengalaman (pernah)",
+  "theme": "tatabahasa",
+  "parts": "辶 (jalan) + 寸 (ukuran)",
+  "trick": "Karakter sama dengan 过 (guò), tapi di sini bunyinya ringan: guo. Artinya 'pernah'.",
+  "words": [
+   [
+    "去过",
+    "qùguo",
+    "pernah pergi"
+   ],
+   [
+    "没吃过",
+    "méi chīguo",
+    "belum pernah makan"
+   ]
+  ],
+  "sentence": [
+   "我去过北京。",
+   "Wǒ qùguo Běijīng.",
+   "Aku pernah pergi ke Beijing."
+  ],
+  "note": "Karakter sama dengan 过 (no. 47) tetapi arti dan bunyinya beda (guò vs guo). Pola: kata kerja + 过 = pernah. Negatif: 没 + kata kerja + 过 (我没去过). Jangan tambahkan 了 di kalimat pengalaman."
+ },
+ {
+  "n": 52,
+  "hanzi": "还是",
+  "pinyin": "háishi",
+  "arti": "atau (dalam pertanyaan); masih",
+  "theme": "tatabahasa",
+  "parts": "还 (masih; juga) + 是 (adalah)",
+  "trick": "'Mana yang adalah (是) pilihanmu, yang ini atau yang itu?' Itulah 还是.",
+  "words": [
+   [
+    "还是",
+    "háishi",
+    "masih; atau"
+   ]
+  ],
+  "sentence": [
+   "你喝茶还是喝咖啡？",
+   "Nǐ hē chá háishi hē kāfēi?",
+   "Kamu mau minum teh atau kopi?"
+  ],
+  "note": "还是 = 'atau' hanya dalam PERTANYAAN pilihan. Dalam pernyataan pakai 或者 (huòzhě). Juga berarti 'masih' atau 'sebaiknya': 还是你去吧."
+ },
+ {
+  "n": 53,
+  "hanzi": "黑色",
+  "pinyin": "hēisè",
+  "arti": "hitam",
+  "theme": "benda",
+  "parts": "黑 (hitam) + 色 (warna)",
+  "trick": "黑 = hitam; 色 = warna. Mudah!",
+  "words": [
+   [
+    "黑色的",
+    "hēisè de",
+    "yang berwarna hitam"
+   ]
+  ],
+  "sentence": [
+   "我有一件黑色的衣服。",
+   "Wǒ yǒu yí jiàn hēisè de yīfu.",
+   "Aku punya sebuah baju berwarna hitam."
+  ]
+ },
+ {
+  "n": 54,
+  "hanzi": "红茶",
+  "pinyin": "hóngchá",
+  "arti": "teh hitam",
+  "theme": "makanan",
+  "parts": "红 (merah) + 茶 (teh)",
+  "trick": "Teh hitam dalam bahasa Mandarin disebut 'teh merah' karena warna seduhannya kemerahan.",
+  "words": [
+   [
+    "红茶",
+    "hóngchá",
+    "teh hitam"
+   ]
+  ],
+  "sentence": [
+   "我想喝一杯红茶。",
+   "Wǒ xiǎng hē yì bēi hóngchá.",
+   "Aku mau minum secangkir teh hitam."
+  ],
+  "note": "Jangan diterjemahkan 'teh merah'. Di Tiongkok teh hitam = 红茶 dan teh yang digelapkan lama = 黑茶 (teh fermentasi gelap)."
+ },
+ {
+  "n": 55,
+  "hanzi": "红色",
+  "pinyin": "hóngsè",
+  "arti": "merah",
+  "theme": "benda",
+  "parts": "红 (merah) + 色 (warna)",
+  "trick": "红 (merah) + 色 (warna). Merah adalah warna keberuntungan di Tiongkok.",
+  "words": [
+   [
+    "红色",
+    "hóngsè",
+    "warna merah"
+   ]
+  ],
+  "sentence": [
+   "她今天穿红色的衣服。",
+   "Tā jīntiān chuān hóngsè de yīfu.",
+   "Hari ini dia memakai baju merah."
+  ]
+ },
+ {
+  "n": 56,
+  "hanzi": "后面",
+  "pinyin": "hòumiàn",
+  "arti": "di belakang; bagian belakang",
+  "theme": "tempat",
+  "parts": "后 (belakang) + 面 (sisi)",
+  "trick": "后 = belakang; 面 = sisi. 'Sisi belakang'.",
+  "words": [
+   [
+    "前面",
+    "qiánmiàn",
+    "di depan"
+   ]
+  ],
+  "sentence": [
+   "学校后面有一个商店。",
+   "Xuéxiào hòumiàn yǒu yí ge shāngdiàn.",
+   "Di belakang sekolah ada sebuah toko."
+  ],
+  "note": "Sering diikuti 'de' atau 儿: 后面儿, 后边."
+ },
+ {
+  "n": 57,
+  "hanzi": "花",
+  "pinyin": "huā",
+  "arti": "menghabiskan (uang/waktu)",
+  "theme": "kerja",
+  "parts": "艹 (rumput) + 化 (berubah)",
+  "trick": "'Berubah' (化) seperti bunga mekar lalu layu: uang atau waktu 'berubah' habis dipakai.",
+  "words": [
+   [
+    "花钱",
+    "huā qián",
+    "menghabiskan uang"
+   ],
+   [
+    "花时间",
+    "huā shíjiān",
+    "menghabiskan waktu"
+   ]
+  ],
+  "sentence": [
+   "我花了很多钱。",
+   "Wǒ huā le hěn duō qián.",
+   "Aku menghabiskan banyak uang."
+  ],
+  "note": "Dua 花: 花 (no. 57) kata kerja 'menghabiskan' dan 花 (no. 58) kata benda 'bunga'. Bunyi dan tulisan sama, arti beda. Cek konteks: ada 钱/时间 = menghabiskan."
+ },
+ {
+  "n": 58,
+  "hanzi": "花",
+  "pinyin": "huā",
+  "arti": "bunga; (beraneka warna)",
+  "theme": "benda",
+  "parts": "艹 (rumput/tanaman) + 化 (berubah)",
+  "trick": "Tanaman (艹) yang 'berubah' (化) menjadi bunga yang indah.",
+  "words": [
+   [
+    "花儿",
+    "huār",
+    "bunga"
+   ],
+   [
+    "花茶",
+    "huāchá",
+    "teh bunga"
+   ]
+  ],
+  "sentence": [
+   "这些花很漂亮。",
+   "Zhèxiē huā hěn piàoliang.",
+   "Bunga-bunga ini cantik sekali."
+  ],
+  "note": "花 (no. 58) 'bunga' berbeda dari 花 (no. 57) 'menghabiskan'. Tulisan dan bunyinya sama, jadi lihat konteks: ada 钱/时间 = menghabiskan; ada tanaman = bunga."
+ },
+ {
+  "n": 59,
+  "hanzi": "画",
+  "pinyin": "huà",
+  "arti": "menggambar; gambar",
+  "theme": "sekolah",
+  "parts": "田 (ladang) + 凵 (bingkai)",
+  "trick": "Seperti membuat denah ladang (田) dalam sebuah bingkai (凵): menggambar.",
+  "words": [
+   [
+    "画画儿",
+    "huà huàr",
+    "menggambar"
+   ]
+  ],
+  "sentence": [
+   "她很喜欢画画儿。",
+   "Tā hěn xǐhuan huà huàr.",
+   "Dia sangat suka menggambar."
+  ],
+  "note": "画 bisa kata kerja (menggambar) dan kata benda (lukisan). 画儿 lebih lisan untuk 'gambar'. Dalam bahasa lisan, pola: 画一张画."
+ },
+ {
+  "n": 60,
+  "hanzi": "坏",
+  "pinyin": "huài",
+  "arti": "buruk; rusak",
+  "theme": "sifat",
+  "parts": "土 (tanah) + 不 (tidak)",
+  "trick": "Tanah (土) yang 'tidak' (不) bagus = buruk/rusak.",
+  "words": [
+   [
+    "坏人",
+    "huàirén",
+    "orang jahat"
+   ],
+   [
+    "坏了",
+    "huài le",
+    "rusak"
+   ]
+  ],
+  "sentence": [
+   "我的手机坏了。",
+   "Wǒ de shǒujī huài le.",
+   "Ponselku rusak."
+  ],
+  "note": "坏 bisa berarti 'rusak' (手机坏了), 'buruk/jahat' (坏人), atau 'busuk/basi' (鱼坏了). Lawan umumnya 好."
+ },
+ {
+  "n": 61,
+  "hanzi": "回来",
+  "pinyin": "huílái",
+  "arti": "pulang; kembali (menuju pembicara)",
+  "theme": "gerak",
+  "parts": "回 (kembali) + 来 (datang)",
+  "trick": "Kembali (回) ke arahku (来).",
+  "words": [
+   [
+    "回来了",
+    "huílái le",
+    "sudah kembali"
+   ]
+  ],
+  "sentence": [
+   "你什么时候回来？",
+   "Nǐ shénme shíhou huílái?",
+   "Kapan kamu pulang?"
+  ],
+  "note": "回来 = menuju pembicara; 回去 (no. 62) = menjauh dari pembicara."
+ },
+ {
+  "n": 62,
+  "hanzi": "回去",
+  "pinyin": "huíqù",
+  "arti": "pulang; kembali (menjauh)",
+  "theme": "gerak",
+  "parts": "回 (kembali) + 去 (pergi)",
+  "trick": "Kembali (回) dan pergi (去) menjauh dariku.",
+  "words": [
+   [
+    "回去",
+    "huíqù",
+    "pulang (ke sana)"
+   ]
+  ],
+  "sentence": [
+   "太晚了，我想回去。",
+   "Tài wǎn le, wǒ xiǎng huíqù.",
+   "Sudah terlalu malam, aku ingin pulang."
+  ]
+ },
+ {
+  "n": 63,
+  "hanzi": "机场",
+  "pinyin": "jīchǎng",
+  "arti": "bandara",
+  "theme": "tempat",
+  "parts": "机 (mesin) + 场 (lapangan)",
+  "trick": "Lapangan (场) tempat mesin terbang (机) berangkat dan mendarat = bandara.",
+  "words": [
+   [
+    "飞机场",
+    "fēijīchǎng",
+    "bandara"
+   ]
+  ],
+  "sentence": [
+   "我们坐出租车去机场。",
+   "Wǒmen zuò chūzūchē qù jīchǎng.",
+   "Kami naik taksi ke bandara."
+  ]
+ },
+ {
+  "n": 64,
+  "hanzi": "机票",
+  "pinyin": "jīpiào",
+  "arti": "tiket pesawat",
+  "theme": "tempat",
+  "parts": "机 (pesawat) + 票 (tiket)",
+  "trick": "Tiket (票) untuk pesawat (机).",
+  "words": [
+   [
+    "电影票",
+    "diànyǐngpiào",
+    "tiket film"
+   ]
+  ],
+  "sentence": [
+   "机票太贵了，我不去了。",
+   "Jīpiào tài guì le, wǒ bú qù le.",
+   "Tiket pesawat terlalu mahal, aku tidak jadi pergi."
+  ],
+  "note": "机 pada 机场/机票 adalah singkatan 飞机."
+ },
+ {
+  "n": 65,
+  "hanzi": "记得",
+  "pinyin": "jìde",
+  "arti": "ingat; mengingat",
+  "theme": "kerja",
+  "parts": "记 (mencatat; mengingat) + 得 (mendapat)",
+  "trick": "'Mencatat' (记) dan 'mendapat' (得) di kepala: kamu ingat.",
+  "words": [
+   [
+    "记得",
+    "jìde",
+    "ingat"
+   ],
+   [
+    "不记得",
+    "bú jìde",
+    "tidak ingat"
+   ]
+  ],
+  "sentence": [
+   "你还记得我吗？",
+   "Nǐ hái jìde wǒ ma?",
+   "Apakah kamu masih ingat aku?"
+  ],
+  "note": "Lawan: 忘 (lupa). Tanpa objek: 我记得 (aku ingat)."
+ },
+ {
+  "n": 66,
+  "hanzi": "间",
+  "pinyin": "jiān",
+  "arti": "(penghitung kamar); antara",
+  "theme": "tatabahasa",
+  "parts": "门 (pintu) + 日 (matahari)",
+  "trick": "Matahari (日) menembus celah pintu (门): ruang di antara. Dari situ jadi 'kamar'.",
+  "words": [
+   [
+    "房间",
+    "fángjiān",
+    "kamar"
+   ],
+   [
+    "时间",
+    "shíjiān",
+    "waktu"
+   ]
+  ],
+  "sentence": [
+   "这间教室很大。",
+   "Zhè jiān jiàoshì hěn dà.",
+   "Ruang kelas ini besar."
+  ],
+  "note": "间 sebagai penghitung dipakai untuk ruangan: 一间房, 两间教室. Sebagai bagian kata: 房间, 时间, 中间 (tengah). Dalam kata-kata HSK ini 间 dibaca jiān (ada bacaan lain jiàn, mis. 间隔, belum perlu dihafal)."
+ },
+ {
+  "n": 67,
+  "hanzi": "教",
+  "pinyin": "jiāo",
+  "arti": "mengajar",
+  "theme": "sekolah",
+  "parts": "孝 (bakti) + 攵 (memukul)",
+  "trick": "Guru kuno mendidik dengan 'bakti' (孝) dan tegas (攵). Sekarang cukup: guru mengajar murid.",
+  "words": [
+   [
+    "教学",
+    "jiàoxué",
+    "mengajar"
+   ]
+  ],
+  "sentence": [
+   "他教我们汉语。",
+   "Tā jiāo wǒmen Hànyǔ.",
+   "Dia mengajar kami bahasa Mandarin."
+  ],
+  "note": "Dibaca jiāo (mengajar), tetapi dalam 教室 dibaca jiào (arti 'pendidikan'). Perhatikan bunyinya."
+ },
+ {
+  "n": 68,
+  "hanzi": "教室",
+  "pinyin": "jiàoshì",
+  "arti": "ruang kelas",
+  "theme": "sekolah",
+  "parts": "教 (mengajar) + 室 (ruangan)",
+  "trick": "Ruangan (室) tempat mengajar (教) = ruang kelas.",
+  "words": [
+   [
+    "办公室",
+    "bàngōngshì",
+    "kantor"
+   ]
+  ],
+  "sentence": [
+   "老师在教室里。",
+   "Lǎoshī zài jiàoshì li.",
+   "Guru ada di dalam kelas."
+  ],
+  "note": "教 dibaca jiào di dalam 教室 (bukan jiāo). Ingat: guru mengajar (jiāo), tempat mengajar (jiào)."
+ },
+ {
+  "n": 69,
+  "hanzi": "介绍",
+  "pinyin": "jièshào",
+  "arti": "memperkenalkan",
+  "theme": "kerja",
+  "parts": "介 (di antara) + 绍 (menyambung)",
+  "trick": "'Menyambung' (绍) dua orang yang berada 'di antara' (介) kita: itulah memperkenalkan.",
+  "words": [
+   [
+    "自我介绍",
+    "zìwǒ jièshào",
+    "perkenalan diri"
+   ]
+  ],
+  "sentence": [
+   "我来介绍一下，这是我的朋友。",
+   "Wǒ lái jièshào yíxià, zhè shì wǒ de péngyou.",
+   "Biar kuperkenalkan, ini temanku."
+  ],
+  "note": "Pola: 介绍 + orang + 给/认识. 我来介绍一下 = 'Biar saya perkenalkan'."
+ },
+ {
+  "n": 70,
+  "hanzi": "进",
+  "pinyin": "jìn",
+  "arti": "masuk",
+  "theme": "gerak",
+  "parts": "辶 (jalan) + 井 (sumur)",
+  "trick": "Berjalan (辶) lalu masuk ke sumur (井)? Intinya: 进 = masuk ke dalam.",
+  "words": [
+   [
+    "进门",
+    "jìn mén",
+    "masuk pintu"
+   ]
+  ],
+  "sentence": [
+   "请进！",
+   "Qǐng jìn!",
+   "Silakan masuk!"
+  ],
+  "note": "进 sering di depan tempat: 进教室. Gabungan 进来/进去 menunjukkan arah."
+ },
+ {
+  "n": 71,
+  "hanzi": "近",
+  "pinyin": "jìn",
+  "arti": "dekat",
+  "theme": "sifat",
+  "parts": "辶 (jalan) + 斤 (kapak)",
+  "trick": "Jalan (辶) yang hanya sepanjang satu ayunan kapak (斤) = dekat.",
+  "words": [
+   [
+    "很近",
+    "hěn jìn",
+    "dekat sekali"
+   ]
+  ],
+  "sentence": [
+   "我家离学校很近。",
+   "Wǒ jiā lí xuéxiào hěn jìn.",
+   "Rumahku dekat dengan sekolah."
+  ],
+  "note": "Lawan: 远. Pola: A 离 B 很近."
+ },
+ {
+  "n": 72,
+  "hanzi": "进来",
+  "pinyin": "jìnlái",
+  "arti": "masuk (menuju pembicara)",
+  "theme": "gerak",
+  "parts": "进 (masuk) + 来 (datang)",
+  "trick": "Masuk (进) ke arahku (来): 'Silakan masuk!' kata tuan rumah.",
+  "words": [
+   [
+    "进来吧",
+    "jìnlái ba",
+    "masuklah"
+   ]
+  ],
+  "sentence": [
+   "请进来坐。",
+   "Qǐng jìnlái zuò.",
+   "Silakan masuk dan duduk."
+  ],
+  "note": "进来 dari sudut orang di dalam; 进去 (no. 73) dari sudut orang di luar."
+ },
+ {
+  "n": 73,
+  "hanzi": "进去",
+  "pinyin": "jìnqù",
+  "arti": "masuk (menjauh dari pembicara)",
+  "theme": "gerak",
+  "parts": "进 (masuk) + 去 (pergi)",
+  "trick": "Masuk (进) dan pergi (去) ke dalam, menjauh dariku.",
+  "words": [
+   [
+    "走进去",
+    "zǒu jìnqù",
+    "berjalan masuk"
+   ]
+  ],
+  "sentence": [
+   "我们进去看看吧。",
+   "Wǒmen jìnqù kànkan ba.",
+   "Ayo kita masuk melihat-lihat."
+  ]
+ },
+ {
+  "n": 74,
+  "hanzi": "经常",
+  "pinyin": "jīngcháng",
+  "arti": "sering",
+  "theme": "waktu",
+  "parts": "经 (melalui) + 常 (biasa)",
+  "trick": "Hal yang berlalu (经) menjadi biasa (常) = sering.",
+  "words": [
+   [
+    "常常",
+    "chángcháng",
+    "sering"
+   ]
+  ],
+  "sentence": [
+   "他经常去书店看书。",
+   "Tā jīngcháng qù shūdiàn kàn shū.",
+   "Dia sering ke toko buku untuk membaca."
+  ],
+  "note": "经常 hampir sama dengan 常常. Letak: sebelum kata kerja."
+ },
+ {
+  "n": 75,
+  "hanzi": "酒店",
+  "pinyin": "jiǔdiàn",
+  "arti": "hotel",
+  "theme": "tempat",
+  "parts": "酒 (arak) + 店 (toko)",
+  "trick": "Dulu penginapan sering menjual arak (酒); sekarang 酒店 berarti hotel.",
+  "words": [
+   [
+    "饭店",
+    "fàndiàn",
+    "restoran; hotel"
+   ]
+  ],
+  "sentence": [
+   "我们住在一个很大的酒店。",
+   "Wǒmen zhù zài yí ge hěn dà de jiǔdiàn.",
+   "Kami menginap di sebuah hotel besar."
+  ],
+  "note": "Di Tiongkok daratan 酒店 = hotel. Hati-hati: 酒 berarti 'arak/minuman keras', tetapi 酒店 jarang berarti 'bar'."
+ },
+ {
+  "n": 76,
+  "hanzi": "就",
+  "pinyin": "jiù",
+  "arti": "langsung; lalu; segera",
+  "theme": "tatabahasa",
+  "parts": "京 (ibu kota) + 尤 (istimewa)",
+  "trick": "Pengingat sederhana: 就 = 'lalu' atau 'langsung'. Dia menyambung peristiwa pertama dengan peristiwa kedua.",
+  "words": [
+   [
+    "就是",
+    "jiù shì",
+    "adalah (menegaskan)"
+   ]
+  ],
+  "sentence": [
+   "我下午三点就到了。",
+   "Wǒ xiàwǔ sān diǎn jiù dào le.",
+   "Aku sudah sampai jam tiga sore."
+  ],
+  "note": "就 berarti 'langsung/sudah' (kejadian lebih cepat dari dugaan) atau 'lalu': 吃了饭就走. Kebalikannya 才 (baru), yang belum perlu dihafal."
+ },
+ {
+  "n": 77,
+  "hanzi": "咖啡",
+  "pinyin": "kāfēi",
+  "arti": "kopi",
+  "theme": "makanan",
+  "parts": "口 + 加 / 口 + 非 (penanda bunyi serapan)",
+  "trick": "咖啡 adalah kata serapan dari 'coffee': kā-fēi. Bunyinya mirip 'kopi'. Bagian 口 menandakan bunyi serapan.",
+  "words": [
+   [
+    "咖啡店",
+    "kāfēidiàn",
+    "kedai kopi"
+   ]
+  ],
+  "sentence": [
+   "我早上喝一杯咖啡。",
+   "Wǒ zǎoshang hē yì bēi kāfēi.",
+   "Pagi hari aku minum secangkir kopi."
+  ],
+  "note": "咖啡 adalah kata serapan fonetik dari 'coffee', jadi tiap karakternya tidak punya arti sendiri."
+ },
+ {
+  "n": 78,
+  "hanzi": "开始",
+  "pinyin": "kāishǐ",
+  "arti": "mulai; permulaan",
+  "theme": "kerja",
+  "parts": "开 (membuka) + 始 (awal)",
+  "trick": "Membuka (开) awal (始) sebuah kegiatan = memulai.",
+  "words": [
+   [
+    "开始",
+    "kāishǐ",
+    "mulai"
+   ]
+  ],
+  "sentence": [
+   "我们开始上课吧。",
+   "Wǒmen kāishǐ shàngkè ba.",
+   "Ayo kita mulai pelajaran."
+  ],
+  "note": "开始 + kata kerja: 开始学习. Lawan: 结束 (jiéshù, selesai), belum perlu dihafal."
+ },
+ {
+  "n": 79,
+  "hanzi": "开学",
+  "pinyin": "kāixué",
+  "arti": "sekolah mulai; tahun ajaran baru",
+  "theme": "sekolah",
+  "parts": "开 (membuka) + 学 (sekolah)",
+  "trick": "Membuka (开) sekolah (学) = tahun ajaran baru dimulai.",
+  "words": [
+   [
+    "开学",
+    "kāixué",
+    "masuk sekolah"
+   ]
+  ],
+  "sentence": [
+   "下个星期开学。",
+   "Xià ge xīngqī kāixué.",
+   "Minggu depan sekolah mulai."
+  ]
+ },
+ {
+  "n": 80,
+  "hanzi": "考",
+  "pinyin": "kǎo",
+  "arti": "ujian; menguji",
+  "theme": "sekolah",
+  "parts": "耂 (tua) + 丂",
+  "trick": "Guru tua (耂) yang suka mengadakan ujian: 考.",
+  "words": [
+   [
+    "考",
+    "kǎo",
+    "ujian"
+   ]
+  ],
+  "sentence": [
+   "明天我要考汉语。",
+   "Míngtiān wǒ yào kǎo Hànyǔ.",
+   "Besok aku ujian bahasa Mandarin."
+  ],
+  "note": "考 juga muncul di 考试, 考虑 (mempertimbangkan; belum perlu dihafal)."
+ },
+ {
+  "n": 81,
+  "hanzi": "考试",
+  "pinyin": "kǎoshì",
+  "arti": "ujian; menempuh ujian",
+  "theme": "sekolah",
+  "parts": "考 (menguji) + 试 (mencoba)",
+  "trick": "Menguji (考) dan mencoba (试): ujian.",
+  "words": [
+   [
+    "考试",
+    "kǎoshì",
+    "ujian"
+   ]
+  ],
+  "sentence": [
+   "明天有汉语考试。",
+   "Míngtiān yǒu Hànyǔ kǎoshì.",
+   "Besok ada ujian bahasa Mandarin."
+  ],
+  "note": "考试 bisa kata kerja (考试: menempuh ujian) dan kata benda (ujian). Contoh: 我明天考试."
+ },
+ {
+  "n": 82,
+  "hanzi": "可能",
+  "pinyin": "kěnéng",
+  "arti": "mungkin; kemungkinan",
+  "theme": "tatabahasa",
+  "parts": "可 (bisa) + 能 (mampu)",
+  "trick": "Bisa (可) dan mampu (能): 'mungkin'.",
+  "words": [
+   [
+    "可能",
+    "kěnéng",
+    "mungkin"
+   ]
+  ],
+  "sentence": [
+   "他可能在家。",
+   "Tā kěnéng zài jiā.",
+   "Mungkin dia ada di rumah."
+  ],
+  "note": "可能 bisa sebagai kata keterangan (mungkin), kata sifat (mungkin terjadi), atau kata benda (kemungkinan). Letak: sebelum kata kerja."
+ },
+ {
+  "n": 83,
+  "hanzi": "裤子",
+  "pinyin": "kùzi",
+  "arti": "celana",
+  "theme": "benda",
+  "parts": "衤 (pakaian) + 库 (gudang)",
+  "trick": "Pakaian (衤) di bagian bawah, 'gudang' (库) untuk kaki.",
+  "words": [
+   [
+    "一条裤子",
+    "yì tiáo kùzi",
+    "sehelai celana"
+   ]
+  ],
+  "sentence": [
+   "这条裤子很便宜。",
+   "Zhè tiáo kùzi hěn piányi.",
+   "Celana ini murah."
+  ],
+  "note": "Penghitung celana: 条. 子 diucapkan ringan: kùzi."
+ },
+ {
+  "n": 84,
+  "hanzi": "快",
+  "pinyin": "kuài",
+  "arti": "cepat; segera",
+  "theme": "sifat",
+  "parts": "忄 (hati) + 夬 (memutus)",
+  "trick": "Hati (忄) yang memutus (夬) cepat-cepat = cepat.",
+  "words": [
+   [
+    "快点儿",
+    "kuài diǎnr",
+    "cepatlah"
+   ]
+  ],
+  "sentence": [
+   "他走得很快。",
+   "Tā zǒu de hěn kuài.",
+   "Dia berjalan cepat sekali."
+  ],
+  "note": "快 bisa kata sifat 'cepat' dan kata keterangan 'segera' (快来！)."
+ },
+ {
+  "n": 85,
+  "hanzi": "快乐",
+  "pinyin": "kuàilè",
+  "arti": "bahagia; riang",
+  "theme": "sifat",
+  "parts": "快 (cepat; menyenangkan) + 乐 (senang)",
+  "trick": "Dua kata yang sama-sama berarti senang. Kata ini dipakai di ucapan: 生日快乐!",
+  "words": [
+   [
+    "生日快乐",
+    "shēngrì kuàilè",
+    "selamat ulang tahun"
+   ],
+   [
+    "新年快乐",
+    "xīnnián kuàilè",
+    "selamat Tahun Baru"
+   ]
+  ],
+  "sentence": [
+   "生日快乐！",
+   "Shēngrì kuàilè!",
+   "Selamat ulang tahun!"
+  ],
+  "note": "快乐 dipakai pada ucapan selamat. Karakter 乐 bisa dibaca yuè (musik), misalnya 音乐."
+ },
+ {
+  "n": 86,
+  "hanzi": "快要",
+  "pinyin": "kuàiyào",
+  "arti": "hampir; akan segera",
+  "theme": "tatabahasa",
+  "parts": "快 (cepat) + 要 (akan)",
+  "trick": "Cepat (快) + akan (要) = sebentar lagi.",
+  "words": [
+   [
+    "快要…了",
+    "kuàiyào … le",
+    "akan segera ..."
+   ]
+  ],
+  "sentence": [
+   "快要下雨了。",
+   "Kuàiyào xiàyǔ le.",
+   "Sebentar lagi hujan."
+  ],
+  "note": "Pola: 快要 + kata kerja + 了. Jangan memakai keterangan waktu pasti (✗ 明天快要下雨了) karena 快要 hanya untuk 'sebentar lagi'."
+ },
+ {
+  "n": 87,
+  "hanzi": "篮球",
+  "pinyin": "lánqiú",
+  "arti": "basket",
+  "theme": "olahraga",
+  "parts": "篮 (keranjang) + 球 (bola)",
+  "trick": "Bola (球) yang dilempar ke keranjang (篮) = basket.",
+  "words": [
+   [
+    "打篮球",
+    "dǎ lánqiú",
+    "bermain basket"
+   ]
+  ],
+  "sentence": [
+   "我们明天打篮球。",
+   "Wǒmen míngtiān dǎ lánqiú.",
+   "Besok kami main basket."
+  ]
+ },
+ {
+  "n": 88,
+  "hanzi": "累",
+  "pinyin": "lèi",
+  "arti": "lelah; melelahkan",
+  "theme": "sifat",
+  "parts": "田 (ladang) + 糸 (benang)",
+  "trick": "Bekerja di ladang (田) sambil memintal benang (糸) seharian: lelah.",
+  "words": [
+   [
+    "很累",
+    "hěn lèi",
+    "lelah sekali"
+   ]
+  ],
+  "sentence": [
+   "我今天很累。",
+   "Wǒ jīntiān hěn lèi.",
+   "Hari ini aku lelah sekali."
+  ],
+  "note": "累 bisa dibaca lèi (lelah) atau lěi (menumpuk; belum perlu dihafal)."
+ },
+ {
+  "n": 89,
+  "hanzi": "离",
+  "pinyin": "lí",
+  "arti": "berjarak dari; meninggalkan",
+  "theme": "tatabahasa",
+  "parts": "离 (bentuk sederhana dari 離: berpisah)",
+  "trick": "Bayangkan dua titik yang saling menjauh. 离 mengukur jaraknya.",
+  "words": [
+   [
+    "离开",
+    "líkāi",
+    "meninggalkan"
+   ]
+  ],
+  "sentence": [
+   "我家离学校很远。",
+   "Wǒ jiā lí xuéxiào hěn yuǎn.",
+   "Rumahku jauh dari sekolah."
+  ],
+  "note": "离 = jarak antara dua tempat/waktu: A 离 B 远/近. 从 (no. 24) adalah titik awal gerakan: 从我家到学校. Jangan tertukar."
+ },
+ {
+  "n": 90,
+  "hanzi": "里面",
+  "pinyin": "lǐmiàn",
+  "arti": "di dalam; bagian dalam",
+  "theme": "tempat",
+  "parts": "里 (dalam) + 面 (sisi)",
+  "trick": "里 (dalam) + 面 (sisi) = sisi dalam.",
+  "words": [
+   [
+    "外面",
+    "wàimiàn",
+    "di luar"
+   ]
+  ],
+  "sentence": [
+   "书包里面有一本书。",
+   "Shūbāo lǐmiàn yǒu yì běn shū.",
+   "Di dalam tas ada sebuah buku."
+  ],
+  "note": "Biasa dipendekkan: 里 (书包里), 里边."
+ },
+ {
+  "n": 91,
+  "hanzi": "楼",
+  "pinyin": "lóu",
+  "arti": "gedung; lantai",
+  "theme": "tempat",
+  "parts": "木 (kayu) + 娄 (penanda bunyi)",
+  "trick": "Bangunan bertingkat dahulu dibuat dari kayu (木).",
+  "words": [
+   [
+    "三楼",
+    "sān lóu",
+    "lantai tiga"
+   ]
+  ],
+  "sentence": [
+   "我家在三楼。",
+   "Wǒ jiā zài sān lóu.",
+   "Rumahku di lantai tiga."
+  ],
+  "note": "楼 dipakai untuk gedung bertingkat dan nomor lantai: 三楼 (lantai 3; di Tiongkok lantai dasar = 一楼)."
+ },
+ {
+  "n": 92,
+  "hanzi": "路",
+  "pinyin": "lù",
+  "arti": "jalan; rute",
+  "theme": "tempat",
+  "parts": "足 (kaki) + 各 (masing-masing)",
+  "trick": "Jalan adalah tempat kaki (足) melangkah.",
+  "words": [
+   [
+    "走路",
+    "zǒulù",
+    "berjalan kaki"
+   ]
+  ],
+  "sentence": [
+   "去学校的路不远。",
+   "Qù xuéxiào de lù bù yuǎn.",
+   "Jalan ke sekolah tidak jauh."
+  ],
+  "note": "Penghitungnya 条: 一条路. 路 juga dipakai untuk nomor rute bus (五路车)."
+ },
+ {
+  "n": 93,
+  "hanzi": "路上",
+  "pinyin": "lùshang",
+  "arti": "di jalan; sepanjang perjalanan",
+  "theme": "tempat",
+  "parts": "路 (jalan) + 上 (atas)",
+  "trick": "Di atas (上) jalan (路) = di perjalanan.",
+  "words": [
+   [
+    "路上小心",
+    "lùshang xiǎoxīn",
+    "hati-hati di jalan"
+   ]
+  ],
+  "sentence": [
+   "路上请慢点儿。",
+   "Lùshang qǐng màn diǎnr.",
+   "Pelan-pelan saja di jalan."
+  ],
+  "note": "上 di sini ringan: lùshang. Ucapan perpisahan: 路上小心!"
+ },
+ {
+  "n": 94,
+  "hanzi": "旅游",
+  "pinyin": "lǚyóu",
+  "arti": "bepergian; berwisata",
+  "theme": "tempat",
+  "parts": "旅 (perjalanan) + 游 (berkelana)",
+  "trick": "Pergi (旅) dan berkelana (游) = berwisata.",
+  "words": [
+   [
+    "旅行",
+    "lǚxíng",
+    "perjalanan"
+   ]
+  ],
+  "sentence": [
+   "我想去中国旅游。",
+   "Wǒ xiǎng qù Zhōngguó lǚyóu.",
+   "Aku ingin berwisata ke Tiongkok."
+  ],
+  "note": "旅游 hampir sama dengan 旅行, tetapi 旅游 lebih berarti berwisata."
+ },
+ {
+  "n": 95,
+  "hanzi": "绿茶",
+  "pinyin": "lǜchá",
+  "arti": "teh hijau",
+  "theme": "makanan",
+  "parts": "绿 (hijau) + 茶 (teh)",
+  "trick": "Hijau (绿) + teh (茶): teh hijau. Sangat jujur.",
+  "words": [
+   [
+    "喝茶",
+    "hē chá",
+    "minum teh"
+   ]
+  ],
+  "sentence": [
+   "我喜欢喝绿茶。",
+   "Wǒ xǐhuan hē lǜchá.",
+   "Aku suka minum teh hijau."
+  ]
+ },
+ {
+  "n": 96,
+  "hanzi": "绿色",
+  "pinyin": "lǜsè",
+  "arti": "hijau; warna hijau",
+  "theme": "benda",
+  "parts": "绿 (hijau) + 色 (warna)",
+  "trick": "Hijau (绿) + warna (色). Warna daun yang menenangkan.",
+  "words": [
+   [
+    "绿色的",
+    "lǜsè de",
+    "yang berwarna hijau"
+   ]
+  ],
+  "sentence": [
+   "她的书包是绿色的。",
+   "Tā de shūbāo shì lǜsè de.",
+   "Tasnya berwarna hijau."
+  ],
+  "note": "绿 dibaca lǜ (bukan lù). Pinyin ü penting."
+ },
+ {
+  "n": 97,
+  "hanzi": "慢",
+  "pinyin": "màn",
+  "arti": "lambat",
+  "theme": "sifat",
+  "parts": "忄 (hati) + 曼 (panjang)",
+  "trick": "Hati (忄) yang santai dan panjang (曼): tidak buru-buru.",
+  "words": [
+   [
+    "慢慢",
+    "mànmàn",
+    "pelan-pelan"
+   ]
+  ],
+  "sentence": [
+   "请说慢一点儿。",
+   "Qǐng shuō màn yìdiǎnr.",
+   "Tolong bicara lebih pelan sedikit."
+  ],
+  "note": "Lawan: 快. Ucapan berguna: 慢走 (hati-hati di jalan, kata tuan rumah kepada tamu)."
+ },
+ {
+  "n": 98,
+  "hanzi": "没意思",
+  "pinyin": "méi yìsi",
+  "arti": "membosankan",
+  "theme": "sifat",
+  "parts": "没 (tidak ada) + 意思 (makna)",
+  "trick": "Tidak ada (没) makna (意思) = membosankan.",
+  "words": [
+   [
+    "有意思",
+    "yǒu yìsi",
+    "menarik"
+   ]
+  ],
+  "sentence": [
+   "这个电影没意思。",
+   "Zhège diànyǐng méi yìsi.",
+   "Film ini membosankan."
+  ],
+  "note": "Lawan: 有意思 (menarik). Lihat pula 不好意思 (no. 13)."
+ },
+ {
+  "n": 99,
+  "hanzi": "每",
+  "pinyin": "měi",
+  "arti": "setiap",
+  "theme": "tatabahasa",
+  "parts": "每 = 𠂉 + 母 (ibu)",
+  "trick": "Setiap anak punya ibu (母), jadi 每 = 'setiap'. Sederhana.",
+  "words": [
+   [
+    "每天",
+    "měitiān",
+    "setiap hari"
+   ]
+  ],
+  "sentence": [
+   "我每天早上六点起床。",
+   "Wǒ měitiān zǎoshang liù diǎn qǐchuáng.",
+   "Setiap pagi aku bangun jam enam."
+  ],
+  "note": "每 + penghitung/kata: 每天, 每个人, 每年. Di depan kata kerja sering diikuti 都: 每个人都…"
+ },
+ {
+  "n": 100,
+  "hanzi": "门",
+  "pinyin": "mén",
+  "arti": "pintu; gerbang",
+  "theme": "benda",
+  "parts": "门 (bentuk sederhana dari 門: dua daun pintu)",
+  "trick": "Dua daun pintu yang terbuka: 门 persis seperti pintu geser.",
+  "history": "门 awalnya gambar pintu dua daun; bentuk tradisional 門 masih memperlihatkan kedua daun pintunya.",
+  "words": [
+   [
+    "开门",
+    "kāi mén",
+    "membuka pintu"
+   ],
+   [
+    "门口",
+    "ménkǒu",
+    "depan pintu"
+   ]
+  ],
+  "sentence": [
+   "请开门。",
+   "Qǐng kāi mén.",
+   "Tolong buka pintu."
+  ],
+  "note": "Pada bentuk tradisional 門 terlihat dua daun pintu. Karakter 门 juga jadi penghitung mata kuliah/pelajaran (一门课)."
+ },
+ {
+  "n": 101,
+  "hanzi": "门口",
+  "pinyin": "ménkǒu",
+  "arti": "pintu; ambang pintu",
+  "theme": "tempat",
+  "parts": "门 (pintu) + 口 (mulut; lubang)",
+  "trick": "Mulut (口) pintu (门): bagian tempat orang keluar-masuk, yaitu di depan pintu.",
+  "words": [
+   [
+    "门",
+    "mén",
+    "pintu"
+   ]
+  ],
+  "sentence": [
+   "他在门口等你。",
+   "Tā zài ménkǒu děng nǐ.",
+   "Dia menunggumu di depan pintu."
+  ]
+ },
+ {
+  "n": 102,
+  "hanzi": "门票",
+  "pinyin": "ménpiào",
+  "arti": "tiket masuk",
+  "theme": "tempat",
+  "parts": "门 (pintu) + 票 (tiket)",
+  "trick": "Tiket (票) untuk melewati pintu (门): tiket masuk ke taman, museum, atau bioskop.",
+  "words": [
+   [
+    "票",
+    "piào",
+    "tiket"
+   ]
+  ],
+  "sentence": [
+   "这个门票多少钱？",
+   "Zhège ménpiào duōshao qián?",
+   "Berapa harga tiket masuk ini?"
+  ],
+  "note": "门票 khusus tiket masuk. Tiket kereta atau pesawat disebut 票 saja (火车票, 飞机票)."
+ },
+ {
+  "n": 103,
+  "hanzi": "面",
+  "pinyin": "miàn",
+  "arti": "sisi; muka; (penghitung benda datar); akhiran tempat",
+  "theme": "tatabahasa",
+  "parts": "Karakter tunggal; gambar wajah/muka",
+  "trick": "Sebagai akhiran, 面 menandai arah: 上面 (atas), 前面 (depan). Bayangkan 'muka' yang menghadap ke satu sisi.",
+  "words": [
+   [
+    "前面",
+    "qiánmiàn",
+    "depan"
+   ],
+   [
+    "外面",
+    "wàimiàn",
+    "luar"
+   ]
+  ],
+  "sentence": [
+   "桌子上面有一本书。",
+   "Zhuōzi shàngmiàn yǒu yì běn shū.",
+   "Di atas meja ada sebuah buku."
+  ],
+  "note": "面 sebagai akhiran arah: 上面, 下面, 前面, 里面, 外面. Sebagai penghitung dipakai untuk benda datar (一面镜子, sebuah cermin). Jangan keliru dengan 面 miàn dalam 面条 (mi); karakternya sama tetapi konteksnya berbeda."
+ },
+ {
+  "n": 104,
+  "hanzi": "名",
+  "pinyin": "míng",
+  "arti": "nama; (penghitung orang)",
+  "theme": "tatabahasa",
+  "parts": "夕 (malam) + 口 (mulut)",
+  "trick": "Di malam gelap (夕) orang tak terlihat, jadi harus menyebut (口) namanya.",
+  "words": [
+   [
+    "名字",
+    "míngzi",
+    "nama"
+   ],
+   [
+    "有名",
+    "yǒumíng",
+    "terkenal"
+   ]
+  ],
+  "sentence": [
+   "我们班有三十名学生。",
+   "Wǒmen bān yǒu sānshí míng xuésheng.",
+   "Kelas kami ada tiga puluh murid."
+  ],
+  "note": "Sebagai penghitung, 名 lebih resmi daripada 个 untuk orang (学生, 老师, 医生). Sebagai nama, 名 sering muncul dalam 名字."
+ },
+ {
+  "n": 105,
+  "hanzi": "拿",
+  "pinyin": "ná",
+  "arti": "mengambil; memegang",
+  "theme": "kerja",
+  "parts": "合 (bertemu; menyatu) + 手 (tangan)",
+  "trick": "Tangan (手) yang menyatukan (合) jarinya pada benda = memegang dan mengambil.",
+  "words": [
+   [
+    "拿出来",
+    "ná chūlái",
+    "mengeluarkan"
+   ]
+  ],
+  "sentence": [
+   "请你拿一下我的书包。",
+   "Qǐng nǐ ná yíxià wǒ de shūbāo.",
+   "Tolong pegangkan tasku sebentar."
+  ],
+  "note": "Sering dipasangkan dengan arah: 拿来 (membawa kemari), 拿走 (membawa pergi)."
+ },
+ {
+  "n": 106,
+  "hanzi": "那么",
+  "pinyin": "nàme",
+  "arti": "begitu; sebegitu; kalau begitu",
+  "theme": "tatabahasa",
+  "parts": "那 (itu) + 么 (akhiran)",
+  "trick": "那么 = 'sebegitu', mirip 'begitu' dalam bahasa Indonesia: 那么大 = sebegitu besar.",
+  "words": [
+   [
+    "那么大",
+    "nàme dà",
+    "sebegitu besar"
+   ]
+  ],
+  "sentence": [
+   "你为什么那么高兴？",
+   "Nǐ wèi shénme nàme gāoxìng?",
+   "Kenapa kamu begitu senang?"
+  ],
+  "note": "那么 dipakai menjelaskan tingkat sifat yang jauh/telah disebut. Dekat: 这么. Kalimat 那么, 我们走吧 = 'kalau begitu, ayo pergi'."
+ },
+ {
+  "n": 107,
+  "hanzi": "那样",
+  "pinyin": "nàyàng",
+  "arti": "seperti itu; begitu",
+  "theme": "tatabahasa",
+  "parts": "那 (itu) + 样 (bentuk; cara)",
+  "trick": "那 (itu) + 样 (cara) = 'dengan cara itu', 'seperti itu'.",
+  "words": [
+   [
+    "那样的人",
+    "nàyàng de rén",
+    "orang seperti itu"
+   ]
+  ],
+  "sentence": [
+   "他不是那样的人。",
+   "Tā bú shì nàyàng de rén.",
+   "Dia bukan orang yang seperti itu."
+  ],
+  "note": "那样 jauh/telah disebut, 这样 dekat. Bedakan dengan 那么: 那样 tidak langsung menerangkan kata sifat seperti 那么大."
+ },
+ {
+  "n": 108,
+  "hanzi": "奶茶",
+  "pinyin": "nǎichá",
+  "arti": "teh susu",
+  "theme": "makanan",
+  "parts": "奶 (susu) + 茶 (teh)",
+  "trick": "奶 (susu) + 茶 (teh) = teh susu. Persis seperti kata Indonesianya, jadi gampang!",
+  "words": [
+   [
+    "奶",
+    "nǎi",
+    "susu"
+   ],
+   [
+    "茶",
+    "chá",
+    "teh"
+   ]
+  ],
+  "sentence": [
+   "我想喝一杯奶茶。",
+   "Wǒ xiǎng hē yì bēi nǎichá.",
+   "Aku mau minum segelas teh susu."
+  ]
+ },
+ {
+  "n": 109,
+  "hanzi": "奶奶",
+  "pinyin": "nǎinai",
+  "arti": "nenek (dari pihak ayah)",
+  "theme": "orang",
+  "parts": "奶 (susu; nenek) + 奶 (ulangan)",
+  "trick": "奶奶 = nenek yang menyusui (奶) kita dengan kasih sayang. Ulangan karakter terdengar manis dan akrab.",
+  "words": [
+   [
+    "爷爷",
+    "yéye",
+    "kakek"
+   ]
+  ],
+  "sentence": [
+   "奶奶今年七十岁。",
+   "Nǎinai jīnnián qīshí suì.",
+   "Nenek tahun ini berusia tujuh puluh."
+  ],
+  "note": "奶奶 untuk nenek dari pihak ayah; nenek dari pihak ibu 外婆/姥姥. Dalam percakapan, nenek orang lain yang dihormati juga bisa dipanggil 奶奶. Pinyin: nǎinai (kedua nada netral di suku kedua)."
+ },
+ {
+  "n": 110,
+  "hanzi": "男孩儿",
+  "pinyin": "nánháir",
+  "arti": "anak laki-laki",
+  "theme": "orang",
+  "parts": "男 (laki-laki) + 孩 (anak) + 儿 (akhiran 'er')",
+  "trick": "男 = ladang (田) + tenaga (力): mnemonik 'laki-laki bertenaga di ladang'. 儿 menambah rasa akrab.",
+  "words": [
+   [
+    "男人",
+    "nánrén",
+    "laki-laki"
+   ]
+  ],
+  "sentence": [
+   "那个男孩儿是我的同学。",
+   "Nàge nánháir shì wǒ de tóngxué.",
+   "Anak laki-laki itu teman sekelasku."
+  ],
+  "note": "Akhiran 儿 (er) khas Mandarin utara. Di buku boleh ditulis 男孩 saja."
+ },
+ {
+  "n": 111,
+  "hanzi": "鸟",
+  "pinyin": "niǎo",
+  "arti": "burung",
+  "theme": "benda",
+  "parts": "Gambar burung",
+  "trick": "Lihat bentuknya: kepala (鸟 bagian atas) dan satu kaki di bawah. Seperti burung yang bertengger di dahan.",
+  "history": "鸟 adalah piktograf burung. Bentuk tradisional 鳥 digambar lebih rinci; 鸟 adalah penyederhanaan dari 鳥.",
+  "words": [
+   [
+    "小鸟",
+    "xiǎoniǎo",
+    "burung kecil"
+   ]
+  ],
+  "sentence": [
+   "天上有一只鸟。",
+   "Tiān shàng yǒu yì zhī niǎo.",
+   "Di langit ada seekor burung."
+  ]
+ },
+ {
+  "n": 112,
+  "hanzi": "女孩儿",
+  "pinyin": "nǚháir",
+  "arti": "anak perempuan",
+  "theme": "orang",
+  "parts": "女 (perempuan) + 孩 (anak) + 儿 (akhiran 'er')",
+  "trick": "女 menyerupai orang yang berlutut dengan tangan bersilang. Pasangan dari 男孩儿.",
+  "words": [
+   [
+    "女人",
+    "nǚrén",
+    "perempuan"
+   ]
+  ],
+  "sentence": [
+   "这个女孩儿很可爱。",
+   "Zhège nǚháir hěn kě'ài.",
+   "Anak perempuan ini sangat menggemaskan."
+  ],
+  "note": "Ucapan nǚ pakai bunyi 'ü' (bibir bundar seperti 'u' tapi lidah 'i')."
+ },
+ {
+  "n": 113,
+  "hanzi": "旁边",
+  "pinyin": "pángbiān",
+  "arti": "samping; sebelah",
+  "theme": "tempat",
+  "parts": "旁 (samping) + 边 (sisi)",
+  "trick": "旁 (samping) + 边 (sisi) = di samping, di sisi.",
+  "words": [
+   [
+    "学校旁边",
+    "xuéxiào pángbiān",
+    "di sebelah sekolah"
+   ]
+  ],
+  "sentence": [
+   "我家在学校旁边。",
+   "Wǒ jiā zài xuéxiào pángbiān.",
+   "Rumahku di samping sekolah."
+  ],
+  "note": "旁边 = di samping, bisa dipakai sendiri atau setelah nomina: 学校旁边. Mirip dengan 'di sebelah' dalam bahasa Indonesia."
+ },
+ {
+  "n": 114,
+  "hanzi": "跑",
+  "pinyin": "pǎo",
+  "arti": "berlari",
+  "theme": "olahraga",
+  "parts": "足 (kaki) + 包 (membungkus)",
+  "trick": "Kaki (足) yang bergerak cepat = lari. 足 di kiri menandai gerakan kaki.",
+  "words": [
+   [
+    "跑步",
+    "pǎobù",
+    "lari"
+   ],
+   [
+    "跑快",
+    "pǎo kuài",
+    "berlari cepat"
+   ]
+  ],
+  "sentence": [
+   "他跑得很快。",
+   "Tā pǎo de hěn kuài.",
+   "Dia berlari sangat cepat."
+  ]
+ },
+ {
+  "n": 115,
+  "hanzi": "跑步",
+  "pinyin": "pǎobù",
+  "arti": "berlari; jogging",
+  "theme": "olahraga",
+  "parts": "跑 (berlari) + 步 (langkah)",
+  "trick": "跑 (lari) + 步 (langkah): langkah-langkah cepat, yaitu jogging.",
+  "words": [
+   [
+    "跑",
+    "pǎo",
+    "lari"
+   ]
+  ],
+  "sentence": [
+   "我每天早上去跑步。",
+   "Wǒ měitiān zǎoshang qù pǎobù.",
+   "Aku pergi jogging tiap pagi."
+  ],
+  "note": "跑步 adalah verba yang sudah berisi objek (verb-object): bisa dipisah, misalnya 跑了一个小时的步. Bandingkan dengan 114 跑 yang bisa langsung diikuti arah atau pelengkap."
+ },
+ {
+  "n": 116,
+  "hanzi": "票",
+  "pinyin": "piào",
+  "arti": "tiket; karcis",
+  "theme": "tempat",
+  "parts": "Karakter tunggal; 西 + 示 (bentuk lama)",
+  "trick": "Tiket kereta (火车票), tiket bioskop (电影票). Ingat: tiket = 票 piào, mirip bunyi 'pyau'.",
+  "words": [
+   [
+    "火车票",
+    "huǒchēpiào",
+    "tiket kereta"
+   ],
+   [
+    "电影票",
+    "diànyǐngpiào",
+    "tiket bioskop"
+   ]
+  ],
+  "sentence": [
+   "我想买火车票。",
+   "Wǒ xiǎng mǎi huǒchēpiào.",
+   "Aku mau beli tiket kereta."
+  ],
+  "note": "Penghitung 票 adalah 张: 一张票."
+ },
+ {
+  "n": 117,
+  "hanzi": "妻子",
+  "pinyin": "qīzi",
+  "arti": "istri",
+  "theme": "orang",
+  "parts": "妻 (istri) + 子 (anak; akhiran)",
+  "trick": "妻 punya bagian 女 (perempuan) di bawah. Tambah 子 sebagai akhiran kata benda.",
+  "words": [
+   [
+    "丈夫",
+    "zhàngfu",
+    "suami"
+   ]
+  ],
+  "sentence": [
+   "他的妻子是老师。",
+   "Tā de qīzi shì lǎoshī.",
+   "Istrinya adalah seorang guru."
+  ],
+  "note": "Dalam percakapan sehari-hari sering dipakai 老婆 (lebih santai). 妻子 lebih resmi atau netral."
+ },
+ {
+  "n": 118,
+  "hanzi": "起来",
+  "pinyin": "qǐlái",
+  "arti": "bangun; berdiri; (setelah verba) mulai, menandai arah naik",
+  "theme": "gerak",
+  "parts": "走 (berjalan) + 己 (diri)",
+  "trick": "Diri (己) yang mulai berjalan (走) = bangkit. Setelah verba, 起来 berarti 'mulai' (笑起来 = mulai tertawa).",
+  "words": [
+   [
+    "站起来",
+    "zhàn qǐlái",
+    "berdiri"
+   ],
+   [
+    "想起来",
+    "xiǎng qǐlái",
+    "teringat"
+   ]
+  ],
+  "sentence": [
+   "天气热起来了。",
+   "Tiānqì rè qǐlái le.",
+   "Cuaca mulai panas."
+  ],
+  "note": "起来 punya tiga peran: 1) bangun/berdiri (站起来), 2) arah naik (拿起来), 3) mulai atau terlihat (看起来 = tampaknya). Jangan lupa pasangan 起床 = bangun dari tempat tidur."
+ },
+ {
+  "n": 119,
+  "hanzi": "前面",
+  "pinyin": "qiánmiàn",
+  "arti": "depan",
+  "theme": "tempat",
+  "parts": "前 (depan) + 面 (sisi)",
+  "trick": "前 (depan) + 面 (sisi). Lawan katanya: 后面 (belakang).",
+  "words": [
+   [
+    "后面",
+    "hòumiàn",
+    "belakang"
+   ]
+  ],
+  "sentence": [
+   "前面是一家医院。",
+   "Qiánmiàn shì yì jiā yīyuàn.",
+   "Di depan ada sebuah rumah sakit."
+  ]
+ },
+ {
+  "n": 120,
+  "hanzi": "晴",
+  "pinyin": "qíng",
+  "arti": "cerah",
+  "theme": "benda",
+  "parts": "日 (matahari) + 青 (biru-hijau)",
+  "trick": "Matahari (日) dan langit biru (青): cuaca cerah.",
+  "words": [
+   [
+    "晴天",
+    "qíngtiān",
+    "hari cerah"
+   ]
+  ],
+  "sentence": [
+   "今天是晴天。",
+   "Jīntiān shì qíngtiān.",
+   "Hari ini cerah."
+  ],
+  "note": "晴 dipakai untuk cuaca. Kebalikannya: 阴 (mendung) dan 下雨 (hujan)."
+ },
+ {
+  "n": 121,
+  "hanzi": "球",
+  "pinyin": "qiú",
+  "arti": "bola",
+  "theme": "olahraga",
+  "parts": "王 (batu giok) + 求 (mencari)",
+  "trick": "Bola (球) bulat seperti batu giok (王 di kiri). Orang mengejar-ngejar (求) bola.",
+  "words": [
+   [
+    "足球",
+    "zúqiú",
+    "sepak bola"
+   ],
+   [
+    "球场",
+    "qiúchǎng",
+    "lapangan"
+   ]
+  ],
+  "sentence": [
+   "你喜欢打球吗？",
+   "Nǐ xǐhuan dǎ qiú ma?",
+   "Kamu suka main bola?"
+  ],
+  "note": "打球 dipakai untuk bola yang dipukul/dilempar (basket, voli, tenis). Untuk sepak bola pakai 踢足球."
+ },
+ {
+  "n": 122,
+  "hanzi": "让",
+  "pinyin": "ràng",
+  "arti": "membiarkan; menyuruh; (pasif) oleh",
+  "theme": "tatabahasa",
+  "parts": "讠 (bahasa; kata) + 上 (atas)",
+  "trick": "Kata (讠) dari atas (上) = perintah. Menyuruh atau membiarkan: 让. Dalam pasif, 让 = 'oleh'.",
+  "words": [
+   [
+    "让我",
+    "ràng wǒ",
+    "biarkan aku"
+   ],
+   [
+    "让他来",
+    "ràng tā lái",
+    "suruh dia datang"
+   ]
+  ],
+  "sentence": [
+   "妈妈让我早点儿睡觉。",
+   "Māma ràng wǒ zǎo diǎnr shuìjiào.",
+   "Ibu menyuruhku tidur lebih awal."
+  ],
+  "note": "让 + orang + verba: 'menyuruh/mengizinkan seseorang melakukan'. Dalam kalimat pasif: 杯子让他打破了 (cangkir dipecahkan olehnya). Jangan campurkan dengan 叫 yang juga berarti 'menyuruh'."
+ },
+ {
+  "n": 123,
+  "hanzi": "肉",
+  "pinyin": "ròu",
+  "arti": "daging",
+  "theme": "makanan",
+  "parts": "Gambar sepotong daging berserat",
+  "trick": "Ini gambar irisan daging dengan serat/otot di dalamnya.",
+  "history": "肉 awalnya piktograf sepotong daging. Sebagai radikal di sisi kiri tubuh, bentuknya berubah menjadi 月 (mis. 脚).",
+  "words": [
+   [
+    "牛肉",
+    "niúròu",
+    "daging sapi"
+   ],
+   [
+    "猪肉",
+    "zhūròu",
+    "daging babi"
+   ]
+  ],
+  "sentence": [
+   "我不吃肉，只吃鱼。",
+   "Wǒ bù chī ròu, zhǐ chī yú.",
+   "Aku tidak makan daging, hanya makan ikan."
+  ]
+ },
+ {
+  "n": 124,
+  "hanzi": "商场",
+  "pinyin": "shāngchǎng",
+  "arti": "pusat perbelanjaan; mal",
+  "theme": "tempat",
+  "parts": "商 (dagang) + 场 (lapangan; tempat)",
+  "trick": "Tempat (场) untuk berdagang (商) = mal.",
+  "words": [
+   [
+    "商店",
+    "shāngdiàn",
+    "toko"
+   ]
+  ],
+  "sentence": [
+   "星期六我们去商场买东西。",
+   "Xīngqīliù wǒmen qù shāngchǎng mǎi dōngxi.",
+   "Hari Sabtu kami pergi ke mal membeli barang."
+  ],
+  "note": "商场 mal besar, sedangkan 商店 toko biasa."
+ },
+ {
+  "n": 125,
+  "hanzi": "上来",
+  "pinyin": "shànglái",
+  "arti": "naik ke sini; naik",
+  "theme": "gerak",
+  "parts": "上 (naik) + 来 (datang)",
+  "trick": "上 (naik) + 来 (datang kemari). Arah naik menuju pembicara.",
+  "words": [
+   [
+    "走上来",
+    "zǒu shànglái",
+    "berjalan naik kemari"
+   ]
+  ],
+  "sentence": [
+   "你上来吧，我在三楼。",
+   "Nǐ shànglái ba, wǒ zài sān lóu.",
+   "Naiklah ke sini, aku di lantai tiga."
+  ],
+  "note": "上来 = naik menuju pembicara; 上去 (127) = naik menjauh dari pembicara. Jangan tertukar."
+ },
+ {
+  "n": 126,
+  "hanzi": "上面",
+  "pinyin": "shàngmiàn",
+  "arti": "atas; bagian atas",
+  "theme": "tempat",
+  "parts": "上 (atas) + 面 (sisi)",
+  "trick": "上 (atas) + 面 (sisi) = bagian atas. Lawannya: 下面.",
+  "words": [
+   [
+    "桌子上面",
+    "zhuōzi shàngmiàn",
+    "di atas meja"
+   ]
+  ],
+  "sentence": [
+   "书在桌子上面。",
+   "Shū zài zhuōzi shàngmiàn.",
+   "Buku ada di atas meja."
+  ]
+ },
+ {
+  "n": 127,
+  "hanzi": "上去",
+  "pinyin": "shàngqù",
+  "arti": "naik ke sana; naik",
+  "theme": "gerak",
+  "parts": "上 (naik) + 去 (pergi)",
+  "trick": "上 (naik) + 去 (pergi). Arah naik menjauh dari pembicara.",
+  "words": [
+   [
+    "走上去",
+    "zǒu shàngqù",
+    "berjalan naik ke sana"
+   ]
+  ],
+  "sentence": [
+   "他已经上去了。",
+   "Tā yǐjīng shàngqù le.",
+   "Dia sudah naik ke atas."
+  ],
+  "note": "Kebalikan dari 上来 (125). Perhatikan sudut pandang pembicara."
+ },
+ {
+  "n": 128,
+  "hanzi": "上网",
+  "pinyin": "shàngwǎng",
+  "arti": "berselancar di internet; online",
+  "theme": "kerja",
+  "parts": "上 (naik; masuk) + 网 (jaring)",
+  "trick": "'Naik' (上) ke jaring (网) = masuk internet. Pakai untuk browsing atau online.",
+  "words": [
+   [
+    "网上",
+    "wǎngshang",
+    "online"
+   ]
+  ],
+  "sentence": [
+   "我每天晚上上网。",
+   "Wǒ měitiān wǎnshang shàngwǎng.",
+   "Aku berselancar di internet tiap malam."
+  ],
+  "note": "上网 adalah verba-objek: 上了一小时网. Negatif 没上网."
+ },
+ {
+  "n": 129,
+  "hanzi": "身体",
+  "pinyin": "shēntǐ",
+  "arti": "tubuh; badan",
+  "theme": "tubuh",
+  "parts": "身 (badan) + 体 (tubuh)",
+  "trick": "身 (badan) + 体 (tubuh): dua karakter yang artinya hampir sama. Baca 身体好 untuk 'sehat'.",
+  "words": [
+   [
+    "身体好",
+    "shēntǐ hǎo",
+    "sehat"
+   ]
+  ],
+  "sentence": [
+   "你身体好吗？",
+   "Nǐ shēntǐ hǎo ma?",
+   "Apa kabar kesehatanmu?"
+  ],
+  "note": "Untuk menanyakan kesehatan, 身体 sering dipakai: 注意身体 (jaga kesehatan)."
+ },
+ {
+  "n": 130,
+  "hanzi": "生日",
+  "pinyin": "shēngrì",
+  "arti": "ulang tahun",
+  "theme": "waktu",
+  "parts": "生 (lahir) + 日 (hari)",
+  "trick": "Hari (日) lahir (生) = ulang tahun. Gampang kan?",
+  "words": [
+   [
+    "生日快乐",
+    "shēngrì kuàilè",
+    "selamat ulang tahun"
+   ]
+  ],
+  "sentence": [
+   "明天是我的生日。",
+   "Míngtiān shì wǒ de shēngrì.",
+   "Besok ulang tahunku."
+  ]
+ },
+ {
+  "n": 131,
+  "hanzi": "时",
+  "pinyin": "shí",
+  "arti": "saat; ketika; waktu",
+  "theme": "waktu",
+  "parts": "日 (matahari) + 寸 (ukuran)",
+  "trick": "Waktu diukur (寸) oleh matahari (日). Pakai 时 untuk 'saat/ketika'.",
+  "words": [
+   [
+    "有时",
+    "yǒushí",
+    "kadang-kadang"
+   ],
+   [
+    "小时",
+    "xiǎoshí",
+    "jam"
+   ]
+  ],
+  "sentence": [
+   "我小时候住在雅加达。",
+   "Wǒ xiǎo shíhou zhù zài Yǎjiādá.",
+   "Waktu kecil aku tinggal di Jakarta."
+  ],
+  "note": "时 tidak berdiri sendiri di lisan; biasanya 时候 (shíhou), 小时 (jam), 有时 (kadang). 时 setelah klausa = 'ketika': 下雨时."
+ },
+ {
+  "n": 132,
+  "hanzi": "事情",
+  "pinyin": "shìqing",
+  "arti": "urusan; hal; perkara",
+  "theme": "kerja",
+  "parts": "事 (urusan) + 情 (perasaan)",
+  "trick": "Urusan (事) yang melibatkan perasaan (情): perkara yang sedang terjadi.",
+  "words": [
+   [
+    "有事",
+    "yǒu shì",
+    "ada urusan"
+   ]
+  ],
+  "sentence": [
+   "你有什么事情？",
+   "Nǐ yǒu shénme shìqing?",
+   "Ada urusan apa?"
+  ],
+  "note": "事情 netral dan dapat dipakai untuk hal-hal bertahap; 事 lebih ringkas. Perhatikan pinyin: shìqing (qing netral)."
+ },
+ {
+  "n": 133,
+  "hanzi": "手",
+  "pinyin": "shǒu",
+  "arti": "tangan",
+  "theme": "tubuh",
+  "parts": "Gambar telapak tangan dengan lima jari",
+  "trick": "Bentuk kuno menggambar telapak tangan dengan jari-jari. Dalam bentuk sekarang, tiga garis mendatar adalah jari-jari.",
+  "history": "手 adalah piktograf telapak tangan dengan jari-jarinya.",
+  "words": [
+   [
+    "手机",
+    "shǒujī",
+    "ponsel"
+   ],
+   [
+    "洗手",
+    "xǐ shǒu",
+    "cuci tangan"
+   ]
+  ],
+  "sentence": [
+   "我的手很冷。",
+   "Wǒ de shǒu hěn lěng.",
+   "Tanganku dingin sekali."
+  ]
+ },
+ {
+  "n": 134,
+  "hanzi": "手表",
+  "pinyin": "shǒubiǎo",
+  "arti": "jam tangan",
+  "theme": "benda",
+  "parts": "手 (tangan) + 表 (penunjuk waktu)",
+  "trick": "Penunjuk waktu (表) di tangan (手) = jam tangan.",
+  "words": [
+   [
+    "手机",
+    "shǒujī",
+    "ponsel"
+   ]
+  ],
+  "sentence": [
+   "这块手表是爸爸送我的。",
+   "Zhè kuài shǒubiǎo shì bàba sòng wǒ de.",
+   "Jam tangan ini diberikan ayah kepadaku."
+  ],
+  "note": "Penghitung jam tangan: 块 (一块手表)."
+ },
+ {
+  "n": 135,
+  "hanzi": "书包",
+  "pinyin": "shūbāo",
+  "arti": "tas sekolah; ransel",
+  "theme": "sekolah",
+  "parts": "书 (buku) + 包 (tas; bungkus)",
+  "trick": "Tas (包) untuk buku (书) = tas sekolah.",
+  "words": [
+   [
+    "书",
+    "shū",
+    "buku"
+   ],
+   [
+    "包",
+    "bāo",
+    "tas"
+   ]
+  ],
+  "sentence": [
+   "我的书包里有两本书。",
+   "Wǒ de shūbāo li yǒu liǎng běn shū.",
+   "Di dalam tasku ada dua buku."
+  ],
+  "note": "Penghitung: 个 atau 只 (一个书包)."
+ },
+ {
+  "n": 136,
+  "hanzi": "舒服",
+  "pinyin": "shūfu",
+  "arti": "nyaman; enak badan",
+  "theme": "sifat",
+  "parts": "舒 (lega; nyaman) + 服 (menyesuaikan; pakaian)",
+  "trick": "舒 (lega) + 服 (cocok di badan) = badan terasa pas dan nyaman, seperti baju yang pas.",
+  "words": [
+   [
+    "不舒服",
+    "bù shūfu",
+    "tidak enak badan"
+   ]
+  ],
+  "sentence": [
+   "我今天有点儿不舒服。",
+   "Wǒ jīntiān yǒudiǎnr bù shūfu.",
+   "Hari ini aku agak kurang enak badan."
+  ],
+  "note": "服 kedua dibaca netral: shūfu. Gunakan 不舒服 saat sakit ringan."
+ },
+ {
+  "n": 137,
+  "hanzi": "送",
+  "pinyin": "sòng",
+  "arti": "memberi (hadiah); mengantar; mengirim",
+  "theme": "kerja",
+  "parts": "辶 (berjalan) + 关",
+  "trick": "辶 (berjalan) menandai gerakan: mengantar orang atau barang. 送 = memberi hadiah, mengantar tamu pulang.",
+  "words": [
+   [
+    "送给",
+    "sòng gěi",
+    "memberikan kepada"
+   ],
+   [
+    "送人",
+    "sòng rén",
+    "mengantar orang"
+   ]
+  ],
+  "sentence": [
+   "我想送你一本书。",
+   "Wǒ xiǎng sòng nǐ yì běn shū.",
+   "Aku mau memberimu sebuah buku."
+  ],
+  "note": "送 dapat berarti 'memberi hadiah' (送礼物), 'mengantar' (送你回家), atau 'mengirim'. Bedakan dari 给 (memberi biasa)."
+ },
+ {
+  "n": 138,
+  "hanzi": "虽然",
+  "pinyin": "suīrán",
+  "arti": "meskipun",
+  "theme": "tatabahasa",
+  "parts": "虽 + 然 (demikian)",
+  "trick": "虽然 = 'meskipun'. Biasanya berpasangan dengan 但是/可是: 虽然…但是… ",
+  "words": [
+   [
+    "虽然…但是…",
+    "suīrán…dànshì…",
+    "meskipun…tetapi…"
+   ]
+  ],
+  "sentence": [
+   "虽然很累，但是我很高兴。",
+   "Suīrán hěn lèi, dànshì wǒ hěn gāoxìng.",
+   "Meskipun capek, aku sangat senang."
+  ],
+  "note": "Dalam bahasa Indonesia kita tidak memakai 'meskipun…tetapi…' bersamaan. Dalam Mandarin 但是 sangat lazim dipasangkan dengan 虽然. Jangan lupa pasangan."
+ },
+ {
+  "n": 139,
+  "hanzi": "所以",
+  "pinyin": "suǒyǐ",
+  "arti": "jadi; oleh karena itu",
+  "theme": "tatabahasa",
+  "parts": "所 + 以 (dengan)",
+  "trick": "所以 = 'maka/jadi'. Pasangan dengan 因为: 因为…所以…",
+  "words": [
+   [
+    "因为…所以…",
+    "yīnwèi…suǒyǐ…",
+    "karena…maka…"
+   ]
+  ],
+  "sentence": [
+   "因为下雨，所以我们不去。",
+   "Yīnwèi xià yǔ, suǒyǐ wǒmen bú qù.",
+   "Karena hujan, jadi kita tidak pergi."
+  ],
+  "note": "Dalam bahasa Indonesia kita cenderung memilih salah satu ('karena' atau 'maka'). Dalam Mandarin sering dipakai berpasangan."
+ },
+ {
+  "n": 140,
+  "hanzi": "疼",
+  "pinyin": "téng",
+  "arti": "sakit; nyeri",
+  "theme": "tubuh",
+  "parts": "疒 (penyakit) + 冬 (musim dingin)",
+  "trick": "Penyakit (疒) di musim dingin (冬): badan terasa nyeri dan ngilu.",
+  "words": [
+   [
+    "头疼",
+    "tóuténg",
+    "sakit kepala"
+   ],
+   [
+    "肚子疼",
+    "dùzi téng",
+    "sakit perut"
+   ]
+  ],
+  "sentence": [
+   "我头疼，想休息一下。",
+   "Wǒ tóuténg, xiǎng xiūxi yíxià.",
+   "Kepalaku sakit, ingin istirahat sebentar."
+  ],
+  "note": "疼 untuk bagian tubuh yang sakit: 头疼, 肚子疼. Boleh juga sebagai verba: 我的腿疼."
+ },
+ {
+  "n": 141,
+  "hanzi": "踢",
+  "pinyin": "tī",
+  "arti": "menendang",
+  "theme": "olahraga",
+  "parts": "足 (kaki) + 易 (mudah)",
+  "trick": "Kaki (足) yang menendang bola dengan mudah. 足 di kiri menandai gerakan kaki.",
+  "words": [
+   [
+    "踢足球",
+    "tī zúqiú",
+    "bermain sepak bola"
+   ]
+  ],
+  "sentence": [
+   "他喜欢踢足球。",
+   "Tā xǐhuan tī zúqiú.",
+   "Dia suka bermain sepak bola."
+  ],
+  "note": "踢足球 = main sepak bola. Jangan pakai 打足球; ingat verba untuk sepak bola adalah 踢."
+ },
+ {
+  "n": 142,
+  "hanzi": "题",
+  "pinyin": "tí",
+  "arti": "soal; pertanyaan; topik",
+  "theme": "sekolah",
+  "parts": "是 (adalah) + 页 (halaman; kepala)",
+  "trick": "Halaman (页) ujian berisi soal-soal yang harus dijawab dengan benar (是).",
+  "words": [
+   [
+    "问题",
+    "wèntí",
+    "masalah; pertanyaan"
+   ],
+   [
+    "题目",
+    "tímù",
+    "soal; judul"
+   ]
+  ],
+  "sentence": [
+   "这个题我不会做。",
+   "Zhège tí wǒ bú huì zuò.",
+   "Soal ini aku tidak bisa mengerjakannya."
+  ],
+  "note": "Penghitung soal: 道 (一道题). 题 sering muncul di 问题 (wèntí)."
+ },
+ {
+  "n": 143,
+  "hanzi": "条",
+  "pinyin": "tiáo",
+  "arti": "(penghitung benda panjang)",
+  "theme": "tatabahasa",
+  "parts": "夂 + 木 (kayu)",
+  "trick": "Benda panjang dan ramping seperti ikan, sungai, celana, jalan, handuk memakai 条.",
+  "words": [
+   [
+    "一条鱼",
+    "yì tiáo yú",
+    "seekor ikan"
+   ],
+   [
+    "一条路",
+    "yì tiáo lù",
+    "sebuah jalan"
+   ]
+  ],
+  "sentence": [
+   "这条路很长。",
+   "Zhè tiáo lù hěn cháng.",
+   "Jalan ini panjang sekali."
+  ],
+  "note": "条 dipakai untuk benda panjang tipis: 一条裤子, 一条河, 一条鱼. Jangan pakai 个 untuk ini."
+ },
+ {
+  "n": 144,
+  "hanzi": "跳舞",
+  "pinyin": "tiàowǔ",
+  "arti": "menari",
+  "theme": "olahraga",
+  "parts": "跳 (melompat) + 舞 (tari)",
+  "trick": "跳 (melompat) + 舞 (tari): melompat-lompat mengikuti irama.",
+  "words": [
+   [
+    "跳",
+    "tiào",
+    "melompat"
+   ],
+   [
+    "唱歌",
+    "chànggē",
+    "bernyanyi"
+   ]
+  ],
+  "sentence": [
+   "她喜欢唱歌，也喜欢跳舞。",
+   "Tā xǐhuan chànggē, yě xǐhuan tiàowǔ.",
+   "Dia suka bernyanyi dan juga suka menari."
+  ],
+  "note": "跳舞 verba-objek: 跳了一个小时的舞."
+ },
+ {
+  "n": 145,
+  "hanzi": "头",
+  "pinyin": "tóu",
+  "arti": "kepala; (penghitung hewan ternak); pertama",
+  "theme": "tubuh",
+  "parts": "Karakter tunggal; 大 + 丶丶 (di atas)",
+  "trick": "头 = kepala. Kata 头 dipakai juga untuk 'ujung' dan 'pertama'. Ternak besar dihitung per kepala (一头牛).",
+  "words": [
+   [
+    "头疼",
+    "tóuténg",
+    "sakit kepala"
+   ],
+   [
+    "头发",
+    "tóufa",
+    "rambut"
+   ]
+  ],
+  "sentence": [
+   "我头疼，想回家睡觉。",
+   "Wǒ tóu téng, xiǎng huí jiā shuìjiào.",
+   "Kepalaku sakit, ingin pulang tidur."
+  ],
+  "note": "头 sebagai penghitung dipakai untuk hewan besar seperti sapi, babi, gajah (一头牛). Untuk bahasa Indonesia mirip 'seekor'. Kata 头 dibaca netral dalam 木头, 石头."
+ },
+ {
+  "n": 146,
+  "hanzi": "外国",
+  "pinyin": "wàiguó",
+  "arti": "luar negeri; negara asing",
+  "theme": "tempat",
+  "parts": "外 (luar) + 国 (negara)",
+  "trick": "外 (luar) + 国 (negara) = negara di luar kita: luar negeri.",
+  "words": [
+   [
+    "外国人",
+    "wàiguórén",
+    "orang asing"
+   ],
+   [
+    "中国",
+    "Zhōngguó",
+    "Tiongkok"
+   ]
+  ],
+  "sentence": [
+   "我想去外国学习。",
+   "Wǒ xiǎng qù wàiguó xuéxí.",
+   "Aku ingin belajar ke luar negeri."
+  ]
+ },
+ {
+  "n": 147,
+  "hanzi": "外面",
+  "pinyin": "wàimiàn",
+  "arti": "luar; bagian luar",
+  "theme": "tempat",
+  "parts": "外 (luar) + 面 (sisi)",
+  "trick": "外 (luar) + 面 (sisi). Lawan dari 里面 (dalam).",
+  "words": [
+   [
+    "里面",
+    "lǐmiàn",
+    "dalam"
+   ]
+  ],
+  "sentence": [
+   "外面下雨了。",
+   "Wàimiàn xià yǔ le.",
+   "Di luar sedang hujan."
+  ]
+ },
+ {
+  "n": 148,
+  "hanzi": "完",
+  "pinyin": "wán",
+  "arti": "selesai; habis",
+  "theme": "kerja",
+  "parts": "宀 (atap) + 元 (awal)",
+  "trick": "Rumah (宀) sudah rampung dengan bagian awal (元): selesai. 完 dipakai sebagai pelengkap hasil: 做完 (selesai dikerjakan).",
+  "words": [
+   [
+    "做完",
+    "zuò wán",
+    "selesai mengerjakan"
+   ],
+   [
+    "吃完",
+    "chī wán",
+    "selesai makan"
+   ]
+  ],
+  "sentence": [
+   "你吃完了吗？",
+   "Nǐ chī wán le ma?",
+   "Kamu sudah selesai makan?"
+  ],
+  "note": "完 sebagai pelengkap hasil mengikuti verba: 吃完, 看完, 写完. Negatif pakai 没: 没吃完."
+ },
+ {
+  "n": 149,
+  "hanzi": "万",
+  "pinyin": "wàn",
+  "arti": "sepuluh ribu",
+  "theme": "tatabahasa",
+  "parts": "万 (bentuk sederhana dari 萬; karakter tunggal)",
+  "trick": "Orang Tionghoa menghitung per 万 (10.000), bukan per ribu. 100.000 = 十万 (sepuluh 万).",
+  "words": [
+   [
+    "十万",
+    "shíwàn",
+    "seratus ribu"
+   ],
+   [
+    "一万",
+    "yí wàn",
+    "sepuluh ribu"
+   ]
+  ],
+  "sentence": [
+   "这个手机一万块钱。",
+   "Zhège shǒujī yí wàn kuài qián.",
+   "Ponsel ini sepuluh ribu yuan."
+  ],
+  "note": "Sistem hitung Mandarin memakai 万 (10^4) dan 亿 (10^8), bukan ribuan/jutaan seperti bahasa Indonesia. Jutaan = 百万 (seratus 万)."
+ },
+ {
+  "n": 150,
+  "hanzi": "往",
+  "pinyin": "wǎng",
+  "arti": "pergi (ke); menuju",
+  "theme": "gerak",
+  "parts": "彳 (langkah kecil) + 主",
+  "trick": "往 = bergerak menuju ke satu arah. Preposisi untuk arah: 往前走 (jalan ke depan).",
+  "words": [
+   [
+    "往前走",
+    "wǎng qián zǒu",
+    "jalan lurus ke depan"
+   ],
+   [
+    "往左",
+    "wǎng zuǒ",
+    "ke kiri"
+   ]
+  ],
+  "sentence": [
+   "请往前走，再往右走。",
+   "Qǐng wǎng qián zǒu, zài wǎng yòu zǒu.",
+   "Silakan jalan lurus, lalu jalan ke kanan."
+  ],
+  "note": "往 + arah + verba: 往左走. Beda dengan 到 (sampai di) dan 去 (pergi ke tempat)."
+ },
+ {
+  "n": 151,
+  "hanzi": "网上",
+  "pinyin": "wǎngshang",
+  "arti": "di internet; online",
+  "theme": "kerja",
+  "parts": "网 (jaring) + 上 (atas)",
+  "trick": "Di 'atas' (上) jaring (网) = di internet.",
+  "words": [
+   [
+    "网上买东西",
+    "wǎngshang mǎi dōngxi",
+    "belanja online"
+   ]
+  ],
+  "sentence": [
+   "我在网上买了一本书。",
+   "Wǒ zài wǎngshang mǎi le yì běn shū.",
+   "Aku membeli sebuah buku secara online."
+  ],
+  "note": "上 pada 网上 dibaca netral: wǎngshang."
+ },
+ {
+  "n": 152,
+  "hanzi": "忘",
+  "pinyin": "wàng",
+  "arti": "lupa",
+  "theme": "kerja",
+  "parts": "亡 (hilang) + 心 (hati)",
+  "trick": "Hal yang hilang (亡) dari hati (心) = terlupa.",
+  "words": [
+   [
+    "忘记",
+    "wàngjì",
+    "lupa"
+   ],
+   [
+    "别忘了",
+    "bié wàng le",
+    "jangan lupa"
+   ]
+  ],
+  "sentence": [
+   "别忘了你的手机。",
+   "Bié wàng le nǐ de shǒujī.",
+   "Jangan lupa ponselmu."
+  ],
+  "note": "别忘了… = 'jangan lupa…' (别 = jangan). 忘 sering diikuti 了: 我忘了."
+ },
+ {
+  "n": 153,
+  "hanzi": "位",
+  "pinyin": "wèi",
+  "arti": "(penghitung orang; sopan)",
+  "theme": "tatabahasa",
+  "parts": "亻 (orang) + 立 (berdiri)",
+  "trick": "Orang (亻) yang berdiri (立) dengan hormat: penghitung orang yang sopan.",
+  "words": [
+   [
+    "三位老师",
+    "sān wèi lǎoshī",
+    "tiga guru"
+   ]
+  ],
+  "sentence": [
+   "这位是我的老师。",
+   "Zhè wèi shì wǒ de lǎoshī.",
+   "Ini adalah guruku."
+  ],
+  "note": "位 lebih sopan daripada 个 untuk orang. Dipakai untuk tamu, guru, dokter. Untuk diri sendiri jangan pakai 位."
+ },
+ {
+  "n": 154,
+  "hanzi": "为什么",
+  "pinyin": "wèi shénme",
+  "arti": "mengapa",
+  "theme": "tatabahasa",
+  "parts": "为 (demi) + 什么 (apa)",
+  "trick": "为什么 = 'demi apa', yaitu 'mengapa'. Jawab pakai 因为…(karena…).",
+  "words": [
+   [
+    "因为",
+    "yīnwèi",
+    "karena"
+   ]
+  ],
+  "sentence": [
+   "你为什么不去？因为我很累。",
+   "Nǐ wèi shénme bú qù? Yīnwèi wǒ hěn lèi.",
+   "Kenapa kamu tidak pergi? Karena aku capek."
+  ],
+  "note": "Pertanyaan 为什么 dijawab dengan 因为…. Bisa ditulis wèi shénme (dua kata) atau wèishénme (satu kata); keduanya benar."
+ },
+ {
+  "n": 155,
+  "hanzi": "希望",
+  "pinyin": "xīwàng",
+  "arti": "berharap",
+  "theme": "kerja",
+  "parts": "希 (jarang; berharap) + 望 (memandang jauh)",
+  "trick": "Memandang jauh (望) ke depan dengan harapan (希) = berharap.",
+  "words": [
+   [
+    "希望你",
+    "xīwàng nǐ",
+    "kuharap kamu"
+   ]
+  ],
+  "sentence": [
+   "我希望明天不下雨。",
+   "Wǒ xīwàng míngtiān bú xià yǔ.",
+   "Aku berharap besok tidak hujan."
+  ],
+  "note": "希望 bisa menjadi verba ('berharap') atau kata benda ('harapan'). Boleh diikuti klausa lengkap."
+ },
+ {
+  "n": 156,
+  "hanzi": "洗",
+  "pinyin": "xǐ",
+  "arti": "mencuci",
+  "theme": "kerja",
+  "parts": "氵 (air) + 先",
+  "trick": "Air (氵) di sisi kiri menandai pekerjaan dengan air. 洗 = cuci.",
+  "words": [
+   [
+    "洗手",
+    "xǐ shǒu",
+    "cuci tangan"
+   ],
+   [
+    "洗澡",
+    "xǐzǎo",
+    "mandi"
+   ]
+  ],
+  "sentence": [
+   "吃饭以前要洗手。",
+   "Chī fàn yǐqián yào xǐ shǒu.",
+   "Sebelum makan harus cuci tangan."
+  ],
+  "note": "Verba 洗 bisa digabung banyak objek: 洗衣服, 洗手, 洗脸, 洗澡."
+ },
+ {
+  "n": 157,
+  "hanzi": "洗手间",
+  "pinyin": "xǐshǒujiān",
+  "arti": "toilet; kamar kecil",
+  "theme": "tempat",
+  "parts": "洗 (cuci) + 手 (tangan) + 间 (ruang)",
+  "trick": "Ruang (间) untuk cuci (洗) tangan (手) = toilet. Cara sopan menanyakan toilet.",
+  "words": [
+   [
+    "洗手间在哪儿",
+    "xǐshǒujiān zài nǎr",
+    "toilet di mana"
+   ]
+  ],
+  "sentence": [
+   "请问，洗手间在哪儿？",
+   "Qǐngwèn, xǐshǒujiān zài nǎr?",
+   "Permisi, toilet di mana?"
+  ],
+  "note": "洗手间 adalah ungkapan sopan. 厕所 lebih langsung. Cocok untuk bertanya di restoran atau mal."
+ },
+ {
+  "n": 158,
+  "hanzi": "下来",
+  "pinyin": "xiàlái",
+  "arti": "turun ke sini; turun",
+  "theme": "gerak",
+  "parts": "下 (turun) + 来 (datang)",
+  "trick": "下 (turun) + 来 (datang kemari). Arah turun menuju pembicara.",
+  "words": [
+   [
+    "走下来",
+    "zǒu xiàlái",
+    "berjalan turun kemari"
+   ]
+  ],
+  "sentence": [
+   "你下来吧，我们在楼下。",
+   "Nǐ xiàlái ba, wǒmen zài lóuxià.",
+   "Turunlah, kami ada di bawah."
+  ],
+  "note": "下来 = turun menuju pembicara. 下去 (160) = turun menjauh. 下来 juga bisa berarti 'tenang/berhenti' (安静下来)."
+ },
+ {
+  "n": 159,
+  "hanzi": "下面",
+  "pinyin": "xiàmiàn",
+  "arti": "bawah; bagian bawah",
+  "theme": "tempat",
+  "parts": "下 (bawah) + 面 (sisi)",
+  "trick": "下 (bawah) + 面 (sisi) = bagian bawah. Lawan dari 上面.",
+  "words": [
+   [
+    "桌子下面",
+    "zhuōzi xiàmiàn",
+    "di bawah meja"
+   ]
+  ],
+  "sentence": [
+   "小猫在桌子下面。",
+   "Xiǎo māo zài zhuōzi xiàmiàn.",
+   "Kucing kecil ada di bawah meja."
+  ],
+  "note": "下面 juga bisa berarti 'berikutnya' (下面请看…)."
+ },
+ {
+  "n": 160,
+  "hanzi": "下去",
+  "pinyin": "xiàqù",
+  "arti": "turun ke sana; turun",
+  "theme": "gerak",
+  "parts": "下 (turun) + 去 (pergi)",
+  "trick": "下 (turun) + 去 (pergi). Arah turun menjauh dari pembicara.",
+  "words": [
+   [
+    "走下去",
+    "zǒu xiàqù",
+    "berjalan turun ke sana"
+   ]
+  ],
+  "sentence": [
+   "我们下去吧，朋友在下面。",
+   "Wǒmen xiàqù ba, péngyou zài xiàmiàn.",
+   "Ayo kita turun, teman-teman ada di bawah."
+  ],
+  "note": "Setelah verba, 下去 bisa berarti 'lanjutkan': 说下去 (lanjutkan bicara)."
+ },
+ {
+  "n": 161,
+  "hanzi": "小孩儿",
+  "pinyin": "xiǎoháir",
+  "arti": "anak kecil",
+  "theme": "orang",
+  "parts": "小 (kecil) + 孩 (anak) + 儿 (akhiran 'er')",
+  "trick": "小 (kecil) + 孩 (anak). Ditambah 儿 agar terdengar akrab.",
+  "words": [
+   [
+    "孩子",
+    "háizi",
+    "anak"
+   ]
+  ],
+  "sentence": [
+   "这个小孩儿在笑。",
+   "Zhège xiǎoháir zài xiào.",
+   "Anak kecil ini sedang tertawa."
+  ],
+  "note": "小孩儿 untuk anak kecil; 孩子 lebih umum untuk 'anak' (juga anak sendiri)."
+ },
+ {
+  "n": 162,
+  "hanzi": "小时候",
+  "pinyin": "xiǎoshíhou",
+  "arti": "masa kecil",
+  "theme": "waktu",
+  "parts": "小 (kecil) + 时候 (waktu)",
+  "trick": "小 (kecil) + 时候 (waktu) = waktu masih kecil.",
+  "words": [
+   [
+    "时候",
+    "shíhou",
+    "waktu"
+   ]
+  ],
+  "sentence": [
+   "我小时候喜欢吃鱼。",
+   "Wǒ xiǎo shíhou xǐhuan chī yú.",
+   "Waktu kecil aku suka makan ikan."
+  ],
+  "note": "小时候 dipakai di awal kalimat sebagai keterangan waktu: 小时候，我喜欢…"
+ },
+ {
+  "n": 163,
+  "hanzi": "笑",
+  "pinyin": "xiào",
+  "arti": "tertawa; tersenyum",
+  "theme": "tubuh",
+  "parts": "竹 (bambu) + 夭",
+  "trick": "Mnemonik: gigi putih yang berderet seperti ruas bambu (竹) saat tertawa. Ini sekadar pengingat, bukan asal-usul.",
+  "words": [
+   [
+    "笑话",
+    "xiàohua",
+    "lelucon"
+   ],
+   [
+    "大笑",
+    "dàxiào",
+    "tertawa terbahak"
+   ]
+  ],
+  "sentence": [
+   "他笑起来很好看。",
+   "Tā xiào qǐlái hěn hǎokàn.",
+   "Dia kelihatan menarik kalau tertawa."
+  ],
+  "note": "笑 dapat berarti 'tertawa' maupun 'tersenyum'. Untuk senyum ringan: 微笑. 笑起来 = mulai/ketika tertawa."
+ },
+ {
+  "n": 164,
+  "hanzi": "姓",
+  "pinyin": "xìng",
+  "arti": "marga; bermarga",
+  "theme": "orang",
+  "parts": "女 (perempuan) + 生 (lahir)",
+  "trick": "女 (perempuan) + 生 (lahir). Marga zaman kuno diturunkan dari garis ibu, tetapi kita belajar saja bahwa 姓 = marga.",
+  "words": [
+   [
+    "你姓什么",
+    "nǐ xìng shénme",
+    "marga kamu apa"
+   ]
+  ],
+  "sentence": [
+   "请问，您姓什么？",
+   "Qǐngwèn, nín xìng shénme?",
+   "Permisi, Anda bermarga apa?"
+  ],
+  "note": "姓 bisa nomina (marga) dan verba (bermarga). Cara sopan menanyakan marga: 您贵姓? Jawab: 我姓…. Jangan jawab 我姓名…."
+ },
+ {
+  "n": 165,
+  "hanzi": "姓名",
+  "pinyin": "xìngmíng",
+  "arti": "nama lengkap",
+  "theme": "orang",
+  "parts": "姓 (marga) + 名 (nama)",
+  "trick": "姓 (marga) + 名 (nama) = marga dan nama: nama lengkap.",
+  "words": [
+   [
+    "名字",
+    "míngzi",
+    "nama"
+   ]
+  ],
+  "sentence": [
+   "请写你的姓名。",
+   "Qǐng xiě nǐ de xìngmíng.",
+   "Tolong tulis nama lengkapmu."
+  ],
+  "note": "姓名 lebih resmi daripada 名字; dipakai di formulir."
+ },
+ {
+  "n": 166,
+  "hanzi": "颜色",
+  "pinyin": "yánsè",
+  "arti": "warna",
+  "theme": "benda",
+  "parts": "颜 (wajah; warna) + 色 (warna)",
+  "trick": "颜 + 色 keduanya berarti warna. Tanyakan: 什么颜色?",
+  "words": [
+   [
+    "什么颜色",
+    "shénme yánsè",
+    "warna apa"
+   ]
+  ],
+  "sentence": [
+   "你喜欢什么颜色？",
+   "Nǐ xǐhuan shénme yánsè?",
+   "Kamu suka warna apa?"
+  ]
+ },
+ {
+  "n": 167,
+  "hanzi": "眼睛",
+  "pinyin": "yǎnjing",
+  "arti": "mata",
+  "theme": "tubuh",
+  "parts": "目 (mata) + 青 (hijau-biru)",
+  "trick": "目 (mata) + 青 (jernih). Mata yang jernih dan bening.",
+  "words": [
+   [
+    "眼睛大",
+    "yǎnjing dà",
+    "bermata besar"
+   ]
+  ],
+  "sentence": [
+   "她的眼睛很大。",
+   "Tā de yǎnjing hěn dà.",
+   "Matanya besar."
+  ],
+  "note": "睛 dibaca netral: yǎnjing. Pada 晴 dan 睛, karakternya mirip: 日 (matahari) vs 目 (mata)."
+ },
+ {
+  "n": 168,
+  "hanzi": "药",
+  "pinyin": "yào",
+  "arti": "obat",
+  "theme": "tubuh",
+  "parts": "艹 (tumbuhan) + 约 (kira-kira)",
+  "trick": "Obat zaman kuno dibuat dari tumbuhan (艹). Ingat: 药 = obat dari tanaman.",
+  "words": [
+   [
+    "吃药",
+    "chī yào",
+    "minum obat"
+   ],
+   [
+    "药店",
+    "yàodiàn",
+    "apotek"
+   ]
+  ],
+  "sentence": [
+   "你生病了，要吃药。",
+   "Nǐ shēngbìng le, yào chī yào.",
+   "Kamu sakit, harus minum obat."
+  ],
+  "note": "Dalam bahasa Mandarin obat 'dimakan' (吃药), bukan 'diminum'."
+ },
+ {
+  "n": 169,
+  "hanzi": "药店",
+  "pinyin": "yàodiàn",
+  "arti": "apotek",
+  "theme": "tempat",
+  "parts": "药 (obat) + 店 (toko)",
+  "trick": "药 (obat) + 店 (toko) = tempat membeli obat.",
+  "words": [
+   [
+    "商店",
+    "shāngdiàn",
+    "toko"
+   ]
+  ],
+  "sentence": [
+   "药店在医院旁边。",
+   "Yàodiàn zài yīyuàn pángbiān.",
+   "Apotek ada di sebelah rumah sakit."
+  ]
+ },
+ {
+  "n": 170,
+  "hanzi": "爷爷",
+  "pinyin": "yéye",
+  "arti": "kakek (dari pihak ayah)",
+  "theme": "orang",
+  "parts": "爷 (kakek) + 爷 (ulangan)",
+  "trick": "Ulangan 爷爷 terdengar hangat. Pasangan dengan 奶奶 (nenek).",
+  "words": [
+   [
+    "奶奶",
+    "nǎinai",
+    "nenek"
+   ]
+  ],
+  "sentence": [
+   "爷爷每天早上跑步。",
+   "Yéye měitiān zǎoshang pǎobù.",
+   "Kakek jogging tiap pagi."
+  ],
+  "note": "爷爷 untuk kakek dari pihak ayah; kakek dari pihak ibu 外公/姥爷."
+ },
+ {
+  "n": 171,
+  "hanzi": "一会儿",
+  "pinyin": "yíhuìr",
+  "arti": "sebentar; sesaat",
+  "theme": "waktu",
+  "parts": "一 (satu) + 会 (bisa; sempat) + 儿 (akhiran)",
+  "trick": "一会儿 = 'satu waktu singkat'. Dengan 儿, nuansanya akrab dan ringan.",
+  "words": [
+   [
+    "一会儿见",
+    "yíhuìr jiàn",
+    "sampai jumpa sebentar lagi"
+   ]
+  ],
+  "sentence": [
+   "你等一会儿，我就来。",
+   "Nǐ děng yíhuìr, wǒ jiù lái.",
+   "Tunggu sebentar, aku segera datang."
+  ],
+  "note": "Pinyin: yíhuìr (一 berubah nada ke-2 sebelum nada ke-4). 一会儿 bisa juga sebagai adverbia ('sebentar lagi'): 一会儿就好."
+ },
+ {
+  "n": 172,
+  "hanzi": "已经",
+  "pinyin": "yǐjīng",
+  "arti": "sudah",
+  "theme": "tatabahasa",
+  "parts": "已 (sudah) + 经 (melewati)",
+  "trick": "已 (sudah) + 经 (melalui) = sudah melalui. Biasanya memakai 了 di akhir: 已经…了.",
+  "words": [
+   [
+    "已经…了",
+    "yǐjīng…le",
+    "sudah…"
+   ]
+  ],
+  "sentence": [
+   "他已经吃完饭了。",
+   "Tā yǐjīng chī wán fàn le.",
+   "Dia sudah selesai makan."
+  ],
+  "note": "已经 + verba + 了 = sudah melakukan. Jangan pakai 已经 untuk masa depan. Bandingkan dengan 还没…呢 = belum."
+ },
+ {
+  "n": 173,
+  "hanzi": "一起",
+  "pinyin": "yìqǐ",
+  "arti": "bersama-sama",
+  "theme": "tatabahasa",
+  "parts": "一 (satu) + 起 (bangkit)",
+  "trick": "Bangkit (起) bersama menjadi satu (一) = bersama. Nada 一 berubah menjadi yì: yìqǐ.",
+  "words": [
+   [
+    "一起去",
+    "yìqǐ qù",
+    "pergi bersama"
+   ]
+  ],
+  "sentence": [
+   "我们一起去学校吧。",
+   "Wǒmen yìqǐ qù xuéxiào ba.",
+   "Ayo kita pergi ke sekolah bersama."
+  ],
+  "note": "一起 sebelum verba: 一起吃饭, 一起走. 一起 itu adverbia; letaknya sebelum verba. Perhatikan nada 一 yang sebelum 起 (nada 3) menjadi yì."
+ },
+ {
+  "n": 174,
+  "hanzi": "意思",
+  "pinyin": "yìsi",
+  "arti": "arti; makna; maksud",
+  "theme": "sekolah",
+  "parts": "音 (bunyi) + 心 (hati)",
+  "trick": "Bunyi (音) dari hati (心) = maksud. Pasangan: 有意思 (menarik).",
+  "words": [
+   [
+    "什么意思",
+    "shénme yìsi",
+    "apa artinya"
+   ],
+   [
+    "有意思",
+    "yǒu yìsi",
+    "menarik"
+   ]
+  ],
+  "sentence": [
+   "这个词是什么意思？",
+   "Zhège cí shì shénme yìsi?",
+   "Apa arti kata ini?"
+  ],
+  "note": "意思 dibaca yìsi (si netral). Contoh tanya: 这是什么意思? Jangan tertukar dengan 意义."
+ },
+ {
+  "n": 175,
+  "hanzi": "阴",
+  "pinyin": "yīn",
+  "arti": "mendung; berawan",
+  "theme": "benda",
+  "parts": "阝 (bukit) + 月 (bulan; bentuk sederhana dari 陰 yang berkomponen 今 + 云)",
+  "trick": "Bulan (月) tertutup di balik bukit (阝) = langit gelap, mendung.",
+  "words": [
+   [
+    "阴天",
+    "yīntiān",
+    "hari mendung"
+   ]
+  ],
+  "sentence": [
+   "今天阴天，可能会下雨。",
+   "Jīntiān yīntiān, kěnéng huì xià yǔ.",
+   "Hari ini mendung, mungkin akan hujan."
+  ],
+  "note": "阴 = mendung. Lawan: 晴 (cerah). 阴 juga bisa berarti 'teduh/bagian bayangan', tapi di level ini pakai untuk cuaca."
+ },
+ {
+  "n": 176,
+  "hanzi": "因为",
+  "pinyin": "yīnwèi",
+  "arti": "karena",
+  "theme": "tatabahasa",
+  "parts": "因 (sebab) + 为 (menjadi)",
+  "trick": "因 (sebab) + 为 (menjadi) = karena. Pasangan 所以.",
+  "words": [
+   [
+    "因为…所以…",
+    "yīnwèi…suǒyǐ…",
+    "karena…maka…"
+   ]
+  ],
+  "sentence": [
+   "因为我生病了，所以没去上课。",
+   "Yīnwèi wǒ shēngbìng le, suǒyǐ méi qù shàngkè.",
+   "Karena aku sakit, jadi tidak masuk kelas."
+  ],
+  "note": "因为 + sebab, 所以 + akibat. Jawaban untuk 为什么. Boleh pakai salah satu saja, tapi berpasangan sangat umum."
+ },
+ {
+  "n": 177,
+  "hanzi": "游",
+  "pinyin": "yóu",
+  "arti": "berenang",
+  "theme": "olahraga",
+  "parts": "氵 (air) + 斿",
+  "trick": "Air (氵) di kiri menandai gerakan di air. 游 sendiri jarang dipakai tanpa 泳; biasanya 游泳.",
+  "words": [
+   [
+    "游泳",
+    "yóuyǒng",
+    "berenang"
+   ],
+   [
+    "游客",
+    "yóukè",
+    "turis"
+   ]
+  ],
+  "sentence": [
+   "他游得很快。",
+   "Tā yóu de hěn kuài.",
+   "Dia berenang sangat cepat."
+  ],
+  "note": "游 tunggal dipakai dalam pola 游得…. Untuk 'berenang' pakai 游泳 (178). 游 juga bisa berarti 'berwisata/berjalan-jalan' (游客)."
+ },
+ {
+  "n": 178,
+  "hanzi": "游泳",
+  "pinyin": "yóuyǒng",
+  "arti": "berenang",
+  "theme": "olahraga",
+  "parts": "游 (berenang) + 泳 (berenang)",
+  "trick": "游 + 泳: dua karakter yang artinya sama; keduanya punya 氵 (air). Verba-objek: 游泳 bisa dipisah: 游了一个小时泳.",
+  "words": [
+   [
+    "去游泳",
+    "qù yóuyǒng",
+    "pergi berenang"
+   ]
+  ],
+  "sentence": [
+   "我喜欢星期六去游泳。",
+   "Wǒ xǐhuan xīngqīliù qù yóuyǒng.",
+   "Aku suka pergi berenang hari Sabtu."
+  ],
+  "note": "Beda dengan 177 游: 游泳 adalah kata utuh 'berenang' (bisa dipisah: 游了一会儿泳), sedangkan 游 sendiri jarang dipakai terpisah kecuali 游得快."
+ },
+ {
+  "n": 179,
+  "hanzi": "有意思",
+  "pinyin": "yǒu yìsi",
+  "arti": "menarik; seru",
+  "theme": "sifat",
+  "parts": "有 (ada) + 意思 (arti)",
+  "trick": "有 (punya) + 意思 (arti) = punya makna = menarik. Lawan: 没意思 (membosankan).",
+  "words": [
+   [
+    "没意思",
+    "méi yìsi",
+    "membosankan"
+   ]
+  ],
+  "sentence": [
+   "这本书很有意思。",
+   "Zhè běn shū hěn yǒu yìsi.",
+   "Buku ini sangat menarik."
+  ],
+  "note": "有意思 = menarik; 没意思 = membosankan. 很 + 有意思. Hati-hati: 意思 sendiri = 'arti'."
+ },
+ {
+  "n": 180,
+  "hanzi": "有时",
+  "pinyin": "yǒushí",
+  "arti": "kadang-kadang",
+  "theme": "waktu",
+  "parts": "有 (ada) + 时 (waktu)",
+  "trick": "'Ada waktu' (有时) di mana hal itu terjadi = kadang-kadang. Lebih sering 有时候.",
+  "words": [
+   [
+    "有时候",
+    "yǒu shíhou",
+    "kadang-kadang"
+   ]
+  ],
+  "sentence": [
+   "我有时坐车去学校。",
+   "Wǒ yǒushí zuò chē qù xuéxiào.",
+   "Kadang-kadang aku naik kendaraan ke sekolah."
+  ],
+  "note": "有时 (sering diulang: 有时…有时…) = kadang…kadang…. Setara dengan 有时候."
+ },
+ {
+  "n": 181,
+  "hanzi": "右",
+  "pinyin": "yòu",
+  "arti": "kanan",
+  "theme": "tempat",
+  "parts": "Gambar tangan kanan + 口 (mulut)",
+  "trick": "右 = tangan kanan (又) + mulut (口): tangan kanan yang membawa makanan ke mulut. Mnemonik: kebanyakan orang makan dengan tangan kanan.",
+  "words": [
+   [
+    "右手",
+    "yòushǒu",
+    "tangan kanan"
+   ]
+  ],
+  "sentence": [
+   "医院在你的右手边。",
+   "Yīyuàn zài nǐ de yòushǒu biān.",
+   "Rumah sakit ada di sebelah kananmu."
+  ],
+  "note": "Lawan kata: 左 (199). Mnemonik: 右 memakai 口 (mulut) — makan dengan tangan kanan."
+ },
+ {
+  "n": 182,
+  "hanzi": "右边",
+  "pinyin": "yòubian",
+  "arti": "sisi kanan",
+  "theme": "tempat",
+  "parts": "右 (kanan) + 边 (sisi)",
+  "trick": "右 (kanan) + 边 (sisi) = sebelah kanan.",
+  "words": [
+   [
+    "左边",
+    "zuǒbian",
+    "kiri"
+   ]
+  ],
+  "sentence": [
+   "学校在医院右边。",
+   "Xuéxiào zài yīyuàn yòubian.",
+   "Sekolah ada di sebelah kanan rumah sakit."
+  ],
+  "note": "边 netral: yòubian. Bentuk lain: 右面."
+ },
+ {
+  "n": 183,
+  "hanzi": "鱼",
+  "pinyin": "yú",
+  "arti": "ikan",
+  "theme": "makanan",
+  "parts": "Gambar ikan: kepala, badan, ekor",
+  "trick": "Bagian atas = kepala, kotak = badan bersisik, bagian bawah = ekor. Ikan beneran!",
+  "history": "鱼 asalnya piktograf ikan. Bentuk tradisional 魚 lebih detail; 鱼 adalah bentuk sederhana.",
+  "words": [
+   [
+    "鱼肉",
+    "yúròu",
+    "daging ikan"
+   ],
+   [
+    "小鱼",
+    "xiǎoyú",
+    "ikan kecil"
+   ]
+  ],
+  "sentence": [
+   "我家有三条鱼。",
+   "Wǒ jiā yǒu sān tiáo yú.",
+   "Di rumahku ada tiga ekor ikan."
+  ],
+  "note": "Penghitung ikan: 条 (一条鱼)."
+ },
+ {
+  "n": 184,
+  "hanzi": "远",
+  "pinyin": "yuǎn",
+  "arti": "jauh",
+  "theme": "sifat",
+  "parts": "辶 (jalan) + 元 (awal)",
+  "trick": "辶 (jalan) menunjukkan perjalanan; berjalan dari awal (元) ke tujuan yang jauh.",
+  "words": [
+   [
+    "很远",
+    "hěn yuǎn",
+    "jauh sekali"
+   ],
+   [
+    "远处",
+    "yuǎnchù",
+    "tempat jauh"
+   ]
+  ],
+  "sentence": [
+   "你家离学校远不远？",
+   "Nǐ jiā lí xuéxiào yuǎn bu yuǎn?",
+   "Apakah rumahmu jauh dari sekolah?"
+  ],
+  "note": "离 + tempat + 远/近: 学校离我家很远. Lawan: 近."
+ },
+ {
+  "n": 185,
+  "hanzi": "运动",
+  "pinyin": "yùndòng",
+  "arti": "berolahraga; olahraga",
+  "theme": "olahraga",
+  "parts": "运 (menggerakkan) + 动 (bergerak)",
+  "trick": "运 (menggerakkan) + 动 (bergerak) = bergerak aktif: olahraga.",
+  "words": [
+   [
+    "运动员",
+    "yùndòngyuán",
+    "atlet"
+   ],
+   [
+    "运动鞋",
+    "yùndòngxié",
+    "sepatu olahraga"
+   ]
+  ],
+  "sentence": [
+   "我每天都运动一个小时。",
+   "Wǒ měitiān dōu yùndòng yí gè xiǎoshí.",
+   "Aku berolahraga satu jam tiap hari."
+  ],
+  "note": "运动 bisa verba ('berolahraga') dan nomina ('olahraga'). 做运动 = berolahraga."
+ },
+ {
+  "n": 186,
+  "hanzi": "站",
+  "pinyin": "zhàn",
+  "arti": "stasiun; halte; berdiri",
+  "theme": "tempat",
+  "parts": "立 (berdiri) + 占 (menempati)",
+  "trick": "Orang yang berdiri (立) menempati (占) satu tempat: berdiri; tempat berdiri = halte/stasiun.",
+  "words": [
+   [
+    "车站",
+    "chēzhàn",
+    "stasiun; halte"
+   ],
+   [
+    "站起来",
+    "zhàn qǐlái",
+    "berdiri"
+   ]
+  ],
+  "sentence": [
+   "我在车站等你。",
+   "Wǒ zài chēzhàn děng nǐ.",
+   "Aku menunggumu di stasiun."
+  ],
+  "note": "站 verba = berdiri (站在门口). 站 nomina = stasiun/halte (火车站, 汽车站)."
+ },
+ {
+  "n": 187,
+  "hanzi": "丈夫",
+  "pinyin": "zhàngfu",
+  "arti": "suami",
+  "theme": "orang",
+  "parts": "丈 (ukuran) + 夫 (pria)",
+  "trick": "丈夫 = suami. Pasangan 妻子 (istri). Perhatikan: 夫 dibaca netral (zhàngfu).",
+  "words": [
+   [
+    "妻子",
+    "qīzi",
+    "istri"
+   ]
+  ],
+  "sentence": [
+   "她的丈夫在医院工作。",
+   "Tā de zhàngfu zài yīyuàn gōngzuò.",
+   "Suaminya bekerja di rumah sakit."
+  ],
+  "note": "Dalam percakapan sehari-hari sering dipakai 老公. 丈夫 adalah netral/resmi."
+ },
+ {
+  "n": 188,
+  "hanzi": "这么",
+  "pinyin": "zhème",
+  "arti": "begini; sebegini",
+  "theme": "tatabahasa",
+  "parts": "这 (ini) + 么 (akhiran)",
+  "trick": "这么 = 'sebegini'. Kebalikan 那么. Dipakai untuk sifat yang dekat/baru saja disebut.",
+  "words": [
+   [
+    "这么大",
+    "zhème dà",
+    "sebesar ini"
+   ]
+  ],
+  "sentence": [
+   "今天怎么这么冷？",
+   "Jīntiān zěnme zhème lěng?",
+   "Kenapa hari ini sedingin ini?"
+  ],
+  "note": "这么 + kata sifat: 这么好. 这么 dekat, 那么 jauh."
+ },
+ {
+  "n": 189,
+  "hanzi": "这样",
+  "pinyin": "zhèyàng",
+  "arti": "seperti ini; begini",
+  "theme": "tatabahasa",
+  "parts": "这 (ini) + 样 (cara)",
+  "trick": "这 (ini) + 样 (cara) = 'cara ini', 'seperti ini'.",
+  "words": [
+   [
+    "这样的人",
+    "zhèyàng de rén",
+    "orang seperti ini"
+   ]
+  ],
+  "sentence": [
+   "你不要这样说。",
+   "Nǐ búyào zhèyàng shuō.",
+   "Jangan bicara seperti ini."
+  ],
+  "note": "这样 bisa menjadi jawaban 'begitu ya' (这样啊). 这样 + verba: 这样做 (berbuat begini)."
+ },
+ {
+  "n": 190,
+  "hanzi": "着",
+  "pinyin": "zhe",
+  "arti": "(partikel keadaan berlangsung)",
+  "theme": "tatabahasa",
+  "parts": "羊 (domba) + 目 (mata) bentuk sederhana",
+  "trick": "着 dipasang di belakang verba untuk menyatakan keadaan yang berlangsung: 站着 (sedang berdiri), 坐着 (duduk).",
+  "words": [
+   [
+    "站着",
+    "zhànzhe",
+    "berdiri"
+   ],
+   [
+    "拿着",
+    "názhe",
+    "membawa"
+   ]
+  ],
+  "sentence": [
+   "他拿着一杯水。",
+   "Tā názhe yì bēi shuǐ.",
+   "Dia sedang memegang segelas air."
+  ],
+  "note": "着 menggambarkan keadaan: 门开着 (pintunya terbuka). Bukan aksi yang bergerak. Bedakan dengan 正在 + verba (aksi sedang berlangsung). Dibaca zhe (netral). Beda dengan 32 得 dan 33 地 yang juga partikel."
+ },
+ {
+  "n": 191,
+  "hanzi": "正",
+  "pinyin": "zhèng",
+  "arti": "tepat; sedang; lurus",
+  "theme": "tatabahasa",
+  "parts": "一 (satu) + 止 (berhenti)",
+  "trick": "正 = tepat/pas. Bayangkan garis lurus (一) yang berhenti (止) tepat di titik. Dalam 正在, ia menandai aksi yang sedang berlangsung.",
+  "words": [
+   [
+    "正在",
+    "zhèngzài",
+    "sedang"
+   ],
+   [
+    "正好",
+    "zhènghǎo",
+    "pas"
+   ]
+  ],
+  "sentence": [
+   "我正在看书呢。",
+   "Wǒ zhèngzài kàn shū ne.",
+   "Aku sedang membaca buku."
+  ],
+  "note": "正 + verba = sedang. Bandingkan: 着 untuk keadaan, 正在/正 untuk aksi yang berlangsung; 呢 boleh di akhir kalimat. Contoh: 我正看书呢."
+ },
+ {
+  "n": 192,
+  "hanzi": "周",
+  "pinyin": "zhōu",
+  "arti": "minggu; pekan",
+  "theme": "waktu",
+  "parts": "Karakter tunggal; 冂 (bingkai) + 土 + 口",
+  "trick": "周 = satu putaran/siklus (satu minggu). Kata dasar: 周末 (akhir pekan).",
+  "words": [
+   [
+    "周末",
+    "zhōumò",
+    "akhir pekan"
+   ],
+   [
+    "一周",
+    "yì zhōu",
+    "satu minggu"
+   ]
+  ],
+  "sentence": [
+   "我们这周去看电影。",
+   "Wǒmen zhè zhōu qù kàn diànyǐng.",
+   "Minggu ini kami pergi menonton film."
+  ],
+  "note": "周 = minggu. Sama dengan 星期 yang sudah dikenal. 周 lebih ringkas dan dipakai di tulisan: 下周, 上周."
+ },
+ {
+  "n": 193,
+  "hanzi": "准备",
+  "pinyin": "zhǔnbèi",
+  "arti": "bersiap; mempersiapkan",
+  "theme": "kerja",
+  "parts": "准 (tepat) + 备 (menyiapkan)",
+  "trick": "准 (tepat) + 备 (siap) = bersiap dengan tepat.",
+  "words": [
+   [
+    "准备好",
+    "zhǔnbèi hǎo",
+    "sudah siap"
+   ]
+  ],
+  "sentence": [
+   "你准备好了吗？",
+   "Nǐ zhǔnbèi hǎo le ma?",
+   "Apa kamu sudah siap?"
+  ],
+  "note": "准备 + verba = 'bersiap/berencana': 我准备去北京. 准备好 = sudah siap."
+ },
+ {
+  "n": 194,
+  "hanzi": "自己",
+  "pinyin": "zìjǐ",
+  "arti": "diri sendiri",
+  "theme": "tatabahasa",
+  "parts": "自 (diri) + 己 (diri)",
+  "trick": "自 (diri) + 己 (diri) = diri sendiri. 自己 mirip 'sendiri' dalam bahasa Indonesia.",
+  "words": [
+   [
+    "自己做",
+    "zìjǐ zuò",
+    "mengerjakan sendiri"
+   ]
+  ],
+  "sentence": [
+   "这件事你自己做吧。",
+   "Zhè jiàn shì nǐ zìjǐ zuò ba.",
+   "Urusan ini kerjakan sendiri ya."
+  ],
+  "note": "自己 sering dipasang setelah subjek: 我自己 (aku sendiri). Pronomina refleksif."
+ },
+ {
+  "n": 195,
+  "hanzi": "走",
+  "pinyin": "zǒu",
+  "arti": "berjalan",
+  "theme": "gerak",
+  "parts": "土 (tanah) + 止 (kaki)",
+  "trick": "Kaki (止) yang menapak di tanah (土) = berjalan. Ingat: 走 = jalan kaki, bukan 'pergi' (去).",
+  "words": [
+   [
+    "走路",
+    "zǒulù",
+    "berjalan"
+   ],
+   [
+    "走吧",
+    "zǒu ba",
+    "ayo pergi"
+   ]
+  ],
+  "sentence": [
+   "我们走着去学校吧。",
+   "Wǒmen zǒuzhe qù xuéxiào ba.",
+   "Ayo kita berjalan kaki ke sekolah."
+  ],
+  "note": "走 = berjalan kaki, bukan 'pergi dengan kendaraan'. 走吧 = 'ayo pergi/jalan'. Jangan tertukar dengan 去 (pergi ke tempat). Kalimat ini juga memakai 着 (190): 走着去 = pergi dengan berjalan."
+ },
+ {
+  "n": 196,
+  "hanzi": "走路",
+  "pinyin": "zǒulù",
+  "arti": "berjalan kaki",
+  "theme": "gerak",
+  "parts": "走 (jalan) + 路 (jalan raya)",
+  "trick": "走 (jalan) + 路 (jalan) = berjalan di jalan: berjalan kaki.",
+  "words": [
+   [
+    "走",
+    "zǒu",
+    "berjalan"
+   ],
+   [
+    "路",
+    "lù",
+    "jalan"
+   ]
+  ],
+  "sentence": [
+   "我们走路去商场吧。",
+   "Wǒmen zǒulù qù shāngchǎng ba.",
+   "Ayo kita jalan kaki ke mal."
+  ],
+  "note": "走路 verba-objek: 走了一个小时的路. Beda dengan 195 走, yang bisa berdiri sendiri: 走吧 (ayo pergi)."
+ },
+ {
+  "n": 197,
+  "hanzi": "足球",
+  "pinyin": "zúqiú",
+  "arti": "sepak bola",
+  "theme": "olahraga",
+  "parts": "足 (kaki) + 球 (bola)",
+  "trick": "Bola (球) yang ditendang dengan kaki (足) = sepak bola.",
+  "words": [
+   [
+    "踢足球",
+    "tī zúqiú",
+    "bermain sepak bola"
+   ]
+  ],
+  "sentence": [
+   "我们明天踢足球。",
+   "Wǒmen míngtiān tī zúqiú.",
+   "Besok kami main sepak bola."
+  ],
+  "note": "Verbanya 踢: 踢足球. Jangan pakai 打."
+ },
+ {
+  "n": 198,
+  "hanzi": "最",
+  "pinyin": "zuì",
+  "arti": "paling",
+  "theme": "tatabahasa",
+  "parts": "冃 + 取 (mengambil)",
+  "trick": "最 = paling. Ingat: 'ambil' (取) yang paling atas. Pakai sebelum kata sifat atau verba perasaan: 最好, 最喜欢.",
+  "words": [
+   [
+    "最好",
+    "zuì hǎo",
+    "terbaik"
+   ],
+   [
+    "最喜欢",
+    "zuì xǐhuan",
+    "paling suka"
+   ]
+  ],
+  "sentence": [
+   "我最喜欢吃鱼。",
+   "Wǒ zuì xǐhuan chī yú.",
+   "Aku paling suka makan ikan."
+  ],
+  "note": "最 + kata sifat/verba. Jangan tambah 很 sebelum 最."
+ },
+ {
+  "n": 199,
+  "hanzi": "左",
+  "pinyin": "zuǒ",
+  "arti": "kiri",
+  "theme": "tempat",
+  "parts": "Gambar tangan kiri + 工 (kerja)",
+  "trick": "左 = tangan kiri (𠂇) + 工 (kerja). Mnemonik: tangan kiri biasanya membantu pekerjaan (工).",
+  "words": [
+   [
+    "左手",
+    "zuǒshǒu",
+    "tangan kiri"
+   ]
+  ],
+  "sentence": [
+   "请往左走。",
+   "Qǐng wǎng zuǒ zǒu.",
+   "Silakan jalan ke arah kiri."
+  ],
+  "note": "Lawan: 右. Mnemonik: 左 + 工 (kerja), sedangkan 右 + 口 (mulut)."
+ },
+ {
+  "n": 200,
+  "hanzi": "左边",
+  "pinyin": "zuǒbian",
+  "arti": "sisi kiri",
+  "theme": "tempat",
+  "parts": "左 (kiri) + 边 (sisi)",
+  "trick": "左 (kiri) + 边 (sisi) = sebelah kiri.",
+  "words": [
+   [
+    "右边",
+    "yòubian",
+    "kanan"
+   ]
+  ],
+  "sentence": [
+   "医院在学校的左边。",
+   "Yīyuàn zài xuéxiào de zuǒbian.",
+   "Rumah sakit ada di sebelah kiri sekolah."
+  ]
+ }
+]

@@ -27,6 +27,10 @@
         <span class="snav-icon">📝</span>
         <span class="snav-label">{{ tr('nav_quiz') }}</span>
       </a>
+      <a class="snav-link" href="{{ url_for('hsk.lobby') }}">
+        <span class="snav-icon">🎁</span>
+        <span class="snav-label">{{ tr('nav_hsk') }}</span>
+      </a>
       <button class="snav-btn" data-page="profile" data-count="{{ badge_idx }}">
         <span class="snav-icon">🏅</span><span class="snav-label">{{ tr('nav_profile') }}</span>
         {% if show_profile_pip %}<span class="snav-pip gold">★</span>{% endif %}
@@ -57,21 +61,6 @@
             <h1 class="page-title">{{ tr('nav_classes') }}</h1>
             <p class="page-sub">{{ tr('page_classes_sub_student') }}</p>
           </div>
-          {% if teachers %}
-          <div class="page-action">
-            <form id="attnForm" method="POST" action="{{ url_for('student.mark_attendance') }}"
-                  style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
-              <input type="hidden" name="tz_offset" id="tzOffset" value="0">
-              <div>
-                <label style="margin-bottom:4px">{{ tr('select_teacher') }}</label>
-                <select name="teacher_id" required style="margin-bottom:0;min-width:150px">
-                  {% for t in teachers %}<option value="{{ t.id }}">{{ t.name() }}</option>{% endfor %}
-                </select>
-              </div>
-              <button class="btn br bsm" type="submit" style="white-space:nowrap;width:auto">✅ {{ tr('submit_attn') }}</button>
-            </form>
-          </div>
-          {% endif %}
         </div>
 
         {% if pay_first_due %}
@@ -178,7 +167,7 @@
           <div class="empty-state">
             <div class="empty-icon">📊</div>
             <div class="empty-title">{{ tr('no_progress') }}</div>
-            <div class="empty-sub">Submit your first attendance to start tracking your progress.</div>
+            <div class="empty-sub">Join your first class to start tracking your progress.</div>
           </div>
         {% endif %}
         </div>
@@ -307,6 +296,10 @@
     <div class="bnav-icon">📝</div>
     <span>{{ tr('nav_quiz') }}</span>
   </a>
+  <a class="bnav-btn" href="{{ url_for('hsk.lobby') }}" style="text-decoration:none">
+    <div class="bnav-icon">🎁</div>
+    <span>{{ tr('nav_hsk') }}</span>
+  </a>
   <button class="bnav-btn" data-page="profile" data-count="{{ badge_idx }}">
     <div class="bnav-icon">🏅
       {% if show_profile_pip %}<span class="bnav-pip">★</span>{% endif %}
@@ -391,14 +384,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
-
-const _attnForm = document.getElementById('attnForm');
-if (_attnForm) {
-  _attnForm.addEventListener('submit', function() {
-    const tzInput = document.getElementById('tzOffset');
-    if(tzInput) tzInput.value = -(new Date().getTimezoneOffset());
-  }, true); 
-}
 
 /* ── New badge: say that one was earned, without naming anything ── */
 window.__newBadge = {{ 'true' if show_profile_pip else 'false' }};
@@ -522,45 +507,6 @@ function updateAllPips(data) {
     ['#sideNav', '#bottomNav'].forEach(s => updatePip(s, 'receipts', newUnpaid, newUnpaid || null));
   }
 }
-
-/* ── Submit attendance (AJAX) ── */
-{% if teachers %}
-if (document.getElementById('attnForm')) {
-    ajaxForm(document.getElementById('attnForm'), function(data){
-      if (data.progress_html) {
-        document.getElementById('progressArea').innerHTML = data.progress_html;
-      }
-      updateAllPips(data);
-
-      if (typeof data.cycle_count === 'number') {
-        const statNums = document.querySelectorAll('.stat-num');
-        if (statNums[0]) statNums[0].textContent = data.cycle_count;
-        if (statNums[1] && typeof data.total_sessions === 'number') statNums[1].textContent = data.total_sessions;
-      }
-
-      if (data.new_receipt_html) {
-        const section = document.getElementById('receiptSection');
-        document.getElementById('noReceiptsMsg')?.remove();
-        let listEl = document.getElementById('receiptList');
-        if (!listEl) {
-          section.innerHTML = '<div id="receiptList"></div>';
-          listEl = document.getElementById('receiptList');
-        }
-        listEl.insertAdjacentHTML('afterbegin', data.new_receipt_html);
-        const newCard = listEl.querySelector('.rc-card');
-        if (newCard) {
-          newCard.style.animation = 'receipt-pop .5s ease';
-          attachCardClick(newCard);
-        }
-        showToast('🎉 Receipt generated!');
-        setTimeout(() => {
-          document.querySelector('#sideNav [data-page="receipts"]')?.click() ||
-          document.querySelector('#bottomNav [data-page="receipts"]')?.click();
-        }, 900);
-      }
-    });
-}
-{% endif %}
 
 /* ── Join class ── */
 document.querySelectorAll('.join-btn').forEach(btn => {

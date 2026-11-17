@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from flask import (Blueprint, render_template, redirect, url_for,
                    request, session, flash, jsonify, g, make_response, render_template_string)
 from .. import db
-from ..models import User, Receipt, Attendance, StudentFee, Schedule, ScheduleJoin, ScheduleInvite
+from ..models import User, Receipt, Attendance, StudentFee, Schedule, ScheduleJoin, ScheduleInvite, BonusAccess
 from ..services.attendance import (
     add_attendance,
     cancel_receipt,
@@ -99,12 +99,17 @@ def dashboard():
     show_receipts_pip   = unpaid_cnt > 0 and _pip("receipts", unpaid_cnt)
     # ----------------------------------------------------
 
-    from ..services.streaks import compute_streaks
+    from ..services.streaks import TIERS, compute_streaks
     streaks = compute_streaks([s.id for s in all_students])
+    streak_tiers = [{"min": t[0], "key": t[1], "char": t[2], "name": t[3], "zh": t[4]} for t in TIERS]
+
+    bonus_grants = {}
+    for g_ in BonusAccess.query.filter(BonusAccess.student_id.in_([s.id for s in all_students] or [0])).all():
+        bonus_grants.setdefault(g_.student_id, set()).add(g_.level)
 
     return render_template("teacher/dashboard.html",
-        user=teacher, receipts=receipts, all_students=all_students,
-        streaks=streaks,
+        user=teacher, receipts=receipts, all_students=all_students, bonus_grants=bonus_grants,
+        streaks=streaks, streak_tiers=streak_tiers,
         progress=progress, custom_fees=custom_fees, custom_fee_types=custom_fee_types,
         pay_first_ids=pay_first_ids, fee_row_ids=fee_row_ids, invoice_due_ids=invoice_due_ids,
         unbilled_records=unbilled_records, unpaid_cnt=unpaid_cnt, 
@@ -115,6 +120,46 @@ def dashboard():
         show_attendance_pip=show_attendance_pip, 
         show_receipts_pip=show_receipts_pip,
         quote=random_quote())
+
+@teacher_bp.route("/teacher/bonus_access", methods=["POST"])
+@teacher_required
+def bonus_access():
+    """Unlock / lock one Bonus Course level for one student, or for all of the teacher's students.
+    Body (JSON): {"student_id": 12 | "all", "level": 1|2|3, "on": true|false}"""
+    from ..services.prepaid import visible_students
+    data = request.get_json(silent=True) or {}
+    try:
+        level = int(data.get("level"))
+    except (TypeError, ValueError):
+        level = 0
+    if level not in (1, 2, 3):
+        return jsonify(ok=False, msg="Unknown level"), 400
+    on = bool(data.get("on"))
+    mine = {s.id for s in visible_students(_get_teacher().id).all()}
+    if data.get("student_id") == "all":
+        targets = mine
+    else:
+        try:
+            sid = int(data.get("student_id"))
+        except (TypeError, ValueError):
+            return jsonify(ok=False, msg="Unknown student"), 400
+        if sid not in mine:
+            return jsonify(ok=False, msg="Unknown student"), 404
+        targets = {sid}
+    have = {a.student_id: a for a in BonusAccess.query.filter(
+        BonusAccess.level == level, BonusAccess.student_id.in_(targets or [0])).all()}
+    for sid in targets:
+        if on and sid not in have:
+            db.session.add(BonusAccess(student_id=sid, level=level))
+        elif not on and sid in have:
+            db.session.delete(have[sid])
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify(ok=False, msg="Could not save. Please try again."), 500
+    return jsonify(ok=True, level=level, on=on, count=len(targets))
+
 
 @teacher_bp.route("/teacher/update_settings", methods=["POST"])
 @teacher_required

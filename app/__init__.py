@@ -65,6 +65,7 @@ def create_app(config_class=None):
     from .routes.schedule import schedule_bp
     from .routes.quiz import quiz_bp
     from .routes.pwa import pwa_bp
+    from .routes.hsk import hsk_bp
 
     flask_app.register_blueprint(auth_bp)
     flask_app.register_blueprint(student_bp)
@@ -72,5 +73,6 @@ def create_app(config_class=None):
     flask_app.register_blueprint(schedule_bp)
     flask_app.register_blueprint(quiz_bp)
     flask_app.register_blueprint(pwa_bp)
+    flask_app.register_blueprint(hsk_bp)
 
     return flask_app
