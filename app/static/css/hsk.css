@@ -168,7 +168,8 @@
 
 /* ── Bonus Courses lobby + locked level pills ── */
 .hk-level.locked { display: inline-flex; align-items: center; gap: 6px; opacity: .55; cursor: not-allowed; }
-.hk-lobby { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.hk-lobby { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; align-items: stretch; }
+.hk-lobby > .card { margin-top: 0; height: 100%; }   /* the global '.card + .card' margin pushed cards 2 and 3 down */
 .hk-course { display: flex; flex-direction: column; gap: 8px; padding: 20px; text-decoration: none; color: var(--text); }
 a.hk-course:hover { border-color: var(--gold); }
 .hk-course-badge { align-self: flex-start; padding: 4px 12px; border-radius: 100px; background: var(--gold-soft); border: 1px solid var(--gold); font-weight: 700; font-size: .95rem; }

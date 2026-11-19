@@ -121,6 +121,27 @@ def dashboard():
         show_receipts_pip=show_receipts_pip,
         quote=random_quote())
 
+@teacher_bp.route("/teacher/delete_student/<int:student_id>", methods=["POST"])
+@teacher_required
+def delete_student(student_id):
+    """Delete a student account and all of their data (attendance, receipts, streaks, quiz results).
+    Only students this teacher can see; teachers can never be deleted here."""
+    from ..services.accounts import erase_student
+    from ..services.prepaid import visible_students
+    student = visible_students(_get_teacher().id).filter(User.id == student_id).first()
+    if not student:
+        return jsonify(ok=False, msg="Student not found"), 404
+    name = student.name()
+    try:
+        erase_student(student)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        logger.exception("Could not delete student %s", student_id)
+        return jsonify(ok=False, msg="Could not delete. Nothing was changed."), 500
+    return jsonify(ok=True, msg=f"{name} was deleted.")
+
+
 @teacher_bp.route("/teacher/bonus_access", methods=["POST"])
 @teacher_required
 def bonus_access():
@@ -326,7 +347,8 @@ def edit_receipt(receipt_id):
 @teacher_bp.route("/teacher/reset_student_password/<int:student_id>", methods=["POST"])
 @teacher_required
 def reset_student_password(student_id):
-    student = db.session.get(User, student_id)
+    from ..services.prepaid import visible_students
+    student = visible_students(_get_teacher().id).filter(User.id == student_id).first()
     new_pw = request.form.get("new_password", "").strip()
     if student and len(new_pw) >= 6:
         student.password = hash_password(new_pw)
