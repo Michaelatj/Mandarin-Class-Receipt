@@ -12,11 +12,13 @@ import logging
 from functools import lru_cache, wraps
 from pathlib import Path
 
-from flask import (Blueprint, abort, jsonify, make_response, redirect,
+from flask import (Blueprint, abort, jsonify, make_response, redirect, request,
                    render_template, session, url_for)
 
 from .. import db
-from ..models import BonusAccess, User
+from datetime import datetime
+
+from ..models import BonusAccess, HskActivity, HskKnown, User
 
 logger = logging.getLogger(__name__)
 hsk_bp = Blueprint("hsk", __name__)
@@ -187,6 +189,55 @@ def theme(user, level, theme_id):
     # the "back" link of this page goes to the theme list, not the dashboard
     return _page("hsk/theme.html", user, level, back=url_for("hsk.index", level=level),
                  theme_id=meta[0], icon=meta[1], label=meta[2], items=items)
+
+
+@hsk_bp.route("/hsk<int:level>/progress", methods=["GET", "POST"])
+@guard(json_response=True)
+def progress(user, level):
+    """The words this account marked as mastered, kept on the server so they follow the student
+    to another phone and the teacher can see them.
+    GET  -> {known: [n, ...]}
+    POST -> {items: [{n, known}, ...]}  (max 400 per call); every item counts as one practice answer."""
+    if request.method == "GET":
+        rows = HskKnown.query.filter_by(user_id=user.id, level=level).all()
+        resp = jsonify(ok=True, known=sorted(r.n for r in rows))
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
+
+    body = request.get_json(silent=True) or {}
+    items = body.get("items")
+    total = len(_entries(level))
+    if not isinstance(items, list) or not items or len(items) > 400:
+        return jsonify(ok=False, msg="bad request"), 400
+    wanted = {}
+    for it in items:
+        n, k = (it.get("n"), it.get("known")) if isinstance(it, dict) else (None, None)
+        if isinstance(n, int) and not isinstance(n, bool) and 1 <= n <= total and isinstance(k, bool):
+            wanted[n] = k
+    if not wanted:
+        return jsonify(ok=False, msg="bad request"), 400
+    have = {r.n: r for r in HskKnown.query.filter(HskKnown.user_id == user.id, HskKnown.level == level,
+                                                  HskKnown.n.in_(list(wanted))).all()}
+    now = datetime.utcnow()
+    for n, k in wanted.items():
+        row = have.get(n)
+        if k and not row:
+            db.session.add(HskKnown(user_id=user.id, level=level, n=n, updated_at=now))
+        elif not k and row:
+            db.session.delete(row)
+    act = HskActivity.query.filter_by(user_id=user.id, level=level).first()
+    if not act:
+        act = HskActivity(user_id=user.id, level=level, reviews=0)
+        db.session.add(act)
+    act.reviews = (act.reviews or 0) + len(wanted)
+    act.last_at = now
+    try:
+        db.session.commit()
+    except Exception:                      # two taps at once can race on the unique key
+        db.session.rollback()
+        logger.exception("hsk progress save failed")
+        return jsonify(ok=False, msg="could not save"), 500
+    return jsonify(ok=True)
 
 
 @hsk_bp.route("/hsk<int:level>/data.json")

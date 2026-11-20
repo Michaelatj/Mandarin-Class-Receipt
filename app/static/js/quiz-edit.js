@@ -25,7 +25,7 @@
 
   function fromServer(q) {
     const m = { cid: nid(), id: q.id, type: q.type, question: q.question || '', meaning: q.questionMeaning || '',
-                explanation: q.explanation || '', points: q.points || 1, errors: [] };
+                explanation: q.explanation || '', points: q.points || 1, audio: q.audio || '', errors: [] };
     if (q.type === 'sentence_reorder') {
       m.chunks = q.chunks.map((t, i) => ({ k: 'c' + i, text: t }));
       m.alts = (q.altOrders || []).map((order) => order.map((i) => 'c' + i));
@@ -36,7 +36,7 @@
     return m;
   }
   function blankQuestion(type) {
-    const m = { cid: nid(), id: null, type, question: '', meaning: '', explanation: '', points: 1, errors: [] };
+    const m = { cid: nid(), id: null, type, question: '', meaning: '', explanation: '', points: 1, audio: '', errors: [] };
     if (type === 'sentence_reorder') { m.chunks = blankChunks(4); m.alts = []; }
     else m.options = blankOptions(type === 'multiple_select' ? 5 : 4);
     return m;
@@ -45,6 +45,7 @@
     const out = { type: m.type, question: m.question.trim(), points: Number(m.points) || 1 };
     if (m.id) out.id = m.id;
     if (m.meaning.trim()) out.questionMeaning = m.meaning.trim();
+    if ((m.audio || '').trim()) out.audio = m.audio.trim();
     if (m.explanation.trim()) out.explanation = m.explanation.trim();
     if (m.type === 'sentence_reorder') {
       out.chunks = m.chunks.map((c) => c.text.trim());
@@ -151,6 +152,7 @@
         <textarea data-f="question" rows="2">${esc(m.question)}</textarea>
         <div class="qz-row" style="margin-bottom:0">
           <div class="qz-field"><label>Meaning in English (optional)</label><input type="text" data-f="meaning" value="${esc(m.meaning)}"></div>
+          <div class="qz-field"><label>🔊 Audio: Chinese text the student's device reads aloud (optional, makes it a listening question)</label><input type="text" data-f="audio" data-no-i18n value="${esc(m.audio || '')}" maxlength="200"></div>
           <div class="qz-field" style="max-width:110px"><label>Points</label><input type="number" data-f="points" min="0.5" max="10" step="0.5" value="${esc(m.points)}"></div>
         </div>
         ${bodyHtml(m)}
@@ -174,6 +176,7 @@
     touch();
     if (f === 'question') m.question = e.target.value;
     else if (f === 'meaning') m.meaning = e.target.value;
+    else if (f === 'audio') m.audio = e.target.value;
     else if (f === 'explanation') m.explanation = e.target.value;
     else if (f === 'points') m.points = e.target.value;
     else if (f === 'otext') m.options.find((o) => o.k === e.target.closest('.qe-opt').dataset.k).text = e.target.value;

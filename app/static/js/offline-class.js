@@ -217,6 +217,15 @@
     });
   }
 
+  /* the streak pop-up (and level-up) after an offline check-in; the page reloads when it is closed */
+  function celebrate(data) {
+    if (!data || !data.streak || !window.StreakOverlay) return false;
+    try { if (window.TIER_KEY) localStorage.setItem(window.TIER_KEY, String(data.streak.tier)); } catch (e) {}
+    const cs = $('rcsModal'); if (cs) cs.classList.add('hidden');
+    return window.StreakOverlay.show({ mode: data.levelup ? 'levelup' : 'join', streak: data.streak,
+                                       link: '', onDone: () => window.location.reload() });
+  }
+
   /* ───────── student: one tap "sudah hadir" on a class card ───────── */
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.attend-btn');
@@ -226,7 +235,7 @@
     const data = await post('/schedule/' + btn.dataset.id + '/attend');
     if (data.ok) {
       toast(data.msg);
-      setTimeout(() => window.location.reload(), 700);   // streak, counts and the card all update
+      if (!celebrate(data)) setTimeout(() => window.location.reload(), 700);   // streak, counts and the card all update
     } else if (data.needs_code && window.OffClass.openCheckin) {
       btn.disabled = false; btn.textContent = label;
       window.OffClass.openCheckin(btn);
@@ -260,7 +269,7 @@
       if (data.ok) {
         msg.textContent = data.msg; msg.className = 'rc-msg ok';
         toast(data.msg);
-        setTimeout(() => window.location.reload(), 900);
+        if (!celebrate(data)) setTimeout(() => window.location.reload(), 900);
       } else {
         msg.textContent = data.msg || 'Could not check in. Try again.'; msg.className = 'rc-msg err';
         submit.disabled = false;

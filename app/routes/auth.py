@@ -164,7 +164,8 @@ def delete_account():
         return redirect(url_for("student.dashboard"))
 
     from ..models import (Attendance, Receipt, StudentFee, Schedule, ScheduleJoin,
-                          ScheduleInvite, ScheduleAbsent, BonusAccess, Quiz, QuizAssign, QuizAttempt)
+                          ScheduleInvite, ScheduleAbsent, BonusAccess, HskKnown, HskActivity,
+                          Quiz, QuizAssign, QuizAttempt)
     # Quizzes first: attempts and assignments point at both quizzes and users
     my_quiz_ids = [q.id for q in Quiz.query.filter_by(teacher_id=user.id).all()]
     if my_quiz_ids:
@@ -184,6 +185,8 @@ def delete_account():
     ScheduleJoin.query.filter_by(student_id=user.id).delete(synchronize_session=False)
     ScheduleAbsent.query.filter_by(student_id=user.id).delete(synchronize_session=False)
     BonusAccess.query.filter_by(student_id=user.id).delete(synchronize_session=False)
+    HskKnown.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    HskActivity.query.filter_by(user_id=user.id).delete(synchronize_session=False)
     ScheduleInvite.query.filter_by(student_id=user.id).delete(synchronize_session=False)
     from ..models import StreakEntry
     StreakEntry.query.filter_by(student_id=user.id).delete(synchronize_session=False)

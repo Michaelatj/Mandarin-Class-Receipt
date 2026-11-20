@@ -278,6 +278,7 @@
             <p class="page-sub">{{ (tr('student_count_one') if student_count == 1 else tr('student_count_many')).format(n=student_count) }}</p>
             </div>
             <div class="page-actions">
+              <button type="button" class="btn bgh bsm" id="badgeGalleryBtn">🎬 Preview badges</button>
               <button type="button" class="btn bgh bsm" id="addStudentBtn">+ Student without account</button>
               <button type="button" class="btn br bsm open-prepay">Record upfront payment</button>
             </div>
@@ -827,6 +828,7 @@
         <div class="badge-next-txt" id="sbmNextTxt"></div>
       </div>
       <div class="sbm-ladder" id="sbmLadder" aria-label="All badges"></div>
+      <div class="sbm-hsk" id="sbmHsk"></div>
     </div>
   </div>
 </div>
@@ -835,12 +837,15 @@
   "name": s.name(), "user": ('' if s.managed_by else s.username),
   "cur": st.current if st else 0, "best": st.best if st else 0, "att": st.attended if st else 0, "tot": st.total if st else 0,
   "tier": (st.tier.index if st else 0), "next_at": (st.next_at if st else 5), "next_name": (st.next_name if st else 'Silver'),
-  "progress": (st.progress if st else 0)
+  "progress": (st.progress if st else 0),
+  "hsk": hsk_stats.get(s.id, {}), "bonus": (bonus_grants.get(s.id, [])|list|sort)
 }|tojson }}{{ "," if not loop.last }}{% endfor %}
 }</script>
 <script id="stuTierData" type="application/json">{{ streak_tiers|tojson }}</script>
 <script src="{{ url_for('static', filename='js/badge-fx.js') }}?v=1"></script>
-<script src="{{ url_for('static', filename='js/student-badge.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/streak-overlay.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/badge-gallery.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/student-badge.js') }}?v=2"></script>
 <script src="{{ url_for('static', filename='js/bonus-access.js') }}?v=1"></script>
 <script src="{{ url_for('static', filename='js/student-delete.js') }}?v=1"></script>
 <script src="{{ url_for('static', filename='js/reset-password.js') }}?v=1"></script>

@@ -13,6 +13,35 @@
   try { known = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify([...known])); } catch (e) {} }
 
+  /* The marks are also kept on the server, so they follow the student to another phone and the
+     teacher can see the progress. localStorage stays as the fast, offline copy. */
+  const CSRF = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+  const PROGRESS_URL = '/hsk' + LEVEL + '/progress';
+  function push(items) {
+    try {
+      fetch(PROGRESS_URL, { method: 'POST', credentials: 'same-origin', keepalive: true,
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ items }) }).catch(() => {});
+    } catch (e) {}
+  }
+  (async function pullProgress() {
+    try {
+      const r = await fetch(PROGRESS_URL, { credentials: 'same-origin' });
+      if (!r.ok) return;
+      const server = new Set((await r.json()).known || []);
+      const before = [...known].sort((a, b) => a - b).join(',');
+      if (!server.size && known.size) {                         // first time: send what this device already had
+        const all = [...known];
+        for (let i = 0; i < all.length; i += 400) push(all.slice(i, i + 400).map((n) => ({ n, known: true })));
+        return;
+      }
+      known = server; save();
+      if ([...known].sort((a, b) => a - b).join(',') !== before && !sessionStorage.getItem(KEY + '_r')) {
+        sessionStorage.setItem(KEY + '_r', '1'); location.reload();   // another device changed it: show the new state once
+      }
+    } catch (e) {}
+  })();
+
   function el(tag, cls, text) {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -176,6 +205,7 @@
     kb.addEventListener('click', () => {
       if (known.has(e.n)) known.delete(e.n); else known.add(e.n);
       save(); paintKb(); updateKnownCount();
+      push([{ n: e.n, known: known.has(e.n) }]);
     });
     paintKb();
     act.appendChild(kb);
@@ -254,7 +284,7 @@
   }
   function setKnown(n, on) {
     if (on) known.add(n); else known.delete(n);
-    save(); updateKnownCount();
+    save(); updateKnownCount(); push([{ n, known: !!on }]);
     const it = document.getElementById('w' + n); if (it && it._paint) it._paint();
   }
   const flip = () => card.classList.toggle('flipped');

@@ -2708,3 +2708,26 @@ body.so-open { overflow: hidden; }
 .so-shake { animation: so-shake .7s cubic-bezier(.36,.07,.19,.97) .2s 3 both; }
 @keyframes so-shake { 10%,90% { transform: translate(-2px,1px); } 20%,80% { transform: translate(5px,-3px); } 30%,50%,70% { transform: translate(-9px,4px); } 40%,60% { transform: translate(9px,-4px); } }
 @media (prefers-reduced-motion: reduce) { .so-shake, .so-card, .so-level .so-kicker { animation: none !important; } }
+
+/* teacher: badge + animation gallery */
+.bg-box { max-width: 520px; width: calc(100% - 24px); max-height: 88vh; overflow: auto; padding: 18px; }
+.bg-head { display: flex; align-items: center; justify-content: space-between; }
+.bg-head h3 { margin: 0; font-size: 1.1rem; }
+.bg-x { border: 0; background: none; font-size: 1.1rem; color: var(--text3); cursor: pointer; padding: 6px; }
+.bg-sub { color: var(--text3); font-size: .85rem; margin: 6px 0 14px; }
+.bg-grid { display: grid; gap: 10px; }
+.bg-card { display: grid; grid-template-columns: 52px 1fr; gap: 6px 12px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--card, #fff); }
+.bg-chip { width: 48px; height: 48px; font-size: 1.4rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; }
+.bg-info b { display: block; font-size: .98rem; } .bg-info small { color: var(--text3); font-size: .78rem; }
+.bg-acts { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+.bg-acts .btn { flex: 1 1 140px; }
+.so { z-index: 4000; }
+
+/* teacher: Bonus Courses progress inside the student badge card */
+.sbm-hsk { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,.25); text-align: left; }
+.sbm-hsk-title { font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; opacity: .75; margin-bottom: 8px; }
+.sbm-hsk-row { display: grid; grid-template-columns: 54px 1fr; gap: 2px 10px; align-items: center; margin-bottom: 8px; }
+.sbm-hsk-row small { grid-column: 2; opacity: .8; font-size: .76rem; }
+.sbm-hsk-bar { height: 8px; border-radius: 99px; background: rgba(128,128,128,.25); overflow: hidden; }
+.sbm-hsk-bar i { display: block; height: 100%; background: linear-gradient(90deg, #43c98f, #ffd54a); }
+.sbm-hsk-none { margin: 0; font-size: .82rem; opacity: .7; }

@@ -272,25 +272,12 @@ def join(sid):
                              date=datetime.utcnow(), note=f"Joined: {s.title}", source='join')
 
     # streak before and after this join, so the page can show the streak pop-up (and a level-up)
-    def _streak_view():
-        try:
-            from ..services.streaks import attendance_streak
-            r = attendance_streak(student.id)
-            if not r:
-                return None
-            t = r["tier"]
-            return {"cur": r["current"], "best": r["best"], "tier": t["index"], "key": t["key"],
-                    "char": t["char"], "name": t["name"], "zh": t["zh"],
-                    "next_at": r["next_at"], "next_name": r["next_name"], "progress": r["progress"]}
-        except Exception:
-            db.session.rollback()
-            return None
-    streak_before = _streak_view()
+    streak_before = streak_view(student.id)
 
     sj = ScheduleJoin(schedule_id=sid, student_id=student.id, attendance_id=att.id if att else None)
     db.session.add(sj)
     db.session.commit()
-    streak_after = _streak_view()
+    streak_after = streak_view(student.id)
 
     msg = "Opening Meet…" if not cooldown_blocked else "Joining Meet (attendance already recorded in last 90 min)"
 
@@ -376,6 +363,31 @@ def _rollcall_state(s):
                      for u in _class_students(s)],
         "present_count": len(present),
     }
+
+
+def streak_view(student_id):
+    """The streak facts the pop-up shows (None when they cannot be worked out; never raises)."""
+    try:
+        from ..services.streaks import attendance_streak
+        r = attendance_streak(student_id)
+        if not r:
+            return None
+        t = r["tier"]
+        return {"cur": r["current"], "best": r["best"], "tier": t["index"], "key": t["key"],
+                "char": t["char"], "name": t["name"], "zh": t["zh"],
+                "next_at": r["next_at"], "next_name": r["next_name"], "progress": r["progress"]}
+    except Exception:
+        db.session.rollback()
+        return None
+
+
+def _checkin_payload(student, mark):
+    """Run mark() and return the streak before/after it, for the pop-up and level-up animation."""
+    before = streak_view(student.id)
+    mark()
+    after = streak_view(student.id)
+    return {"streak": after,
+            "levelup": bool(before and after and after["tier"] > before["tier"])}
 
 
 def _mark_present(s, student, source="rollcall", note=None):
@@ -507,8 +519,8 @@ def rollcall_checkin(sid):
         return jsonify(ok=False, msg="That code is not right. Check the code your teacher shows.")
 
     clear_attempts(key)
-    _mark_present(s, student)
-    return jsonify(ok=True, already=False, msg="You are marked present. 谢谢!")
+    extra = _checkin_payload(student, lambda: _mark_present(s, student))
+    return jsonify(ok=True, already=False, msg="You are marked present. 谢谢!", **extra)
 
 
 @schedule_bp.route("/schedule/<int:sid>/attend", methods=["POST"])
@@ -537,5 +549,5 @@ def attend(sid):
     if s.is_offline and s.rollcall_open():
         return jsonify(ok=False, needs_code=True, msg="Enter the code your teacher shows")
 
-    _mark_present(s, student, source="schedule", note=f"Submitted: {s.title}")
-    return jsonify(ok=True, already=False, msg="Attendance recorded. 谢谢!")
+    extra = _checkin_payload(student, lambda: _mark_present(s, student, source="schedule", note=f"Submitted: {s.title}"))
+    return jsonify(ok=True, already=False, msg="Attendance recorded. 谢谢!", **extra)

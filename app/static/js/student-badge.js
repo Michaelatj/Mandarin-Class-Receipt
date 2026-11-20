@@ -51,6 +51,29 @@
       cell.append(seal, nm, need);
       ladder.appendChild(cell);
     });
+    // Bonus Courses: flashcard progress for the levels this student can open
+    const hk = $('sbmHsk');
+    if (hk) {
+      hk.replaceChildren();
+      const h = document.createElement('div'); h.className = 'sbm-hsk-title'; h.textContent = 'Bonus Courses progress';
+      hk.appendChild(h);
+      const open = d.bonus || [];
+      if (!open.length) {
+        const p = document.createElement('p'); p.className = 'sbm-hsk-none'; p.textContent = 'No Bonus Course unlocked for this student.'; hk.appendChild(p);
+      }
+      open.forEach((lv) => {
+        const s = (d.hsk || {})[lv];
+        const known = s ? s.known : 0, total = s ? s.total : 0;
+        const row = document.createElement('div'); row.className = 'sbm-hsk-row';
+        const name = document.createElement('b'); name.textContent = 'HSK ' + lv;
+        const bar = document.createElement('div'); bar.className = 'sbm-hsk-bar';
+        const fill = document.createElement('i'); fill.style.width = (total ? Math.round(known / total * 100) : 0) + '%'; bar.appendChild(fill);
+        const txt = document.createElement('small');
+        txt.textContent = s ? (known + ' / ' + total + ' mastered · ' + s.reviews + ' cards answered' + (s.last ? ' · last ' + s.last : '')) : 'Not started yet';
+        row.append(name, bar, txt);
+        hk.appendChild(row);
+      });
+    }
     modal.classList.remove('hidden');
   }
 

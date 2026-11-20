@@ -510,7 +510,7 @@ function updateAllPips(data) {
 }
 
 /* ── Streak pop-up: shown after Join, before Meet opens. Returns false when it could not be shown. ── */
-const TIER_KEY = 'tier_seen_{{ user.id }}';
+const TIER_KEY = window.TIER_KEY = 'tier_seen_{{ user.id }}';
 function joinPopup(data, link) {
   if (!data.streak || !window.StreakOverlay) return false;
   try { localStorage.setItem(TIER_KEY, String(data.streak.tier)); } catch (e) {}
@@ -749,6 +749,6 @@ document.querySelectorAll('#receiptList .rc-card').forEach(attachCardClick);
     <p class="rc-hint" style="margin-top:12px">Your teacher shows a 4-digit code during the class.</p>
   </div>
 </div>
-<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=2"></script>
+<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=3"></script>
 
 {% endblock %}

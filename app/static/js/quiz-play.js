@@ -188,7 +188,7 @@
       }).join('') + '</div>';
     }
 
-    return body;
+    return (q.audio ? `<button type="button" class="btn bgh qz-btn-sm qz-audio" data-a="qaudio" data-q="${q.id}">🔊 ${T('Listen')}</button>` : '') + body;
   }
 
   function render() {
@@ -455,6 +455,11 @@
       return;
     }
     const act = el.dataset.a;
+    if (act === 'qaudio') {
+      const qa = S.quiz.questions.find((x) => x.id === el.dataset.q);
+      if (qa && qa.audio) speak(qa.audio);
+      return;
+    }
     if (S.quiz.story) {
       if (act === 'speak') { speak(S.quiz.story.text); return; }
       if (act === 'toggle-pinyin') { S.showPinyin = !S.showPinyin; renderStory(); return; }
