@@ -60,6 +60,10 @@ def validate_quiz_payload(payload):
     errors = []
     if not isinstance(payload, dict):
         return ["The quiz must be a JSON object."]
+    try:
+        clean_story(payload.get("story"))
+    except ValueError as e:
+        errors.append(str(e))
     if not isinstance(payload.get("title"), str) or not payload["title"].strip():
         errors.append('Missing a "title" (text).')
     questions = payload.get("questions")
@@ -77,6 +81,8 @@ def validate_quiz_payload(payload):
             continue
         if not isinstance(q.get("question"), str) or not q["question"].strip():
             errors.append(f'{label}: missing the "question" text.')
+        if q.get("audio") is not None and (not isinstance(q["audio"], str) or len(q["audio"]) > 200):
+            errors.append(f'{label}: "audio" must be a short text in Chinese characters (max 200).')
         qtype = q.get("type", "multiple_choice")
         if qtype == "sentence_reorder":
             chunks = q.get("chunks")
@@ -107,6 +113,26 @@ def validate_quiz_payload(payload):
         else:
             errors.append(f'{label}: unsupported type "{qtype}".')
     return errors
+
+
+MAX_STORY = 3000
+
+
+def clean_story(raw):
+    """Optional reading passage. Returns a dict or None (no story). Invalid stories raise ValueError."""
+    if raw in (None, "", {}):
+        return None
+    if not isinstance(raw, dict):
+        raise ValueError('"story" must be an object with a "text".')
+    text = raw.get("text")
+    if not isinstance(text, str) or not text.strip():
+        raise ValueError('The story needs a "text" in Chinese characters.')
+    out = {}
+    for key in ("title", "text", "pinyin", "meaning"):
+        v = raw.get(key)
+        out[key] = v.strip()[:MAX_STORY] if isinstance(v, str) else ""
+    out["title"] = out["title"][:200]
+    return out
 
 
 def _alt_orders(chunks, raw):
@@ -166,6 +192,8 @@ def normalize_quiz(payload, existing_ids=None):
             "explanation": _clean(q["explanation"], 600) if q.get("explanation") else None,
             "points": q["points"] if isinstance(q.get("points"), (int, float)) and 0 < q["points"] <= 10 else 1,
         }
+        if isinstance(q.get("audio"), str) and q["audio"].strip():
+            base["audio"] = _clean(q["audio"], 200)       # read aloud by the student's device (listen-and-choose)
         if base["type"] == "sentence_reorder":
             chunks = [_clean(c) for c in q["chunks"]]
             base["chunks"] = chunks
@@ -216,12 +244,15 @@ def to_student_view(quiz):
     hide = bool(quiz.hide_pinyin)
     fix = strip_pinyin if hide else (lambda t: t)
     questions = list(quiz.questions)
-    random.shuffle(questions)
+    if not getattr(quiz, "_has_story", False):      # a story quiz keeps the teacher's order
+        random.shuffle(questions)
 
     out = []
     for q in questions:
         item = {"id": q["id"], "type": q["type"], "question": fix(q["question"]),
                 "questionMeaning": q.get("questionMeaning")}
+        if q.get("audio"):
+            item["audio"] = q["audio"]
         if q["type"] == "sentence_reorder":
             chunks = [{"id": i, "text": fix(text)} for i, text in enumerate(q["chunks"])]
             random.shuffle(chunks)
@@ -245,6 +276,7 @@ def to_student_view(quiz):
     return {
         "id": quiz.id,
         "title": quiz.title,
+        "story": None,
         "description": quiz.description or "",
         "timeLimitSeconds": quiz.time_limit_seconds or 0,
         "questions": out,

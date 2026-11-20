@@ -19,6 +19,19 @@
 <div class="qz-notice" style="margin:0 0 14px">Finished results: {{ submitted }}. Saving re-grades them with your changes.</div>
 {% endif %}
 
+<div class="card" id="qe-story-card">
+  <div class="qz-section-title">Story (optional)</div>
+  <p class="qz-hint-text">With a story, students read it first and answer ALL questions on one page. Leave the text empty to make this a normal quiz.</p>
+  <label for="qe-story-title">Story title</label>
+  <input type="text" id="qe-story-title" data-no-i18n maxlength="200" value="{{ story.title if story else '' }}">
+  <label for="qe-story-text">Story (Chinese characters)</label>
+  <textarea id="qe-story-text" class="qz-textarea" data-no-i18n style="min-height:120px">{{ story.text if story else '' }}</textarea>
+  <label for="qe-story-pinyin">Pinyin (optional, students can show or hide it)</label>
+  <textarea id="qe-story-pinyin" class="qz-textarea" data-no-i18n style="min-height:80px">{{ story.pinyin if story else '' }}</textarea>
+  <label for="qe-story-meaning">Indonesian translation (optional)</label>
+  <textarea id="qe-story-meaning" class="qz-textarea" data-no-i18n style="min-height:80px">{{ story.meaning if story else '' }}</textarea>
+</div>
+
 <div id="qe-list"></div>
 
 <div class="card">
@@ -37,4 +50,4 @@
 <script type="application/json" id="qe-stats">{{ stats|tojson }}</script>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-edit.js') + '?v=1' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-edit.js') + '?v=2' }}"></script>{% endblock %}

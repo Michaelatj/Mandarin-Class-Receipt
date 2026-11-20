@@ -17,7 +17,7 @@ from flask import (Blueprint, render_template, redirect, url_for, request,
 from sqlalchemy import func
 
 from .. import db
-from ..models import User, Quiz, QuizAssign, QuizAttempt
+from ..models import User, Quiz, QuizAssign, QuizAttempt, QuizStory
 from ..services import quiz_logic as ql
 
 logger = logging.getLogger(__name__)
@@ -131,6 +131,20 @@ def new(user):
     return render_template("quiz/new.html", home=url_for("quiz.index"))
 
 
+def _save_story(quiz, story):
+    """Create, replace or remove the quiz's reading passage (None removes it)."""
+    row = QuizStory.query.filter_by(quiz_id=quiz.id).first()
+    if story is None:
+        if row:
+            db.session.delete(row)
+        return
+    if not row:
+        row = QuizStory(quiz_id=quiz.id, text=story["text"])
+        db.session.add(row)
+    row.title, row.text = story["title"], story["text"]
+    row.pinyin, row.meaning = story["pinyin"], story["meaning"]
+
+
 @quiz_bp.route("/quiz/api/create", methods=["POST"])
 @guard("teacher")
 def api_create(user):
@@ -146,6 +160,8 @@ def api_create(user):
     quiz = Quiz(teacher_id=user.id, title=norm["title"], description=norm["description"],
                 questions=norm["questions"])
     db.session.add(quiz)
+    db.session.flush()
+    _save_story(quiz, ql.clean_story(payload.get("story")))
     db.session.commit()
     logger.info("Quiz %s created by teacher %s (%d questions)", quiz.id, user.id, len(quiz.questions))
     return jsonify(ok=True, id=quiz.id, url=url_for("quiz.edit", quiz_id=quiz.id, new=1)), 201
@@ -200,7 +216,8 @@ def edit(user, quiz_id):
         return _not_found()
     submitted = (QuizAttempt.query.filter_by(quiz_id=quiz.id)
                  .filter(QuizAttempt.submitted_at.isnot(None)).count())
-    return render_template("quiz/edit.html", home=url_for("quiz.detail", quiz_id=quiz.id), quiz=quiz,
+    story = QuizStory.query.filter_by(quiz_id=quiz.id).first()
+    return render_template("quiz/edit.html", home=url_for("quiz.detail", quiz_id=quiz.id), quiz=quiz, story=story,
                            stats=_question_stats(quiz), submitted=submitted,
                            is_new=request.args.get("new") == "1")
 
@@ -215,13 +232,16 @@ def api_questions(user, quiz_id):
         return jsonify(ok=False, msg="That quiz is too large."), 413
     data = request.get_json(silent=True) or {}
     questions = data.get("questions")
-    errors = ql.validate_quiz_payload({"title": quiz.title, "questions": questions})
+    errors = ql.validate_quiz_payload({"title": quiz.title, "questions": questions,
+                                       "story": data.get("story")})
     if errors:
         return jsonify(ok=False, msg="This quiz has problems.", details=errors[:12]), 400
 
     norm = ql.normalize_quiz({"title": quiz.title, "questions": questions},
                              existing_ids=[q["id"] for q in quiz.questions])
     quiz.questions = norm["questions"]          # assign a new list so the JSON column is saved
+    if "story" in data:                         # the edit page sends the passage along with the questions
+        _save_story(quiz, ql.clean_story(data.get("story")))
 
     # A corrected answer key should fix everyone's score, so grade finished attempts again
     attempts = QuizAttempt.query.filter_by(quiz_id=quiz.id).filter(QuizAttempt.submitted_at.isnot(None)).all()
@@ -282,9 +302,31 @@ def api_delete(user, quiz_id):
         return _not_found()
     QuizAttempt.query.filter_by(quiz_id=quiz.id).delete(synchronize_session=False)
     QuizAssign.query.filter_by(quiz_id=quiz.id).delete(synchronize_session=False)
+    QuizStory.query.filter_by(quiz_id=quiz.id).delete(synchronize_session=False)
     db.session.delete(quiz)
     db.session.commit()
     return jsonify(ok=True, url=url_for("quiz.index"))
+
+
+@quiz_bp.route("/quiz/api/bulk_delete", methods=["POST"])
+@guard("teacher")
+def api_bulk_delete(user):
+    """Delete several of this teacher's quizzes at once (checkbox list on the quiz page)."""
+    data = request.get_json(silent=True) or {}
+    raw = data.get("ids")
+    if not isinstance(raw, list) or not raw or len(raw) > 500 \
+            or not all(isinstance(i, int) and not isinstance(i, bool) for i in raw):
+        return jsonify(ok=False, msg="Select at least one quiz."), 400
+    ids = [q.id for q in Quiz.query.filter(Quiz.teacher_id == user.id, Quiz.id.in_(raw)).all()]
+    if not ids:
+        return jsonify(ok=False, msg="Quiz not found."), 404
+    QuizAttempt.query.filter(QuizAttempt.quiz_id.in_(ids)).delete(synchronize_session=False)
+    QuizAssign.query.filter(QuizAssign.quiz_id.in_(ids)).delete(synchronize_session=False)
+    QuizStory.query.filter(QuizStory.quiz_id.in_(ids)).delete(synchronize_session=False)
+    Quiz.query.filter(Quiz.id.in_(ids)).delete(synchronize_session=False)
+    db.session.commit()
+    logger.info("Teacher %s bulk-deleted %d quizzes", user.id, len(ids))
+    return jsonify(ok=True, deleted=len(ids))
 
 
 # ---------------------------------------------------------------------
@@ -356,7 +398,14 @@ def api_start(user, quiz_id):
         attempt = QuizAttempt(quiz_id=quiz.id, student_id=user.id, answers={}, answer_order=[])
         db.session.add(attempt)
     db.session.commit()
-    return jsonify(ok=True, attemptId=attempt.id, quiz=ql.to_student_view(quiz))
+    story = QuizStory.query.filter_by(quiz_id=quiz.id).first()
+    quiz._has_story = story is not None
+    view = ql.to_student_view(quiz)
+    if story:
+        view["story"] = {"title": story.title or "", "text": story.text,
+                         "pinyin": "" if quiz.hide_pinyin else (story.pinyin or ""),
+                         "meaning": story.meaning or ""}
+    return jsonify(ok=True, attemptId=attempt.id, quiz=view)
 
 
 def _open_attempt(user, attempt_id):
@@ -423,6 +472,13 @@ def _result_payload(quiz_questions, attempt):
     }
 
 
+def _with_badge(payload, user):
+    """Add the student's current badge so the finish screen can play that tier's celebration."""
+    from .schedule import streak_view
+    payload["badge"] = streak_view(user.id)
+    return payload
+
+
 @quiz_bp.route("/quiz/api/attempt/<int:attempt_id>/submit", methods=["POST"])
 @guard("student")
 def api_submit(user, attempt_id):
@@ -435,7 +491,7 @@ def api_submit(user, attempt_id):
 
     # A double submit (timer + button) just returns the saved result
     if attempt.submitted_at:
-        return jsonify(_result_payload(quiz.questions, attempt))
+        return jsonify(_with_badge(_result_payload(quiz.questions, attempt), user))
 
     data = request.get_json(silent=True) or {}
     answers = _clean_answers(quiz.questions, data.get("answers"))
@@ -459,4 +515,4 @@ def api_submit(user, attempt_id):
     attempt.title = title["name"]
     attempt.submitted_at = datetime.utcnow()
     db.session.commit()
-    return jsonify(_result_payload(quiz.questions, attempt))
+    return jsonify(_with_badge(_result_payload(quiz.questions, attempt), user))

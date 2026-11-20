@@ -156,7 +156,43 @@
     return !!(a && (Array.isArray(a.value) ? a.value.length > 0 : a.value != null));
   }
 
+  function bodyHtml(q, a, locked, showHint) {
+    let body = '';
+    if (q.type === 'sentence_reorder') {
+      const placed = S.reorder[q.id] || [];
+      const chunkById = {};
+      q.chunks.forEach((c) => { chunkById[c.id] = c; });
+      const verdict = a.checked ? (a.correct === true ? 'right' : a.correct === false ? 'wrong' : '') : '';
+      const assembled = placed.length
+        ? placed.map((id) => `<button type="button" class="qz-chip ${locked ? 'locked' : ''}" data-no-i18n data-a="unplace" data-q="${q.id}" data-id="${id}">${esc(chunkById[id].text)}</button>`).join('')
+        : `<span class="qz-placeholder">${T('Tap the pieces below to build the sentence.')}</span>`;
+      const pool = q.chunks.filter((c) => !placed.includes(c.id))
+        .map((c) => `<button type="button" class="qz-chip ${locked ? 'locked' : ''}" data-no-i18n data-a="place" data-q="${q.id}" data-id="${c.id}">${esc(c.text)}</button>`).join('');
+      body = `
+        <div class="qz-assembled ${verdict} ${a.checking ? 'checking' : ''}" id="qz-target">${assembled}</div>
+        <div class="qz-pool">${pool}</div>
+        ${locked || !placed.length ? '' : `<button type="button" class="qz-link" data-a="reset" data-q="${q.id}">${T('Start over')}</button>`}`;
+    } else {
+      const multi = q.type === 'multiple_select';
+      body = (multi ? `<div class="qz-multi-hint">${T('Select all that apply')}</div>` : '') + '<div class="qz-options">' + q.options.map((text, idx) => {
+        const value = q.optionValues[idx];
+        const chosen = multi ? (Array.isArray(a.value) && a.value.includes(value)) : a.value === value;
+        let cls = 'qz-option';
+        if (chosen && a.checked) cls += a.correct === true ? ' right' : a.correct === false ? ' wrong' : ' selected';
+        else if (chosen) cls += a.checking ? ' selected checking' : ' selected';
+        if (locked) cls += ' locked';
+        const mark = chosen && a.checked ? (a.correct === true ? '<span class="qz-mark" style="color:var(--green)">✓</span>' : a.correct === false ? '<span class="qz-mark" style="color:var(--red)">✕</span>' : '') : '';
+        const meaning = showHint && q.optionMeanings && q.optionMeanings[idx]
+          ? `<span class="qz-option-meaning">${esc(q.optionMeanings[idx])}</span>` : '';
+        return `<div class="${cls}" data-a="opt" data-q="${q.id}" data-i="${idx}" role="button" tabindex="0"><span class="${multi ? 'qz-box' : 'qz-dot'}"></span><span data-no-i18n>${esc(text)}${meaning}</span>${mark}</div>`;
+      }).join('') + '</div>';
+    }
+
+    return (q.audio ? `<button type="button" class="btn bgh qz-btn-sm qz-audio" data-a="qaudio" data-q="${q.id}">🔊 ${T('Listen')}</button>` : '') + body;
+  }
+
   function render() {
+    if (S.quiz.story) { renderStory(); return; }
     const quiz = S.quiz, n = quiz.questions.length, q = cur();
     const a = S.answers[q.id] || {};
     const locked = !!(a.checked || a.checking);
@@ -170,36 +206,7 @@
 
     const checkedCount = quiz.questions.filter((x) => (S.answers[x.id] || {}).checked).length;
 
-    let body = '';
-    if (q.type === 'sentence_reorder') {
-      const placed = S.reorder[q.id] || [];
-      const chunkById = {};
-      q.chunks.forEach((c) => { chunkById[c.id] = c; });
-      const verdict = a.checked ? (a.correct === true ? 'right' : a.correct === false ? 'wrong' : '') : '';
-      const assembled = placed.length
-        ? placed.map((id) => `<button type="button" class="qz-chip ${locked ? 'locked' : ''}" data-no-i18n data-a="unplace" data-id="${id}">${esc(chunkById[id].text)}</button>`).join('')
-        : `<span class="qz-placeholder">${T('Tap the pieces below to build the sentence.')}</span>`;
-      const pool = q.chunks.filter((c) => !placed.includes(c.id))
-        .map((c) => `<button type="button" class="qz-chip ${locked ? 'locked' : ''}" data-no-i18n data-a="place" data-id="${c.id}">${esc(c.text)}</button>`).join('');
-      body = `
-        <div class="qz-assembled ${verdict} ${a.checking ? 'checking' : ''}" id="qz-target">${assembled}</div>
-        <div class="qz-pool">${pool}</div>
-        ${locked || !placed.length ? '' : `<button type="button" class="qz-link" data-a="reset">${T('Start over')}</button>`}`;
-    } else {
-      const multi = q.type === 'multiple_select';
-      body = (multi ? `<div class="qz-multi-hint">${T('Select all that apply')}</div>` : '') + '<div class="qz-options">' + q.options.map((text, idx) => {
-        const value = q.optionValues[idx];
-        const chosen = multi ? (Array.isArray(a.value) && a.value.includes(value)) : a.value === value;
-        let cls = 'qz-option';
-        if (chosen && a.checked) cls += a.correct === true ? ' right' : a.correct === false ? ' wrong' : ' selected';
-        else if (chosen) cls += a.checking ? ' selected checking' : ' selected';
-        if (locked) cls += ' locked';
-        const mark = chosen && a.checked ? (a.correct === true ? '<span class="qz-mark" style="color:var(--green)">✓</span>' : a.correct === false ? '<span class="qz-mark" style="color:var(--red)">✕</span>' : '') : '';
-        const meaning = showHint && q.optionMeanings && q.optionMeanings[idx]
-          ? `<span class="qz-option-meaning">${esc(q.optionMeanings[idx])}</span>` : '';
-        return `<div class="${cls}" data-a="opt" data-i="${idx}" role="button" tabindex="0"><span class="${multi ? 'qz-box' : 'qz-dot'}"></span><span data-no-i18n>${esc(text)}${meaning}</span>${mark}</div>`;
-      }).join('') + '</div>';
-    }
+    const body = bodyHtml(q, a, locked, showHint);
 
     let verdictLine = '';
     if (a.checked) {
@@ -246,6 +253,58 @@
       <div style="display:flex;justify-content:space-between;margin-top:12px">
         <button type="button" class="qz-quit" data-a="quit">${T('Quit quiz')}</button>
         <button type="button" class="qz-link" data-a="submit-now">${T('Submit now')}</button>
+      </div>`);
+  }
+
+  /* ---------------- story mode: one page, story on top, every question below ---------------- */
+  function speak(text) {
+    if (!('speechSynthesis' in window)) { showToast('This browser cannot read aloud. Try Chrome or Safari.', 'err'); return; }
+    const voices = window.speechSynthesis.getVoices() || [];
+    const zh = voices.filter((x) => /^zh/i.test(x.lang) || /chinese|mandarin|中文|普通话/i.test(x.name));
+    if (voices.length && !zh.length) { showToast('No Chinese voice on this device. Install one in Settings > Text-to-speech.', 'err'); return; }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN'; u.rate = 0.85;
+    if (zh.length) u.voice = zh.find((x) => /zh[-_]cn/i.test(x.lang)) || zh[0];
+    u.onerror = () => showToast('Could not play the sound. Check the volume and silent mode.', 'err');
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+    setTimeout(() => { try { window.speechSynthesis.speak(u); } catch (e) { showToast('Could not play the sound.', 'err'); } }, 60);
+  }
+
+  function renderStory() {
+    const quiz = S.quiz, st = quiz.story, n = quiz.questions.length;
+    const answered = quiz.questions.filter(ready).length;
+    const timer = quiz.timeLimitSeconds > 0
+      ? `<div class="qz-timer-row"><span>${T('Time left')}</span><span id="qz-timer-text"></span></div>
+         <div class="qz-timer-track"><div class="qz-timer-fill" id="qz-timer-fill"></div></div>` : '';
+    const paras = String(st.text).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join('');
+    const pinyin = st.pinyin ? String(st.pinyin).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join('') : '';
+    const meaning = st.meaning ? String(st.meaning).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join('') : '';
+    const qs = quiz.questions.map((q, idx) => {
+      const a = S.answers[q.id] || {};
+      return `<div class="qz-qblock qz-story-q ${ready(q) ? 'filled' : ''}" id="sq-${idx}">
+        <div class="qz-qhead"><span class="qz-qindex">${T('Question')} ${idx + 1} / ${n}</span></div>
+        <div class="qz-qtext" data-no-i18n>${esc(q.question)}</div>
+        ${bodyHtml(q, a, false, false)}
+      </div>`;
+    }).join('');
+    paint(`
+      ${timer}
+      <div class="qz-story-card">
+        ${st.title ? `<h2 class="qz-story-title" data-no-i18n>${esc(st.title)}</h2>` : ''}
+        <div class="qz-story-text" data-no-i18n>${paras}</div>
+        <div class="qz-story-tools">
+          <button type="button" class="btn bgh qz-btn-sm" data-a="speak">🔊 ${T('Listen')}</button>
+          ${pinyin ? `<button type="button" class="btn bgh qz-btn-sm ${S.showPinyin ? 'on' : ''}" data-a="toggle-pinyin">拼 ${T('Pinyin')}</button>` : ''}
+          ${meaning ? `<button type="button" class="btn bgh qz-btn-sm ${S.showMeaning ? 'on' : ''}" data-a="toggle-meaning">🇮🇩 ${T('Meaning')}</button>` : ''}
+        </div>
+        ${S.showPinyin && pinyin ? `<div class="qz-story-sub" data-no-i18n>${pinyin}</div>` : ''}
+        ${S.showMeaning && meaning ? `<div class="qz-story-sub qz-story-mean" data-no-i18n>${meaning}</div>` : ''}
+      </div>
+      <div class="qz-story-bar"><span>${answered} / ${n} ${T('answered')}</span><div class="qz-progress"><div style="width:${Math.round(answered / n * 100)}%"></div></div></div>
+      ${qs}
+      <div class="qz-story-submit">
+        <button type="button" class="btn qz-btn-gold" data-a="story-submit">${T('Submit answers')}</button>
+        <button type="button" class="qz-quit" data-a="quit">${T('Quit quiz')}</button>
       </div>`);
   }
 
@@ -299,6 +358,7 @@
   }
 
   function unanswered() {
+    if (S.quiz.story) return S.quiz.questions.filter((q) => !ready(q)).length;
     return S.quiz.questions.filter((q) => !(S.answers[q.id] && S.answers[q.id].checked)).length;
   }
 
@@ -313,6 +373,13 @@
     paint(`<div class="qz-start"><p>${T('Submitting your answers...')}</p></div>`);
 
     const answers = {};
+    if (S.quiz.story) {                // story mode: nothing was checked one by one, so build the answers now
+      S.order = [];
+      S.quiz.questions.forEach((q) => {
+        if (q.type === 'sentence_reorder' && ready(q)) S.answers[q.id] = { value: (S.reorder[q.id] || []).slice(), usedMeaning: false, answeredAtMs: Date.now() - S.startedAt };
+        if (ready(q)) S.order.push(q.id);
+      });
+    }
     S.quiz.questions.forEach((q) => {
       const a = S.answers[q.id];
       if (!a || a.value == null) return;
@@ -376,7 +443,11 @@
       </div>`);
     if (r.accuracyScore >= 75) {
       const seal = box.querySelector('.qz-title-reveal');
-      if (seal) { burst(seal, top); soundStreak(); }
+      if (seal) { burst(seal, top); if (!r.badge || !window.StreakOverlay) soundStreak(); }
+    }
+    // the finish celebration belongs to the student's badge: bronze is small, dragon is wild
+    if (r.badge && window.StreakOverlay && r.accuracyScore >= 60) {
+      setTimeout(() => window.StreakOverlay.burst(r.badge.key, r.accuracyScore >= 90), 350);
     }
   }
 
@@ -387,10 +458,22 @@
     if (!el || !S.quiz) {
       return;
     }
-    const q = S.quiz.questions[S.i];
+    const act = el.dataset.a;
+    if (act === 'qaudio') {
+      const qa = S.quiz.questions.find((x) => x.id === el.dataset.q);
+      if (qa && qa.audio) speak(qa.audio);
+      return;
+    }
+    if (S.quiz.story) {
+      if (act === 'speak') { speak(S.quiz.story.text); return; }
+      if (act === 'toggle-pinyin') { S.showPinyin = !S.showPinyin; renderStory(); return; }
+      if (act === 'toggle-meaning') { S.showMeaning = !S.showMeaning; renderStory(); return; }
+      if (act === 'story-submit') { submit(false); return; }
+    }
+    const q = el.dataset.q ? S.quiz.questions.find((x) => x.id === el.dataset.q) : S.quiz.questions[S.i];
+    if (!q) return;
     const a = S.answers[q.id] || {};
     const locked = !!(a.checked || a.checking);
-    const act = el.dataset.a;
 
     if (act === 'opt') {
       if (locked) return;
@@ -399,9 +482,9 @@
         const now = Array.isArray(a.value) ? a.value.slice() : [];
         const at = now.indexOf(picked);
         if (at >= 0) now.splice(at, 1); else now.push(picked);
-        S.answers[q.id] = { value: now, usedMeaning: !!S.usedHint[q.id] };
+        S.answers[q.id] = { value: now, usedMeaning: !!S.usedHint[q.id], answeredAtMs: Date.now() - S.startedAt };
       } else {
-        S.answers[q.id] = { value: picked, usedMeaning: !!S.usedHint[q.id] };
+        S.answers[q.id] = { value: picked, usedMeaning: !!S.usedHint[q.id], answeredAtMs: Date.now() - S.startedAt };
       }
       render();
     } else if (act === 'place') {

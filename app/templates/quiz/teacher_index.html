@@ -10,10 +10,19 @@
   <a class="btn qz-btn-gold qz-btn-sm" href="{{ url_for('quiz.new') }}">New quiz</a>
 </div>
 
+{% if quizzes %}
+<div class="qz-bulkbar" id="qz-bulkbar" data-url="{{ url_for('quiz.api_bulk_delete') }}">
+  <label class="qz-check"><input type="checkbox" id="qz-selall"> <span>Select all</span></label>
+  <span class="qz-bulkcount" id="qz-bulkcount">0 selected</span>
+  <button type="button" class="btn qz-btn-sm qz-btn-danger" id="qz-bulkdel" disabled>Delete selected</button>
+</div>
+{% endif %}
+
 <div class="card">
   {% if quizzes %}
     {% for q in quizzes %}
     <div class="qz-item">
+      <label class="qz-check qz-item-check"><input type="checkbox" class="qz-pick" value="{{ q.id }}" aria-label="Select quiz"></label>
       <div class="qz-item-main">
         <div class="qz-item-title" data-no-i18n>{{ q.title }}</div>
         {% if q.description %}<div class="qz-item-desc" data-no-i18n>{{ q.description }}</div>{% endif %}
@@ -37,3 +46,5 @@
   {% endif %}
 </div>
 {% endblock %}
+
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-bulk.js') + '?v=1' }}"></script>{% endblock %}

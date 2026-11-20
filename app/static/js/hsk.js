@@ -13,6 +13,35 @@
   try { known = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify([...known])); } catch (e) {} }
 
+  /* The marks are also kept on the server, so they follow the student to another phone and the
+     teacher can see the progress. localStorage stays as the fast, offline copy. */
+  const CSRF = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+  const PROGRESS_URL = '/hsk' + LEVEL + '/progress';
+  function push(items) {
+    try {
+      fetch(PROGRESS_URL, { method: 'POST', credentials: 'same-origin', keepalive: true,
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ items }) }).catch(() => {});
+    } catch (e) {}
+  }
+  (async function pullProgress() {
+    try {
+      const r = await fetch(PROGRESS_URL, { credentials: 'same-origin' });
+      if (!r.ok) return;
+      const server = new Set((await r.json()).known || []);
+      const before = [...known].sort((a, b) => a - b).join(',');
+      if (!server.size && known.size) {                         // first time: send what this device already had
+        const all = [...known];
+        for (let i = 0; i < all.length; i += 400) push(all.slice(i, i + 400).map((n) => ({ n, known: true })));
+        return;
+      }
+      known = server; save();
+      if ([...known].sort((a, b) => a - b).join(',') !== before && !sessionStorage.getItem(KEY + '_r')) {
+        sessionStorage.setItem(KEY + '_r', '1'); location.reload();   // another device changed it: show the new state once
+      }
+    } catch (e) {}
+  })();
+
   function el(tag, cls, text) {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -29,11 +58,29 @@
   }
   const norm = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  /* Phones are the tricky part: the voice list loads late, Android only speaks Chinese when a Chinese
+     voice is installed (Settings > Text-to-speech), and iPhones stay silent in silent mode. So we wait
+     for the voices, pick a Chinese one, and tell the student what is wrong when nothing plays. */
+  let voices = [];
+  function loadVoices() { try { voices = speechSynthesis.getVoices() || []; } catch (e) { voices = []; } }
+  if (canSpeak) { loadVoices(); speechSynthesis.addEventListener && speechSynthesis.addEventListener('voiceschanged', loadVoices); }
+  const say = (m) => { if (typeof showToast === 'function') showToast(m, 'err'); };
   function speak(t) {
-    if (!canSpeak) return;
+    if (!canSpeak) { say('This browser cannot read aloud. Try Chrome or Safari.'); return; }
+    loadVoices();
+    const zh = voices.filter((v) => /^zh[-_]?(cn|hans)?/i.test(v.lang) || /chinese|mandarin|中文|普通话/i.test(v.name));
+    if (voices.length && !zh.length) { say('No Chinese voice on this device. Install one: Settings > Text-to-speech (Android) or Spoken Content (iPhone).'); return; }
     const u = new SpeechSynthesisUtterance(t);
-    u.lang = 'zh-CN'; u.rate = 0.85;
-    speechSynthesis.cancel(); speechSynthesis.speak(u);
+    u.lang = 'zh-CN'; u.rate = 0.85; u.volume = 1;
+    if (zh.length) u.voice = zh.find((v) => /zh[-_]cn/i.test(v.lang)) || zh[0];
+    let started = false;
+    u.onstart = () => { started = true; };
+    u.onerror = () => say('Could not play the sound. Check the volume, and that the phone is not on silent.');
+    try { speechSynthesis.cancel(); if (speechSynthesis.paused) speechSynthesis.resume(); } catch (e) {}
+    setTimeout(() => {                                 // Chrome on Android drops a speak() sent right after cancel()
+      try { speechSynthesis.speak(u); } catch (e) { say('Could not play the sound.'); }
+      setTimeout(() => { if (!started && !speechSynthesis.speaking) say('No sound started. Turn the volume up and switch silent mode off.'); }, 2500);
+    }, 60);
   }
 
   /* ───────────── index page ───────────── */
@@ -158,6 +205,7 @@
     kb.addEventListener('click', () => {
       if (known.has(e.n)) known.delete(e.n); else known.add(e.n);
       save(); paintKb(); updateKnownCount();
+      push([{ n: e.n, known: known.has(e.n) }]);
     });
     paintKb();
     act.appendChild(kb);
@@ -236,7 +284,7 @@
   }
   function setKnown(n, on) {
     if (on) known.add(n); else known.delete(n);
-    save(); updateKnownCount();
+    save(); updateKnownCount(); push([{ n, known: !!on }]);
     const it = document.getElementById('w' + n); if (it && it._paint) it._paint();
   }
   const flip = () => card.classList.toggle('flipped');

@@ -342,6 +342,7 @@
 
 {% block page_scripts %}
 <script src="{{ url_for('static', filename='js/badge-fx.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/streak-overlay.js') }}?v=1"></script>
 <script>
 /* These two controls are not on every page. Without the null guard the missing one threw an
    error here, which stopped the rest of this script, so no button on the page worked. */
@@ -508,6 +509,28 @@ function updateAllPips(data) {
   }
 }
 
+/* ── Streak pop-up: shown after Join, before Meet opens. Returns false when it could not be shown. ── */
+const TIER_KEY = window.TIER_KEY = 'tier_seen_{{ user.id }}';
+function joinPopup(data, link) {
+  if (!data.streak || !window.StreakOverlay) return false;
+  try { localStorage.setItem(TIER_KEY, String(data.streak.tier)); } catch (e) {}
+  return window.StreakOverlay.show({ mode: data.levelup ? 'levelup' : 'join', streak: data.streak, link: link });
+}
+{% if streak %}
+/* a new badge since the last visit: celebrate it once */
+(function () {
+  try {
+    const cur = {{ badge_idx }}, prev = localStorage.getItem(TIER_KEY);
+    localStorage.setItem(TIER_KEY, String(cur));
+    if (prev !== null && cur > parseInt(prev, 10) && window.StreakOverlay) {
+      const s = {{ {'cur': streak.current, 'best': streak.best, 'tier': streak.tier.index, 'key': streak.tier.key, 'char': streak.tier.char,
+                    'name': streak.tier.name, 'zh': streak.tier.zh, 'next_at': streak.next_at, 'next_name': streak.next_name, 'progress': streak.progress}|tojson }};
+      setTimeout(() => window.StreakOverlay.show({ mode: 'levelup', streak: s }), 900);
+    }
+  } catch (e) {}
+})();
+{% endif %}
+
 /* ── Join class ── */
 document.querySelectorAll('.join-btn').forEach(btn => {
   btn.addEventListener('click', async function(){
@@ -528,7 +551,7 @@ document.querySelectorAll('.join-btn').forEach(btn => {
 
         if (data.cooldown_blocked) {
           showToast('✓ Meet opened (attendance already recorded this session)');
-          if (link) { foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.78rem;color:var(--text3);margin-left:8px">attendance recorded earlier</span>`; setTimeout(()=>window.open(link,'_blank'),300); }
+          if (link) { foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.78rem;color:var(--text3);margin-left:8px">attendance recorded earlier</span>`; if (!joinPopup(data, link)) setTimeout(()=>window.open(link,'_blank'),300); }
           else { foot.innerHTML = `<span style="font-size:.84rem;color:var(--text3);font-style:italic">✓ Already recorded this session</span>`; }
           if (badge) { badge.style.color='var(--green)'; badge.textContent='✓ Joined'; }
           return;
@@ -537,8 +560,9 @@ document.querySelectorAll('.join-btn').forEach(btn => {
         showToast('✓ Attendance recorded!');
         if (link) {
           foot.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="btn bg bsm">🎥 Open Meet</a><span style="font-size:.8rem;color:var(--text3);margin-left:8px">✓ Recorded</span>`;
-          setTimeout(() => window.open(link,'_blank'), 400);
+          if (!joinPopup(data, link)) setTimeout(() => window.open(link,'_blank'), 400);
         } else {
+          joinPopup(data, '');
           foot.innerHTML = `<span style="font-size:.84rem;color:var(--text3);font-style:italic">✓ Attendance marked</span>`;
         }
         if (badge) { badge.style.color='var(--green)'; badge.textContent='✓ Joined'; }
@@ -725,6 +749,6 @@ document.querySelectorAll('#receiptList .rc-card').forEach(attachCardClick);
     <p class="rc-hint" style="margin-top:12px">Your teacher shows a 4-digit code during the class.</p>
   </div>
 </div>
-<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=2"></script>
+<script src="{{ url_for('static', filename='js/offline-class.js') }}?v=3"></script>
 
 {% endblock %}

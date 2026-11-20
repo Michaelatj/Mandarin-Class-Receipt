@@ -103,13 +103,27 @@ def dashboard():
     streaks = compute_streaks([s.id for s in all_students])
     streak_tiers = [{"min": t[0], "key": t[1], "char": t[2], "name": t[3], "zh": t[4]} for t in TIERS]
 
+    from ..models import HskActivity, HskKnown
+    from .hsk import LEVELS as _HSK_LEVELS, _entries as _hsk_entries
+    sids = [s.id for s in all_students] or [0]
+    hsk_stats = {}                    # {student_id: {level: {known, total, reviews, last}}}
+    for lv in _HSK_LEVELS:
+        total_words = len(_hsk_entries(lv))
+        counts = dict(db.session.query(HskKnown.user_id, db.func.count(HskKnown.id))
+                      .filter(HskKnown.level == lv, HskKnown.user_id.in_(sids)).group_by(HskKnown.user_id).all())
+        for a_ in HskActivity.query.filter(HskActivity.level == lv, HskActivity.user_id.in_(sids)).all():
+            hsk_stats.setdefault(a_.user_id, {})[lv] = {"known": counts.get(a_.user_id, 0), "total": total_words,
+                "reviews": a_.reviews or 0, "last": a_.last_at.strftime("%d %b %Y") if a_.last_at else ""}
+        for uid_, c_ in counts.items():
+            hsk_stats.setdefault(uid_, {}).setdefault(lv, {"known": c_, "total": total_words, "reviews": 0, "last": ""})
+
     bonus_grants = {}
     for g_ in BonusAccess.query.filter(BonusAccess.student_id.in_([s.id for s in all_students] or [0])).all():
         bonus_grants.setdefault(g_.student_id, set()).add(g_.level)
 
     return render_template("teacher/dashboard.html",
         user=teacher, receipts=receipts, all_students=all_students, bonus_grants=bonus_grants,
-        streaks=streaks, streak_tiers=streak_tiers,
+        streaks=streaks, streak_tiers=streak_tiers, hsk_stats=hsk_stats,
         progress=progress, custom_fees=custom_fees, custom_fee_types=custom_fee_types,
         pay_first_ids=pay_first_ids, fee_row_ids=fee_row_ids, invoice_due_ids=invoice_due_ids,
         unbilled_records=unbilled_records, unpaid_cnt=unpaid_cnt, 
@@ -120,6 +134,27 @@ def dashboard():
         show_attendance_pip=show_attendance_pip, 
         show_receipts_pip=show_receipts_pip,
         quote=random_quote())
+
+@teacher_bp.route("/teacher/delete_student/<int:student_id>", methods=["POST"])
+@teacher_required
+def delete_student(student_id):
+    """Delete a student account and all of their data (attendance, receipts, streaks, quiz results).
+    Only students this teacher can see; teachers can never be deleted here."""
+    from ..services.accounts import erase_student
+    from ..services.prepaid import visible_students
+    student = visible_students(_get_teacher().id).filter(User.id == student_id).first()
+    if not student:
+        return jsonify(ok=False, msg="Student not found"), 404
+    name = student.name()
+    try:
+        erase_student(student)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        logger.exception("Could not delete student %s", student_id)
+        return jsonify(ok=False, msg="Could not delete. Nothing was changed."), 500
+    return jsonify(ok=True, msg=f"{name} was deleted.")
+
 
 @teacher_bp.route("/teacher/bonus_access", methods=["POST"])
 @teacher_required
@@ -326,7 +361,8 @@ def edit_receipt(receipt_id):
 @teacher_bp.route("/teacher/reset_student_password/<int:student_id>", methods=["POST"])
 @teacher_required
 def reset_student_password(student_id):
-    student = db.session.get(User, student_id)
+    from ..services.prepaid import visible_students
+    student = visible_students(_get_teacher().id).filter(User.id == student_id).first()
     new_pw = request.form.get("new_password", "").strip()
     if student and len(new_pw) >= 6:
         student.password = hash_password(new_pw)

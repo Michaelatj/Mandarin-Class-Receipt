@@ -29,6 +29,8 @@
       text: 'ENGLISH -> MANDARIN ("type": "multiple_choice") - The question is a specific plain English sentence or phrase, so only one option can match it. Options are Hanzi + pinyin only. Wrong options must differ in meaning or be clearly ungrammatical, never a near-synonym of the answer.' },
     { id: 'what_means', label: 'What does it mean', hint: 'A Hanzi word or phrase, the student picks the English meaning.', on: true,
       text: 'WHAT DOES IT MEAN ("type": "multiple_choice") - The question is a Hanzi term with pinyin. Options are English translations with clearly different meanings (no synonyms). Omit "optionMeanings".' },
+    { id: 'listen_choose', label: 'Listen and choose (audio)', hint: 'The device reads a word or sentence aloud, the student picks what they heard.', on: false,
+      text: 'LISTEN AND CHOOSE ("type": "multiple_choice") - Add an "audio" field to the question: ONE Chinese word or short sentence in Hanzi only (no pinyin, max 40 characters) that the student\'s device reads aloud. The "question" is a fixed instruction such as "听一听，选择你听到的。(Tīng yi tīng, xuǎnzé nǐ tīngdào de.)" or "听一听，它是什么意思？(Tīng yi tīng, tā shì shénme yìsi?)". NEVER write the audio text inside the question or the explanation. Options are Hanzi + pinyin (for what was heard) or short meanings; exactly ONE option matches the audio, and the wrong options must sound or look clearly different from it. Use only words from the TEACHING MATERIAL.' },
     { id: 'translate_id', label: 'Translate to Indonesian', hint: 'A Hanzi sentence, the student picks the Indonesian translation.', on: false,
       text: 'TRANSLATE TO INDONESIAN ("type": "multiple_choice") - The question is a full Hanzi sentence with pinyin. Options are Indonesian translations; each wrong option must change the meaning (who, what, when, negation), not just the style. Omit "optionMeanings".' },
     { id: 'conversation', label: 'Conversation reply (A to B)', hint: 'Person A says something, the student picks how B replies.', on: false,
@@ -39,7 +41,7 @@
       text: 'REORDER THE SENTENCE ("type": "sentence_reorder") - A sentence split into 4-7 chunks, listed in the correct order. Each chunk is "chunk (pinyin)". Include the "chunks" array and omit "options" and "answer". Put EVERY other natural word order with the same meaning in "altOrders" (see the rules below).' },
   ];
 
-  function buildPrompt(hsk, count, kindIds) {
+  function buildPrompt(hsk, count, kindIds, story) {
     const kinds = KINDS.filter((k) => kindIds.includes(k.id));
     const hasReorder = kinds.some((k) => k.id === 'sentence_reorder');
     const hasMulti = kinds.some((k) => k.id === 'multi_select');
@@ -90,6 +92,20 @@ SENTENCE ORDER QUESTIONS
 - Write each alternative with the chunk text copied exactly from "chunks".
 ` : '';
 
+    const storyRules = story ? `
+STORY QUIZ (all questions are about ONE reading passage)
+- Write ONE short story or dialogue of about ${Math.min(220, 60 + Number(hsk) * 25)} Chinese characters at HSK ${hsk} level, using the vocabulary of the TEACHING MATERIAL. Put it in the "story" object: "text" (Chinese characters only, no pinyin), "pinyin" (the same text in pinyin, with tone marks), "meaning" (an Indonesian translation), and a short "title".
+- Every question must be answerable ONLY by reading the story (who, where, when, what happened, why, what someone said). Do not ask questions the student can answer without the story.
+- Mix the question types below, but make most of them comprehension questions about the story. Put the question text in Chinese with pinyin in parentheses, as usual.
+- Order the questions as the story goes, from the beginning to the end.
+` : '';
+    const storyShape = story ? `  "story": {
+    "title": "Story title (Chinese + pinyin)",
+    "text": "The whole story in Chinese characters",
+    "pinyin": "The whole story in pinyin",
+    "meaning": "Indonesian translation of the whole story"
+  },
+` : '';
     return `You are a Mandarin quiz writer for a teacher. Read the TEACHING MATERIAL and return ONE valid JSON object with exactly ${count} questions at HSK ${hsk} level.
 
 WRITE NEW QUESTIONS, DO NOT COPY THE MATERIAL
@@ -104,7 +120,7 @@ EVERY QUESTION MUST HAVE ONE CLEAR ANSWER (the most important rule)
     BAD:  今天下雨，我没去___。  a. 游泳  b. 旅游  c. 跳舞  d. 打篮球   (all four make sense)
     GOOD: 我家有一___小猫。  a. 只  b. 本  c. 杯  d. 张   (only 只 fits)
 - Before you write the final JSON, check every question again. If any wrong option could be defended as correct, change the option or the sentence. If a question can only be fixed by accepting several answers, make it a select-all question instead of leaving it ambiguous.
-${multiRules}${reorderRules}
+${multiRules}${reorderRules}${storyRules}
 STRICT FORMAT RULES
 1. Return ONLY the raw JSON object. No explanations, no greeting, no markdown fences.
 2. Never use unescaped double quotes (") inside text values. Use single quotes (') or Chinese quotation marks.
@@ -120,7 +136,7 @@ JSON OUTPUT STRUCTURE
 {
   "title": "Short quiz title",
   "description": "One sentence describing this quiz",
-  "questions": [
+${storyShape}  "questions": [
 ${shapes}
   ]
 }
@@ -179,6 +195,7 @@ FINAL REMINDER: your entire reply must be the raw JSON object and nothing else. 
     const hsk = document.getElementById('qz-hsk');
     const count = document.getElementById('qz-count');
     const kindsBox = document.getElementById('qz-kinds');
+    const storyBox = document.getElementById('qz-story');
     const promptBox = document.getElementById('qz-prompt');
     const jsonBox = document.getElementById('qz-json');
     const errBox = document.getElementById('qz-errors');
@@ -194,10 +211,11 @@ FINAL REMINDER: your entire reply must be the raw JSON object and nothing else. 
     function refresh() {
       const n = Math.max(4, Math.min(30, parseInt(count.value, 10) || 10));
       const ids = [...kindsBox.querySelectorAll('input:checked')].map((i) => i.value);
-      promptBox.value = buildPrompt(hsk.value, n, ids);
+      promptBox.value = buildPrompt(hsk.value, n, ids, !!(storyBox && storyBox.checked));
     }
     [hsk, count].forEach((el) => el.addEventListener('input', refresh));
     kindsBox.addEventListener('change', refresh);
+    if (storyBox) storyBox.addEventListener('change', refresh);
     refresh();
 
     document.getElementById('qz-copy').addEventListener('click', async () => {

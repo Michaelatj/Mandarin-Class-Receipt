@@ -254,6 +254,46 @@ class Quiz(db.Model):
     created_at         = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class HskKnown(db.Model):
+    """One word a student marked as mastered in Bonus Courses (flashcards or the word list).
+    Presence of the row = mastered. Created automatically on start-up."""
+    __tablename__ = "hsk_known"
+
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
+    level      = db.Column(db.Integer, nullable=False)
+    n          = db.Column(db.Integer, nullable=False)             # the word's number inside its level
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint("user_id", "level", "n", name="uq_hsk_known"),)
+
+
+class HskActivity(db.Model):
+    """How much a student practised one Bonus Courses level: card answers and the last time."""
+    __tablename__ = "hsk_activity"
+
+    id      = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
+    level   = db.Column(db.Integer, nullable=False)
+    reviews = db.Column(db.Integer, default=0)
+    last_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint("user_id", "level", name="uq_hsk_activity"),)
+
+
+class QuizStory(db.Model):
+    """Optional reading passage for a quiz. When it exists the quiz is shown on ONE page: the story
+    on top and every question below it. Separate table so no column migration is needed."""
+    __tablename__ = "quiz_story"
+
+    id      = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey("quiz.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+    title   = db.Column(db.String(200), default="")
+    text    = db.Column(db.Text, nullable=False)          # the story in hanzi (with pinyin in brackets if the teacher wants)
+    pinyin  = db.Column(db.Text, default="")
+    meaning = db.Column(db.Text, default="")              # Indonesian translation, shown on request
+
+
 class QuizAssign(db.Model):
     """A quiz given to one specific student."""
     __tablename__ = "quiz_assign"
