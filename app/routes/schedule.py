@@ -271,9 +271,26 @@ def join(sid):
         att = add_attendance(student_id=student.id, teacher_id=s.teacher_id,
                              date=datetime.utcnow(), note=f"Joined: {s.title}", source='join')
 
+    # streak before and after this join, so the page can show the streak pop-up (and a level-up)
+    def _streak_view():
+        try:
+            from ..services.streaks import attendance_streak
+            r = attendance_streak(student.id)
+            if not r:
+                return None
+            t = r["tier"]
+            return {"cur": r["current"], "best": r["best"], "tier": t["index"], "key": t["key"],
+                    "char": t["char"], "name": t["name"], "zh": t["zh"],
+                    "next_at": r["next_at"], "next_name": r["next_name"], "progress": r["progress"]}
+        except Exception:
+            db.session.rollback()
+            return None
+    streak_before = _streak_view()
+
     sj = ScheduleJoin(schedule_id=sid, student_id=student.id, attendance_id=att.id if att else None)
     db.session.add(sj)
     db.session.commit()
+    streak_after = _streak_view()
 
     msg = "Opening Meet…" if not cooldown_blocked else "Joining Meet (attendance already recorded in last 90 min)"
 
@@ -282,7 +299,9 @@ def join(sid):
         unbilled_cnt   = _Att.query.filter_by(student_id=student.id, billed=False).count()
         total_sessions = _Att.query.filter_by(student_id=student.id).count()
         return jsonify(ok=True, already=False, meet_link=s.meet_link, msg=msg,
-                       cooldown_blocked=cooldown_blocked, cycle_count=unbilled_cnt, total_sessions=total_sessions)
+                       cooldown_blocked=cooldown_blocked, cycle_count=unbilled_cnt, total_sessions=total_sessions,
+                       streak=streak_after,
+                       levelup=bool(streak_before and streak_after and streak_after["tier"] > streak_before["tier"]))
     if s.meet_link:
         return redirect(s.meet_link)
     flash("Attendance marked!", "ok")

@@ -29,11 +29,29 @@
   }
   const norm = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  /* Phones are the tricky part: the voice list loads late, Android only speaks Chinese when a Chinese
+     voice is installed (Settings > Text-to-speech), and iPhones stay silent in silent mode. So we wait
+     for the voices, pick a Chinese one, and tell the student what is wrong when nothing plays. */
+  let voices = [];
+  function loadVoices() { try { voices = speechSynthesis.getVoices() || []; } catch (e) { voices = []; } }
+  if (canSpeak) { loadVoices(); speechSynthesis.addEventListener && speechSynthesis.addEventListener('voiceschanged', loadVoices); }
+  const say = (m) => { if (typeof showToast === 'function') showToast(m, 'err'); };
   function speak(t) {
-    if (!canSpeak) return;
+    if (!canSpeak) { say('This browser cannot read aloud. Try Chrome or Safari.'); return; }
+    loadVoices();
+    const zh = voices.filter((v) => /^zh[-_]?(cn|hans)?/i.test(v.lang) || /chinese|mandarin|中文|普通话/i.test(v.name));
+    if (voices.length && !zh.length) { say('No Chinese voice on this device. Install one: Settings > Text-to-speech (Android) or Spoken Content (iPhone).'); return; }
     const u = new SpeechSynthesisUtterance(t);
-    u.lang = 'zh-CN'; u.rate = 0.85;
-    speechSynthesis.cancel(); speechSynthesis.speak(u);
+    u.lang = 'zh-CN'; u.rate = 0.85; u.volume = 1;
+    if (zh.length) u.voice = zh.find((v) => /zh[-_]cn/i.test(v.lang)) || zh[0];
+    let started = false;
+    u.onstart = () => { started = true; };
+    u.onerror = () => say('Could not play the sound. Check the volume, and that the phone is not on silent.');
+    try { speechSynthesis.cancel(); if (speechSynthesis.paused) speechSynthesis.resume(); } catch (e) {}
+    setTimeout(() => {                                 // Chrome on Android drops a speak() sent right after cancel()
+      try { speechSynthesis.speak(u); } catch (e) { say('Could not play the sound.'); }
+      setTimeout(() => { if (!started && !speechSynthesis.speaking) say('No sound started. Turn the volume up and switch silent mode off.'); }, 2500);
+    }, 60);
   }
 
   /* ───────────── index page ───────────── */

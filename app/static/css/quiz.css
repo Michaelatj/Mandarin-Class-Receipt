@@ -337,3 +337,29 @@
   .fc-mid .btn { flex: 1; }
   .fc-actions .btn:not(.fc-mid .btn) { flex: 1; }
 }
+
+/* bulk select + delete (teacher quiz list) */
+.qz-bulkbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 10px; padding: 10px 14px; background: var(--card, #fff); border: 1px solid var(--border); border-radius: 12px; }
+.qz-check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: .85rem; color: var(--text2); margin: 0; }
+.qz-check input { width: 18px; height: 18px; accent-color: var(--gold); cursor: pointer; margin: 0; }
+.qz-item-check { flex: 0 0 auto; padding: 4px; }
+.qz-item .qz-item-main { flex: 1 1 auto; }
+.qz-item.picked { background: rgba(184,134,11,.07); border-radius: 10px; }
+.qz-bulkcount { font-size: .82rem; color: var(--text3); margin-right: auto; }
+.qz-btn-danger { background: var(--red, #c0392b); color: #fff; border: 0; }
+.qz-btn-danger:disabled { opacity: .4; cursor: not-allowed; }
+
+/* story quiz: one page */
+.qz-story-card { background: var(--card, #fff); border: 1px solid var(--border); border-left: 4px solid var(--gold); border-radius: 14px; padding: 18px 20px; margin: 0 0 14px; }
+.qz-story-title { font-size: 1.15rem; margin: 0 0 10px; color: var(--text); }
+.qz-story-text p { font-size: 1.25rem; line-height: 2; margin: 0 0 8px; color: var(--text); overflow-wrap: anywhere; }
+.qz-story-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.qz-story-tools .on { background: rgba(184,134,11,.15); border-color: var(--gold); }
+.qz-story-sub { margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(0,0,0,.04); color: var(--text2); font-size: .95rem; line-height: 1.7; }
+.qz-story-sub p { margin: 0 0 6px; }
+.qz-story-mean { background: rgba(184,134,11,.08); }
+.qz-story-bar { display: flex; align-items: center; gap: 12px; padding: 8px 0; background: var(--bg, #fff); font-size: .82rem; color: var(--text3); }
+.qz-story-bar .qz-progress { flex: 1; margin: 0; }
+.qz-story-q { margin-bottom: 14px; }
+.qz-story-q.filled { border-color: rgba(184,134,11,.5); }
+.qz-story-submit { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 40px; }

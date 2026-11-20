@@ -26,6 +26,10 @@
       <input type="number" id="qz-count" min="4" max="30" value="10">
     </div>
   </div>
+  <label class="qz-kind" style="margin:4px 0 12px">
+    <input type="checkbox" id="qz-story">
+    <span>Story quiz<small>The chatbot writes a short story and ALL questions about it show on one page under the story (no "next" button).</small></span>
+  </label>
   <label>Question types</label>
   <div class="qz-kinds" id="qz-kinds" style="margin-top:6px"></div>
 
@@ -47,4 +51,4 @@
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-teacher.js') + '?v=1' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-teacher.js') + '?v=2' }}"></script>{% endblock %}

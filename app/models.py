@@ -254,6 +254,19 @@ class Quiz(db.Model):
     created_at         = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class QuizStory(db.Model):
+    """Optional reading passage for a quiz. When it exists the quiz is shown on ONE page: the story
+    on top and every question below it. Separate table so no column migration is needed."""
+    __tablename__ = "quiz_story"
+
+    id      = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey("quiz.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+    title   = db.Column(db.String(200), default="")
+    text    = db.Column(db.Text, nullable=False)          # the story in hanzi (with pinyin in brackets if the teacher wants)
+    pinyin  = db.Column(db.Text, default="")
+    meaning = db.Column(db.Text, default="")              # Indonesian translation, shown on request
+
+
 class QuizAssign(db.Model):
     """A quiz given to one specific student."""
     __tablename__ = "quiz_assign"

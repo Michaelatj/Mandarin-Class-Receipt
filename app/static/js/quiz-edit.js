@@ -266,6 +266,11 @@
 
   /* ---------------- save ---------------- */
   let saving = false;
+  function readStory() {
+    const v = (id) => (document.getElementById(id) || { value: '' }).value.trim();
+    if (!v('qe-story-text')) return null;                 // empty text = no story
+    return { title: v('qe-story-title'), text: v('qe-story-text'), pinyin: v('qe-story-pinyin'), meaning: v('qe-story-meaning') };
+  }
   async function save() {
     if (saving) return;
     errBox.hidden = true;
@@ -289,7 +294,7 @@
       const res = await fetch(root.dataset.saveUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': _CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-        body: JSON.stringify({ questions: Q.map(toServer) }),
+        body: JSON.stringify({ questions: Q.map(toServer), story: readStory() }),
       });
       let data = {};
       try { data = await res.json(); } catch (err) { /* not JSON */ }
