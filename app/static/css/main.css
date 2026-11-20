@@ -2731,3 +2731,5 @@ body.so-open { overflow: hidden; }
 .sbm-hsk-bar { height: 8px; border-radius: 99px; background: rgba(128,128,128,.25); overflow: hidden; }
 .sbm-hsk-bar i { display: block; height: 100%; background: linear-gradient(90deg, #43c98f, #ffd54a); }
 .sbm-hsk-none { margin: 0; font-size: .82rem; opacity: .7; }
+
+.so-solo { position: fixed; inset: 0; z-index: 3500; pointer-events: none; overflow: hidden; }

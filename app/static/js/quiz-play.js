@@ -443,7 +443,11 @@
       </div>`);
     if (r.accuracyScore >= 75) {
       const seal = box.querySelector('.qz-title-reveal');
-      if (seal) { burst(seal, top); soundStreak(); }
+      if (seal) { burst(seal, top); if (!r.badge || !window.StreakOverlay) soundStreak(); }
+    }
+    // the finish celebration belongs to the student's badge: bronze is small, dragon is wild
+    if (r.badge && window.StreakOverlay && r.accuracyScore >= 60) {
+      setTimeout(() => window.StreakOverlay.burst(r.badge.key, r.accuracyScore >= 90), 350);
     }
   }
 

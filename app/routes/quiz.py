@@ -472,6 +472,13 @@ def _result_payload(quiz_questions, attempt):
     }
 
 
+def _with_badge(payload, user):
+    """Add the student's current badge so the finish screen can play that tier's celebration."""
+    from .schedule import streak_view
+    payload["badge"] = streak_view(user.id)
+    return payload
+
+
 @quiz_bp.route("/quiz/api/attempt/<int:attempt_id>/submit", methods=["POST"])
 @guard("student")
 def api_submit(user, attempt_id):
@@ -484,7 +491,7 @@ def api_submit(user, attempt_id):
 
     # A double submit (timer + button) just returns the saved result
     if attempt.submitted_at:
-        return jsonify(_result_payload(quiz.questions, attempt))
+        return jsonify(_with_badge(_result_payload(quiz.questions, attempt), user))
 
     data = request.get_json(silent=True) or {}
     answers = _clean_answers(quiz.questions, data.get("answers"))
@@ -508,4 +515,4 @@ def api_submit(user, attempt_id):
     attempt.title = title["name"]
     attempt.submitted_at = datetime.utcnow()
     db.session.commit()
-    return jsonify(_result_payload(quiz.questions, attempt))
+    return jsonify(_with_badge(_result_payload(quiz.questions, attempt), user))

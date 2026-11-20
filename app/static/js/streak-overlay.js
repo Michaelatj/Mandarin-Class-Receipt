@@ -160,6 +160,19 @@
     return true;
   }
 
+  /* Just the celebration, no card: for the end of a quiz or a game. big = a great result. */
+  function burst(key, big) {
+    if (reduce()) return;
+    key = TIERS.includes(key) ? key : 'bronze';
+    const solo = document.createElement('div');
+    solo.className = 'so-solo tier-' + key;
+    solo.innerHTML = '<div class="so-fx" aria-hidden="true"></div>';
+    document.body.appendChild(solo);
+    SHOW[key](solo.firstChild, !!big);
+    (SOUND[key] || SOUND.bronze)();
+    setTimeout(() => solo.remove(), 5200);
+  }
+
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && current && !current.querySelector('[data-act="go"]')) close(); });
-  window.StreakOverlay = { show, close };
+  window.StreakOverlay = { show, close, burst };
 })();
