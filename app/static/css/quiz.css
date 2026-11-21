@@ -339,7 +339,7 @@
 }
 
 /* bulk select + delete (teacher quiz list) */
-.qz-bulkbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 10px; padding: 10px 14px; background: var(--card, #fff); border: 1px solid var(--border); border-radius: 12px; }
+.qz-bulkbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 10px; padding: 10px 14px; background: var(--surface, #fff); border: 1px solid var(--border); border-radius: 12px; }
 .qz-check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: .85rem; color: var(--text2); margin: 0; }
 .qz-check input { width: 18px; height: 18px; accent-color: var(--gold); cursor: pointer; margin: 0; }
 .qz-item-check { flex: 0 0 auto; padding: 4px; }
@@ -350,7 +350,7 @@
 .qz-btn-danger:disabled { opacity: .4; cursor: not-allowed; }
 
 /* story quiz: one page */
-.qz-story-card { background: var(--card, #fff); border: 1px solid var(--border); border-left: 4px solid var(--gold); border-radius: 14px; padding: 18px 20px; margin: 0 0 14px; }
+.qz-story-card { background: var(--surface, #fff); border: 1px solid var(--border); border-left: 4px solid var(--gold); border-radius: 14px; padding: 18px 20px; margin: 0 0 14px; }
 .qz-story-title { font-size: 1.15rem; margin: 0 0 10px; color: var(--text); }
 .qz-story-text p { font-size: 1.25rem; line-height: 2; margin: 0 0 8px; color: var(--text); overflow-wrap: anywhere; }
 .qz-story-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
