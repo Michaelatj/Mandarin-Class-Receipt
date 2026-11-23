@@ -5,6 +5,7 @@
 {% block head_extra %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=5' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=4' }}">
 {% endblock %}
 
 {% block qz_body %}
@@ -28,6 +29,12 @@
     </label>
     <div id="hk-results" class="hk-results" hidden></div>
   </div>
+
+  <div class="hk-cta-row">
+    <a class="hk-games-cta" href="{{ url_for('hsk.flashcards', level=level) }}"><span>🃏</span><b>Flashcards</b><small>Open the flashcard page and practise all {{ total }} words.</small></a>
+    <a class="hk-games-cta" href="{{ url_for('hsk.games', level=level) }}"><span>🎮</span><b>Games</b><small>Draw the lines · Fill the blank · Riddle · Memory · Speed · Ladder</small></a>
+  </div>
+
 
   <div class="hk-overall" id="hk-overall" data-all="{{ all_ns|join(',') }}">
     <span id="hk-overall-text">Mastered 0 of {{ total }} words</span>
@@ -54,4 +61,4 @@
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=5' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=8' }}"></script>{% endblock %}

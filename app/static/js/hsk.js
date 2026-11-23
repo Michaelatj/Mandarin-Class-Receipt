@@ -131,21 +131,25 @@
     return;
   }
 
+  /* ───────────── flashcard page (all words) ───────────── */
+  if (root.dataset.page === 'flash') { initFlashcards(JSON.parse($('hsk-data').textContent), () => {}, true); return; }
+
   /* ───────────── theme page ───────────── */
   const entries = JSON.parse($('hsk-data').textContent);
   const updateKnownCount = () => { $('hk-known-count').textContent = entries.filter((e) => known.has(e.n)).length; };
 
   /* tabs */
-  const tabList = $('tab-list'), tabPrac = $('tab-practice');
+  const tabList = $('tab-list'), tabPrac = $('tab-practice');   // the All words page has no tabs (flashcards live on the level page)
   function showTab(which) {
     const list = which === 'list';
     $('view-list').hidden = !list; $('view-practice').hidden = list;
+    if (!tabList || !tabPrac) return;
     tabList.classList.toggle('on', list); tabPrac.classList.toggle('on', !list);
     tabList.setAttribute('aria-selected', list); tabPrac.setAttribute('aria-selected', !list);
     if (!list) startPractice();
   }
-  tabList.addEventListener('click', () => showTab('list'));
-  tabPrac.addEventListener('click', () => showTab('practice'));
+  if (tabList) tabList.addEventListener('click', () => showTab('list'));
+  if (tabPrac) tabPrac.addEventListener('click', () => showTab('practice'));
 
   /* word list */
   const listEl = $('hk-list');
@@ -238,77 +242,84 @@
   onlyUnknown.addEventListener('change', applyFilter);
   updateKnownCount();
 
+  if (location.hash === '#flashcards' && tabPrac) showTab('practice');     // the "Flashcards" button on the level page
   if (location.hash && /^#w\d+$/.test(location.hash)) {      // open the word a search result pointed at
     const t = document.querySelector(location.hash + ' .hk-row');
     if (t) { t.click(); t.scrollIntoView({ block: 'center' }); }
   }
 
-  /* flashcards */
+  /* flashcards: used by the level page (all words) and by each theme page */
+  function initFlashcards(entries, updateKnownCount, autostart) {
+    if (!$('fc-card')) return;                 // this page has no flashcards
   const card = $('fc-card');
-  let deck = [], pos = 0, gotIt = 0, mode = 'zh', onlyNew = true;
+    let deck = [], pos = 0, gotIt = 0, mode = 'zh', onlyNew = true;
+  
+    function buildDeck() { return onlyNew ? entries.filter((e) => !known.has(e.n)) : entries.slice(); }
+    function showDeck(on) { $('fc').hidden = !on; }
+    function startPractice(shuffle) {
+      deck = buildDeck();
+      if (shuffle) for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+      pos = 0; gotIt = 0;
+      $('fc-done').hidden = true;
+      const none = deck.length === 0;
+      $('fc-none').hidden = !none; showDeck(!none);
+      if (!none) render();
+    }
+    function render() {
+      const e = deck[pos], zhMode = mode === 'zh';
+      card.classList.remove('flipped');
+      const f = $('fc-front'), b = $('fc-back');
+      f.textContent = zhMode ? e.hanzi : e.arti;
+      f.classList.toggle('is-zh', zhMode); if (zhMode) f.lang = 'zh'; else f.removeAttribute('lang');
+      b.textContent = zhMode ? e.arti : e.hanzi;
+      b.classList.toggle('is-zh', !zhMode); if (!zhMode) b.lang = 'zh'; else b.removeAttribute('lang');
+      $('fc-back-sub').textContent = e.pinyin;
+      $('fc-sen-zh').textContent = e.sentence[0];
+      $('fc-sen-py').textContent = e.sentence[1];
+      $('fc-sen-id').textContent = e.sentence[2];
+      $('fc-count').textContent = 'Card ' + (pos + 1) + ' of ' + deck.length;
+      $('fc-known').textContent = known.size ? entries.filter((x) => known.has(x.n)).length + ' mastered' : '';
+      $('fc-prog').style.width = ((pos + 1) / deck.length * 100) + '%';
+      $('fc-prev').disabled = pos === 0;
+      $('fc-speak').hidden = !canSpeak;
+    }
+    function advance() { if (pos + 1 >= deck.length) finish(); else { pos++; render(); } }
+    function finish() {
+      showDeck(false); $('fc-done').hidden = false;
+      $('fc-done-title').textContent = 'Nice work!';
+      $('fc-done-sub').textContent = 'You marked ' + gotIt + ' of ' + deck.length + ' cards as mastered.';
+    }
+    function setKnown(n, on) {
+      if (on) known.add(n); else known.delete(n);
+      save(); updateKnownCount(); push([{ n, known: !!on }]);
+      const it = document.getElementById('w' + n); if (it && it._paint) it._paint();
+    }
+    const flip = () => card.classList.toggle('flipped');
+    card.addEventListener('click', flip);
+    card.addEventListener('keydown', (ev) => {
+      if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); flip(); }
+      else if (ev.key === 'ArrowRight') advance();
+      else if (ev.key === 'ArrowLeft' && pos > 0) { pos--; render(); }
+    });
+    $('fc-next').addEventListener('click', advance);
+    $('fc-prev').addEventListener('click', () => { if (pos > 0) { pos--; render(); } });
+    $('fc-know').addEventListener('click', () => { setKnown(deck[pos].n, true); gotIt++; advance(); });
+    $('fc-again').addEventListener('click', () => { setKnown(deck[pos].n, false); advance(); });
+    $('fc-speak').addEventListener('click', (ev) => { ev.stopPropagation(); speak(deck[pos].hanzi); });
+    $('fc-redo').addEventListener('click', () => startPractice());
+    $('hk-shuffle').addEventListener('click', () => startPractice(true));
+    document.querySelectorAll('.hk-seg-btn').forEach((b) => b.addEventListener('click', () => {
+      mode = b.dataset.mode;
+      document.querySelectorAll('.hk-seg-btn').forEach((x) => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+      if (deck.length && !$('fc').hidden) render();
+    }));
+    const chip = $('hk-practice-unknown');
+    chip.addEventListener('click', () => {
+      onlyNew = !onlyNew; chip.classList.toggle('on', onlyNew); chip.setAttribute('aria-pressed', onlyNew);
+      startPractice();
+    });
+    if (autostart) startPractice();
+  }
 
-  function buildDeck() { return onlyNew ? entries.filter((e) => !known.has(e.n)) : entries.slice(); }
-  function showDeck(on) { $('fc').hidden = !on; }
-  function startPractice(shuffle) {
-    deck = buildDeck();
-    if (shuffle) for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
-    pos = 0; gotIt = 0;
-    $('fc-done').hidden = true;
-    const none = deck.length === 0;
-    $('fc-none').hidden = !none; showDeck(!none);
-    if (!none) render();
-  }
-  function render() {
-    const e = deck[pos], zhMode = mode === 'zh';
-    card.classList.remove('flipped');
-    const f = $('fc-front'), b = $('fc-back');
-    f.textContent = zhMode ? e.hanzi : e.arti;
-    f.classList.toggle('is-zh', zhMode); if (zhMode) f.lang = 'zh'; else f.removeAttribute('lang');
-    b.textContent = zhMode ? e.arti : e.hanzi;
-    b.classList.toggle('is-zh', !zhMode); if (!zhMode) b.lang = 'zh'; else b.removeAttribute('lang');
-    $('fc-back-sub').textContent = e.pinyin;
-    $('fc-sen-zh').textContent = e.sentence[0];
-    $('fc-sen-py').textContent = e.sentence[1];
-    $('fc-sen-id').textContent = e.sentence[2];
-    $('fc-count').textContent = 'Card ' + (pos + 1) + ' of ' + deck.length;
-    $('fc-known').textContent = known.size ? entries.filter((x) => known.has(x.n)).length + ' mastered' : '';
-    $('fc-prog').style.width = ((pos + 1) / deck.length * 100) + '%';
-    $('fc-prev').disabled = pos === 0;
-    $('fc-speak').hidden = !canSpeak;
-  }
-  function advance() { if (pos + 1 >= deck.length) finish(); else { pos++; render(); } }
-  function finish() {
-    showDeck(false); $('fc-done').hidden = false;
-    $('fc-done-title').textContent = 'Nice work!';
-    $('fc-done-sub').textContent = 'You marked ' + gotIt + ' of ' + deck.length + ' cards as mastered.';
-  }
-  function setKnown(n, on) {
-    if (on) known.add(n); else known.delete(n);
-    save(); updateKnownCount(); push([{ n, known: !!on }]);
-    const it = document.getElementById('w' + n); if (it && it._paint) it._paint();
-  }
-  const flip = () => card.classList.toggle('flipped');
-  card.addEventListener('click', flip);
-  card.addEventListener('keydown', (ev) => {
-    if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); flip(); }
-    else if (ev.key === 'ArrowRight') advance();
-    else if (ev.key === 'ArrowLeft' && pos > 0) { pos--; render(); }
-  });
-  $('fc-next').addEventListener('click', advance);
-  $('fc-prev').addEventListener('click', () => { if (pos > 0) { pos--; render(); } });
-  $('fc-know').addEventListener('click', () => { setKnown(deck[pos].n, true); gotIt++; advance(); });
-  $('fc-again').addEventListener('click', () => { setKnown(deck[pos].n, false); advance(); });
-  $('fc-speak').addEventListener('click', (ev) => { ev.stopPropagation(); speak(deck[pos].hanzi); });
-  $('fc-redo').addEventListener('click', () => startPractice());
-  $('hk-shuffle').addEventListener('click', () => startPractice(true));
-  document.querySelectorAll('.hk-seg-btn').forEach((b) => b.addEventListener('click', () => {
-    mode = b.dataset.mode;
-    document.querySelectorAll('.hk-seg-btn').forEach((x) => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
-    if (deck.length && !$('fc').hidden) render();
-  }));
-  const chip = $('hk-practice-unknown');
-  chip.addEventListener('click', () => {
-    onlyNew = !onlyNew; chip.classList.toggle('on', onlyNew); chip.setAttribute('aria-pressed', onlyNew);
-    startPractice();
-  });
+  initFlashcards(entries, updateKnownCount, false);
 })();

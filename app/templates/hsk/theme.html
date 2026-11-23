@@ -18,10 +18,12 @@
     </div>
   </div>
 
+  {% if theme_id != 'semua' %}
   <div class="hk-tabs" role="tablist">
     <button type="button" class="hk-tab on" id="tab-list" role="tab" aria-selected="true"><svg class="hk-i"><use href="#i-list"/></svg>Word list</button>
     <button type="button" class="hk-tab" id="tab-practice" role="tab" aria-selected="false"><svg class="hk-i"><use href="#i-cards"/></svg>Flashcards</button>
   </div>
+  {% endif %}
 
   <section id="view-list">
     <div class="hk-tools">
@@ -35,6 +37,7 @@
     <div id="hk-empty" class="hk-empty" hidden>No matching words</div>
   </section>
 
+  {% if theme_id != 'semua' %}
   <section id="view-practice" hidden>
     <div class="hk-pbar">
       <div class="hk-seg" role="group" aria-label="Card mode">
@@ -91,8 +94,9 @@
       <p class="hk-panel-sub">Turn off “Not mastered only” to review all the cards.</p>
     </div>
   </section>
+  {% endif %}
 </div>
 <script type="application/json" id="hsk-data">{{ items|tojson }}</script>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=5' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=8' }}"></script>{% endblock %}

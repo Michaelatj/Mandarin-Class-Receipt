@@ -39,13 +39,16 @@
       text: 'SELECT ALL THAT APPLY ("type": "multiple_select") - Give 5 or 6 options of which 2 or 3 are correct, and put every correct option in "answers". Use it for "which sentences are correct" or "which words can complete this sentence", where each correct option is clearly right and each wrong option is clearly wrong. The question text must say "Choose all correct answers (选出所有正确的答案)".' },
     { id: 'sentence_reorder', label: 'Reorder the sentence', hint: 'The student taps shuffled word chunks into the right order.', on: false,
       text: 'REORDER THE SENTENCE ("type": "sentence_reorder") - A sentence split into 4-7 chunks, listed in the correct order. Each chunk is "chunk (pinyin)". Include the "chunks" array and omit "options" and "answer". Put EVERY other natural word order with the same meaning in "altOrders" (see the rules below).' },
+    { id: 'type_answer', label: 'Type the answer (pinyin)', hint: 'The student types the answer instead of picking it. Good for pinyin practice.', on: false,
+      text: 'TYPE THE ANSWER ("type": "type_answer") - Ask for a short answer the student types, for example "Write the pinyin of 谢谢 (xièxie)?" or "How do you say \'thank you\' in Chinese? Type the pinyin". Omit "options" and "answer". Put every accepted answer in "answers": the pinyin with tone marks AND the same pinyin without tones (for example ["xièxie", "xiexie"]), because phones make tone marks hard to type. Only ask for answers that have one clear spelling.' },
   ];
 
   function buildPrompt(hsk, count, kindIds, story) {
     const kinds = KINDS.filter((k) => kindIds.includes(k.id));
     const hasReorder = kinds.some((k) => k.id === 'sentence_reorder');
     const hasMulti = kinds.some((k) => k.id === 'multi_select');
-    const hasChoice = kinds.some((k) => !['sentence_reorder', 'multi_select'].includes(k.id)) || (!hasReorder && !hasMulti);
+    const hasTyped = kinds.some((k) => k.id === 'type_answer');
+    const hasChoice = kinds.some((k) => !['sentence_reorder', 'multi_select', 'type_answer'].includes(k.id)) || (!hasReorder && !hasMulti && !hasTyped);
     const kindsList = kinds.map((k) => k.label).join(', ') || 'a mix of question styles';
     const kindInstructions = kinds.map((k, i) => `${i + 1}. ${k.text}`).join('\n');
 
@@ -75,7 +78,14 @@
       "altOrders": [["昨天 (zuótiān)", "我 (wǒ)", "去了 (qù le)", "商店 (shāngdiàn)"]],
       "explanation": "Brief explanation."
     }`;
-    const shapes = [hasChoice ? choiceShape : '', hasMulti ? multiShape : '', hasReorder ? reorderShape : ''].filter(Boolean).join(',\n');
+    const typedShape = `    {
+      "type": "type_answer",
+      "question": "Write the pinyin of 谢谢",
+      "questionMeaning": "English meaning",
+      "answers": ["xièxie", "xiexie"],
+      "explanation": "Brief explanation."
+    }`;
+    const shapes = [hasChoice ? choiceShape : '', hasMulti ? multiShape : '', hasReorder ? reorderShape : '', hasTyped ? typedShape : ''].filter(Boolean).join(',\n');
 
     const multiRules = hasMulti ? `
 WHEN SEVERAL ANSWERS ARE CORRECT

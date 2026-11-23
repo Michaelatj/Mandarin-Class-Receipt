@@ -402,6 +402,7 @@ EXTRA.update({
     "Gold": "黄金",
     "Jade": "翡翠",
     "Dragon": "神龙",
+    "Diamond": "钻石",
     "Your badge": "你的徽章",
     "Tap the badge": "点一点徽章",
     "You got a new badge!": "你获得了新徽章！",

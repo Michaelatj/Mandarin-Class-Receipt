@@ -5,7 +5,8 @@
    Every tier has its own show, and the higher the tier the bigger it gets:
      bronze  stamp + copper dust          silver  gleam + twinkling stars
      gold    coin spin + confetti storm   jade    bloom + rising orbs + shock rings
-     dragon  screen shake + fire + dragon + lightning flashes
+     diamond light beams + falling crystals + white flash
+     dragon  rainbow aurora + glowing dragon glyph + drifting rainbow petals (elegant, slow)
    Needs badge-fx.js (the seal's own motion) and the .badge-* styles from main.css. */
 (function () {
   'use strict';
@@ -13,35 +14,58 @@
   const rand = (a, b) => a + Math.random() * (b - a);
   const reduce = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const TIERS = ['bronze', 'silver', 'gold', 'jade', 'dragon'];
+  const TIERS = ['bronze', 'silver', 'gold', 'jade', 'diamond', 'dragon'];
 
-  /* ---------- tiny sound kit (WebAudio, no files) ---------- */
+  /* ---------- sound kit (WebAudio, no files). Every tier has its own little piece of music ---------- */
   let ac = null;
-  function tone(f, d, type, at, vol) {
+  function ctx() {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended' && ac.resume) ac.resume();
+    return ac;
+  }
+  // one note: type, start offset, length, volume, attack, optional low-pass
+  function note(f, dur, o) {
     try {
-      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-      const t0 = ac.currentTime + (at || 0), o = ac.createOscillator(), g = ac.createGain();
-      o.type = type || 'sine'; o.frequency.setValueAtTime(f, t0);
-      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol || 0.15, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
-      o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + d + 0.05);
+      o = o || {};
+      const c = ctx(), t0 = c.currentTime + (o.at || 0), osc = c.createOscillator(), g = c.createGain();
+      osc.type = o.type || 'sine'; osc.frequency.setValueAtTime(f, t0);
+      if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + dur);
+      const att = o.att || 0.012, v = o.vol || 0.12;
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(v, t0 + att); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      let out = osc;
+      if (o.lp) { const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = o.lp; osc.connect(lp); out = lp; }
+      out.connect(g).connect(c.destination); osc.start(t0); osc.stop(t0 + dur + 0.05);
     } catch (e) { /* sound is optional */ }
   }
-  function roar() {
+  const pluck = (f, at, vol) => { note(f, 1.3, { type: 'triangle', at, vol: vol || 0.14, att: 0.004, lp: 3200 }); note(f * 2, 0.5, { type: 'sine', at, vol: (vol || 0.14) * 0.35, att: 0.004 }); };
+  const bell = (f, at, dur, vol) => { [[1, 1], [2.76, 0.45], [5.4, 0.2]].forEach(([m, k]) => note(f * m, dur || 1.6, { at, vol: (vol || 0.1) * k, att: 0.003 })); };
+  const pad = (freqs, at, dur, vol) => freqs.forEach((f) => note(f, dur, { type: 'sine', at, vol: vol || 0.05, att: dur * 0.35 }));
+  function noise(at, dur, lpFrom, lpTo, vol) {
     try {
-      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-      const t0 = ac.currentTime, len = ac.sampleRate * 1.2, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
-      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.5);
-      const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
-      s.buffer = buf; f.type = 'lowpass'; f.frequency.setValueAtTime(900, t0); f.frequency.exponentialRampToValueAtTime(120, t0 + 1.1);
-      g.gain.value = 0.5; s.connect(f).connect(g).connect(ac.destination); s.start(t0);
+      const c = ctx(), t0 = c.currentTime + (at || 0), len = Math.floor(c.sampleRate * dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+      const src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      src.buffer = buf; f.type = 'lowpass'; f.frequency.setValueAtTime(lpFrom, t0); f.frequency.exponentialRampToValueAtTime(lpTo, t0 + dur);
+      g.gain.value = vol || 0.3; src.connect(f).connect(g).connect(c.destination); src.start(t0);
     } catch (e) { /* optional */ }
   }
   const SOUND = {
-    bronze() { tone(110, 0.25, 'triangle', 0, 0.25); tone(165, 0.2, 'triangle', 0.05, 0.15); },
-    silver() { [880, 1175, 1480].forEach((f, i) => tone(f, 0.5, 'sine', i * 0.12, 0.12)); },
-    gold() { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.35, 'triangle', i * 0.09, 0.15)); },
-    jade() { [392, 494, 587, 784, 988, 1175].forEach((f, i) => tone(f, 0.9, 'sine', i * 0.16, 0.11)); },
-    dragon() { roar(); tone(65, 1.4, 'sawtooth', 0, 0.22); [262, 330, 392, 523, 659, 784].forEach((f, i) => tone(f, 0.5, 'square', 0.5 + i * 0.08, 0.08)); },
+    // bronze: a short wooden drum thud, like a stamp on paper
+    bronze() { noise(0, 0.18, 900, 150, 0.35); note(90, 0.35, { type: 'sine', vol: 0.3, to: 55 }); note(196, 0.18, { type: 'triangle', at: 0.06, vol: 0.1 }); note(262, 0.25, { type: 'triangle', at: 0.16, vol: 0.09 }); },
+    // silver: glass chimes, light and airy
+    silver() { [1319, 1760, 2093, 2637].forEach((f, i) => bell(f, i * 0.14, 1.8, 0.075)); note(5200, 0.9, { at: 0.5, vol: 0.02, att: 0.4 }); },
+    // gold: a short fanfare and a coin "ching"
+    gold() { [[523, 0], [523, 0.13], [523, 0.26], [659, 0.4]].forEach(([f, t]) => { note(f, 0.28, { type: 'sawtooth', at: t, vol: 0.07, lp: 1800 }); note(f / 2, 0.28, { type: 'triangle', at: t, vol: 0.08 }); });
+      [523, 659, 784, 1047].forEach((f) => note(f, 1.1, { type: 'sawtooth', at: 0.55, vol: 0.05, lp: 2200, att: 0.03 })); bell(2093, 0.75, 1.2, 0.09); bell(2637, 0.85, 1.2, 0.07); },
+    // jade: a plucked zither running up and down the pentatonic scale over a soft pad
+    jade() { const sc = [293.7, 329.6, 370, 440, 493.9, 587.3, 659.3, 740, 880]; sc.forEach((f, i) => pluck(f, i * 0.11, 0.13)); sc.slice(0, 8).reverse().forEach((f, i) => pluck(f, 1.1 + i * 0.13, 0.09)); pad([293.7, 440, 587.3], 0, 3.2, 0.045); },
+    // diamond: a cascade of crystal bells and a rising sparkle sweep
+    diamond() { [1568, 1976, 2349, 2637, 3136, 3951].forEach((f, i) => bell(f, i * 0.075, 1.5, 0.075)); note(1200, 0.7, { at: 0.1, type: 'sine', vol: 0.05, to: 7000 });
+      for (let i = 0; i < 9; i++) note(rand(3500, 6500), 0.18, { at: 0.5 + i * 0.09, vol: 0.03, att: 0.004 }); pad([1047, 1319, 1568], 0.4, 2.2, 0.03); },
+    // dragon: a deep gong, a harp running over two octaves and a warm choir-like chord. Grand, never harsh
+    dragon() { bell(98, 0, 4.2, 0.2); note(49, 3.2, { type: 'sine', vol: 0.18, att: 0.05 });
+      const sc = [261.6, 293.7, 329.6, 392, 440, 523.3, 587.3, 659.3, 784, 880, 1047, 1175, 1318.5]; sc.forEach((f, i) => pluck(f, 0.5 + i * 0.075, 0.1));
+      pad([261.6, 329.6, 392, 523.3], 1.4, 3.6, 0.06); pad([130.8, 196], 1.4, 3.6, 0.05); bell(2093, 1.6, 2.4, 0.06); bell(1568, 1.9, 2.4, 0.05); },
   };
 
   /* ---------- particles (full screen layer) ---------- */
@@ -79,16 +103,23 @@
       for (let i = 0; i < (big ? 70 : 46); i++) bit(L, 'sof-rise', { '--x': rand(0, W()) + 'px', '--size': rand(8, 22) + 'px', '--delay': rand(0, 2) + 's', '--dur': rand(2.4, 4.2) + 's', '--sway': rand(-50, 50) + 'px', '--c': i % 2 ? '#7bf0b8' : '#2fb67f' });
       for (let i = 0; i < 12; i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(18, 34) + 'px', '--delay': rand(0, 2) + 's', '--c': '#c9ffe5' }, '翠');
     },
+    diamond(L, big) {
+      L.parentNode.classList.add('so-glow-diamond');
+      flash(L, 'rgba(255,255,255,.85)', 420);
+      for (let i = 0; i < (big ? 7 : 5); i++) bit(L, 'sof-beam', { '--x': rand(0, W()) + 'px', '--w': rand(50, 130) + 'px', '--delay': (0.15 + i * 0.18) + 's' });
+      for (let i = 0; i < (big ? 46 : 30); i++) bit(L, 'sof-shard', { '--x': rand(0, W()) + 'px', '--drift': rand(-90, 90) + 'px', '--size': rand(12, 30) + 'px', '--delay': rand(0, 1.6) + 's', '--dur': rand(1.8, 3) + 's', '--rot': rand(-360, 360) + 'deg', '--c': ['#bff0ff', '#78d6ff', '#ffffff', '#9ab8ff'][i % 4] }, i % 3 ? '◆' : '✧');
+      for (let i = 0; i < 26; i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(16, 36) + 'px', '--delay': rand(0.2, 2.2) + 's', '--c': '#e8fbff' }, '✦');
+      wave(L, '#78d6ff', 0.2, 1.1); wave(L, '#ffffff', 0.45, 1.5);
+    },
     dragon(L, big) {
-      L.parentNode.classList.add('so-shake', 'so-glow-dragon');
-      flash(L, 'rgba(255,60,30,.65)', 900);
-      setTimeout(() => flash(L, 'rgba(255,255,255,.85)', 220), 260);          // lightning
-      setTimeout(() => flash(L, 'rgba(255,200,90,.6)', 500), 900);
-      bit(L, 'sof-dragon', { '--delay': '0.1s' }, '龙');
-      for (let i = 0; i < 5; i++) wave(L, ['#ff5a36', '#ffb347', '#d61f26'][i % 3], i * 0.28, 1 + i * 0.5);
-      for (let i = 0; i < (big ? 150 : 110); i++) bit(L, 'sof-rise sof-ember', { '--x': rand(0, W()) + 'px', '--size': rand(6, 16) + 'px', '--delay': rand(0, 2.2) + 's', '--dur': rand(1.6, 3.4) + 's', '--sway': rand(-60, 60) + 'px', '--c': ['#ff5a36', '#ffb347', '#ffe08a', '#d61f26'][i % 4] });
-      for (let i = 0; i < 40; i++) { const a = rand(0, Math.PI * 2), r = rand(120, Math.max(W(), H()) * 0.6); bit(L, 'sof-burst', { '--dx': Math.cos(a) * r + 'px', '--dy': Math.sin(a) * r + 'px', '--size': rand(6, 15) + 'px', '--delay': rand(0.15, 0.6) + 's', '--c': ['#ff5a36', '#ffb347', '#ffe08a'][i % 3] }); }
-      bit(L, 'sof-fire', {});
+      L.parentNode.classList.add('so-glow-dragon');
+      bit(L, 'sof-aurora', {});
+      bit(L, 'sof-dragon', { '--delay': '0.15s' }, '龙');
+      const hues = ['#ff6b8b', '#ffb15c', '#f6e65a', '#6fe39a', '#4cc9f0', '#8a7dff', '#e879f9'];
+      for (let i = 0; i < 7; i++) wave(L, hues[i], 0.1 + i * 0.22, 1 + i * 0.22);
+      for (let i = 0; i < (big ? 46 : 34); i++) bit(L, 'sof-petal', { '--x': rand(0, W()) + 'px', '--size': rand(9, 18) + 'px', '--delay': rand(0.3, 2.6) + 's', '--dur': rand(3.2, 5) + 's', '--sway': rand(30, 90) + 'px', '--c': hues[i % 7] });
+      for (let i = 0; i < 24; i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(16, 34) + 'px', '--delay': rand(0.4, 3) + 's', '--c': hues[(i + 2) % 7] }, '✦');
+      setTimeout(() => flash(L, 'rgba(255,255,255,.22)', 700), 650);
     },
   };
 
@@ -170,7 +201,7 @@
     document.body.appendChild(solo);
     SHOW[key](solo.firstChild, !!big);
     (SOUND[key] || SOUND.bronze)();
-    setTimeout(() => solo.remove(), 5200);
+    setTimeout(() => solo.remove(), key === 'dragon' ? 7000 : 5200);
   }
 
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && current && !current.querySelector('[data-act="go"]')) close(); });

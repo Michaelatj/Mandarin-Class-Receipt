@@ -14,6 +14,7 @@ A student attended a class when either of these is true:
   * they pressed Join for it (online) or checked in to its roll call (offline),
   * the teacher recorded their attendance by hand, close to the class time or on the same day
     (WIB) as the class.
+A class that is running (inside the grace period) counts the moment the student attends it.
 Students can no longer submit attendance by hand: an old attendance with source 'student' no
 longer counts for a class (MANUAL_SOURCES). One teacher-recorded attendance counts for one class
 only, so two classes in a day need two attendances.
@@ -53,9 +54,10 @@ SETTLE_AFTER = timedelta(hours=36)   # after this long a class result is final a
 TIERS = [
     (0,  "bronze",  "铜", "Bronze",  "青铜"),
     (5,  "silver",  "银", "Silver",  "白银"),
-    (11, "gold",    "金", "Gold",    "黄金"),
-    (18, "jade",    "翠", "Jade",    "翡翠"),
-    (26, "dragon",  "龙", "Dragon",  "神龙"),
+    (10, "gold",    "金", "Gold",    "黄金"),
+    (15, "jade",    "翠", "Jade",    "翡翠"),
+    (20, "diamond", "钻", "Diamond", "钻石"),
+    (25, "dragon",  "龙", "Dragon",  "神龙"),
 ]
 
 
@@ -223,8 +225,14 @@ def compute_streaks(student_ids, now=None, grace_minutes=GRACE_MINUTES, freeze_i
                 db.session.delete(row)
                 changed = True
 
+        # A class that is running right now (inside the grace period) counts as soon as the student
+        # has attended it, so the streak goes up the moment they join / check in. If they have not
+        # attended yet it is neither a hit nor a miss: it stays in "live" until the grace is over.
+        live_now = [(s, attended(s)) for s in running if _eligible(s, sid, invites, since)]
+
         # the full timeline: classes that still exist + frozen records of deleted ones
         timeline = [(s.scheduled_at, ok) for s, ok in zip(mine, hits)]
+        timeline += [(s.scheduled_at, True) for s, ok in live_now if ok]
         timeline += [(e.class_at, e.attended) for e in kept.get(sid, [])]
         timeline.sort(key=lambda t: t[0])
 
@@ -235,7 +243,7 @@ def compute_streaks(student_ids, now=None, grace_minutes=GRACE_MINUTES, freeze_i
         current = run                      # the run that is still open at the newest class
 
         live = [{"title": s.title, "at": s.scheduled_at, "minutes_left": max(1, int((s.start_utc - cutoff).total_seconds() // 60))}
-                for s in running if _eligible(s, sid, invites, since) and not attended(s)]
+                for s, ok in live_now if not ok]
 
         tier = tier_for(current)
         nxt_tier = _next_tier(current)

@@ -372,7 +372,9 @@ def play(user, quiz_id):
     if not quiz or not _visible_to(user, quiz):
         return _not_found()
     blocked = (not quiz.allow_retakes) and _has_submitted(user, quiz)
-    return render_template("quiz/play.html", home=url_for("quiz.index"), quiz=quiz,
+    from .schedule import streak_view
+    badge_key = (streak_view(user.id) or {}).get("key", "bronze")
+    return render_template("quiz/play.html", home=url_for("quiz.index"), quiz=quiz, badge_key=badge_key,
                            question_count=len(quiz.questions), blocked=blocked)
 
 

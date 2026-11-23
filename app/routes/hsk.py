@@ -18,7 +18,7 @@ from flask import (Blueprint, abort, jsonify, make_response, redirect, request,
 from .. import db
 from datetime import datetime
 
-from ..models import BonusAccess, HskActivity, HskKnown, User
+from ..models import BonusAccess, HskActivity, HskGame, HskKnown, User
 
 logger = logging.getLogger(__name__)
 hsk_bp = Blueprint("hsk", __name__)
@@ -173,6 +173,13 @@ def index(user, level):
                  intro=LEVELS[level]["intro"])
 
 
+@hsk_bp.route("/hsk<int:level>/flashcards")
+@guard()
+def flashcards(user, level):
+    """Flashcards for every word of the level (the level page only has a button to this page)."""
+    return _page("hsk/flashcards.html", user, level, back=url_for("hsk.index", level=level), items=_entries(level))
+
+
 @hsk_bp.route("/hsk<int:level>/<theme_id>")
 @guard()
 def theme(user, level, theme_id):
@@ -240,11 +247,55 @@ def progress(user, level):
     return jsonify(ok=True)
 
 
+GAMES = ("memory", "speed", "ladder", "match", "fill", "riddle")
+
+
+@hsk_bp.route("/hsk<int:level>/games")
+@guard()
+def games(user, level):
+    entries = _entries(level)
+    themes = [{"id": tid, "icon": icon, "label": label,
+               "count": sum(1 for e in entries if e["theme"] == tid)} for tid, icon, label in THEMES[level]]
+    best = {g.game: {"best": g.best or 0, "plays": g.plays or 0}
+            for g in HskGame.query.filter_by(user_id=user.id, level=level).all()}
+    from .schedule import streak_view
+    badge = streak_view(user.id) if user.role == "student" else None
+    return _page("hsk/games.html", user, level, back=url_for("hsk.index", level=level), themes=themes,
+                 total=len(entries), best=best, badge_key=(badge or {}).get("key", "gold"))
+
+
+@hsk_bp.route("/hsk<int:level>/game_score", methods=["POST"])
+@guard(json_response=True)
+def game_score(user, level):
+    """Save a finished game. Only the best score is kept, plus how many times it was played."""
+    body = request.get_json(silent=True) or {}
+    game, score = body.get("game"), body.get("score")
+    if game not in GAMES or not isinstance(score, int) or isinstance(score, bool) or not 0 <= score <= 5000:
+        return jsonify(ok=False, msg="bad request"), 400
+    row = HskGame.query.filter_by(user_id=user.id, level=level, game=game).first()
+    if not row:
+        row = HskGame(user_id=user.id, level=level, game=game, best=0, plays=0)
+        db.session.add(row)
+    record = score > (row.best or 0)
+    if record:
+        row.best = score
+    row.plays = (row.plays or 0) + 1
+    row.last_at = datetime.utcnow()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        logger.exception("hsk game score failed")
+        return jsonify(ok=False, msg="could not save"), 500
+    return jsonify(ok=True, best=row.best, record=record, plays=row.plays)
+
+
 @hsk_bp.route("/hsk<int:level>/data.json")
 @guard(json_response=True)
 def data(user, level):
     slim = [{"n": e["n"], "hanzi": e["hanzi"], "pinyin": e["pinyin"],
-             "arti": e["arti"], "theme": e["theme"]} for e in _entries(level)]
+             "arti": e["arti"], "theme": e["theme"], "parts": e.get("parts", ""), "trick": e.get("trick", ""),
+             "sentence": e.get("sentence") or []} for e in _entries(level)]
     resp = jsonify(slim)
     resp.headers["Cache-Control"] = "no-store"
     return resp

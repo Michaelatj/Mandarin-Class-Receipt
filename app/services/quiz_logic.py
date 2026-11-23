@@ -6,6 +6,7 @@ validation of the JSON a chatbot produces, per-student shuffling, grading,
 the two scores (accuracy and XP) and the fun title for each attempt.
 """
 import re
+import unicodedata
 import random
 import secrets
 
@@ -89,6 +90,11 @@ def validate_quiz_payload(payload):
             if not isinstance(chunks, list) or not (2 <= len(chunks) <= MAX_CHUNKS) \
                     or not all(isinstance(c, str) and c.strip() for c in chunks):
                 errors.append(f"{label}: needs between 2 and {MAX_CHUNKS} text chunks.")
+        elif qtype == "type_answer":
+            ans = q.get("answers")
+            if not isinstance(ans, list) or not (1 <= len(ans) <= 6) \
+                    or not all(isinstance(a, str) and a.strip() and len(a) <= 100 for a in ans):
+                errors.append(f'{label}: needs an "answers" list of 1 to 6 accepted texts (for example the pinyin).')
         elif qtype in ("multiple_choice", "multiple_select"):
             options = q.get("options")
             if not isinstance(options, list) or not (2 <= len(options) <= MAX_OPTIONS) \
@@ -183,7 +189,7 @@ def normalize_quiz(payload, existing_ids=None):
         if not (isinstance(qid, str) and qid in allowed and qid not in used):
             qid = new_id()
         used.add(qid)
-        qtype = q.get("type") if q.get("type") in ("sentence_reorder", "multiple_select") else "multiple_choice"
+        qtype = q.get("type") if q.get("type") in ("sentence_reorder", "multiple_select", "type_answer") else "multiple_choice"
         base = {
             "id": qid,
             "type": qtype,
@@ -194,7 +200,9 @@ def normalize_quiz(payload, existing_ids=None):
         }
         if isinstance(q.get("audio"), str) and q["audio"].strip():
             base["audio"] = _clean(q["audio"], 200)       # read aloud by the student's device (listen-and-choose)
-        if base["type"] == "sentence_reorder":
+        if base["type"] == "type_answer":
+            base["answers"] = [_clean(a, 100) for a in q["answers"]]
+        elif base["type"] == "sentence_reorder":
             chunks = [_clean(c) for c in q["chunks"]]
             base["chunks"] = chunks
             base["altOrders"] = _alt_orders(chunks, q.get("altOrders"))
@@ -253,7 +261,9 @@ def to_student_view(quiz):
                 "questionMeaning": q.get("questionMeaning")}
         if q.get("audio"):
             item["audio"] = q["audio"]
-        if q["type"] == "sentence_reorder":
+        if q["type"] == "type_answer":
+            pass                                   # the student gets an empty text box
+        elif q["type"] == "sentence_reorder":
             chunks = [{"id": i, "text": fix(text)} for i, text in enumerate(q["chunks"])]
             random.shuffle(chunks)
             item["chunks"] = chunks
@@ -286,7 +296,28 @@ def to_student_view(quiz):
 # ---------------------------------------------------------------------
 # Grading + scoring
 # ---------------------------------------------------------------------
+def _norm_typed(text):
+    return re.sub(r"[\s'’.,!?，。！？、]+", "", unicodedata.normalize("NFC", str(text)).lower().replace("v", "ü"))
+
+
+def _toneless(text):
+    return unicodedata.normalize("NFC", "".join(c for c in unicodedata.normalize("NFD", text) if not unicodedata.combining(c) or c == "\u0308"))
+
+
 def is_answer_correct(q, value):
+    if q["type"] == "type_answer":
+        if not isinstance(value, str):
+            return False
+        v = _norm_typed(value)
+        if not v:
+            return False
+        for a in q["answers"]:
+            a = _norm_typed(a)
+            if v == a:
+                return True
+            if _toneless(a) == a and _toneless(v) == a and v == _toneless(v):   # accepted answer has no tones: typing without tones is fine
+                return True
+        return False
     if q["type"] == "sentence_reorder":
         total = len(q["chunks"])
         if not isinstance(value, list) or len(value) != total:
@@ -366,6 +397,8 @@ def display_answer(q, value):
 
 
 def correct_text(q):
+    if q["type"] == "type_answer":
+        return " / ".join(q["answers"])
     if q["type"] == "sentence_reorder":
         return " ".join(q["chunks"])
     if q["type"] == "multiple_select":

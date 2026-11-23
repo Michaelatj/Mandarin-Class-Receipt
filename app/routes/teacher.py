@@ -103,7 +103,7 @@ def dashboard():
     streaks = compute_streaks([s.id for s in all_students])
     streak_tiers = [{"min": t[0], "key": t[1], "char": t[2], "name": t[3], "zh": t[4]} for t in TIERS]
 
-    from ..models import HskActivity, HskKnown
+    from ..models import HskActivity, HskGame, HskKnown
     from .hsk import LEVELS as _HSK_LEVELS, _entries as _hsk_entries
     sids = [s.id for s in all_students] or [0]
     hsk_stats = {}                    # {student_id: {level: {known, total, reviews, last}}}
@@ -116,6 +116,10 @@ def dashboard():
                 "reviews": a_.reviews or 0, "last": a_.last_at.strftime("%d %b %Y") if a_.last_at else ""}
         for uid_, c_ in counts.items():
             hsk_stats.setdefault(uid_, {}).setdefault(lv, {"known": c_, "total": total_words, "reviews": 0, "last": ""})
+
+    for g_ in HskGame.query.filter(HskGame.user_id.in_(sids)).all():
+        e_ = hsk_stats.setdefault(g_.user_id, {}).setdefault(g_.level, {"known": 0, "total": len(_hsk_entries(g_.level)), "reviews": 0, "last": ""})
+        e_.setdefault("games", {})[g_.game] = {"best": g_.best, "plays": g_.plays}
 
     bonus_grants = {}
     for g_ in BonusAccess.query.filter(BonusAccess.student_id.in_([s.id for s in all_students] or [0])).all():

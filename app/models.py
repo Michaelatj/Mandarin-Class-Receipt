@@ -281,6 +281,21 @@ class HskActivity(db.Model):
     __table_args__ = (db.UniqueConstraint("user_id", "level", name="uq_hsk_activity"),)
 
 
+class HskGame(db.Model):
+    """Best score and number of plays of one Bonus Courses game per account and level."""
+    __tablename__ = "hsk_game"
+
+    id      = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
+    level   = db.Column(db.Integer, nullable=False)
+    game    = db.Column(db.String(20), nullable=False)       # memory | speed | ladder
+    best    = db.Column(db.Integer, default=0)
+    plays   = db.Column(db.Integer, default=0)
+    last_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint("user_id", "level", "game", name="uq_hsk_game"),)
+
+
 class QuizStory(db.Model):
     """Optional reading passage for a quiz. When it exists the quiz is shown on ONE page: the story
     on top and every question below it. Separate table so no column migration is needed."""
