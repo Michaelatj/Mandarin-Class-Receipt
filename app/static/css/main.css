@@ -2413,22 +2413,26 @@ body:has(.app-shell) .n-moon { display: none; }
 /* ── Attendance panel states ── */
 .rc-row.absent .rc-mark { color: var(--red); font-weight: 700; }
 
-/* ── Badge tiers: Bronze, Silver, Gold, Jade, Dragon ──
+/* ── Badge tiers: Bronze, Silver, Gold, Jade, Diamond, Dragon (rainbow) ──
    One colour per tier, shared by the small chips (teacher lists) and the big badge (Profile). */
 :root .streak-chip.tier-bronze, :root .badge-seal.tier-bronze { background: linear-gradient(145deg, #e0a470, #a8642a 58%, #7a4219); color: #fff4e6; }
 :root .streak-chip.tier-silver, :root .badge-seal.tier-silver { background: linear-gradient(145deg, #f7f9fc, #b9c0cb 58%, #8a93a1); color: #2b3340; }
 :root .streak-chip.tier-gold,   :root .badge-seal.tier-gold   { background: linear-gradient(145deg, #ffe58f, #e0a915 58%, #b57d06); color: #4a3000; }
 :root .streak-chip.tier-jade,   :root .badge-seal.tier-jade   { background: linear-gradient(145deg, #d6fbe6, #43c98f 55%, #157a55); color: #04331f; }
+:root .streak-chip.tier-diamond, :root .badge-seal.tier-diamond { background: linear-gradient(145deg, #ffffff, #a9e6ff 38%, #38b6f0 68%, #1b6fb8); color: #04304f; }
 :root .streak-chip.tier-dragon, :root .badge-seal.tier-dragon {
-  background: linear-gradient(120deg, #ff5a36, #d61f26, #ffb347, #d61f26, #ff5a36);
-  background-size: 300% 100%; color: #fff0c2; text-shadow: 0 1px 3px rgba(80,0,0,.55);
-  animation: tier-shimmer 6s linear infinite;
+  background: linear-gradient(115deg, #ff6b8b, #ffb15c, #f6e65a, #6fe39a, #4cc9f0, #8a7dff, #e879f9, #ff6b8b);
+  background-size: 300% 100%; color: #fff; text-shadow: 0 1px 4px rgba(40,20,80,.6);
+  animation: tier-shimmer 7s linear infinite;
+}
 }
 :root .streak-chip[class*="tier-"] { font-weight: 700; }
 :root .streak-bar.tier-bronze > div, :root .badge-next-bar.tier-bronze > div { background: #a8642a; }
 :root .streak-bar.tier-silver > div, :root .badge-next-bar.tier-silver > div { background: #8a93a1; }
 :root .streak-bar.tier-gold   > div, :root .badge-next-bar.tier-gold   > div { background: #e0a915; }
 :root .streak-bar.tier-jade   > div, :root .badge-next-bar.tier-jade   > div { background: #2fb67f; }
+:root .streak-bar.tier-diamond > div, :root .badge-next-bar.tier-diamond > div { background: #38b6f0; }
+:root .streak-bar.tier-dragon > div, :root .badge-next-bar.tier-dragon > div { background: linear-gradient(90deg, #ff6b8b, #ffb15c, #f6e65a, #6fe39a, #4cc9f0, #8a7dff); }
 @keyframes tier-shimmer { to { background-position: 300% 0; } }
 @media (prefers-reduced-motion: reduce) { :root .streak-chip.tier-dragon, :root .badge-seal.tier-dragon { animation: none; } }
 
@@ -2448,7 +2452,8 @@ body:has(.app-shell) .n-moon { display: none; }
 .tier-silver .badge-aura { background: radial-gradient(circle, rgba(207,214,226,.7), transparent 68%); }
 .tier-gold   .badge-aura { background: radial-gradient(circle, rgba(255,213,74,.6), transparent 68%); animation: aura-breathe 3.4s ease-in-out infinite; }
 .tier-jade   .badge-aura { background: radial-gradient(circle, rgba(67,201,143,.6), transparent 68%); animation: aura-breathe 4s ease-in-out infinite; }
-.tier-dragon .badge-aura { background: conic-gradient(from 0deg, rgba(255,90,54,.7), rgba(255,179,71,.35), rgba(214,31,38,.7), rgba(255,179,71,.35), rgba(255,90,54,.7)); animation: aura-spin 7s linear infinite; }
+.tier-diamond .badge-aura { background: radial-gradient(circle, rgba(120,214,255,.7), transparent 68%); animation: aura-breathe 2.6s ease-in-out infinite; }
+.tier-dragon .badge-aura { background: conic-gradient(from 0deg, rgba(255,107,139,.7), rgba(255,177,92,.6), rgba(246,230,90,.55), rgba(111,227,154,.6), rgba(76,201,240,.7), rgba(138,125,255,.7), rgba(232,121,249,.65), rgba(255,107,139,.7)); animation: aura-spin 9s linear infinite; }
 @keyframes aura-breathe { 50% { transform: scale(1.12); opacity: .8; } }
 @keyframes aura-spin { to { transform: rotate(360deg); } }
 
@@ -2465,7 +2470,8 @@ body:has(.app-shell) .n-moon { display: none; }
 .tier-silver .badge-shine { animation: idle-sheen 5s ease-in-out infinite 1.5s; }
 .tier-gold .badge-seal   { box-shadow: inset 0 0 0 5px rgba(255,255,255,.4), 0 0 28px rgba(255,200,40,.5), 0 10px 26px rgba(0,0,0,.28); }
 .tier-jade .badge-seal   { box-shadow: inset 0 0 0 5px rgba(255,255,255,.4), 0 0 28px rgba(67,201,143,.55), 0 10px 26px rgba(0,0,0,.28); }
-.tier-dragon .badge-seal { box-shadow: inset 0 0 0 5px rgba(255,236,170,.55), 0 0 34px rgba(255,90,54,.7), 0 10px 26px rgba(0,0,0,.3); }
+.tier-diamond .badge-seal { box-shadow: inset 0 0 0 5px rgba(255,255,255,.65), 0 0 32px rgba(90,200,255,.75), 0 10px 26px rgba(0,0,0,.28); }
+.tier-dragon .badge-seal { box-shadow: inset 0 0 0 5px rgba(255,255,255,.6), 0 0 18px rgba(255,107,139,.6), 0 0 34px rgba(76,201,240,.6), 0 10px 26px rgba(0,0,0,.3); }
 @keyframes idle-sheen { 0%, 70%, 100% { transform: translateX(-130%); } 85% { transform: translateX(130%); } }
 
 .badge-name { font-family: var(--font-display); font-size: 1.7rem; font-weight: 700; color: var(--text); margin-top: 2px; }
@@ -2535,13 +2541,18 @@ body:has(.app-shell) .n-moon { display: none; }
   30% { transform: rotate(-1deg) translateY(-16px) scale(1.08); filter: brightness(1.25) saturate(1.2); }
   70% { transform: rotate(-6deg) translateY(-10px) scale(1.05); filter: brightness(1.15); } }
 
-.badge-seal.fx-dragon { animation: seal-roar 1.4s ease-out both; }
-@keyframes seal-roar { 0% { transform: rotate(-4deg) scale(1); }
-  8% { transform: rotate(-9deg) translateX(-8px) scale(1.04); } 16% { transform: rotate(1deg) translateX(8px) scale(1.07); }
-  24% { transform: rotate(-9deg) translateX(-7px) scale(1.1); } 32% { transform: rotate(1deg) translateX(7px) scale(1.12); }
-  50% { transform: rotate(-4deg) scale(1.3); filter: brightness(1.45) saturate(1.3); }
-  100% { transform: rotate(-4deg) scale(1); filter: none; } }
-.badge-stage.fx-dragon .badge-aura { animation: aura-spin .9s linear infinite; opacity: 1; }
+.badge-seal.fx-diamond { animation: seal-facet 1.5s cubic-bezier(.3,.7,.3,1) both; }
+.badge-seal.fx-diamond .badge-shine { animation: shine-sweep .6s ease-in-out .35s 2 both; }
+@keyframes seal-facet { 0% { transform: rotate(-4deg) rotateY(0) scale(1); filter: brightness(1); } 40% { transform: rotate(-4deg) rotateY(180deg) scale(1.18); filter: brightness(1.5) saturate(1.2); }
+  70% { transform: rotate(-4deg) rotateY(360deg) scale(1.1); filter: brightness(1.8); } 100% { transform: rotate(-4deg) rotateY(360deg) scale(1); filter: none; } }
+
+.badge-seal.fx-dragon { animation: seal-ascend 2.6s ease-in-out both; }
+@keyframes seal-ascend { 0% { transform: rotate(-4deg) translateY(0) scale(1); filter: hue-rotate(0); }
+  35% { transform: rotate(0deg) translateY(-22px) scale(1.14); filter: hue-rotate(120deg) brightness(1.2); }
+  70% { transform: rotate(-3deg) translateY(-14px) scale(1.1); filter: hue-rotate(250deg) brightness(1.15); }
+  100% { transform: rotate(-4deg) translateY(0) scale(1); filter: hue-rotate(360deg); } }
+.badge-stage.fx-dragon .badge-aura { animation: aura-spin 2.4s linear infinite; opacity: 1; transform: scale(1.3); }
+.badge-stage.fx-diamond .badge-aura { opacity: 1; animation: aura-breathe .45s ease-in-out 3; }
 .badge-stage.fx-gold .badge-aura   { animation: aura-breathe .5s ease-in-out 2; opacity: .95; }
 .badge-stage.fx-jade .badge-aura   { opacity: .95; transform: scale(1.25); transition: transform .6s, opacity .6s; }
 
@@ -2568,7 +2579,7 @@ button.dt-name.stu-info-btn:hover { color: var(--gold); text-decoration: underli
 .sbm-box { max-width: 460px; width: calc(100vw - 24px); max-height: 92vh; overflow-y: auto; padding: 8px 14px 18px; }
 .sbm-box .badge-hero { padding-top: 14px; }
 .sbm-rate { margin-top: 10px; font-size: .88rem; color: var(--text2); }
-.sbm-ladder { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border); }
+.sbm-ladder { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border); }
 .sbm-step { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .72rem; color: var(--text3); }
 .sbm-step b { color: var(--text); font-size: .78rem; }
 .sbm-step.ahead { opacity: .42; }
@@ -2697,14 +2708,24 @@ body.so-open { overflow: hidden; }
 .sof-rise { left: var(--x); bottom: -30px; width: var(--size); height: var(--size); border-radius: 50% 50% 50% 8%; background: var(--c); box-shadow: 0 0 14px var(--c); opacity: 0; animation: sof-rise var(--dur, 3s) ease-out var(--delay, 0s) both; }
 .sof-ember { border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%; height: calc(var(--size) * 1.6); }
 @keyframes sof-rise { 0% { transform: translate(0,0) scale(.4); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(var(--sway), -108vh) scale(1.1); opacity: 0; } }
-.sof-dragon { left: 50%; top: 50%; font-size: min(80vw, 520px); line-height: 1; margin: 0; color: rgba(255,80,40,.28); text-shadow: 0 0 60px rgba(255,120,40,.7); transform: translate(-50%,-50%) scale(.3); opacity: 0; animation: sof-dragon 2.4s ease-out var(--delay, 0s) both; font-family: "Noto Serif SC", "Songti SC", serif; }
-@keyframes sof-dragon { 0% { transform: translate(-50%,-50%) scale(.3) rotate(-8deg); opacity: 0; } 30% { opacity: 1; transform: translate(-50%,-50%) scale(1.05) rotate(2deg); } 100% { transform: translate(-50%,-50%) scale(1.4); opacity: 0; } }
+.sof-dragon { left: 50%; top: 50%; font-size: min(62vw, 380px); line-height: 1; margin: 0; background: linear-gradient(120deg, #ff6b8b, #ffb15c, #f6e65a, #6fe39a, #4cc9f0, #8a7dff, #e879f9); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 28px rgba(255,255,255,.55)); transform: translate(-50%,-50%) scale(.6); opacity: 0; animation: sof-dragon 3.4s ease-in-out var(--delay, 0s) both; font-family: "Noto Serif SC", "Songti SC", serif; }
+@keyframes sof-dragon { 0% { transform: translate(-50%,-50%) scale(.6) rotate(-4deg); opacity: 0; } 30% { opacity: .3; } 60% { opacity: .3; transform: translate(-50%,-50%) scale(1) rotate(0); } 100% { transform: translate(-50%,-50%) scale(1.25); opacity: 0; } }
+.sof-aurora { left: 50%; top: 50%; width: 170vmax; height: 170vmax; margin: -85vmax 0 0 -85vmax; background: conic-gradient(from 0deg, #ff6b8b, #ffb15c, #f6e65a, #6fe39a, #4cc9f0, #8a7dff, #e879f9, #ff6b8b); filter: blur(70px); opacity: 0; animation: sof-aurora 4.6s ease-in-out both; }
+@keyframes sof-aurora { 0% { transform: rotate(0); opacity: 0; } 25% { opacity: .3; } 70% { opacity: .24; } 100% { transform: rotate(200deg); opacity: 0; } }
+.sof-beam { top: -20%; left: var(--x); width: var(--w, 90px); height: 150%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent); transform: rotate(24deg) translateX(-120vw); opacity: 0; animation: sof-beam 1.3s ease-in-out var(--delay, 0s) both; }
+@keyframes sof-beam { 0% { transform: rotate(24deg) translateX(-60vw); opacity: 0; } 30% { opacity: 1; } 100% { transform: rotate(24deg) translateX(60vw); opacity: 0; } }
+.sof-shard { left: var(--x); top: -30px; font-size: var(--size); color: var(--c); text-shadow: 0 0 12px var(--c), 0 0 4px #fff; opacity: 0; animation: sof-shard var(--dur, 2.4s) ease-in var(--delay, 0s) both; }
+@keyframes sof-shard { 0% { transform: translate(0,0) rotate(0) scale(.6); opacity: 0; } 10% { opacity: 1; } 100% { transform: translate(var(--drift), 108vh) rotate(var(--rot)) scale(1); opacity: .85; } }
+.sof-petal { left: var(--x); top: -30px; width: var(--size); height: calc(var(--size) * 1.5); border-radius: 80% 0 80% 0; background: var(--c); opacity: 0; box-shadow: 0 0 10px var(--c); animation: sof-petal var(--dur, 4s) ease-in-out var(--delay, 0s) both; }
+@keyframes sof-petal { 0% { transform: translate(0,0) rotate(0); opacity: 0; } 12% { opacity: .95; } 50% { transform: translate(var(--sway), 52vh) rotate(160deg); } 100% { transform: translate(calc(var(--sway) * -1), 108vh) rotate(340deg); opacity: .8; } }
 .sof-fire { left: 0; right: 0; bottom: 0; height: 38vh; background: radial-gradient(ellipse at 50% 100%, rgba(255,120,40,.85), rgba(214,31,38,.45) 45%, transparent 72%); opacity: 0; animation: sof-fire 2.6s ease-in-out both; }
 @keyframes sof-fire { 0% { opacity: 0; transform: translateY(40%); } 25%,60% { opacity: 1; transform: translateY(0) scaleY(1.1); } 80% { transform: scaleY(.95); } 100% { opacity: 0; } }
 .so-glow-jade .so-card { animation: so-jade 2.4s ease-in-out 2; }
 @keyframes so-jade { 50% { box-shadow: 0 0 0 6px rgba(67,201,143,.35), 0 0 90px rgba(67,201,143,.9); } }
-.so-glow-dragon .so-card { animation: so-dragon 1.8s ease-in-out 2; }
-@keyframes so-dragon { 50% { box-shadow: 0 0 0 6px rgba(255,90,54,.4), 0 0 110px rgba(255,90,54,1); } }
+.so-glow-diamond .so-card { animation: so-diamond 1.2s ease-in-out 3; }
+@keyframes so-diamond { 50% { box-shadow: 0 0 0 5px rgba(120,214,255,.45), 0 0 90px rgba(90,200,255,1); } }
+.so-glow-dragon .so-card { animation: so-dragon 5s linear 1; }
+@keyframes so-dragon { 0% { box-shadow: 0 0 0 5px rgba(255,107,139,.4), 0 0 90px rgba(255,107,139,.9); } 20% { box-shadow: 0 0 0 5px rgba(246,230,90,.4), 0 0 90px rgba(246,230,90,.9); } 40% { box-shadow: 0 0 0 5px rgba(111,227,154,.4), 0 0 90px rgba(111,227,154,.9); } 60% { box-shadow: 0 0 0 5px rgba(76,201,240,.4), 0 0 90px rgba(76,201,240,.9); } 80% { box-shadow: 0 0 0 5px rgba(138,125,255,.4), 0 0 90px rgba(138,125,255,.9); } 100% { box-shadow: 0 0 0 5px rgba(232,121,249,.3), 0 0 90px rgba(232,121,249,.7); } }
 .so-shake { animation: so-shake .7s cubic-bezier(.36,.07,.19,.97) .2s 3 both; }
 @keyframes so-shake { 10%,90% { transform: translate(-2px,1px); } 20%,80% { transform: translate(5px,-3px); } 30%,50%,70% { transform: translate(-9px,4px); } 40%,60% { transform: translate(9px,-4px); } }
 @media (prefers-reduced-motion: reduce) { .so-shake, .so-card, .so-level .so-kicker { animation: none !important; } }

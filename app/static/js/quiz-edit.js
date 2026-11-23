@@ -26,7 +26,9 @@
   function fromServer(q) {
     const m = { cid: nid(), id: q.id, type: q.type, question: q.question || '', meaning: q.questionMeaning || '',
                 explanation: q.explanation || '', points: q.points || 1, audio: q.audio || '', errors: [] };
-    if (q.type === 'sentence_reorder') {
+    if (q.type === 'type_answer') {
+      m.accepted = (q.answers || []).join('\n');
+    } else if (q.type === 'sentence_reorder') {
       m.chunks = q.chunks.map((t, i) => ({ k: 'c' + i, text: t }));
       m.alts = (q.altOrders || []).map((order) => order.map((i) => 'c' + i));
     } else {
@@ -37,7 +39,8 @@
   }
   function blankQuestion(type) {
     const m = { cid: nid(), id: null, type, question: '', meaning: '', explanation: '', points: 1, audio: '', errors: [] };
-    if (type === 'sentence_reorder') { m.chunks = blankChunks(4); m.alts = []; }
+    if (type === 'type_answer') m.accepted = '';
+    else if (type === 'sentence_reorder') { m.chunks = blankChunks(4); m.alts = []; }
     else m.options = blankOptions(type === 'multiple_select' ? 5 : 4);
     return m;
   }
@@ -47,7 +50,9 @@
     if (m.meaning.trim()) out.questionMeaning = m.meaning.trim();
     if ((m.audio || '').trim()) out.audio = m.audio.trim();
     if (m.explanation.trim()) out.explanation = m.explanation.trim();
-    if (m.type === 'sentence_reorder') {
+    if (m.type === 'type_answer') {
+      out.answers = (m.accepted || '').split('\n').map((t) => t.trim()).filter(Boolean);
+    } else if (m.type === 'sentence_reorder') {
       out.chunks = m.chunks.map((c) => c.text.trim());
       const at = new Map(m.chunks.map((c, i) => [c.k, i]));
       out.altOrders = m.alts.filter((a) => a.length === m.chunks.length && a.every((k) => at.has(k))).map((a) => a.map((k) => at.get(k)));
@@ -66,7 +71,9 @@
   function problems(m) {
     const p = [];
     if (!m.question.trim()) p.push('Write the question text.');
-    if (m.type === 'sentence_reorder') {
+    if (m.type === 'type_answer') {
+      if (!(m.accepted || '').split('\n').some((t) => t.trim())) p.push('Write at least one accepted answer.');
+    } else if (m.type === 'sentence_reorder') {
       if (m.chunks.length < 2 || m.chunks.length > MAX_CHUNKS) p.push('Use between 2 and 12 chunks.');
       if (m.chunks.some((c) => !c.text.trim())) p.push('Every chunk needs text.');
     } else {
@@ -85,10 +92,14 @@
   }
 
   /* ---------------- drawing ---------------- */
-  const TYPES = [['multiple_choice', 'One correct answer'], ['multiple_select', 'Several correct answers'], ['sentence_reorder', 'Reorder the sentence']];
+  const TYPES = [['multiple_choice', 'One correct answer'], ['multiple_select', 'Several correct answers'], ['sentence_reorder', 'Reorder the sentence'], ['type_answer', 'Type the answer']];
   const chunkText = (m, k) => (m.chunks.find((c) => c.k === k) || { text: '' }).text;
 
   function bodyHtml(m) {
+    if (m.type === 'type_answer') {
+      return `<div class="qe-sub">Accepted answers (one per line). Tip: add a version without tones too, because phones make tone marks hard to type.</div>
+        <textarea data-f="accepted" rows="3" placeholder="nǐ hǎo&#10;ni hao" style="width:100%;box-sizing:border-box">${esc(m.accepted || '')}</textarea>`;
+    }
     if (m.type === 'sentence_reorder') {
       const rows = m.chunks.map((c, i) => `
         <div class="qe-chunk" data-k="${c.k}">
@@ -181,6 +192,7 @@
     else if (f === 'points') m.points = e.target.value;
     else if (f === 'otext') m.options.find((o) => o.k === e.target.closest('.qe-opt').dataset.k).text = e.target.value;
     else if (f === 'omeaning') m.options.find((o) => o.k === e.target.closest('.qe-opt').dataset.k).meaning = e.target.value;
+    else if (f === 'accepted') m.accepted = e.target.value;
     else if (f === 'ctext') m.chunks.find((c) => c.k === e.target.closest('.qe-chunk').dataset.k).text = e.target.value;
   });
   list.addEventListener('change', (e) => {
@@ -198,7 +210,7 @@
   });
 
   function convert(m, to) {
-    const optionBased = (t) => t !== 'sentence_reorder';
+    const optionBased = (t) => t !== 'sentence_reorder' && t !== 'type_answer';
     if (optionBased(m.type) && optionBased(to)) {
       if (to === 'multiple_choice') {
         let seen = false;
@@ -208,7 +220,9 @@
       return true;
     }
     if (!confirm(T('Changing to this type clears the answer options. Continue?'))) return false;
-    if (to === 'sentence_reorder') { delete m.options; m.chunks = blankChunks(4); m.alts = []; }
+    delete m.accepted;
+    if (to === 'type_answer') { delete m.options; delete m.chunks; delete m.alts; m.accepted = ''; }
+    else if (to === 'sentence_reorder') { delete m.options; m.chunks = blankChunks(4); m.alts = []; }
     else { delete m.chunks; delete m.alts; m.options = blankOptions(to === 'multiple_select' ? 5 : 4); }
     m.type = to;
     return true;

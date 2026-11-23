@@ -70,7 +70,10 @@
         const fill = document.createElement('i'); fill.style.width = (total ? Math.round(known / total * 100) : 0) + '%'; bar.appendChild(fill);
         const txt = document.createElement('small');
         txt.textContent = s ? (known + ' / ' + total + ' mastered · ' + s.reviews + ' cards answered' + (s.last ? ' · last ' + s.last : '')) : 'Not started yet';
-        row.append(name, bar, txt);
+        const gm = (s && s.games) || {}, gl = {memory:'Memory',speed:'Speed',ladder:'Ladder'};
+        const gtxt = Object.keys(gl).filter((k) => gm[k]).map((k) => gl[k] + ' ' + gm[k].best + ' (' + gm[k].plays + '×)').join(' · ');
+        const gsm = document.createElement('small'); gsm.textContent = '🎮 ' + (gtxt || 'No games played yet');
+        row.append(name, bar, txt, gsm);
         hk.appendChild(row);
       });
     }

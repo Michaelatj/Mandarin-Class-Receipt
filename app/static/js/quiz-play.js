@@ -158,7 +158,10 @@
 
   function bodyHtml(q, a, locked, showHint) {
     let body = '';
-    if (q.type === 'sentence_reorder') {
+    if (q.type === 'type_answer') {
+      const verdict = a.checked ? (a.correct === true ? 'right' : a.correct === false ? 'wrong' : '') : '';
+      body = `<input type="text" class="qz-typed ${verdict}" data-a="typed" data-q="${q.id}" value="${esc(typeof a.value === 'string' ? a.value : '')}" placeholder="${T('Type your answer')}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" ${locked ? 'disabled' : ''} data-no-i18n>`;
+    } else if (q.type === 'sentence_reorder') {
       const placed = S.reorder[q.id] || [];
       const chunkById = {};
       q.chunks.forEach((c) => { chunkById[c.id] = c; });
@@ -520,7 +523,17 @@
       }
     }
   });
+  box.addEventListener('input', (e) => {
+    const el = e.target.closest('[data-a="typed"]'); if (!el) return;
+    const q = S.quiz.questions.find((x) => x.id === el.dataset.q); if (!q) return;
+    const val = el.value;
+    S.answers[q.id] = { value: val.trim() ? val : null, usedMeaning: !!S.usedHint[q.id], answeredAtMs: Date.now() - S.startedAt };
+    const b = box.querySelector('[data-a="check"]'); if (b) b.disabled = !val.trim();
+  });
   box.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('[data-a="typed"]')) {
+      e.preventDefault(); const b = box.querySelector('[data-a="check"]'); if (b && !b.disabled) b.click(); return;
+    }
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-a="opt"]')) {
       e.preventDefault();
       e.target.click();

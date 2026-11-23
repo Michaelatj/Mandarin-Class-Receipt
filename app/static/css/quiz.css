@@ -363,3 +363,8 @@
 .qz-story-q { margin-bottom: 14px; }
 .qz-story-q.filled { border-color: rgba(184,134,11,.5); }
 .qz-story-submit { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 40px; }
+
+.qz-typed { width: 100%; box-sizing: border-box; padding: 14px 16px; font-size: 1.2rem; border: 2px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); margin-top: 6px; }
+.qz-typed:focus { outline: none; border-color: var(--gold); }
+.qz-typed.right { border-color: var(--green); }
+.qz-typed.wrong { border-color: var(--red); }

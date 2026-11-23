@@ -54,9 +54,10 @@ SETTLE_AFTER = timedelta(hours=36)   # after this long a class result is final a
 TIERS = [
     (0,  "bronze",  "铜", "Bronze",  "青铜"),
     (5,  "silver",  "银", "Silver",  "白银"),
-    (11, "gold",    "金", "Gold",    "黄金"),
-    (18, "jade",    "翠", "Jade",    "翡翠"),
-    (26, "dragon",  "龙", "Dragon",  "神龙"),
+    (10, "gold",    "金", "Gold",    "黄金"),
+    (15, "jade",    "翠", "Jade",    "翡翠"),
+    (20, "diamond", "钻", "Diamond", "钻石"),
+    (25, "dragon",  "龙", "Dragon",  "神龙"),
 ]
 
 

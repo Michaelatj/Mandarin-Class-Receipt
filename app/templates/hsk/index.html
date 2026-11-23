@@ -5,6 +5,7 @@
 {% block head_extra %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=5' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=2' }}">
 {% endblock %}
 
 {% block qz_body %}
@@ -27,6 +28,11 @@
       <input type="search" id="hk-search" class="hk-input" placeholder="Search a word: 爱, ài, or a meaning" autocomplete="off" aria-label="Search words">
     </label>
     <div id="hk-results" class="hk-results" hidden></div>
+  </div>
+
+  <div class="hk-cta-row">
+    <a class="hk-games-cta" href="{{ url_for('hsk.theme', level=level, theme_id='semua') }}#flashcards"><span>🃏</span><b>Flashcards</b><small>Flip cards to practise all {{ total }} words. Or open a topic below and tap Flashcards.</small></a>
+    <a class="hk-games-cta" href="{{ url_for('hsk.games', level=level) }}"><span>🎮</span><b>Games</b><small>Draw the lines · Fill the blank · Riddle · Memory · Speed · Ladder</small></a>
   </div>
 
   <div class="hk-overall" id="hk-overall" data-all="{{ all_ns|join(',') }}">
@@ -54,4 +60,4 @@
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=5' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=6' }}"></script>{% endblock %}

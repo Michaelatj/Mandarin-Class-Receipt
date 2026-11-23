@@ -238,6 +238,7 @@
   onlyUnknown.addEventListener('change', applyFilter);
   updateKnownCount();
 
+  if (location.hash === '#flashcards') showTab('practice');     // the "Flashcards" button on the level page
   if (location.hash && /^#w\d+$/.test(location.hash)) {      // open the word a search result pointed at
     const t = document.querySelector(location.hash + ' .hk-row');
     if (t) { t.click(); t.scrollIntoView({ block: 'center' }); }
