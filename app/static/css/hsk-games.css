@@ -98,3 +98,14 @@
 
 .hk-h2 { font-size: 1.05rem; margin: 22px 0 10px; }
 .hk-flash { margin-bottom: 18px; scroll-margin-top: 70px; }
+
+/* flashcard page: centred and a bit bigger */
+.hk-flash-head { text-align: center; margin-bottom: 8px; }
+.hk-flash-page { max-width: 640px; margin: 0 auto 24px; }
+.hk-flash-page .hk-card { min-height: min(62vh, 460px); }
+.hk-flash-page .hk-face-main { font-size: 2.1rem; }
+.hk-flash-page .hk-face-main.is-zh { font-size: clamp(4.6rem, 22vw, 7rem); }
+.hk-flash-page .hk-pbar { justify-content: center; }
+.hk-flash-page .hk-pmeta { justify-content: center; gap: 16px; }
+.hk-flash-page .hk-controls { max-width: 520px; margin: 0 auto; }
+@media (max-width: 480px) { .hk-flash-page .hk-card { min-height: 430px; } }

@@ -99,7 +99,6 @@
       $('hk-overall-bar').style.width = (k / all.length * 100) + '%';
     }
     paint();
-    if ($('hsk-data')) initFlashcards(JSON.parse($('hsk-data').textContent), paint, true);
 
     let all = null, loading = false;
     const input = $('hk-search'), box = $('hk-results');
@@ -131,6 +130,9 @@
     });
     return;
   }
+
+  /* ───────────── flashcard page (all words) ───────────── */
+  if (root.dataset.page === 'flash') { initFlashcards(JSON.parse($('hsk-data').textContent), () => {}, true); return; }
 
   /* ───────────── theme page ───────────── */
   const entries = JSON.parse($('hsk-data').textContent);
