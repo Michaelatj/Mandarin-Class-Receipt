@@ -1,7 +1,7 @@
 {% extends "quiz/layout.html" %}
 {% block qz_title %}{{ quiz.title }}{% endblock %}
 {% block qz_back %}Back to quizzes{% endblock %}
-{% block qz_attrs %}data-page="play" data-start-url="{{ url_for('quiz.api_start', quiz_id=quiz.id) }}" data-attempt-base="/quiz/api/attempt/" data-home="{{ home }}"{% endblock %}
+{% block qz_attrs %}data-page="play" data-start-url="{{ url_for('quiz.api_start', quiz_id=quiz.id) }}" data-attempt-base="/quiz/api/attempt/" data-home="{{ home }}" data-badge="{{ badge_key }}"{% endblock %}
 
 {% block qz_body %}
 <div id="qz-play">
@@ -21,4 +21,4 @@
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=3' }}"></script><script src="{{ url_for('static', filename='js/quiz-play.js') + '?v=4' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=3' }}"></script><script src="{{ url_for('static', filename='js/quiz-play.js') + '?v=5' }}"></script>{% endblock %}

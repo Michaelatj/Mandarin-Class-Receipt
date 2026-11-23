@@ -104,27 +104,55 @@
     const pairs = Math.min(8, list.length);
     const picked = shuffle(list).slice(0, pairs);
     const cards = shuffle(picked.flatMap((w) => [{ id: w.n, kind: 'zh', w }, { id: w.n, kind: 'id', w }]));
-    let open = [], matched = 0, moves = 0, misses = 0, secs = 0, lock = false;
+    const PEEK = Math.max(4, Math.round(pairs * 0.9) + 2);      // seconds to memorise
+    let matched = 0, moves = 0, misses = 0, secs = 0, started = false;
     stage.innerHTML = `<div class="gm-bar"><span class="gm-stat">Pairs <b id="m-p">0</b>/${pairs}</span><span class="gm-stat">Moves <b id="m-m">0</b></span><span class="gm-stat">Time <b id="m-t">0</b>s</span><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Quit</button></div>
-      <div class="gm-board">${cards.map((c, i) => `<button type="button" class="gm-mcard" data-i="${i}" aria-label="Card ${i + 1}"><span class="gm-mback">文</span><span class="gm-mfront ${c.kind === 'zh' ? 'zh' : ''}">${c.kind === 'zh' ? `${esc(c.w.hanzi)}<small>${esc(c.w.pinyin)}</small>` : esc(short(c.w))}</span></button>`).join('')}</div>`;
+      <p class="gm-tip" id="m-tip"></p>
+      <div class="gm-board">${cards.map((c, i) => `<button type="button" class="gm-mcard open" data-i="${i}" aria-label="Card ${i + 1}"><span class="gm-mback">文</span><span class="gm-mfront ${c.kind === 'zh' ? 'zh' : ''}">${c.kind === 'zh' ? `${esc(c.w.hanzi)}<small>${esc(c.w.pinyin)}</small>` : esc(short(c.w))}</span></button>`).join('')}</div>`;
     $('gm-quit').onclick = backToMenu;
-    every(() => { secs++; $('m-t').textContent = secs; }, 1000);
+    const cardEls = [...stage.querySelectorAll('.gm-mcard')];
+    const tip = $('m-tip');
+    // 1) show every card first, then turn them all face down
+    let left = PEEK;
+    tip.textContent = `Memorise the cards! They close in ${left}s…`;
+    every(() => {
+      if (started) return;
+      left--;
+      if (left > 0) { tip.textContent = `Memorise the cards! They close in ${left}s…`; return; }
+      started = true;
+      cardEls.forEach((x) => x.classList.remove('open'));
+      tip.textContent = 'Tap a card to open it, tap it again to close it. Open two cards that go together to score a pair.';
+    }, 1000);
+    every(() => { if (started) { secs++; $('m-t').textContent = secs; } }, 1000);
+
+    // 2) tap = open, tap again = close. Two open cards are checked; a wrong pair stays open until you close one
     stage.querySelector('.gm-board').addEventListener('click', (e) => {
       const el = e.target.closest('.gm-mcard');
-      if (!el || lock || el.classList.contains('open') || el.classList.contains('done')) return;
-      el.classList.add('open'); open.push(el);
-      if (open.length < 2) return;
+      if (!el || !started || el.classList.contains('done')) return;
+      const opened = () => cardEls.filter((x) => x.classList.contains('open') && !x.classList.contains('done'));
+      if (el.classList.contains('open')) {                       // close it
+        el.classList.remove('open', 'bad');
+        opened().forEach((x) => x.classList.remove('bad'));
+        return;
+      }
+      if (opened().length >= 2) {                                // already two open: close one first
+        opened().forEach((x) => { x.classList.remove('bad'); void x.offsetWidth; x.classList.add('bad'); });
+        return;
+      }
+      el.classList.add('open');
+      const now = opened();
+      if (now.length < 2) return;
       moves++; $('m-m').textContent = moves;
-      const [a, b] = open.map((x) => cards[+x.dataset.i]);
+      const [a, b] = now.map((x) => cards[+x.dataset.i]);
       if (a.id === b.id && a.kind !== b.kind) {
-        open.forEach((x) => x.classList.add('done')); open = []; matched++; $('m-p').textContent = matched;
+        now.forEach((x) => x.classList.add('done')); matched++; $('m-p').textContent = matched;
         if (matched === pairs) later(() => {
           const score = Math.max(50, pairs * 120 - misses * 15 - secs * 2);
           finish('memory', score, [`${pairs} pairs in ${moves} moves · ${secs}s`, `${misses} wrong ${misses === 1 ? 'try' : 'tries'}`], score >= pairs * 80);
         }, 500);
       } else {
-        misses++; lock = true; open.forEach((x) => x.classList.add('bad'));
-        later(() => { open.forEach((x) => x.classList.remove('open', 'bad')); open = []; lock = false; }, 800);
+        misses++; now.forEach((x) => x.classList.add('bad'));
+        tip.textContent = 'Not a pair. Tap one of the open cards to close it.';
       }
     });
   }

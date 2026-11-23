@@ -5,7 +5,7 @@
 {% block head_extra %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=5' }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=2' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=3' }}">
 {% endblock %}
 
 {% block qz_body %}
@@ -31,9 +31,67 @@
   </div>
 
   <div class="hk-cta-row">
-    <a class="hk-games-cta" href="{{ url_for('hsk.theme', level=level, theme_id='semua') }}#flashcards"><span>🃏</span><b>Flashcards</b><small>Flip cards to practise all {{ total }} words. Or open a topic below and tap Flashcards.</small></a>
+    <a class="hk-games-cta" href="#view-practice"><span>🃏</span><b>Flashcards</b><small>Flip cards to practise all {{ total }} words, right here. Each topic below also has its own Flashcards tab.</small></a>
     <a class="hk-games-cta" href="{{ url_for('hsk.games', level=level) }}"><span>🎮</span><b>Games</b><small>Draw the lines · Fill the blank · Riddle · Memory · Speed · Ladder</small></a>
   </div>
+
+  <h2 class="hk-h2">🃏 Flashcards · all {{ total }} words</h2>
+  <section id="view-practice" class="hk-flash">
+    <div class="hk-pbar">
+      <div class="hk-seg" role="group" aria-label="Card mode">
+        <button type="button" class="hk-seg-btn on" data-mode="zh" aria-pressed="true">Hanzi → Meaning</button>
+        <button type="button" class="hk-seg-btn" data-mode="id" aria-pressed="false">Meaning → Hanzi</button>
+      </div>
+      <div class="hk-pbar-r">
+        <button type="button" class="hk-chip on" id="hk-practice-unknown" aria-pressed="true"><svg class="hk-i"><use href="#i-check"/></svg>Not mastered only</button>
+        <button type="button" class="hk-iconbtn" id="hk-shuffle" aria-label="Shuffle" title="Shuffle"><svg class="hk-i"><use href="#i-shuffle"/></svg></button>
+      </div>
+    </div>
+
+    <div class="hk-deck" id="fc">
+      <div class="hk-pmeta"><span id="fc-count"></span><span id="fc-known"></span></div>
+      <div class="hk-prog"><i id="fc-prog" style="width:0"></i></div>
+
+      <div class="hk-stage" id="fc-stage">
+        <button type="button" class="hk-listen" id="fc-speak" hidden aria-label="Listen" title="Listen"><svg class="hk-i"><use href="#i-volume"/></svg></button>
+        <div class="hk-card" id="fc-card" tabindex="0" role="button" aria-label="Flip card">
+          <div class="hk-face hk-front">
+            <div class="hk-face-main" id="fc-front"></div>
+            <div class="hk-hint"><svg class="hk-i"><use href="#i-flip"/></svg>Tap to flip</div>
+          </div>
+          <div class="hk-face hk-back">
+            <div class="hk-face-main" id="fc-back"></div>
+            <div class="hk-face-sub" id="fc-back-sub"></div>
+            <div class="hk-divider"></div>
+            <div class="hk-cardsen">
+              <div class="hk-sen-zh" id="fc-sen-zh" lang="zh"></div>
+              <div class="hk-sen-py" id="fc-sen-py"></div>
+              <div class="hk-sen-id" id="fc-sen-id"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hk-controls">
+        <button type="button" class="hk-round" id="fc-prev" aria-label="Previous card" title="Previous"><svg class="hk-i"><use href="#i-left"/></svg></button>
+        <button type="button" class="hk-ans hk-ans-no" id="fc-again"><svg class="hk-i"><use href="#i-x"/></svg>Not yet</button>
+        <button type="button" class="hk-ans hk-ans-yes" id="fc-know"><svg class="hk-i"><use href="#i-check"/></svg>Got it</button>
+        <button type="button" class="hk-round" id="fc-next" aria-label="Next card" title="Next"><svg class="hk-i"><use href="#i-right"/></svg></button>
+      </div>
+    </div>
+
+    <div class="hk-panel" id="fc-done" hidden>
+      <span class="hk-panel-ico"><svg class="hk-i"><use href="#i-done"/></svg></span>
+      <div class="hk-panel-title" id="fc-done-title"></div>
+      <p class="hk-panel-sub" id="fc-done-sub"></p>
+      <button type="button" class="hk-ans hk-ans-yes hk-ans-solo" id="fc-redo"><svg class="hk-i"><use href="#i-flip"/></svg>Practise again</button>
+    </div>
+    <div class="hk-panel" id="fc-none" hidden>
+      <span class="hk-panel-ico"><svg class="hk-i"><use href="#i-done"/></svg></span>
+      <div class="hk-panel-title">Everything in this theme is mastered</div>
+      <p class="hk-panel-sub">Turn off “Not mastered only” to review all the cards.</p>
+    </div>
+  </section>
 
   <div class="hk-overall" id="hk-overall" data-all="{{ all_ns|join(',') }}">
     <span id="hk-overall-text">Mastered 0 of {{ total }} words</span>
@@ -58,6 +116,7 @@
   </div>
   <p class="qz-hint-text hk-foot">Your “mastered” marks are saved in this browser.</p>
 </div>
+<script type="application/json" id="hsk-data">{{ items|tojson }}</script>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=6' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=7' }}"></script>{% endblock %}

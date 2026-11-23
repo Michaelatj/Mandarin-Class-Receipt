@@ -5,7 +5,7 @@
 {% block head_extra %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=6' }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=2' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=3' }}">
 {% endblock %}
 
 {% block qz_body %}
@@ -37,4 +37,4 @@
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=3' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=1' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=3' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=2' }}"></script>{% endblock %}

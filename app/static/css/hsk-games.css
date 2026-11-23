@@ -95,3 +95,6 @@
 .gm-clue { text-align: center; color: var(--text2, var(--text)); margin: 6px 0; font-style: italic; }
 .gm-reveal { min-height: 3em; margin-top: 12px; text-align: center; color: var(--text2, var(--text)); }
 @media (max-width: 480px) { .gm-lines { gap: 0 40px; } .gm-node { font-size: .85rem; padding: 6px 8px; } }
+
+.hk-h2 { font-size: 1.05rem; margin: 22px 0 10px; }
+.hk-flash { margin-bottom: 18px; scroll-margin-top: 70px; }

@@ -169,7 +169,7 @@ def index(user, level):
             "ns": [e["n"] for e in items],
         })
     return _page("hsk/index.html", user, level, back=url_for("hsk.lobby"), themes=themes, total=len(entries),
-                 all_ns=[e["n"] for e in entries], level_zh=LEVELS[level]["zh"],
+                 all_ns=[e["n"] for e in entries], items=entries, level_zh=LEVELS[level]["zh"],
                  intro=LEVELS[level]["intro"])
 
 

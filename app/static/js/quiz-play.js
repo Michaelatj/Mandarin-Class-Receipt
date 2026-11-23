@@ -347,7 +347,11 @@
     const target = box.querySelector('.qz-option.right, .qz-option.wrong, #qz-target') || box;
     if (a.correct === true) {
       burst(target, S.streak >= 3);
-      if (S.streak >= 3) { soundStreak(); showToast(S.streak + ' in a row!'); } else { soundRight(); }
+      // a run of right answers plays the show of the student's own badge (bronze is small, dragon is rainbow)
+      const milestone = S.streak === 3 || S.streak === 5 || (S.streak >= 8 && S.streak % 5 === 0);
+      if (S.streak >= 3) { showToast(S.streak + ' in a row!'); }
+      if (milestone && window.StreakOverlay && root.dataset.badge) window.StreakOverlay.burst(root.dataset.badge, S.streak >= 8);
+      else if (S.streak >= 3) soundStreak(); else soundRight();
     } else if (a.correct === false) {
       sadFx(target);
       soundWrong();
