@@ -14,7 +14,10 @@
   const rand = (a, b) => a + Math.random() * (b - a);
   const reduce = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const TIERS = ['bronze', 'silver', 'gold', 'jade', 'diamond', 'dragon'];
+  const TIERS = ['bronze', 'silver', 'gold', 'jade', 'diamond', 'ruby', 'dragon'];
+  // weaker phones get fewer particles, so the show stays smooth
+  const LOW = (navigator.hardwareConcurrency || 4) <= 4 || (navigator.deviceMemory || 4) <= 2 || Math.min(window.innerWidth, window.innerHeight) < 480;
+  const N = (n) => Math.max(3, Math.round(n * (LOW ? 0.5 : 1)));
 
   /* ---------- sound kit (WebAudio, no files). Every tier has its own little piece of music ---------- */
   let ac = null;
@@ -54,18 +57,24 @@
     bronze() { noise(0, 0.18, 900, 150, 0.35); note(90, 0.35, { type: 'sine', vol: 0.3, to: 55 }); note(196, 0.18, { type: 'triangle', at: 0.06, vol: 0.1 }); note(262, 0.25, { type: 'triangle', at: 0.16, vol: 0.09 }); },
     // silver: glass chimes, light and airy
     silver() { [1319, 1760, 2093, 2637].forEach((f, i) => bell(f, i * 0.14, 1.8, 0.075)); note(5200, 0.9, { at: 0.5, vol: 0.02, att: 0.4 }); },
-    // gold: a short fanfare and a coin "ching"
+    // gold: a fanfare, then a shower of coins
     gold() { [[523, 0], [523, 0.13], [523, 0.26], [659, 0.4]].forEach(([f, t]) => { note(f, 0.28, { type: 'sawtooth', at: t, vol: 0.07, lp: 1800 }); note(f / 2, 0.28, { type: 'triangle', at: t, vol: 0.08 }); });
-      [523, 659, 784, 1047].forEach((f) => note(f, 1.1, { type: 'sawtooth', at: 0.55, vol: 0.05, lp: 2200, att: 0.03 })); bell(2093, 0.75, 1.2, 0.09); bell(2637, 0.85, 1.2, 0.07); },
+      [523, 659, 784, 1047].forEach((f) => note(f, 1.0, { type: 'sawtooth', at: 0.55, vol: 0.05, lp: 2200, att: 0.03 }));
+      for (let i = 0; i < 16; i++) bell([2093, 2349, 2637, 3136][i % 4], 0.7 + i * 0.09 + Math.random() * 0.04, 0.5, 0.05); },
     // jade: a plucked zither running up and down the pentatonic scale over a soft pad
     jade() { const sc = [293.7, 329.6, 370, 440, 493.9, 587.3, 659.3, 740, 880]; sc.forEach((f, i) => pluck(f, i * 0.11, 0.13)); sc.slice(0, 8).reverse().forEach((f, i) => pluck(f, 1.1 + i * 0.13, 0.09)); pad([293.7, 440, 587.3], 0, 3.2, 0.045); },
     // diamond: a cascade of crystal bells and a rising sparkle sweep
     diamond() { [1568, 1976, 2349, 2637, 3136, 3951].forEach((f, i) => bell(f, i * 0.075, 1.5, 0.075)); note(1200, 0.7, { at: 0.1, type: 'sine', vol: 0.05, to: 7000 });
       for (let i = 0; i < 9; i++) note(rand(3500, 6500), 0.18, { at: 0.5 + i * 0.09, vol: 0.03, att: 0.004 }); pad([1047, 1319, 1568], 0.4, 2.2, 0.03); },
-    // dragon: a deep gong, a harp running over two octaves and a warm choir-like chord. Grand, never harsh
-    dragon() { bell(98, 0, 4.2, 0.2); note(49, 3.2, { type: 'sine', vol: 0.18, att: 0.05 });
-      const sc = [261.6, 293.7, 329.6, 392, 440, 523.3, 587.3, 659.3, 784, 880, 1047, 1175, 1318.5]; sc.forEach((f, i) => pluck(f, 0.5 + i * 0.075, 0.1));
-      pad([261.6, 329.6, 392, 523.3], 1.4, 3.6, 0.06); pad([130.8, 196], 1.4, 3.6, 0.05); bell(2093, 1.6, 2.4, 0.06); bell(1568, 1.9, 2.4, 0.05); },
+    // ruby: glass cracks and falls, a deep boom, then rich strings in a minor key
+    ruby() { noise(0, 0.5, 9000, 2500, 0.32); noise(0.05, 0.35, 5000, 800, 0.25); note(62, 1.3, { type: 'sine', vol: 0.34, to: 38 }); bell(1568, 0.1, 1.2, 0.06);
+      for (let i = 0; i < 7; i++) note(rand(2500, 6000), 0.12, { at: 0.35 + i * 0.07, vol: 0.04, att: 0.003 });
+      [[220, 0.5], [261.6, 0.5], [329.6, 0.5], [440, 0.5]].forEach(([f, t]) => note(f, 2.6, { type: 'sawtooth', at: t, vol: 0.045, lp: 1400, att: 0.5 }));
+      [659, 784, 988].forEach((f, i) => pluck(f, 1.2 + i * 0.15, 0.1)); },
+    // dragon: bright and hopeful. A rising harp, a warm choir chord and a shower of tiny bells, like a sunrise
+    dragon() { const sc = [261.6, 329.6, 392, 523.3, 659.3, 784, 1047, 1319, 1568]; sc.forEach((f, i) => pluck(f, i * 0.09, 0.11));
+      pad([261.6, 329.6, 392, 523.3], 0.3, 3.8, 0.06); pad([392, 493.9, 587.3, 784], 1.5, 3.2, 0.05); pad([130.8, 196], 0.3, 3.8, 0.05);
+      for (let i = 0; i < 10; i++) bell(rand(1800, 3600), 1.1 + i * 0.16, 1.2, 0.04); note(1047, 3, { type: 'sine', at: 1.6, vol: 0.05, att: 0.8 }); },
   };
 
   /* ---------- particles (full screen layer) ---------- */
@@ -81,45 +90,74 @@
   const flash = (layer, c, ms) => bit(layer, 'sof-flash', { '--c': c, '--ms': (ms || 700) + 'ms' });
   const wave = (layer, c, delay, size) => bit(layer, 'sof-wave', { '--c': c, '--delay': (delay || 0) + 's', '--s': size || 1 });
 
+  const solid = (L, cls, vars, text) => bit(L, cls, vars, text);
   const SHOW = {
+    // bronze: a plain, small stamp of copper dust
     bronze(L, big) {
-      wave(L, '#c9854a', 0.1); if (big) wave(L, '#a8642a', 0.3, 1.4);
-      for (let i = 0; i < (big ? 26 : 14); i++) bit(L, 'sof-burst', { '--dx': rand(-170, 170) + 'px', '--dy': rand(-130, 90) + 'px', '--size': rand(5, 11) + 'px', '--delay': rand(0.12, 0.3) + 's', '--c': i % 2 ? '#b47a4a' : '#e0a470' });
+      wave(L, '#c9854a', 0.1);
+      for (let i = 0; i < N(big ? 20 : 12); i++) bit(L, 'sof-burst', { '--dx': rand(-170, 170) + 'px', '--dy': rand(-130, 130) + 'px', '--size': rand(5, 10) + 'px', '--delay': rand(0, 0.25) + 's', '--c': ['#c9854a', '#a8642a', '#e3a76b'][i % 3] });
     },
+    // silver: one clean sweep of light and a few quiet glints
     silver(L, big) {
-      flash(L, 'rgba(220,230,255,.45)', 600);
-      for (let i = 0; i < (big ? 46 : 26); i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(14, 32) + 'px', '--delay': rand(0, 1.6) + 's', '--c': i % 3 ? '#ffffff' : '#bcd0ff' }, '✦');
+      flash(L, 'rgba(225,232,255,.35)', 500);
+      bit(L, 'sof-beam', { '--x': '50%', '--w': '140px', '--delay': '0.1s' });
+      for (let i = 0; i < N(big ? 26 : 16); i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(14, 30) + 'px', '--delay': rand(0, 1.4) + 's', '--c': '#eef2ff' }, '✦');
       wave(L, '#cfd6e2', 0.2);
     },
+    // gold: money everywhere
     gold(L, big) {
-      flash(L, 'rgba(255,214,90,.5)', 800);
-      for (let i = 0; i < (big ? 120 : 80); i++) bit(L, 'sof-confetti', { '--x': rand(0, W()) + 'px', '--drift': rand(-120, 120) + 'px', '--size': rand(7, 14) + 'px', '--delay': rand(0, 1.3) + 's', '--dur': rand(1.8, 3.2) + 's', '--rot': rand(-900, 900) + 'deg', '--c': ['#ffd54a', '#e0a915', '#fff2a8', '#d4380d', '#ffffff'][i % 5] });
-      for (let i = 0; i < 18; i++) bit(L, 'sof-burst', { '--dx': rand(-220, 220) + 'px', '--dy': rand(-260, 40) + 'px', '--size': rand(10, 18) + 'px', '--delay': rand(0.1, 0.4) + 's', '--c': '#ffd54a', '--r': '50%' }, '');
-      wave(L, '#e0a915', 0.15); wave(L, '#fff2a8', 0.4, 1.5);
+      flash(L, 'rgba(255,214,90,.35)', 700);
+      const money = ['🪙', '🪙', '💰', '🪙', '💵'];
+      for (let i = 0; i < N(big ? 56 : 38); i++) bit(L, 'sof-coin', { '--x': rand(0, W()) + 'px', '--drift': rand(-70, 70) + 'px', '--size': rand(20, 38) + 'px', '--delay': rand(0, 1.6) + 's', '--dur': rand(1.7, 2.8) + 's' }, money[i % money.length]);
+      for (let i = 0; i < N(14); i++) bit(L, 'sof-burst', { '--dx': rand(-220, 220) + 'px', '--dy': rand(-240, 40) + 'px', '--size': rand(6, 12) + 'px', '--delay': rand(0, 0.3) + 's', '--c': '#ffd34d' });
+      wave(L, '#e0a915', 0.15);
     },
+    // jade: calm and elegant. Slow green light rising, soft rings
     jade(L, big) {
       L.parentNode.classList.add('so-glow-jade');
-      for (let i = 0; i < 4; i++) wave(L, i % 2 ? '#9af0c6' : '#43c98f', i * 0.35, 1 + i * 0.35);
-      for (let i = 0; i < (big ? 70 : 46); i++) bit(L, 'sof-rise', { '--x': rand(0, W()) + 'px', '--size': rand(8, 22) + 'px', '--delay': rand(0, 2) + 's', '--dur': rand(2.4, 4.2) + 's', '--sway': rand(-50, 50) + 'px', '--c': i % 2 ? '#7bf0b8' : '#2fb67f' });
-      for (let i = 0; i < 12; i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(18, 34) + 'px', '--delay': rand(0, 2) + 's', '--c': '#c9ffe5' }, '翠');
+      for (let i = 0; i < 3; i++) wave(L, i % 2 ? '#9af0c6' : '#43c98f', i * 0.5, 1 + i * 0.4);
+      for (let i = 0; i < N(big ? 30 : 22); i++) bit(L, 'sof-orb', { '--x': rand(0, W()) + 'px', '--size': rand(8, 18) + 'px', '--delay': rand(0, 2.2) + 's', '--dur': rand(3.2, 5) + 's', '--sway': rand(-50, 50) + 'px', '--c': ['#7ee8b4', '#43c98f', '#d4ffe9'][i % 3] });
+      for (let i = 0; i < N(8); i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(14, 26) + 'px', '--delay': rand(0.4, 2.4) + 's', '--c': '#d4ffe9' }, '✦');
     },
+    // diamond: luxury. Beams of white light, falling crystals, a white flash
     diamond(L, big) {
-      L.parentNode.classList.add('so-glow-diamond');
-      flash(L, 'rgba(255,255,255,.85)', 420);
-      for (let i = 0; i < (big ? 7 : 5); i++) bit(L, 'sof-beam', { '--x': rand(0, W()) + 'px', '--w': rand(50, 130) + 'px', '--delay': (0.15 + i * 0.18) + 's' });
-      for (let i = 0; i < (big ? 46 : 30); i++) bit(L, 'sof-shard', { '--x': rand(0, W()) + 'px', '--drift': rand(-90, 90) + 'px', '--size': rand(12, 30) + 'px', '--delay': rand(0, 1.6) + 's', '--dur': rand(1.8, 3) + 's', '--rot': rand(-360, 360) + 'deg', '--c': ['#bff0ff', '#78d6ff', '#ffffff', '#9ab8ff'][i % 4] }, i % 3 ? '◆' : '✧');
-      for (let i = 0; i < 26; i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(16, 36) + 'px', '--delay': rand(0.2, 2.2) + 's', '--c': '#e8fbff' }, '✦');
+      flash(L, 'rgba(255,255,255,.75)', 420);
+      for (let i = 0; i < N(big ? 5 : 4); i++) bit(L, 'sof-beam', { '--x': rand(0, W()) + 'px', '--w': rand(50, 120) + 'px', '--delay': (0.15 + i * 0.2) + 's' });
+      for (let i = 0; i < N(big ? 30 : 22); i++) bit(L, 'sof-shard', { '--x': rand(0, W()) + 'px', '--drift': rand(-90, 90) + 'px', '--size': rand(12, 28) + 'px', '--delay': rand(0, 1.6) + 's', '--dur': rand(1.8, 3) + 's', '--rot': rand(-360, 360) + 'deg', '--c': ['#bff0ff', '#78d6ff', '#ffffff', '#9ab8ff'][i % 4] }, i % 3 ? '◆' : '✧');
+      for (let i = 0; i < N(14); i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(16, 34) + 'px', '--delay': rand(0.2, 2.2) + 's', '--c': '#e8fbff' }, '✦');
       wave(L, '#78d6ff', 0.2, 1.1); wave(L, '#ffffff', 0.45, 1.5);
     },
+    // ruby: expensive and dramatic. Red flash, the screen cracks and shakes, glass falls
+    ruby(L, big) {
+      L.parentNode.classList.add('so-glow-ruby');
+      flash(L, 'rgba(255,40,80,.5)', 600);
+      const cx = W() / 2, cy = H() * 0.45, ns = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(ns, 'svg'); svg.setAttribute('class', 'sof sof-crack'); svg.setAttribute('viewBox', '0 0 ' + W() + ' ' + H()); svg.setAttribute('preserveAspectRatio', 'none');
+      const rays = LOW ? 9 : 14;
+      for (let i = 0; i < rays; i++) {
+        const a = (i / rays) * Math.PI * 2 + rand(-0.12, 0.12); let x = cx, y = cy, d = 'M' + x + ' ' + y;
+        const segs = Math.floor(rand(4, 7)); let len = rand(60, 120);
+        for (let k = 0; k < segs; k++) { const aa = a + rand(-0.25, 0.25); x += Math.cos(aa) * len; y += Math.sin(aa) * len; d += 'L' + x.toFixed(0) + ' ' + y.toFixed(0); len *= rand(1, 1.5); }
+        const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); p.style.animationDelay = (0.05 + i * 0.012) + 's'; svg.appendChild(p);
+        if (i % 2) { const f = document.createElementNS(ns, 'path'); f.setAttribute('d', d); f.setAttribute('class', 'f'); f.style.animationDelay = (0.1 + i * 0.012) + 's'; svg.appendChild(f); }
+      }
+      L.appendChild(svg); svg.addEventListener('animationend', (e) => { if (e.target === svg) svg.remove(); });
+      L.parentNode.classList.add('so-shake'); setTimeout(() => L.parentNode.classList.remove('so-shake'), 650);
+      for (let i = 0; i < N(big ? 22 : 16); i++) {
+        const x = rand(0, W()), y = rand(0, H() * 0.7), sz = rand(26, 70);
+        bit(L, 'sof-glass', { '--x': x + 'px', '--y': y + 'px', '--size': sz + 'px', '--p1': rand(0, 40) + '% ' + rand(0, 40) + '%', '--p2': rand(60, 100) + '% ' + rand(0, 50) + '%', '--p3': rand(20, 80) + '% ' + rand(60, 100) + '%', '--dx': rand(-80, 80) + 'px', '--rot': rand(-200, 200) + 'deg', '--delay': (0.45 + rand(0, 0.5)) + 's', '--dur': rand(1.2, 2) + 's' });
+      }
+      for (let i = 0; i < N(14); i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(16, 30) + 'px', '--delay': rand(0.8, 2.4) + 's', '--c': ['#ff8fa8', '#ffffff', '#ff3b6b'][i % 3] }, '✦');
+      wave(L, '#ff3b6b', 0.5, 1.4);
+    },
+    // dragon: the godly one. Bright, colourful and hopeful, like a sunrise with a rainbow
     dragon(L, big) {
-      L.parentNode.classList.add('so-glow-dragon');
-      bit(L, 'sof-aurora', {});
-      bit(L, 'sof-dragon', { '--delay': '0.15s' }, '龙');
-      const hues = ['#ff6b8b', '#ffb15c', '#f6e65a', '#6fe39a', '#4cc9f0', '#8a7dff', '#e879f9'];
-      for (let i = 0; i < 7; i++) wave(L, hues[i], 0.1 + i * 0.22, 1 + i * 0.22);
-      for (let i = 0; i < (big ? 46 : 34); i++) bit(L, 'sof-petal', { '--x': rand(0, W()) + 'px', '--size': rand(9, 18) + 'px', '--delay': rand(0.3, 2.6) + 's', '--dur': rand(3.2, 5) + 's', '--sway': rand(30, 90) + 'px', '--c': hues[i % 7] });
-      for (let i = 0; i < 24; i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(16, 34) + 'px', '--delay': rand(0.4, 3) + 's', '--c': hues[(i + 2) % 7] }, '✦');
-      setTimeout(() => flash(L, 'rgba(255,255,255,.22)', 700), 650);
+      flash(L, 'rgba(255,255,255,.6)', 900);
+      bit(L, 'sof-ray', {}); bit(L, 'sof-arch', { '--delay': '0.3s' });
+      const hues = ['#ff9db8', '#ffcf8a', '#f6f08a', '#9df0b8', '#8ad8f5', '#b9a8ff', '#f0a8f8'];
+      for (let i = 0; i < 4; i++) wave(L, hues[i * 2 % 7], 0.15 + i * 0.3, 1 + i * 0.4);
+      for (let i = 0; i < N(big ? 34 : 26); i++) bit(L, 'sof-orb', { '--x': rand(0, W()) + 'px', '--size': rand(7, 15) + 'px', '--delay': rand(0.2, 3) + 's', '--dur': rand(3.4, 5.4) + 's', '--sway': rand(-60, 60) + 'px', '--c': hues[i % 7] });
+      for (let i = 0; i < N(16); i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(16, 34) + 'px', '--delay': rand(0.4, 3) + 's', '--c': hues[(i + 2) % 7] }, '✦');
     },
   };
 
@@ -201,7 +239,7 @@
     document.body.appendChild(solo);
     SHOW[key](solo.firstChild, !!big);
     (SOUND[key] || SOUND.bronze)();
-    setTimeout(() => solo.remove(), key === 'dragon' ? 7000 : 5200);
+    setTimeout(() => solo.remove(), key === 'dragon' ? 7000 : key === 'ruby' ? 5200 : 5200);
   }
 
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && current && !current.querySelector('[data-act="go"]')) close(); });

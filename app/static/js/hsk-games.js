@@ -22,6 +22,20 @@
   const every = (fn, ms) => { const t = setInterval(fn, ms); timers.push(t); return t; };
   const stopTimers = () => { timers.forEach((t) => { clearTimeout(t); clearInterval(t); }); timers = []; };
 
+  // the two display switches (saved on this device)
+  const SET = (() => { try { return JSON.parse(localStorage.getItem('hskGameSet') || '{}'); } catch (e) { return {}; } })();
+  function applySet() {
+    app.classList.toggle('gm-nopy', SET.py === false);
+    app.classList.toggle('gm-nomean', SET.mean === false);
+    const a = document.getElementById('gm-showpy'), b = document.getElementById('gm-showmean');
+    if (a) a.checked = SET.py !== false; if (b) b.checked = SET.mean !== false;
+    try { localStorage.setItem('hskGameSet', JSON.stringify(SET)); } catch (e) { /* optional */ }
+  }
+  document.addEventListener('change', (e) => {
+    if (e.target.id === 'gm-showpy') { SET.py = e.target.checked; applySet(); }
+    if (e.target.id === 'gm-showmean') { SET.mean = e.target.checked; applySet(); }
+  });
+
   function paintBest() {
     document.querySelectorAll('em[data-best]').forEach((el) => {
       const b = best[el.dataset.best];
@@ -29,6 +43,7 @@
     });
   }
   paintBest();
+  applySet();
 
   async function load() {
     const [d, p] = await Promise.all([
@@ -83,7 +98,7 @@
       if (res && res.ok) { best[game] = { best: res.best, plays: res.plays }; paintBest(); }
     } catch (e) {}
     const review = (wrong || []).length
-      ? `<div class="gm-review"><b style="font-size:.8rem;font-family:inherit">Words to review</b>${wrong.map((w) => `<div><b>${esc(w.hanzi)}</b>${esc(w.pinyin)} · ${esc(w.arti)}</div>`).join('')}</div>` : '';
+      ? `<div class="gm-review"><b style="font-size:.8rem;font-family:inherit">Words to review</b>${wrong.map((w) => `<div><b>${esc(w.hanzi)}</b><span class="py">${esc(w.pinyin)} · </span>${esc(w.arti)}</div>`).join('')}</div>` : '';
     stage.innerHTML = `<div class="card gm-end">
       <h2>${great ? 'Excellent! 太棒了!' : 'Finished! 加油!'}</h2>
       <div class="gm-big">${score}</div>
@@ -329,7 +344,7 @@
       return { word: w,
         options: choices(w, 'hanzi'),
         prompt: `<div class="gm-sent" lang="zh">${esc(zh.replace(w.hanzi, '＿＿'))}</div><div class="gm-meaning" style="font-size:1rem">${esc(id || '')}</div>`,
-        reveal: `<b lang="zh">${esc(zh)}</b><br>${esc(py || '')}` };
+        reveal: `<b lang="zh">${esc(zh)}</b><br><span class="py">${esc(py || '')}</span>` };
     });
   }
 
@@ -341,8 +356,8 @@
       const clue = (w.trick || '').split(w.hanzi).join('＿');
       return { word: w,
         options: choices(w, 'hanzi'),
-        prompt: `<div class="gm-meaning" style="font-size:.95rem">Which character is built from these parts?</div><div class="gm-parts" lang="zh">${esc(w.parts)}</div>${clue ? `<div class="gm-clue">💡 ${esc(clue)}</div>` : ''}<div class="gm-meaning" style="font-size:.9rem">Meaning: ${esc(short(w))}</div>`,
-        reveal: `<b lang="zh">${esc(w.hanzi)}</b> ${esc(w.pinyin)} · ${esc(w.arti)}` };
+        prompt: `<div class="gm-meaning" style="font-size:.95rem">Which character is built from these parts?</div><div class="gm-parts" lang="zh">${esc(w.parts)}</div>${clue ? `<div class="gm-clue gm-riddle-mean">💡 ${esc(clue)}</div>` : ''}<div class="gm-meaning gm-riddle-mean" style="font-size:.9rem">Meaning: ${esc(short(w))}</div>`,
+        reveal: `<b lang="zh">${esc(w.hanzi)}</b> <span class="py">${esc(w.pinyin)} · </span>${esc(w.arti)}` };
     });
   }
 

@@ -24,7 +24,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=37" }}">
+<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=40" }}">
 {% block head_extra %}{% endblock %}
 </head>
 <body>
@@ -39,6 +39,11 @@
   <div class="n-stars"></div>
   <div class="n-moon"></div>
   <div class="n-mount"></div>
+</div>
+
+<div class="orn-forest" aria-hidden="true">
+  <div class="f-trees"></div>
+  <i class="f-fly" style="--x:12vw;--y:58vh;--d:0s"></i><i class="f-fly" style="--x:30vw;--y:70vh;--d:1.4s"></i><i class="f-fly" style="--x:55vw;--y:62vh;--d:2.6s"></i><i class="f-fly" style="--x:78vw;--y:72vh;--d:.7s"></i><i class="f-fly" style="--x:90vw;--y:55vh;--d:3.4s"></i>
 </div>
 
 <div class="orn" aria-hidden="true">
@@ -186,8 +191,9 @@ document.addEventListener('click', function(e) {
 </script>
 <script src="{{ url_for('auth.i18n_data') }}?v={{ i18n_version }}"></script>
 <script src="{{ url_for('static', filename='js/i18n-live.js') }}?v=1"></script>
-<script src="{{ url_for('static', filename='js/theme-picker.js') }}?v=1"></script>
+<script src="{{ url_for('static', filename='js/theme-picker.js') }}?v=2"></script>
 <script src="{{ url_for('static', filename='js/nav-drawer.js') }}?v=1" defer></script>
+<script src="{{ url_for('static', filename='js/title-tip.js') }}?v=2" defer></script>
 {% block page_scripts %}{% endblock %}
 </body>
 </html>

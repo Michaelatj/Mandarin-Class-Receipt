@@ -22,6 +22,8 @@
       {% for t in themes %}<option value="{{ t.id }}">{{ t.icon }} {{ t.label }} ({{ t.count }})</option>{% endfor %}
     </select>
     <label class="gm-check"><input type="checkbox" id="gm-unknown"> Only words I have not mastered</label>
+    <label class="gm-check"><input type="checkbox" id="gm-showpy" checked> Show pinyin</label>
+    <label class="gm-check"><input type="checkbox" id="gm-showmean" checked> Show meaning and clue in the Character riddle</label>
   </div>
 
   <div id="gm-menu" class="gm-menu">
@@ -37,4 +39,4 @@
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=3' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=2' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=5' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=3' }}"></script>{% endblock %}

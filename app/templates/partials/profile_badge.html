@@ -3,7 +3,7 @@
    the page only says that a new one is waiting once it has been earned. #}
 {% set tier = streak.tier if streak else {'key': 'bronze', 'char': '铜', 'name': 'Bronze', 'zh': '青铜'} %}
 <div class="card badge-hero tier-{{ tier.key }}" id="badgeHero" data-tier="{{ tier.key }}">
-  <div class="badge-who">
+  <div class="badge-who np-tier-{{ tier.key }}">
     <span class="badge-avatar">{{ user.name()[0] }}</span>
     <span class="badge-who-name">{{ user.name() }}</span>
   </div>

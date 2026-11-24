@@ -1,4 +1,4 @@
-/* Theme choice for the whole app: Light, Dark, Night, Chinese, Chinese (dark).
+/* Theme choice for the whole app: Light, Dark, Night, Forest, Chinese, Chinese (dark).
    Saved on this device. The same dropdown is used on the login page and in Settings. */
 (function () {
   'use strict';
@@ -9,6 +9,8 @@
     { id: 'dark',       label: 'Dark',             note: 'Easy on the eyes',                    theme: 'dark',  skin: '' },
     { id: 'night',      label: 'Night',            note: 'Blue dusk with mountains and a moon', theme: 'dark',  skin: 'night' },
     { id: 'china',      label: 'Chinese',          note: 'Red and cream with lanterns',         theme: 'light', skin: 'china' },
+    { id: 'forest',     label: 'Forest',           note: 'Cozy green with pine trees',          theme: 'light', skin: 'forest' },
+    { id: 'forest-dark', label: 'Forest (dark)',    note: 'Mossy night with fireflies',          theme: 'dark',  skin: 'forest' },
     { id: 'china-dark', label: 'Chinese (dark)',   note: 'Red accents on warm charcoal',        theme: 'dark',  skin: 'china' },
   ];
 

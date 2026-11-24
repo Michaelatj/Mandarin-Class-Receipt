@@ -198,6 +198,8 @@ def normalize_quiz(payload, existing_ids=None):
             "explanation": _clean(q["explanation"], 600) if q.get("explanation") else None,
             "points": q["points"] if isinstance(q.get("points"), (int, float)) and 0 < q["points"] <= 10 else 1,
         }
+        if q.get("aboutStory") is True:
+            base["aboutStory"] = True                     # a story quiz: this question is about the reading passage
         if isinstance(q.get("audio"), str) and q["audio"].strip():
             base["audio"] = _clean(q["audio"], 200)       # read aloud by the student's device (listen-and-choose)
         if base["type"] == "type_answer":
@@ -261,6 +263,8 @@ def to_student_view(quiz):
                 "questionMeaning": q.get("questionMeaning")}
         if q.get("audio"):
             item["audio"] = q["audio"]
+        if q.get("aboutStory"):
+            item["aboutStory"] = True
         if q["type"] == "type_answer":
             pass                                   # the student gets an empty text box
         elif q["type"] == "sentence_reorder":
@@ -414,8 +418,13 @@ def build_review(questions, answers):
         review.append({
             "id": q["id"],
             "type": q["type"],
+            "aboutStory": bool(q.get("aboutStory")),
             "question": q["question"],
             "questionMeaning": q.get("questionMeaning"),
+            "options": q.get("options") or [],
+            "optionMeanings": q.get("optionMeanings") or [],
+            "chosen": (given.get("value") if isinstance(given.get("value"), (str, list)) else None),
+            "answerList": q.get("answers") if q["type"] == "multiple_select" else None,
             "explanation": q.get("explanation"),
             "given": display_answer(q, value),
             "correctAnswer": correct_text(q),

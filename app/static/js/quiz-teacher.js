@@ -43,7 +43,8 @@
       text: 'TYPE THE ANSWER ("type": "type_answer") - Ask for a short answer the student types, for example "Write the pinyin of 谢谢 (xièxie)?" or "How do you say \'thank you\' in Chinese? Type the pinyin". Omit "options" and "answer". Put every accepted answer in "answers": the pinyin with tone marks AND the same pinyin without tones (for example ["xièxie", "xiexie"]), because phones make tone marks hard to type. Only ask for answers that have one clear spelling.' },
   ];
 
-  function buildPrompt(hsk, count, kindIds, story) {
+  function buildPrompt(hsk, count, kindIds, storyN) {
+    const story = storyN > 0;
     const kinds = KINDS.filter((k) => kindIds.includes(k.id));
     const hasReorder = kinds.some((k) => k.id === 'sentence_reorder');
     const hasMulti = kinds.some((k) => k.id === 'multi_select');
@@ -103,11 +104,11 @@ SENTENCE ORDER QUESTIONS
 ` : '';
 
     const storyRules = story ? `
-STORY QUIZ (all questions are about ONE reading passage)
+STORY QUIZ (${storyN >= count ? 'all' : 'the first ' + storyN} questions are about ONE reading passage)
 - Write ONE short story or dialogue of about ${Math.min(220, 60 + Number(hsk) * 25)} Chinese characters at HSK ${hsk} level, using the vocabulary of the TEACHING MATERIAL. Put it in the "story" object: "text" (Chinese characters only, no pinyin), "pinyin" (the same text in pinyin, with tone marks), "meaning" (an Indonesian translation), and a short "title".
-- Every question must be answerable ONLY by reading the story (who, where, when, what happened, why, what someone said). Do not ask questions the student can answer without the story.
-- Mix the question types below, but make most of them comprehension questions about the story. Put the question text in Chinese with pinyin in parentheses, as usual.
-- Order the questions as the story goes, from the beginning to the end.
+- The first ${Math.min(storyN, count)} questions are STORY questions. Give each of them "aboutStory": true. Each must be answerable ONLY by reading the story (who, where, when, what happened, why, what someone said). Do not ask questions the student can answer without the story. Order them as the story goes.
+${storyN < count ? `- The remaining ${count - storyN} questions have NOTHING to do with the story: do not mention it, do not need it, and do not put "aboutStory" on them. They test the vocabulary and grammar of the TEACHING MATERIAL on their own.` : ''}
+- Mix the question types below. Put the question text in Chinese with pinyin in parentheses, as usual.
 ` : '';
     const storyShape = story ? `  "story": {
     "title": "Story title (Chinese + pinyin)",
@@ -221,9 +222,11 @@ FINAL REMINDER: your entire reply must be the raw JSON object and nothing else. 
     function refresh() {
       const n = Math.max(4, Math.min(30, parseInt(count.value, 10) || 10));
       const ids = [...kindsBox.querySelectorAll('input:checked')].map((i) => i.value);
-      promptBox.value = buildPrompt(hsk.value, n, ids, !!(storyBox && storyBox.checked));
+      const sn = document.getElementById('qz-story-n');
+      document.getElementById('qz-story-n-box').hidden = !(storyBox && storyBox.checked);
+      promptBox.value = buildPrompt(hsk.value, n, ids, storyBox && storyBox.checked ? Math.max(1, Math.min(n, parseInt(sn.value, 10) || 5)) : 0);
     }
-    [hsk, count].forEach((el) => el.addEventListener('input', refresh));
+    [hsk, count, document.getElementById('qz-story-n')].forEach((el) => el.addEventListener('input', refresh));
     kindsBox.addEventListener('change', refresh);
     if (storyBox) storyBox.addEventListener('change', refresh);
     refresh();

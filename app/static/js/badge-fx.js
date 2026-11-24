@@ -5,6 +5,7 @@
      gold    coin     - spins like a coin and gold confetti bursts and falls
      jade    bloom    - glows and floats while green rings and orbs drift up
      diamond facet    - flips like a cut stone, white flashes and crystal glints
+     ruby    slam     - drops in hard, red shock rings and ruby glints
      dragon  ascend   - floats up while the colours of the rainbow flow through it
    The seal does the motion (CSS class fx-<tier>); this file adds the particles around it.
    With "reduce motion" on, only a quiet pulse is played. */
@@ -84,20 +85,28 @@
       }
       return 1900;
     },
+    ruby(layer) {
+      ring(layer, '#ff3b6b', 0.05); ring(layer, '#ffffff', 0.25, 1.3);
+      for (let i = 0; i < 12; i++) {
+        const a = rand(0, Math.PI * 2), r = rand(80, 150);
+        particle(layer, 'bfx-star', { '--x': Math.cos(a) * r + 'px', '--y': Math.sin(a) * r + 'px', '--size': rand(12, 24) + 'px', '--delay': rand(0.1, 0.9) + 's', '--c': ['#ff3b6b', '#ff8fa8', '#ffffff'][i % 3] }, i % 2 ? '◆' : '✦');
+      }
+      return 1700;
+    },
     dragon(layer) {
-      const hues = ['#ff6b8b', '#ffb15c', '#f6e65a', '#6fe39a', '#4cc9f0', '#8a7dff', '#e879f9'];
-      hues.forEach((h, i) => ring(layer, h, 0.1 + i * 0.2, 1 + i * 0.18));
-      for (let i = 0; i < 22; i++) {
+      const hues = ['#ff9db8', '#ffcf8a', '#f6f08a', '#9df0b8', '#8ad8f5', '#b9a8ff', '#f0a8f8'];
+      [0, 2, 4, 6].forEach((i, k) => ring(layer, hues[i], 0.1 + k * 0.25, 1 + k * 0.2));
+      for (let i = 0; i < 12; i++) {
         particle(layer, 'bfx-orb', {
           '--x': rand(-130, 130) + 'px', '--rise': -rand(120, 230) + 'px', '--sway': rand(-40, 40) + 'px',
-          '--size': rand(8, 16) + 'px', '--delay': rand(0.2, 1.6) + 's', '--c': hues[i % 7],
+          '--size': rand(8, 14) + 'px', '--delay': rand(0.2, 1.6) + 's', '--c': hues[i % 7],
         });
       }
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 6; i++) {
         const a = rand(0, Math.PI * 2), r = rand(80, 150);
-        particle(layer, 'bfx-star', { '--x': Math.cos(a) * r + 'px', '--y': Math.sin(a) * r + 'px', '--size': rand(14, 26) + 'px', '--delay': rand(0.3, 1.8) + 's', '--c': hues[(i + 3) % 7] }, '✦');
+        particle(layer, 'bfx-star', { '--x': Math.cos(a) * r + 'px', '--y': Math.sin(a) * r + 'px', '--size': rand(14, 24) + 'px', '--delay': rand(0.3, 1.8) + 's', '--c': hues[(i + 3) % 7] }, '✦');
       }
-      return 3000;
+      return 2800;
     },
   };
 

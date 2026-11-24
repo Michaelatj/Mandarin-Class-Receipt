@@ -57,7 +57,8 @@ TIERS = [
     (10, "gold",    "金", "Gold",    "黄金"),
     (15, "jade",    "翠", "Jade",    "翡翠"),
     (20, "diamond", "钻", "Diamond", "钻石"),
-    (25, "dragon",  "龙", "Dragon",  "神龙"),
+    (25, "ruby",    "红", "Ruby",    "红宝石"),
+    (30, "dragon",  "龙", "Dragon",  "神龙"),
 ]
 
 

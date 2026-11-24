@@ -297,5 +297,5 @@ def data(user, level):
              "arti": e["arti"], "theme": e["theme"], "parts": e.get("parts", ""), "trick": e.get("trick", ""),
              "sentence": e.get("sentence") or []} for e in _entries(level)]
     resp = jsonify(slim)
-    resp.headers["Cache-Control"] = "no-store"
+    resp.headers["Cache-Control"] = "private, max-age=3600"  # the word list never changes between deploys: the browser reuses it, no server call
     return resp

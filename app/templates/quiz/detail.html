@@ -14,7 +14,6 @@
     <p class="qz-sub" style="margin-top:8px"><span>{{ quiz.questions|length }} question{{ '' if quiz.questions|length == 1 else 's' }}</span>{% if quiz.description %} · <span data-no-i18n>{{ quiz.description }}</span>{% endif %}</p>
   </div>
   <div class="qz-actions-row">
-    <a class="btn bgh qz-btn-sm" href="{{ url_for('quiz.cards', quiz_id=quiz.id) }}">Preview cards</a>
     <a class="btn qz-btn-gold qz-btn-sm" href="{{ url_for('quiz.edit', quiz_id=quiz.id) }}">Edit questions</a>
   </div>
 </div>
@@ -71,7 +70,7 @@
           <td class="num">{{ r.attempt.accuracy_score|int }}</td>
           <td class="num">{{ r.attempt.xp_score }}</td>
           <td class="num">{{ r.attempt.longest_streak }}</td>
-          <td>{% if r.title %}<span class="qz-badge-title">{{ r.title.icon }} {{ r.title.name }}</span>{% endif %}</td>
+          <td>{% if r.title %}<span class="qz-badge-title" tabindex="0" data-tt-zh="{{ r.title.name }}" data-tt-py="{{ r.title.pinyin }}" data-tt-en="{{ r.title.meaning }}">{{ r.title.icon }} {{ r.title.name }}</span>{% endif %}</td>
           <td>{{ fmt_date(to_wib(r.attempt.submitted_at)) }}</td>
         </tr>
         <tr>
@@ -79,12 +78,38 @@
             <details class="qz-review">
               <summary>Review answers</summary>
               <div class="qz-review-list">
+                {% if story %}
+                <div class="qz-rv-story">
+                  {% if story.title %}<h4 data-no-i18n>{{ story.title }}</h4>{% endif %}
+                  {% for para in story.text.split('\n') if para.strip() %}<p data-no-i18n>{{ para }}</p>{% endfor %}
+                  {% if story.pinyin %}{% for para in story.pinyin.split('\n') if para.strip() %}<p class="sub" data-no-i18n>{{ para }}</p>{% endfor %}{% endif %}
+                  {% if story.meaning %}{% for para in story.meaning.split('\n') if para.strip() %}<p class="sub" data-no-i18n>{{ para }}</p>{% endfor %}{% endif %}
+                </div>
+                {% endif %}
+                {% set flagged = r.review|selectattr('aboutStory')|list|length > 0 %}
+                {% set ns = namespace(sec='') %}
                 {% for item in r.review %}
+                {% set sec = ('story' if (item.aboutStory or not flagged) else 'other') if story else '' %}
+                {% if story and sec != ns.sec %}{% set ns.sec = sec %}
+                <div class="qz-rv-sec">{{ 'Questions about the story' if sec == 'story' else 'Other questions' }}<small>{{ 'answered with the story above' if sec == 'story' else 'not about the story' }}</small></div>
+                {% endif %}
                 <div class="qz-review-q {{ 'ok' if item.correct else 'bad' }}">
                   <div class="q" data-no-i18n>{{ loop.index }}. {{ item.question }}</div>
+                  {% if item.questionMeaning %}<div class="qz-rv-why" data-no-i18n>{{ item.questionMeaning }}</div>{% endif %}
+                  {% if item.type in ('multiple_choice', 'multiple_select') and item.options %}
+                  <ul class="qz-rv-opts">
+                    {% for o in item.options %}
+                    {% set is_right = (o in item.answerList) if item.type == 'multiple_select' else (o == item.correctAnswer) %}
+                    {% set is_pick = (o in (item.chosen or [])) if item.type == 'multiple_select' else (o == item.chosen) %}
+                    <li class="{{ 'right' if is_right else '' }} {{ 'picked' if is_pick else '' }} {{ 'wrongpick' if is_pick and not is_right else '' }}" data-no-i18n>{{ '✓ ' if is_right else ('✗ ' if is_pick else '') }}{{ o }}{% if item.optionMeanings and item.optionMeanings[loop.index0] %}<small>{{ item.optionMeanings[loop.index0] }}</small>{% endif %}{% if is_pick %}<small>(student)</small>{% endif %}</li>
+                    {% endfor %}
+                  </ul>
+                  {% else %}
                   <div class="a"><b>Student answer:</b> <span data-no-i18n>{{ item.given if item.given else '-' }}</span></div>
                   {% if not item.correct %}<div class="a"><b>Correct answer:</b> <span data-no-i18n>{{ item.correctAnswer }}</span></div>{% endif %}
                   {% if not item.correct and item.otherOrders %}<div class="a"><b>Also accepted:</b> <span data-no-i18n>{{ item.otherOrders|join('  |  ') }}</span></div>{% endif %}
+                  {% endif %}
+                  {% if item.explanation %}<div class="qz-rv-why" data-no-i18n>💡 {{ item.explanation }}</div>{% endif %}
                 </div>
                 {% endfor %}
               </div>
@@ -103,4 +128,4 @@
 <div class="qz-danger"><button type="button" class="btn br qz-btn-sm" id="qz-delete">Delete quiz</button></div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-teacher.js') + '?v=1' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-teacher.js') + '?v=3' }}"></script>{% endblock %}
