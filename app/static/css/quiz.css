@@ -389,3 +389,20 @@
 .qz-rv-opts li.picked.wrongpick { border-color: #d4380d; background: rgba(212,56,13,.1); }
 .qz-rv-opts li small { color: var(--text3); margin-left: 6px; }
 .qz-rv-why { font-size: .9rem; color: var(--text3); margin-top: 6px; }
+
+/* v22: use the whole screen. Bonus Courses fills the width; quiz pages are wide */
+.qz-content { max-width: none; margin-left: 0; margin-right: 0; }
+.qz-content .qz-shell { max-width: 1280px; }
+body:has(#hsk-app) .qz-content .qz-shell, body:has(#gm-app) .qz-content .qz-shell { max-width: none; }
+/* bigger text for questions, the story and the teacher review */
+.qz-qtext { font-size: 1.35rem; line-height: 1.55; }
+.qz-story-q .qz-qtext { font-size: 1.3rem; }
+.qz-option { font-size: 1.12rem; padding-top: 14px; padding-bottom: 14px; }
+.qz-story-box, .qz-story-text, .qz-story p { font-size: 1.3rem; line-height: 1.9; }
+.qz-rv-story p { font-size: 1.2rem; line-height: 1.85; } .qz-rv-story .sub { font-size: 1.02rem; }
+.qz-review-q .q { font-size: 1.15rem; } .qz-review-q .a { font-size: 1.02rem; }
+.qz-rv-opts li { font-size: 1.05rem; padding: 8px 12px; } .qz-rv-why { font-size: 1rem; }
+.qz-story-text p { font-size: 1.5rem; line-height: 2.05; }
+.qz-story-title { font-size: 1.35rem; }
+.qz-story-sub { font-size: 1.1rem; line-height: 1.7; }
+.qz-story-tools .btn { font-size: .95rem; }

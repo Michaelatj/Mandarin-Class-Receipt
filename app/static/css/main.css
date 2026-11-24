@@ -2834,7 +2834,7 @@ body.so-open { overflow: hidden; }
   --bg: #eaf1df; --surface: #fbfaf2; --surface2: #f1f4e6;
   --border: #d3deba; --border2: #bccd9d;
   --text: #28372a; --text2: #435544; --text3: #66786a;
-  --sidebar-bg: #dfe9cf; --sidebar-border: rgba(60,90,50,.18);
+  --sidebar-bg: #2f4d37; --sidebar-border: rgba(255,255,255,.14);
   --shadow: 0 1px 3px rgba(40,70,40,.1), 0 6px 20px rgba(40,70,40,.08);
   --shadow-md: 0 8px 28px rgba(40,70,40,.16);
   --accent: #4a7c3f; --on-accent: #fff;
@@ -2858,11 +2858,11 @@ body.so-open { overflow: hidden; }
 [data-skin="forest"] .app-content, [data-skin="forest"] .auth-col { position: relative; z-index: 1; }
 .orn-forest { display: none; }
 [data-skin="forest"] .orn-forest { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.f-trees { position: absolute; left: 0; right: 0; bottom: 0; height: 30vh; max-height: 320px; background: url('/static/img/forest/trees.svg') center bottom / cover no-repeat; opacity: .55; }
-body:has(.app-shell) .f-trees { left: var(--sidebar-w); height: 24vh; opacity: .4; }
+.f-trees { position: absolute; left: 0; right: 0; bottom: 0; height: 22vh; max-height: 240px; background: url('/static/img/forest/trees.svg') center bottom / auto 100% repeat-x; opacity: .45; -webkit-mask-image: linear-gradient(transparent, #000 55%); mask-image: linear-gradient(transparent, #000 55%); }
+body:has(.app-shell) .f-trees { left: var(--sidebar-w); height: 16vh; opacity: .3; }
 [data-theme="dark"][data-skin="forest"] .f-trees { opacity: .3; filter: brightness(.55); }
 .f-fly { display: none; position: absolute; left: var(--x); top: var(--y); width: 6px; height: 6px; border-radius: 50%; background: #fff7a8; box-shadow: 0 0 8px 2px rgba(255,240,140,.8); animation: f-fly 7s ease-in-out var(--d) infinite alternate; }
 [data-theme="dark"][data-skin="forest"] .f-fly { display: block; }
 @keyframes f-fly { from { transform: translate(0, 0); opacity: .2; } to { transform: translate(26px, -34px); opacity: 1; } }
-@media (max-width: 860px) { body:has(.app-shell) .f-trees { left: 0; bottom: var(--bottom-tab-h); height: 16vh; } }
+@media (max-width: 860px) { body:has(.app-shell) .f-trees { left: 0; bottom: var(--bottom-tab-h); height: 12vh; } }
 @media (prefers-reduced-motion: reduce) { .f-fly { animation: none; } }

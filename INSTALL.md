@@ -1,15 +1,15 @@
-# Update v14 (menggantikan v5–v13; cukup pasang yang ini di atas main)
-Ekstrak ke folder project (timpa), restart app. Tabel baru (quiz_story, hsk_known, hsk_activity) dibuat otomatis saat start.
+# Update v22 (includes v15 to v21)
 
-## Baru di v14 (di atas v11)
-- Progres Bonus Courses: tanda "mastered" murid kini tersimpan di server (ikut pindah HP). Guru melihat di kartu Students > Badge & streak: HSK 1/2/3, jumlah kata dikuasai, jumlah kartu dijawab, dan tanggal terakhir latihan.
-- Soal "Listen and choose": perangkat membacakan kata/kalimat, murid memilih. Dibuat lewat New quiz (jenis soal "Listen and choose"), atau isi kolom Audio di halaman Edit questions.
-- Guru: tombol "Preview badges" di halaman Students untuk memutar semua badge dan animasinya (pop-up streak dan "new badge").
-- Absen offline ("Sudah hadir" dan kode roll call) kini juga memunculkan pop-up streak dan animasi naik badge.
+Extract and replace the files. Deleted from the project: app/templates/quiz/cards.html and app/static/js/flashcards.js (preview cards are gone; you can delete both files by hand, leaving them does no harm).
+Database: table `hsk_game` (Vercel creates it; local SQLite: `python migrate_new_tables.py`).
 
-## Baru di v14 (di atas v12)
-- Setelah murid menyelesaikan kuis (akurasi 60% ke atas), layar hasil memutar perayaan sesuai badge mereka: Bronze kecil sampai Dragon heboh. Akurasi 90%+ memakai versi lebih besar. Fungsi `StreakOverlay.burst(tier, big)` bisa dipakai game Bonus Courses nanti.
+- Games: switches for pinyin (all games) and for meaning + clue (Character riddle).
+- Quiz and Bonus Courses pages are centred. Preview cards removed.
+- Story quiz: teacher chooses how many questions are about the story; the rest are separate. Teacher review shows the story and every question with its options.
+- 7 badges: Bronze 0, Silver 5, Gold 10, Jade 15, Diamond 20, Ruby 25, Dragon 30+ (white rainbow). New effects and music, lighter on weak phones.
+- Titles and badge names show hanzi, pinyin and meaning on hover or tap. Nameplate colours follow the badge.
+- New theme: Forest and Forest (dark).
+- Insights: new Bonus Courses activity card.
+- data.json is cached by the browser for one hour (fewer Vercel function calls).
 
-## Baru di v14 (di atas v13)
-- BUG streak: kelas yang baru dimulai (masih masa tenggang 60 menit) sekarang langsung dihitung begitu murid join / absen (online maupun offline). Sebelumnya streak baru naik 60 menit setelah kelas dimulai. File: app/services/streaks.py.
-- Pop-up streak / badge / galeri guru: warna kartu mengikuti tema (terang, gelap, night, China terang, China gelap). Sebelumnya di tema gelap kartu putih dengan tulisan terang sehingga tidak terbaca.
+- v22: Forest theme readable (dark green sidebar, softer trees). Bonus Courses fills the screen width; quiz pages are wide. Bigger text for questions, story and teacher review. Fixed example words of 对不起 (HSK 1 data).
