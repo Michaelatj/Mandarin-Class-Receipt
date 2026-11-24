@@ -24,7 +24,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=40" }}">
+<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=41" }}">
 {% block head_extra %}{% endblock %}
 </head>
 <body>
@@ -36,7 +36,7 @@
 <div id="toast"></div>
 
 <div class="orn-night" aria-hidden="true">
-  <div class="n-stars"></div>
+  <div class="n-stars"></div><i class="n-shoot" style="--x:18vw;--y:8vh;--d:2s"></i><i class="n-shoot" style="--x:55vw;--y:15vh;--d:7.5s"></i>
   <div class="n-moon"></div>
   <div class="n-mount"></div>
 </div>

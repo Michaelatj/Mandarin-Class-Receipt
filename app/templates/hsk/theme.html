@@ -4,12 +4,12 @@
 {% block qz_attrs %}data-page="hsk-theme"{% endblock %}
 {% block head_extra %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=5' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=7' }}">
 {% endblock %}
 
 {% block qz_body %}
 {% include 'hsk/_sprite.html' %}
-<div id="hsk-app" data-page="theme" data-uid="{{ uid }}" data-level="{{ level }}">
+<div id="hsk-app" data-page="theme" data-uid="{{ uid }}" data-level="{{ level }}"{% if theme_id == 'semua' %} data-tiles="1"{% endif %}>
   <div class="hk-head">
     <span class="hk-head-ico">{{ icon }}</span>
     <div>
@@ -99,4 +99,4 @@
 <script type="application/json" id="hsk-data">{{ items|tojson }}</script>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=8' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/hsk.js') + '?v=9' }}"></script>{% endblock %}

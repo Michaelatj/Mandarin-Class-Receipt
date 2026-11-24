@@ -181,3 +181,24 @@ a.hk-course:hover { border-color: var(--gold); }
 .hk-course.is-locked { opacity: .62; background: var(--surface2); }
 .hk-course.is-locked .hk-course-badge { background: transparent; border-color: var(--border); color: var(--text3); }
 .hk-course-lock { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--text2); }
+
+/* All words: tiles + popup */
+.hk-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+.hk-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 12px 6px; min-height: 92px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; color: var(--text); cursor: pointer; font: inherit; transition: transform .12s, border-color .12s; }
+.hk-tile:hover, .hk-tile:focus-visible { transform: translateY(-2px); border-color: var(--gold); outline: none; }
+.hk-tile[hidden] { display: none; }
+.hk-tile-zh { font-size: 1.7rem; line-height: 1.15; font-family: "Noto Serif SC", "Songti SC", serif; }
+.hk-tile-py { font-size: .72rem; color: var(--text3); }
+.hk-tile.known { background: var(--green-soft); border-color: var(--green); }
+.hk-modal { position: fixed; inset: 0; z-index: 1500; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(10,15,12,.55); }
+.hk-modal-card { position: relative; width: min(560px, 100%); max-height: 90vh; overflow-y: auto; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 18px; padding: 20px 18px 18px; box-shadow: var(--shadow-md); animation: hkpop .18s ease-out; }
+@keyframes hkpop { from { transform: scale(.94); opacity: 0; } to { transform: none; opacity: 1; } }
+.hk-modal-x { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface2); color: var(--text); display: grid; place-items: center; cursor: pointer; }
+.hk-modal-head { text-align: center; margin-bottom: 8px; }
+.hk-modal-zh { font-size: 3.4rem; line-height: 1.2; font-family: "Noto Serif SC", "Songti SC", serif; }
+.hk-modal-py { font-size: 1.1rem; color: var(--text2); }
+.hk-modal-id { font-size: 1.05rem; font-weight: 600; margin-top: 2px; }
+.hk-modal .hk-detail { border: 0; padding: 0; background: none; }
+body.hk-lock { overflow: hidden; }
+
+.hk-note .hk-sec-text { white-space: pre-line; }

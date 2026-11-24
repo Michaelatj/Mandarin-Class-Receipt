@@ -87,6 +87,16 @@ LEVEL_LIST = [(lv, LEVELS[lv]["name"]) for lv in sorted(LEVELS)]
 
 
 @lru_cache(maxsize=4)
+def _riddles(level):
+    """Hand-written Indonesian riddles (hanzi -> riddle). Only some levels have them."""
+    try:
+        with open(DATA_DIR / f"riddles{level}.json", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+@lru_cache(maxsize=4)
 def _entries(level):
     with open(DATA_DIR / f"hsk{level}.json", encoding="utf-8") as f:
         return json.load(f)
@@ -247,7 +257,7 @@ def progress(user, level):
     return jsonify(ok=True)
 
 
-GAMES = ("memory", "speed", "ladder", "match", "fill", "riddle")
+GAMES = ("memory", "speed", "ladder", "match", "fill", "riddle", "race")
 
 
 @hsk_bp.route("/hsk<int:level>/games")
@@ -295,7 +305,8 @@ def game_score(user, level):
 def data(user, level):
     slim = [{"n": e["n"], "hanzi": e["hanzi"], "pinyin": e["pinyin"],
              "arti": e["arti"], "theme": e["theme"], "parts": e.get("parts", ""), "trick": e.get("trick", ""),
-             "sentence": e.get("sentence") or []} for e in _entries(level)]
+             "sentence": e.get("sentence") or [], "riddle": _riddles(level).get(e["hanzi"], "")}
+            for e in _entries(level)]
     resp = jsonify(slim)
     resp.headers["Cache-Control"] = "private, max-age=3600"  # the word list never changes between deploys: the browser reuses it, no server call
     return resp

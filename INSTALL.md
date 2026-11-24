@@ -1,15 +1,10 @@
-# Update v22 (includes v15 to v21)
+# Update v23 (includes v15 to v22)
 
-Extract and replace the files. Deleted from the project: app/templates/quiz/cards.html and app/static/js/flashcards.js (preview cards are gone; you can delete both files by hand, leaving them does no harm).
-Database: table `hsk_game` (Vercel creates it; local SQLite: `python migrate_new_tables.py`).
+Extract and replace the files. No new database table (the `hsk_game` table from before is enough; the new Racing game uses it too).
 
-- Games: switches for pinyin (all games) and for meaning + clue (Character riddle).
-- Quiz and Bonus Courses pages are centred. Preview cards removed.
-- Story quiz: teacher chooses how many questions are about the story; the rest are separate. Teacher review shows the story and every question with its options.
-- 7 badges: Bronze 0, Silver 5, Gold 10, Jade 15, Diamond 20, Ruby 25, Dragon 30+ (white rainbow). New effects and music, lighter on weak phones.
-- Titles and badge names show hanzi, pinyin and meaning on hover or tap. Nameplate colours follow the badge.
-- New theme: Forest and Forest (dark).
-- Insights: new Bonus Courses activity card.
-- data.json is cached by the browser for one hour (fewer Vercel function calls).
-
-- v22: Forest theme readable (dark green sidebar, softer trees). Bonus Courses fills the screen width; quiz pages are wide. Bigger text for questions, story and teacher review. Fixed example words of 对不起 (HSK 1 data).
+- Riddles: real Indonesian riddles, the answer is one of 4 words (HSK 1 has 130+ riddles in app/data/riddles1.json; the tile is hidden for levels without riddles yet).
+- New game: Racing (60 seconds, right answer = faster, wrong answer = the car breaks down).
+- Forest (dark) is much lighter and easier to read. Night has two slow shooting stars and drifting stars.
+- All words: tiles of hanzi, tap one to see the details in a popup.
+- Content: 对不起 has no forced example words; a few odd memory tricks rewritten; clear notes for 会/能/可以 and 不/没.
+- Not in this update (next): notification bell, custom dialogs and date picker, navbar changes.

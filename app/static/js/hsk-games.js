@@ -52,7 +52,9 @@
     ]);
     words = d; knownSet = new Set((p && p.known) || []);
   }
-  const ready = load().catch(() => { words = []; });
+  const ready = load().then(() => {
+    if (!words.some((w) => w.riddle)) { const t = document.querySelector('.gm-tile[data-game="riddle"]'); if (t) t.hidden = true; }   // riddles exist only for some levels
+  }).catch(() => { words = []; });
 
   function pool() {
     const theme = $('gm-theme').value, onlyNew = $('gm-unknown').checked;
@@ -348,17 +350,68 @@
     });
   }
 
-  /* ---------- character riddle ---------- */
+  /* ---------- riddle: a real Indonesian riddle, the answer is one of the 4 words ---------- */
   function riddle(list) {
-    const pool = list.filter((w) => w.parts && !w.parts.includes(w.hanzi));
-    if (pool.length < 4) { alert('Not enough words with parts in this selection. Try "All words".'); return; }
-    quiz10('riddle', pool, (w) => {
-      const clue = (w.trick || '').split(w.hanzi).join('＿');
-      return { word: w,
-        options: choices(w, 'hanzi'),
-        prompt: `<div class="gm-meaning" style="font-size:.95rem">Which character is built from these parts?</div><div class="gm-parts" lang="zh">${esc(w.parts)}</div>${clue ? `<div class="gm-clue gm-riddle-mean">💡 ${esc(clue)}</div>` : ''}<div class="gm-meaning gm-riddle-mean" style="font-size:.9rem">Meaning: ${esc(short(w))}</div>`,
-        reveal: `<b lang="zh">${esc(w.hanzi)}</b> <span class="py">${esc(w.pinyin)} · </span>${esc(w.arti)}` };
+    const pool = list.filter((w) => w.riddle);
+    if (pool.length < 4) { alert('This selection has fewer than 4 riddles. Try "All words".'); return; }
+    quiz10('riddle', pool, (w) => ({ word: w,
+      options: choices(w, 'hanzi'),
+      prompt: `<div class="gm-meaning" style="font-size:.9rem">Teka-teki: siapa / apa aku?</div><div class="gm-riddle">${esc(w.riddle)}</div>`,
+      reveal: `<b lang="zh">${esc(w.hanzi)}</b> <span class="py">${esc(w.pinyin)} · </span>${esc(w.arti)}` }));
+  }
+
+  /* ---------- racing: 60 seconds, right answer = faster, wrong answer = the car breaks down ---------- */
+  function race(list) {
+    const next = deckOf(list), TIME = 60, MAXV = 200;
+    const FAULTS = ['💥 Flat tire!', '🔥 Engine overheating!', '⛽ Fuel leak!', '🔧 Gearbox stuck!'];
+    let left = TIME, v = 40, dist = 0, off = 0, right = 0, total = 0, combo = 0, bestCombo = 0, trouble = 0, over = false, cur = null, locked = false;
+    const wrong = [];
+    stage.innerHTML = `<div class="gm-bar"><span class="gm-stat">⏱ <b id="r-t">${TIME}</b>s</span><span class="gm-stat">Speed <b id="r-v">40</b> km/h</span><span class="gm-stat">Distance <b id="r-d">0</b> m</span><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Quit</button></div>
+      <div class="gm-time" id="r-bar"><i style="width:100%"></i></div>
+      <div class="rc-road" id="r-road"><div class="rc-lines" id="r-lines"></div><div class="rc-car" id="r-car"><span class="rc-body">🏎️</span><span class="rc-smoke" id="r-smoke">💨</span></div><div class="rc-flag" id="r-flag"></div></div>
+      <div id="r-q"></div>`;
+    $('gm-quit').onclick = backToMenu;
+    const lines = $('r-lines'), car = $('r-car'), flag = $('r-flag');
+    function ask() {
+      if (over) return;
+      cur = { w: next(), mode: Math.random() < 0.6 ? 'zh' : 'id' }; locked = false;
+      $('r-q').innerHTML = question(cur.w, cur.mode).html;
+    }
+    $('r-q').addEventListener('click', (e) => {
+      const b = e.target.closest('.gm-opt'); if (!b || b.disabled || over || locked) return;
+      locked = true; total++;
+      document.querySelectorAll('#r-q .gm-opt').forEach((x) => { x.disabled = true; if (x.dataset.n === String(cur.w.n)) x.classList.add('right'); });
+      if (b.dataset.n === String(cur.w.n)) {
+        right++; combo++; bestCombo = Math.max(bestCombo, combo);
+        v = Math.min(MAXV, v + (trouble > 0 ? 12 : 22) + Math.min(combo, 5) * 2);
+      } else {
+        b.classList.add('wrong'); combo = 0;
+        trouble = 4; v = Math.max(15, v * 0.35);
+        flag.textContent = FAULTS[Math.floor(Math.random() * FAULTS.length)];
+        car.classList.add('hurt');
+        if (!wrong.find((x) => x.n === cur.w.n) && wrong.length < 8) wrong.push(cur.w);
+      }
+      later(ask, 400);
     });
+    const DT = 0.05;
+    every(() => {
+      if (over) return;
+      left -= DT; if (trouble > 0) { trouble -= DT; if (trouble <= 0) { car.classList.remove('hurt'); flag.textContent = ''; } }
+      v = Math.max(trouble > 0 ? 10 : 25, v - (trouble > 0 ? 1.2 : 0.5) * DT * 10);   // the car slowly loses speed if you stop answering
+      dist += v / 3.6 * DT; off = (off + v * DT * 1.2) % 80;
+      lines.style.transform = `translate3d(${-off}px,0,0)`;
+      car.style.transform = `translate3d(${Math.min(60, v / MAXV * 60)}%,0,0)`;
+      const sec = Math.ceil(Math.max(0, left));
+      if (sec !== +$('r-t').textContent) { $('r-t').textContent = sec; $('r-bar').classList.toggle('low', sec <= 10); }
+      $('r-v').textContent = Math.round(v); $('r-d').textContent = Math.round(dist);
+      $('r-bar').firstChild.style.width = Math.max(0, left) / TIME * 100 + '%';
+      if (left <= 0) {
+        over = true;
+        const score = Math.min(5000, Math.round(dist)), acc = total ? Math.round(right / total * 100) : 0;
+        finish('race', score, [`${Math.round(dist)} metres in ${TIME} seconds`, `${right} of ${total} correct (${acc}%) · best combo ${bestCombo}`], acc >= 80 && right >= 12, wrong);
+      }
+    }, DT * 1000);
+    ask();
   }
 
   async function start(game) {
@@ -366,7 +419,7 @@
     const list = pool();
     if (list.length < 4) { alert('Choose more words: this selection has fewer than 4 words. Try "All words".'); return; }
     stopTimers(); menu.hidden = true; stage.hidden = false;
-    ({ memory, speed, ladder, match, fill, riddle })[game](list);
+    ({ memory, speed, ladder, match, fill, riddle, race })[game](list);
     window.scrollTo({ top: 0 });
   }
   menu.addEventListener('click', (e) => { const t = e.target.closest('[data-game]'); if (t) start(t.dataset.game); });

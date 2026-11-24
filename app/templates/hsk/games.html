@@ -4,8 +4,8 @@
 {% block qz_attrs %}data-page="hsk-games"{% endblock %}
 {% block head_extra %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=6' }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=4' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=7' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=5' }}">
 {% endblock %}
 
 {% block qz_body %}
@@ -23,7 +23,6 @@
     </select>
     <label class="gm-check"><input type="checkbox" id="gm-unknown"> Only words I have not mastered</label>
     <label class="gm-check"><input type="checkbox" id="gm-showpy" checked> Show pinyin</label>
-    <label class="gm-check"><input type="checkbox" id="gm-showmean" checked> Show meaning and clue in the Character riddle</label>
   </div>
 
   <div id="gm-menu" class="gm-menu">
@@ -32,11 +31,12 @@
     <button type="button" class="gm-tile" data-game="ladder"><span class="gm-ico">🪜</span><b>Level ladder</b><small>Climb 10 floors. A wrong answer drops you one floor.</small><em data-best="ladder"></em></button>
     <button type="button" class="gm-tile" data-game="match"><span class="gm-ico">🔗</span><b>Draw the lines</b><small>Drag a line from each word to its meaning. 3 rounds of 5.</small><em data-best="match"></em></button>
     <button type="button" class="gm-tile" data-game="fill"><span class="gm-ico">✏️</span><b>Fill the blank</b><small>Choose the word that completes the sentence. 10 sentences.</small><em data-best="fill"></em></button>
-    <button type="button" class="gm-tile" data-game="riddle"><span class="gm-ico">🧩</span><b>Character riddle</b><small>Guess the character from its parts and a memory clue.</small><em data-best="riddle"></em></button>
+    <button type="button" class="gm-tile" data-game="riddle"><span class="gm-ico">🧩</span><b>Riddles</b><small>Read a riddle in Indonesian and pick the word that is the answer.</small><em data-best="riddle"></em></button>
+    <button type="button" class="gm-tile" data-game="race"><span class="gm-ico">🏎️</span><b>Racing</b><small>60 seconds. Right answers speed the car up, a wrong one breaks it down.</small><em data-best="race"></em></button>
   </div>
 
   <div id="gm-stage" hidden></div>
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=5' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=3' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=5' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=4' }}"></script>{% endblock %}
