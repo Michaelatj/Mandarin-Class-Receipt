@@ -2420,10 +2420,11 @@ body:has(.app-shell) .n-moon { display: none; }
 :root .streak-chip.tier-gold,   :root .badge-seal.tier-gold   { background: linear-gradient(145deg, #ffe58f, #e0a915 58%, #b57d06); color: #4a3000; }
 :root .streak-chip.tier-jade,   :root .badge-seal.tier-jade   { background: linear-gradient(145deg, #d6fbe6, #43c98f 55%, #157a55); color: #04331f; }
 :root .streak-chip.tier-diamond, :root .badge-seal.tier-diamond { background: linear-gradient(145deg, #ffffff, #a9e6ff 38%, #38b6f0 68%, #1b6fb8); color: #04304f; }
+:root .streak-chip.tier-ruby, :root .badge-seal.tier-ruby { background: linear-gradient(145deg, #ff8fa8, #e0264f 45%, #8e0f2e); color: #fff; text-shadow: 0 1px 3px rgba(60,0,15,.6); }
 :root .streak-chip.tier-dragon, :root .badge-seal.tier-dragon {
-  background: linear-gradient(115deg, #ff6b8b, #ffb15c, #f6e65a, #6fe39a, #4cc9f0, #8a7dff, #e879f9, #ff6b8b);
-  background-size: 300% 100%; color: #fff; text-shadow: 0 1px 4px rgba(40,20,80,.6);
-  animation: tier-shimmer 7s linear infinite;
+  background: linear-gradient(115deg, #ffffff 0%, #ffd9ec 14%, #d9ecff 28%, #d9ffe6 42%, #fff6cf 56%, #ecdcff 70%, #ffffff 84%, #ffd9ec 100%);
+  background-size: 250% 100%; color: #4b3a86; text-shadow: 0 0 6px rgba(255,255,255,.9);
+  animation: tier-shimmer 8s linear infinite;
 }
 }
 :root .streak-chip[class*="tier-"] { font-weight: 700; }
@@ -2432,7 +2433,8 @@ body:has(.app-shell) .n-moon { display: none; }
 :root .streak-bar.tier-gold   > div, :root .badge-next-bar.tier-gold   > div { background: #e0a915; }
 :root .streak-bar.tier-jade   > div, :root .badge-next-bar.tier-jade   > div { background: #2fb67f; }
 :root .streak-bar.tier-diamond > div, :root .badge-next-bar.tier-diamond > div { background: #38b6f0; }
-:root .streak-bar.tier-dragon > div, :root .badge-next-bar.tier-dragon > div { background: linear-gradient(90deg, #ff6b8b, #ffb15c, #f6e65a, #6fe39a, #4cc9f0, #8a7dff); }
+:root .streak-bar.tier-ruby > div, :root .badge-next-bar.tier-ruby > div { background: #e0264f; }
+:root .streak-bar.tier-dragon > div, :root .badge-next-bar.tier-dragon > div { background: linear-gradient(90deg, #ff9db8, #ffcf8a, #f6f08a, #9df0b8, #8ad8f5, #b9a8ff, #f0a8f8); }
 @keyframes tier-shimmer { to { background-position: 300% 0; } }
 @media (prefers-reduced-motion: reduce) { :root .streak-chip.tier-dragon, :root .badge-seal.tier-dragon { animation: none; } }
 
@@ -2453,7 +2455,8 @@ body:has(.app-shell) .n-moon { display: none; }
 .tier-gold   .badge-aura { background: radial-gradient(circle, rgba(255,213,74,.6), transparent 68%); animation: aura-breathe 3.4s ease-in-out infinite; }
 .tier-jade   .badge-aura { background: radial-gradient(circle, rgba(67,201,143,.6), transparent 68%); animation: aura-breathe 4s ease-in-out infinite; }
 .tier-diamond .badge-aura { background: radial-gradient(circle, rgba(120,214,255,.7), transparent 68%); animation: aura-breathe 2.6s ease-in-out infinite; }
-.tier-dragon .badge-aura { background: conic-gradient(from 0deg, rgba(255,107,139,.7), rgba(255,177,92,.6), rgba(246,230,90,.55), rgba(111,227,154,.6), rgba(76,201,240,.7), rgba(138,125,255,.7), rgba(232,121,249,.65), rgba(255,107,139,.7)); animation: aura-spin 9s linear infinite; }
+.tier-ruby .badge-aura { background: radial-gradient(circle, rgba(255,60,100,.65), transparent 68%); }
+.tier-dragon .badge-aura { background: conic-gradient(from 0deg, rgba(255,157,184,.8), rgba(255,207,138,.75), rgba(246,240,138,.7), rgba(157,240,184,.75), rgba(138,216,245,.8), rgba(185,168,255,.8), rgba(240,168,248,.75), rgba(255,157,184,.8)); }
 @keyframes aura-breathe { 50% { transform: scale(1.12); opacity: .8; } }
 @keyframes aura-spin { to { transform: rotate(360deg); } }
 
@@ -2471,7 +2474,8 @@ body:has(.app-shell) .n-moon { display: none; }
 .tier-gold .badge-seal   { box-shadow: inset 0 0 0 5px rgba(255,255,255,.4), 0 0 28px rgba(255,200,40,.5), 0 10px 26px rgba(0,0,0,.28); }
 .tier-jade .badge-seal   { box-shadow: inset 0 0 0 5px rgba(255,255,255,.4), 0 0 28px rgba(67,201,143,.55), 0 10px 26px rgba(0,0,0,.28); }
 .tier-diamond .badge-seal { box-shadow: inset 0 0 0 5px rgba(255,255,255,.65), 0 0 32px rgba(90,200,255,.75), 0 10px 26px rgba(0,0,0,.28); }
-.tier-dragon .badge-seal { box-shadow: inset 0 0 0 5px rgba(255,255,255,.6), 0 0 18px rgba(255,107,139,.6), 0 0 34px rgba(76,201,240,.6), 0 10px 26px rgba(0,0,0,.3); }
+.tier-ruby .badge-seal { box-shadow: inset 0 0 0 5px rgba(255,255,255,.45), 0 0 26px rgba(255,40,90,.7), 0 10px 26px rgba(0,0,0,.3); }
+.tier-dragon .badge-seal { box-shadow: inset 0 0 0 5px rgba(255,255,255,.9), 0 0 20px rgba(255,255,255,.9), 0 0 36px rgba(180,160,255,.55), 0 10px 26px rgba(0,0,0,.22); }
 @keyframes idle-sheen { 0%, 70%, 100% { transform: translateX(-130%); } 85% { transform: translateX(130%); } }
 
 .badge-name { font-family: var(--font-display); font-size: 1.7rem; font-weight: 700; color: var(--text); margin-top: 2px; }
@@ -2579,7 +2583,7 @@ button.dt-name.stu-info-btn:hover { color: var(--gold); text-decoration: underli
 .sbm-box { max-width: 460px; width: calc(100vw - 24px); max-height: 92vh; overflow-y: auto; padding: 8px 14px 18px; }
 .sbm-box .badge-hero { padding-top: 14px; }
 .sbm-rate { margin-top: 10px; font-size: .88rem; color: var(--text2); }
-.sbm-ladder { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border); }
+.sbm-ladder { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border); }
 .sbm-step { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: .72rem; color: var(--text3); }
 .sbm-step b { color: var(--text); font-size: .78rem; }
 .sbm-step.ahead { opacity: .42; }
@@ -2765,3 +2769,100 @@ body.so-open { overflow: hidden; }
 [data-theme="dark"] .so-card, [data-skin="night"] .so-card { background: var(--surface); color: var(--text); border-color: var(--border2); box-shadow: 0 24px 70px rgba(0,0,0,.7); }
 [data-theme="dark"] .so-streak b, [data-skin="night"] .so-streak b { color: var(--text); }
 .bg-card { border-color: var(--border); }
+
+
+/* ═══ v21: seven tiers, lighter effects ═══ */
+.badge-seal.fx-ruby { animation: seal-slam 1.2s cubic-bezier(.2,.9,.2,1) both; }
+@keyframes seal-slam { 0% { transform: rotate(-4deg) scale(2.4); opacity: 0; } 45% { transform: rotate(-4deg) scale(.9); opacity: 1; } 60% { transform: rotate(-6deg) scale(1.12); } 100% { transform: rotate(-4deg) scale(1); } }
+.badge-stage.fx-ruby .badge-aura { opacity: 1; animation: aura-breathe .4s ease-in-out 3; }
+/* the glow behind a badge sways in the badge's own colour; only transform/opacity move, so it stays cheap */
+[class*="tier-"] .badge-aura { animation: aura-sway 5s ease-in-out infinite; will-change: transform; }
+.tier-dragon .badge-aura { animation: aura-spin 14s linear infinite; }
+@keyframes aura-sway { 0%, 100% { transform: rotate(-7deg) scale(.98); opacity: .85; } 50% { transform: rotate(7deg) scale(1.08); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { [class*="tier-"] .badge-aura { animation: none; } }
+
+/* overlay: lighter replacements for the heaviest effects (no blur filters, no animated shadows) */
+.sof-aurora, .sof-dragon { display: none; }
+.sof-twinkle { text-shadow: none; }
+.sof-shard { text-shadow: none; }
+.so-glow-diamond .so-card, .so-glow-dragon .so-card, .so-glow-jade .so-card { animation: none; }
+.sof-coin { left: var(--x); top: -40px; font-size: var(--size); opacity: 0; animation: sof-coin var(--dur, 2.2s) ease-in var(--delay, 0s) both; }
+@keyframes sof-coin { 0% { transform: translate(0,0) rotateY(0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translate(var(--drift), 108vh) rotateY(900deg); opacity: 1; } }
+.sof-ray { left: 50%; top: 42%; width: 190vmax; height: 190vmax; margin: -95vmax 0 0 -95vmax; opacity: 0;
+  background: repeating-conic-gradient(from 0deg, rgba(255,255,255,.55) 0 6deg, rgba(255,255,255,0) 6deg 22deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0, transparent 55%); mask-image: radial-gradient(circle, #000 0, transparent 55%);
+  animation: sof-ray 6s ease-in-out both; }
+@keyframes sof-ray { 0% { transform: rotate(0); opacity: 0; } 20% { opacity: .9; } 80% { opacity: .7; } 100% { transform: rotate(60deg); opacity: 0; } }
+.sof-arch { left: 50%; top: 18%; width: min(120vw, 900px); aspect-ratio: 2 / 1; margin-left: calc(min(120vw, 900px) / -2); opacity: 0;
+  background: radial-gradient(circle at 50% 100%, transparent 0 52%, #ff9db8 53% 57%, #ffcf8a 57% 61%, #f6f08a 61% 65%, #9df0b8 65% 69%, #8ad8f5 69% 73%, #b9a8ff 73% 77%, transparent 78%);
+  -webkit-mask-image: linear-gradient(#000 50%, transparent 50%); mask-image: linear-gradient(#000 50%, transparent 50%);
+  animation: sof-arch 5s ease-out both; }
+@keyframes sof-arch { 0% { opacity: 0; transform: scale(.7); } 25% { opacity: .6; } 75% { opacity: .5; } 100% { opacity: 0; transform: scale(1.08); } }
+.sof-orb { left: var(--x); bottom: -20px; width: var(--size); height: var(--size); border-radius: 50%; background: var(--c); opacity: 0; animation: sof-orb var(--dur, 4s) ease-out var(--delay, 0s) both; }
+@keyframes sof-orb { 0% { transform: translate(0,0); opacity: 0; } 15% { opacity: .9; } 100% { transform: translate(var(--sway), -85vh); opacity: 0; } }
+/* ruby: the screen cracks, shakes once, and the glass falls */
+.sof-crack { inset: 0; width: 100%; height: 100%; opacity: 0; animation: sof-crack 3s ease-out both; }
+.sof-crack path { fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 600; stroke-dashoffset: 600; animation: sof-draw .45s ease-out forwards; filter: none; }
+.sof-crack path.f { stroke: #ff3b6b; stroke-width: 1; opacity: .8; }
+@keyframes sof-draw { to { stroke-dashoffset: 0; } }
+@keyframes sof-crack { 0% { opacity: 0; } 4% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+.sof-glass { left: var(--x); top: var(--y); width: var(--size); height: var(--size); background: linear-gradient(135deg, rgba(255,255,255,.85), rgba(255,120,150,.55)); clip-path: polygon(var(--p1), var(--p2), var(--p3)); opacity: 0; animation: sof-glass var(--dur, 1.6s) ease-in var(--delay, 0s) both; }
+@keyframes sof-glass { 0% { transform: translate(0,0) rotate(0); opacity: 0; } 8% { opacity: 1; } 100% { transform: translate(var(--dx), 95vh) rotate(var(--rot)); opacity: 1; } }
+.so-shake { animation: so-shake .5s ease-in-out 1; }
+@keyframes so-shake { 10% { transform: translate(-9px, 4px); } 30% { transform: translate(8px, -6px); } 50% { transform: translate(-6px, 5px); } 70% { transform: translate(5px, -3px); } 90% { transform: translate(-2px, 1px); } }
+.so-glow-ruby .so-card { box-shadow: 0 24px 70px rgba(0,0,0,.5), 0 0 0 3px rgba(255,60,100,.35); }
+.sof-burst { box-shadow: none; }
+
+/* title popover and nameplate: the badge decides how a name looks */
+.tt-pop { position: fixed; z-index: 4000; display: grid; gap: 2px; justify-items: center; padding: 10px 16px; border-radius: 12px; background: var(--surface, #fff); color: var(--text, #222); border: 1px solid var(--border2, var(--border)); box-shadow: 0 10px 30px rgba(0,0,0,.28); pointer-events: none; max-width: 260px; text-align: center; }
+.tt-zh { font-size: 1.6rem; line-height: 1.2; font-weight: 600; }
+.tt-py { color: var(--gold, #b8860b); font-size: .95rem; }
+.tt-en { color: var(--text3, #777); font-size: .82rem; }
+[data-tt-zh], .streak-chip[class*="tier-"], .badge-seal[class*="tier-"] { cursor: help; }
+.badge-who .badge-avatar { box-shadow: 0 0 0 3px var(--np, transparent); }
+.np-tier-bronze { --np: #c9854a; } .np-tier-silver { --np: #c3cbd8; } .np-tier-gold { --np: #e0a915; } .np-tier-jade { --np: #2fb67f; } .np-tier-diamond { --np: #4fc3f7; } .np-tier-ruby { --np: #e0264f; }
+.np-tier-dragon { --np: #d8c8ff; }
+.badge-who.np-tier-gold .badge-who-name { color: #b98a00; } .badge-who.np-tier-jade .badge-who-name { color: #1f9a68; }
+.badge-who.np-tier-diamond .badge-who-name { color: #1a8fc4; } .badge-who.np-tier-ruby .badge-who-name { color: #c4163f; }
+.badge-who.np-tier-dragon .badge-who-name { background: linear-gradient(90deg, #ff6b9a, #ffb347, #8fe08f, #4cc9f0, #9a7dff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ═══ Forest: cozy green, pine trees and a few fireflies ═══ */
+[data-skin="forest"] {
+  --red: #b5533c; --red-soft: #f3ddd5;
+  --gold: #4a7c3f; --gold-soft: #e0ecd2;
+  --green: #3f8f5b; --green-soft: #d8efdf;
+  --bg: #eaf1df; --surface: #fbfaf2; --surface2: #f1f4e6;
+  --border: #d3deba; --border2: #bccd9d;
+  --text: #28372a; --text2: #435544; --text3: #66786a;
+  --sidebar-bg: #dfe9cf; --sidebar-border: rgba(60,90,50,.18);
+  --shadow: 0 1px 3px rgba(40,70,40,.1), 0 6px 20px rgba(40,70,40,.08);
+  --shadow-md: 0 8px 28px rgba(40,70,40,.16);
+  --accent: #4a7c3f; --on-accent: #fff;
+}
+[data-theme="dark"][data-skin="forest"] {
+  color-scheme: dark;
+  --red: #f0907a; --red-soft: #4a2c27;
+  --gold: #a9d58a; --gold-soft: #2f4a2d;
+  --green: #7fe3a5; --green-soft: #1f4a35;
+  --bg: #16241a; --surface: #20332a; --surface2: #29402f;
+  --border: #355040; --border2: #46664f;
+  --text: #eaf5e3; --text2: #cfe3c8; --text3: #a6c0a3;
+  --sidebar-bg: #112016; --sidebar-border: rgba(255,255,255,.1);
+  --shadow: 0 1px 3px rgba(0,0,0,.4), 0 6px 22px rgba(0,0,0,.3);
+  --shadow-md: 0 8px 30px rgba(0,0,0,.45);
+  --accent: #a9d58a; --on-accent: #10200f;
+}
+[data-skin="forest"] body { background: linear-gradient(180deg, #f3f7e8 0%, #e6efd7 60%, #d7e6c4 100%); background-attachment: fixed; }
+[data-theme="dark"][data-skin="forest"] body { background: linear-gradient(180deg, #1c3024 0%, #15251b 60%, #0f1c14 100%); background-attachment: fixed; }
+[data-skin="forest"] .auth-shell { background: transparent; }
+[data-skin="forest"] .app-content, [data-skin="forest"] .auth-col { position: relative; z-index: 1; }
+.orn-forest { display: none; }
+[data-skin="forest"] .orn-forest { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.f-trees { position: absolute; left: 0; right: 0; bottom: 0; height: 30vh; max-height: 320px; background: url('/static/img/forest/trees.svg') center bottom / cover no-repeat; opacity: .55; }
+body:has(.app-shell) .f-trees { left: var(--sidebar-w); height: 24vh; opacity: .4; }
+[data-theme="dark"][data-skin="forest"] .f-trees { opacity: .3; filter: brightness(.55); }
+.f-fly { display: none; position: absolute; left: var(--x); top: var(--y); width: 6px; height: 6px; border-radius: 50%; background: #fff7a8; box-shadow: 0 0 8px 2px rgba(255,240,140,.8); animation: f-fly 7s ease-in-out var(--d) infinite alternate; }
+[data-theme="dark"][data-skin="forest"] .f-fly { display: block; }
+@keyframes f-fly { from { transform: translate(0, 0); opacity: .2; } to { transform: translate(26px, -34px); opacity: 1; } }
+@media (max-width: 860px) { body:has(.app-shell) .f-trees { left: 0; bottom: var(--bottom-tab-h); height: 16vh; } }
+@media (prefers-reduced-motion: reduce) { .f-fly { animation: none; } }

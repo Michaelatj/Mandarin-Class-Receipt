@@ -282,14 +282,20 @@
     const paras = String(st.text).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join('');
     const pinyin = st.pinyin ? String(st.pinyin).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join('') : '';
     const meaning = st.meaning ? String(st.meaning).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join('') : '';
-    const qs = quiz.questions.map((q, idx) => {
+    const block = (q, idx) => {
       const a = S.answers[q.id] || {};
       return `<div class="qz-qblock qz-story-q ${ready(q) ? 'filled' : ''}" id="sq-${idx}">
         <div class="qz-qhead"><span class="qz-qindex">${T('Question')} ${idx + 1} / ${n}</span></div>
         <div class="qz-qtext" data-no-i18n>${esc(q.question)}</div>
         ${bodyHtml(q, a, false, false)}
       </div>`;
-    }).join('');
+    };
+    // questions about the story come first; the others (if the teacher made any) sit under their own heading
+    const flagged = quiz.questions.some((q) => q.aboutStory);
+    const about = (q) => !flagged || q.aboutStory;
+    const aboutHtml = quiz.questions.map((q, i) => (about(q) ? block(q, i) : '')).join('');
+    const otherHtml = quiz.questions.map((q, i) => (about(q) ? '' : block(q, i))).join('');
+    const qs = aboutHtml + (otherHtml ? `<h3 class="qz-other-title">${T('Other questions')}<small>${T('These are not about the story')}</small></h3>` + otherHtml : '');
     paint(`
       ${timer}
       <div class="qz-story-card">

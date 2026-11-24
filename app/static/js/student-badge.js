@@ -18,6 +18,7 @@
     $('sbmSeal').dataset.tier = t.key;
     $('sbmChar').textContent = t.char;
     $('sbmAvatar').textContent = (d.name || '?').charAt(0);
+    $('sbmName').parentNode.className = 'badge-who np-tier-' + t.key;
     $('sbmName').textContent = d.name + (d.user ? '  @' + d.user : '');
     $('sbmTier').textContent = t.name + ' · ' + t.zh;
     $('sbmCur').textContent = d.cur;

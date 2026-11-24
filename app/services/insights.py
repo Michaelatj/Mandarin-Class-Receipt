@@ -256,7 +256,31 @@ def build_insights(teacher, now=None):
                         "rate": round(ok / seen * 100), "seen": seen})
     hardest.sort(key=lambda x: (x["rate"], -x["seen"]))
 
+    # ───────── Bonus Courses: who practised and played ─────────
+    from ..models import HskActivity, HskGame, HskKnown
+    week_ago = now - timedelta(days=7)
+    bonus_rows = []
+    sids = [u.id for u in students]
+    if sids:
+        acts = defaultdict(list); games = defaultdict(list); known = defaultdict(int)
+        for a in HskActivity.query.filter(HskActivity.user_id.in_(sids)).all():
+            acts[a.user_id].append(a)
+        for g in HskGame.query.filter(HskGame.user_id.in_(sids)).all():
+            games[g.user_id].append(g)
+        for (uid, n) in db.session.query(HskKnown.user_id, db.func.count(HskKnown.id)).filter(HskKnown.user_id.in_(sids)).group_by(HskKnown.user_id).all():
+            known[uid] = n
+        for u in students:
+            stamps = [a.last_at for a in acts[u.id] if a.last_at] + [g.last_at for g in games[u.id] if g.last_at]
+            last = max(stamps) if stamps else None
+            bonus_rows.append({"name": u.name(), "last": _wib(last) if last else None, "recent": bool(last and last >= week_ago),
+                               "reviews": sum(a.reviews or 0 for a in acts[u.id]), "plays": sum(g.plays or 0 for g in games[u.id]),
+                               "known": known[u.id], "_sort": last or datetime.min})
+        bonus_rows.sort(key=lambda r: r["_sort"], reverse=True)
+    bonus = {"rows": bonus_rows[:12], "active": sum(1 for r in bonus_rows if r["recent"]), "total": len(bonus_rows),
+             "idle": [r["name"] for r in bonus_rows if not r["recent"]][:8]}
+
     return {
+        "bonus": bonus,
         "months": labels, "generated": _wib(now),
         "revenue": revenue, "classes": classes, "students": students_info,
         "quiz": {"count": len(quizzes), "attempts": len(attempts), "rows": quiz_rows[:8], "hardest": hardest[:5]},

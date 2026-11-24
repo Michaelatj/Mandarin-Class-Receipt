@@ -191,7 +191,8 @@ def detail(user, quiz_id):
         "review": ql.build_review(quiz.questions, a.answers or {}),
     } for a in attempts]
 
-    return render_template("quiz/detail.html", home=url_for("quiz.index"), quiz=quiz,
+    story = QuizStory.query.filter_by(quiz_id=quiz.id).first()
+    return render_template("quiz/detail.html", home=url_for("quiz.index"), quiz=quiz, story=story,
                            students=students, assigned_ids=assigned_ids, rows=rows)
 
 
@@ -335,34 +336,6 @@ def api_bulk_delete(user):
 def _has_submitted(user, quiz):
     return (QuizAttempt.query.filter_by(quiz_id=quiz.id, student_id=user.id)
             .filter(QuizAttempt.submitted_at.isnot(None)).first() is not None)
-
-
-@quiz_bp.route("/quiz/<int:quiz_id>/cards")
-@guard()
-def cards(user, quiz_id):
-    """Flashcards built from the quiz questions: question on the front, correct answer on the back.
-    Students only get them after they have finished the quiz, so the answers are not given away."""
-    quiz = db.session.get(Quiz, quiz_id)
-    if not quiz:
-        return _not_found()
-    if user.role == "teacher":
-        if quiz.teacher_id != user.id:
-            return _not_found()
-    elif not (_visible_to(user, quiz) and _has_submitted(user, quiz)):
-        return _not_found()
-
-    deck = []
-    for q in quiz.questions or []:
-        front = q.get("question") or ""
-        if quiz.hide_pinyin:
-            front = ql.strip_pinyin(front)
-        deck.append({
-            "front": front,
-            "frontSub": q.get("questionMeaning") or "",
-            "back": ql.correct_text(q),
-            "why": q.get("explanation") or "",
-        })
-    return render_template("quiz/cards.html", home=url_for("quiz.index"), quiz=quiz, deck=deck)
 
 
 @quiz_bp.route("/quiz/<int:quiz_id>/play")

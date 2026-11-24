@@ -368,3 +368,24 @@
 .qz-typed:focus { outline: none; border-color: var(--gold); }
 .qz-typed.right { border-color: var(--green); }
 .qz-typed.wrong { border-color: var(--red); }
+
+/* v21: quiz and Bonus Courses pages sit in the middle, not against the left edge */
+.qz-content { margin-left: auto; margin-right: auto; width: 100%; }
+.qz-shell { margin-left: auto; margin-right: auto; }
+
+[hidden] { display: none !important; }
+.qz-other-title { margin: 28px 0 10px; font-size: 1.1rem; display: flex; flex-direction: column; gap: 2px; }
+.qz-other-title small { font-weight: 400; font-size: .85rem; color: var(--text3); }
+/* teacher review: the story and every question, neatly */
+.qz-rv-story { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin: 6px 0 14px; background: var(--surface2, var(--surface)); }
+.qz-rv-story h4 { margin: 0 0 6px; font-size: 1.05rem; }
+.qz-rv-story p { margin: 4px 0; line-height: 1.7; }
+.qz-rv-story .sub { color: var(--text3); font-size: .92rem; }
+.qz-rv-sec { margin: 16px 0 8px; font-weight: 700; font-size: .95rem; }
+.qz-rv-sec small { font-weight: 400; color: var(--text3); margin-left: 6px; }
+.qz-rv-opts { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 4px; }
+.qz-rv-opts li { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); font-size: .95rem; }
+.qz-rv-opts li.right { border-color: #2fb67f; background: rgba(47,182,127,.12); }
+.qz-rv-opts li.picked.wrongpick { border-color: #d4380d; background: rgba(212,56,13,.1); }
+.qz-rv-opts li small { color: var(--text3); margin-left: 6px; }
+.qz-rv-why { font-size: .9rem; color: var(--text3); margin-top: 6px; }

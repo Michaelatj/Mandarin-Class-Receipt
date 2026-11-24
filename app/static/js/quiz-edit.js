@@ -25,7 +25,7 @@
 
   function fromServer(q) {
     const m = { cid: nid(), id: q.id, type: q.type, question: q.question || '', meaning: q.questionMeaning || '',
-                explanation: q.explanation || '', points: q.points || 1, audio: q.audio || '', errors: [] };
+                explanation: q.explanation || '', points: q.points || 1, audio: q.audio || '', aboutStory: !!q.aboutStory, errors: [] };
     if (q.type === 'type_answer') {
       m.accepted = (q.answers || []).join('\n');
     } else if (q.type === 'sentence_reorder') {
@@ -49,6 +49,7 @@
     if (m.id) out.id = m.id;
     if (m.meaning.trim()) out.questionMeaning = m.meaning.trim();
     if ((m.audio || '').trim()) out.audio = m.audio.trim();
+    if (m.aboutStory) out.aboutStory = true;
     if (m.explanation.trim()) out.explanation = m.explanation.trim();
     if (m.type === 'type_answer') {
       out.answers = (m.accepted || '').split('\n').map((t) => t.trim()).filter(Boolean);

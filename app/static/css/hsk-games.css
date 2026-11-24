@@ -109,3 +109,7 @@
 .hk-flash-page .hk-pmeta { justify-content: center; gap: 16px; }
 .hk-flash-page .hk-controls { max-width: 520px; margin: 0 auto; }
 @media (max-width: 480px) { .hk-flash-page .hk-card { min-height: 430px; } }
+
+/* display switches */
+.gm-nopy .gm-pinyin, .gm-nopy .py, .gm-nopy .gm-mfront small, .gm-nopy .gm-node.left small { display: none !important; }
+.gm-nomean .gm-riddle-mean { display: none !important; }

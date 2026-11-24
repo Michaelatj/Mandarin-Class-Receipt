@@ -130,6 +130,21 @@
   </section>
 
   <section class="card">
+    <div class="card-title"><span class="card-title-icon">🎮</span> Bonus Courses activity</div>
+    {% if d.bonus.total %}
+    <p class="muted" style="margin:0 0 8px">{{ d.bonus.active }} of {{ d.bonus.total }} students practised or played in the last 7 days.</p>
+    <div class="ins-list">
+      {% for r in d.bonus.rows %}
+      <div class="ins-row">
+        <div class="ins-row-main"><b>{{ r.name }}</b><span>{% if r.last %}last active {{ r.last.strftime('%d %b %Y') }}{% else %}has not started yet{% endif %} · {{ r.known }} words mastered · {{ r.reviews }} card answers · {{ r.plays }} games</span></div>
+        <div class="ins-row-val {{ '' if r.recent else 'muted' }}">{{ 'active' if r.recent else 'idle' }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}<div class="ins-empty">No students yet.</div>{% endif %}
+  </section>
+
+  <section class="card">
     <div class="card-title"><span class="card-title-icon">📝</span> Quizzes</div>
     {% if qz.rows %}
     <div class="ins-table-wrap">

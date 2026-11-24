@@ -28,8 +28,13 @@
   </div>
   <label class="qz-kind" style="margin:4px 0 12px">
     <input type="checkbox" id="qz-story">
-    <span>Story quiz<small>The chatbot writes a short story and ALL questions about it show on one page under the story (no "next" button).</small></span>
+    <span>Story quiz<small>The chatbot writes a short story and the questions show on one page under the story (no "next" button).</small></span>
   </label>
+  <div class="qz-field" id="qz-story-n-box" hidden>
+    <label for="qz-story-n">How many questions are about the story?</label>
+    <input type="number" id="qz-story-n" min="1" max="29" value="5">
+    <small class="qz-hint-text">The other questions use the question types below and have nothing to do with the story. They show under a separate heading.</small>
+  </div>
   <label>Question types</label>
   <div class="qz-kinds" id="qz-kinds" style="margin-top:6px"></div>
 
@@ -51,4 +56,4 @@
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-teacher.js') + '?v=2' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/quiz-teacher.js') + '?v=3' }}"></script>{% endblock %}
