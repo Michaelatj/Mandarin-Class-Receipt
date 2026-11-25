@@ -97,6 +97,9 @@ def create():
         except (ValueError, TypeError):
             pass
 
+    from ..services.notify import notify, student_ids
+    notify(invited_ids or student_ids(), "class", "New class: " + title,
+           dt.strftime("%a %d %b, %H:%M") + (" · " + location if location else ""), "/")
     db.session.commit()
 
     invited_names = []
@@ -119,6 +122,7 @@ def edit(sid):
         if _is_ajax(): return jsonify(ok=False, msg="Not found")
         return redirect(url_for("teacher.dashboard"))
 
+    old_when = s.scheduled_at
     s.title       = request.form.get("title", s.title).strip()[:200]
     s.description = request.form.get("description", s.description).strip()[:500]
     link          = request.form.get("meet_link", s.meet_link).strip()[:500]
@@ -147,6 +151,10 @@ def edit(sid):
 
     from ..services.streaks import forget_class
     forget_class(sid)                      # time or invited students may have changed: work it out again
+    from ..services.notify import notify, student_ids
+    if s.scheduled_at != old_when:
+        notify([int(x) for x in request.form.getlist("invited_students") if str(x).isdigit()] or student_ids(), "class",
+               "Class moved: " + s.title, "Now " + s.scheduled_at.strftime("%a %d %b, %H:%M"), "/")
     db.session.commit()
     if _is_ajax():
         dt_fmt = s.scheduled_at.strftime("%a, %d %b %Y · %H:%M")
@@ -171,6 +179,9 @@ def cancel(sid):
     s.cancelled = True
     from ..services.streaks import forget_class
     forget_class(sid)                      # a cancelled class never counts for any streak
+    from ..services.notify import notify, student_ids
+    inv = [i.student_id for i in ScheduleInvite.query.filter_by(schedule_id=sid).all()]
+    notify(inv or student_ids(), "class", "Class cancelled: " + s.title, s.scheduled_at.strftime("%a %d %b, %H:%M"), "/")
     db.session.commit()
     if _is_ajax(): return jsonify(ok=True, msg="Class cancelled")
     flash("Class cancelled", "ok")

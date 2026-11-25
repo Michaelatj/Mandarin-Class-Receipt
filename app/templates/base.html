@@ -24,10 +24,11 @@
 <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}{{ tr('app_title') }}{% endblock %} · 中文课堂</title>
-<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=41" }}">
+<link rel="stylesheet" href="{{ url_for("static", filename="css/main.css") + "?v=42" }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ui-kit.css') }}?v=1">
 {% block head_extra %}{% endblock %}
 </head>
-<body>
+<body{% if session.get('user_id') %} data-notif="{{ notif_unread }}"{% endif %}>
 
 {# The language switch for the auth pages now sits inside the login column (see .auth-lang) #}
 <button class="theme-btn" id="dmToggle" hidden tabindex="-1" aria-hidden="true">🌙</button>
@@ -193,6 +194,7 @@ document.addEventListener('click', function(e) {
 <script src="{{ url_for('static', filename='js/i18n-live.js') }}?v=1"></script>
 <script src="{{ url_for('static', filename='js/theme-picker.js') }}?v=2"></script>
 <script src="{{ url_for('static', filename='js/nav-drawer.js') }}?v=1" defer></script>
+<script src="{{ url_for('static', filename='js/ui-kit.js') }}?v=1" defer></script>
 <script src="{{ url_for('static', filename='js/title-tip.js') }}?v=2" defer></script>
 {% block page_scripts %}{% endblock %}
 </body>

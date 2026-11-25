@@ -334,3 +334,17 @@ class QuizAttempt(db.Model):
     title          = db.Column(db.String(50))
     started_at     = db.Column(db.DateTime, default=datetime.utcnow)
     submitted_at   = db.Column(db.DateTime)
+
+
+class Notification(db.Model):
+    """One in-app notification (the bell). read_at is empty until the person has seen it."""
+    __tablename__ = "notification"
+
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    kind       = db.Column(db.String(20), default="info")      # class | quiz | receipt | hsk | student | info
+    title      = db.Column(db.String(200), nullable=False)
+    body       = db.Column(db.String(300), default="")
+    url        = db.Column(db.String(300), default="")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    read_at    = db.Column(db.DateTime, nullable=True)

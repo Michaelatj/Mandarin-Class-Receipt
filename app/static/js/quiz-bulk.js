@@ -23,7 +23,7 @@
   del.addEventListener('click', async () => {
     const ids = picks().filter((c) => c.checked).map((c) => parseInt(c.value, 10));
     if (!ids.length) return;
-    if (!confirm('Delete ' + ids.length + ' quiz' + (ids.length === 1 ? '' : 'zes') + '?\n\nAll student results for them are erased too. This cannot be undone.')) return;
+    if (!(await UI.confirm('Delete ' + ids.length + ' quiz' + (ids.length === 1 ? '' : 'zes') + '?\n\nAll student results for them are erased too. This cannot be undone.', { danger: true }))) return;
     del.disabled = true;
     try {
       const r = await fetch(bar.dataset.url, {

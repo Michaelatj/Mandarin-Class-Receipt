@@ -43,7 +43,15 @@ def create_app(config_class=None):
 
     @flask_app.context_processor
     def inject_globals():
+        unread = 0
+        uid = session.get('user_id')
+        if uid and request.endpoint not in (None, 'static'):
+            try:
+                unread = __import__('app.services.notify', fromlist=['x']).unread_count(uid)
+            except Exception:       # e.g. the table does not exist yet: the bell simply shows nothing
+                unread = 0
         return {
+            'notif_unread': unread,
             'lang': getattr(g, 'lang', 'en'),
             'i18n_version': __import__('app.services.i18n_live', fromlist=['version']).version(),
             'get_lang': get_lang,
@@ -66,6 +74,7 @@ def create_app(config_class=None):
     from .routes.quiz import quiz_bp
     from .routes.pwa import pwa_bp
     from .routes.hsk import hsk_bp
+    from .routes.notifications import notif_bp
 
     flask_app.register_blueprint(auth_bp)
     flask_app.register_blueprint(student_bp)
@@ -74,5 +83,6 @@ def create_app(config_class=None):
     flask_app.register_blueprint(quiz_bp)
     flask_app.register_blueprint(pwa_bp)
     flask_app.register_blueprint(hsk_bp)
+    flask_app.register_blueprint(notif_bp)
 
     return flask_app

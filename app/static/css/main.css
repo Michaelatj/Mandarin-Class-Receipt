@@ -2874,3 +2874,55 @@ body:has(.app-shell) .f-trees { left: var(--sidebar-w); height: 16vh; opacity: .
 .n-stars { animation: n-drift 60s ease-in-out infinite alternate; }
 @keyframes n-drift { from { transform: translate3d(0,0,0); } to { transform: translate3d(-14px,8px,0); } }
 @media (prefers-reduced-motion: reduce) { .n-shoot, .n-stars { animation: none; } .n-shoot { display: none; } }
+
+
+/* ═══ v23: ruby earthquake, dragon = gold and light (no rainbow), cozy jade ═══ */
+/* ruby: the whole card shakes, then settles */
+.badge-hero.fx-quake { animation: bfx-quake 1s linear both; }
+@keyframes bfx-quake { 0% { transform: translate(0,0); } 6% { transform: translate(-9px,4px) rotate(-.5deg); } 14% { transform: translate(8px,-5px) rotate(.4deg); }
+  22% { transform: translate(-7px,5px); } 30% { transform: translate(6px,-3px) rotate(-.3deg); } 40% { transform: translate(-5px,3px); } 52% { transform: translate(4px,-2px); }
+  66% { transform: translate(-2px,2px); } 82% { transform: translate(1px,-1px); } 100% { transform: translate(0,0); } }
+.bfx-crack { width: var(--len); height: 3px; margin: -1.5px 0 0 0; background: linear-gradient(90deg, #ffd0dc, #e0264f 40%, transparent); transform-origin: 0 50%; transform: rotate(var(--a)) scaleX(0); opacity: 0; border-radius: 2px; animation: bfx-crack .9s ease-out var(--delay) both; }
+@keyframes bfx-crack { 0% { transform: rotate(var(--a)) scaleX(0); opacity: 0; } 25% { opacity: 1; } 100% { transform: rotate(var(--a)) scaleX(1); opacity: 0; } }
+.bfx-debris { width: var(--size); height: var(--size); margin: calc(var(--size) / -2); background: var(--c); clip-path: polygon(50% 0, 100% 70%, 20% 100%); animation: bfx-debris 1.3s cubic-bezier(.3,.6,.5,1) var(--delay) both; }
+@keyframes bfx-debris { 0% { transform: translate(0,0) rotate(0); opacity: 0; } 10% { opacity: 1; } 35% { transform: translate(calc(var(--dx) * .6), var(--up)) rotate(calc(var(--rot) * .4)); }
+  100% { transform: translate(var(--dx), var(--fall)) rotate(var(--rot)); opacity: 0; } }
+
+/* dragon: gold on deep night violet. Light, not colours. */
+:root .streak-chip.tier-dragon, :root .badge-seal.tier-dragon {
+  background: radial-gradient(circle at 30% 22%, #5b3aa8, #34196b 55%, #1b0d3a); background-size: auto;
+  color: #ffe08a; text-shadow: 0 0 10px rgba(255,214,102,.85), 0 1px 2px rgba(0,0,0,.6); animation: none;
+}
+:root .badge-seal.tier-dragon { box-shadow: inset 0 0 0 4px rgba(255,214,102,.75), inset 0 0 0 8px rgba(0,0,0,.25), 0 0 34px rgba(255,200,70,.55), 0 10px 26px rgba(0,0,0,.35); }
+:root .streak-bar.tier-dragon > div, :root .badge-next-bar.tier-dragon > div { background: linear-gradient(90deg, #ffc24d, #ffe08a, #ffc24d); }
+.tier-dragon .badge-aura { background: repeating-conic-gradient(from 0deg, rgba(255,214,102,.65) 0 7deg, rgba(255,214,102,0) 7deg 22deg); -webkit-mask-image: radial-gradient(circle, #000 28%, transparent 70%); mask-image: radial-gradient(circle, #000 28%, transparent 70%); filter: none; opacity: .75; }
+.np-tier-dragon { --np: #f2c14e; }
+.badge-who.np-tier-dragon .badge-who-name { background: linear-gradient(90deg, #d99a1c, #ffe08a, #d99a1c); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.badge-seal.fx-dragon { animation: seal-radiance 3s ease-in-out both; }
+@keyframes seal-radiance { 0%, 100% { transform: rotate(-4deg) translateY(0) scale(1); filter: brightness(1); } 30% { transform: rotate(0) translateY(-20px) scale(1.12); filter: brightness(1.35); } 65% { transform: rotate(-2deg) translateY(-14px) scale(1.08); filter: brightness(1.2); } }
+.badge-stage.fx-dragon .badge-aura { animation: aura-spin 6s linear infinite; opacity: 1; transform: scale(1.3); }
+.bfx-rays { width: 460px; height: 460px; margin: -230px 0 0 -230px; border-radius: 50%; opacity: 0;
+  background: repeating-conic-gradient(from 0deg, rgba(255,226,140,.9) 0 5deg, rgba(255,226,140,0) 5deg 15deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 24%, #000 34%, transparent 72%); mask-image: radial-gradient(circle, transparent 24%, #000 34%, transparent 72%);
+  animation: bfx-rays 3.2s ease-in-out both; will-change: transform, opacity; }
+.bfx-rays2 { background: repeating-conic-gradient(from 7deg, rgba(255,255,255,.85) 0 3deg, rgba(255,255,255,0) 3deg 20deg); animation-name: bfx-rays-r; animation-delay: .2s; }
+@keyframes bfx-rays { 0% { transform: rotate(0) scale(.5); opacity: 0; } 25% { opacity: 1; } 75% { opacity: .85; } 100% { transform: rotate(60deg) scale(1.15); opacity: 0; } }
+@keyframes bfx-rays-r { 0% { transform: rotate(0) scale(.6); opacity: 0; } 30% { opacity: .9; } 100% { transform: rotate(-50deg) scale(1.2); opacity: 0; } }
+.bfx-halo { width: 300px; height: 300px; margin: -150px 0 0 -150px; border-radius: 50%; background: radial-gradient(circle, rgba(154,240,198,.55), rgba(154,240,198,0) 68%); opacity: 0; animation: bfx-halo 3.4s ease-in-out both; }
+.bfx-halo-gold { background: radial-gradient(circle, rgba(255,226,140,.8), rgba(255,226,140,0) 66%); animation-duration: 3s; }
+@keyframes bfx-halo { 0% { transform: scale(.5); opacity: 0; } 35% { opacity: 1; transform: scale(1.05); } 100% { transform: scale(1.4); opacity: 0; } }
+
+/* jade: cozy. Slow breathing, soft glows, leaves that sway down. */
+.badge-seal.fx-jade { animation: seal-breathe 3.4s ease-in-out both; }
+@keyframes seal-breathe { 0%, 100% { transform: rotate(-4deg) translateY(0) scale(1); filter: brightness(1); } 25% { transform: rotate(-3deg) translateY(-8px) scale(1.06); filter: brightness(1.12); }
+  50% { transform: rotate(-5deg) translateY(-3px) scale(1.02); filter: brightness(1.05); } 75% { transform: rotate(-3deg) translateY(-8px) scale(1.06); filter: brightness(1.14); } }
+.bfx-bokeh { width: var(--size); height: var(--size); margin: calc(var(--size) / -2); border-radius: 50%; background: radial-gradient(circle, rgba(190,255,215,.55), rgba(190,255,215,0) 70%); transform: translate(var(--x), var(--y)); opacity: 0; animation: bfx-bokeh 3s ease-in-out var(--delay) both; }
+@keyframes bfx-bokeh { 0%, 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(.7); } 50% { opacity: 1; transform: translate(var(--x), calc(var(--y) - 14px)) scale(1.1); } }
+.bfx-leaf { width: var(--size); height: calc(var(--size) * 1.5); margin: 0; border-radius: 0 85% 0 85%; background: var(--c); opacity: 0; transform: translate(var(--x), var(--y)); animation: bfx-leaf 3s ease-in-out var(--delay) both; }
+@keyframes bfx-leaf { 0% { transform: translate(var(--x), var(--y)) rotate(0); opacity: 0; } 15% { opacity: .95; } 50% { transform: translate(calc(var(--x) + var(--sway)), calc(var(--y) + var(--fall) * .5)) rotate(150deg); }
+  100% { transform: translate(calc(var(--x) - var(--sway)), calc(var(--y) + var(--fall))) rotate(320deg); opacity: 0; } }
+
+/* overlay: dragon in gold, jade with leaves */
+.sof-arch { background: radial-gradient(circle at 50% 100%, transparent 0 52%, rgba(255,214,102,.9) 53% 58%, rgba(255,240,180,.75) 58% 63%, rgba(255,200,80,.5) 63% 70%, transparent 71%); }
+.sof-ray { background: repeating-conic-gradient(from 0deg, rgba(255,226,140,.6) 0 6deg, rgba(255,226,140,0) 6deg 22deg); }
+@keyframes so-dragon { 0%, 100% { box-shadow: 0 0 0 5px rgba(255,214,102,.4), 0 0 70px rgba(255,200,70,.7); } 50% { box-shadow: 0 0 0 6px rgba(255,236,160,.5), 0 0 100px rgba(255,214,102,.95); } }

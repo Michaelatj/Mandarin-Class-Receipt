@@ -6,7 +6,7 @@
      bronze  stamp + copper dust          silver  gleam + twinkling stars
      gold    coin spin + confetti storm   jade    bloom + rising orbs + shock rings
      diamond light beams + falling crystals + white flash
-     dragon  rainbow aurora + glowing dragon glyph + drifting rainbow petals (elegant, slow)
+     dragon  rays of golden light + gold halo + drifting gold sparks (elegant, slow)
    Needs badge-fx.js (the seal's own motion) and the .badge-* styles from main.css. */
 (function () {
   'use strict';
@@ -115,8 +115,10 @@
     // jade: calm and elegant. Slow green light rising, soft rings
     jade(L, big) {
       L.parentNode.classList.add('so-glow-jade');
-      for (let i = 0; i < 3; i++) wave(L, i % 2 ? '#9af0c6' : '#43c98f', i * 0.5, 1 + i * 0.4);
-      for (let i = 0; i < N(big ? 30 : 22); i++) bit(L, 'sof-orb', { '--x': rand(0, W()) + 'px', '--size': rand(8, 18) + 'px', '--delay': rand(0, 2.2) + 's', '--dur': rand(3.2, 5) + 's', '--sway': rand(-50, 50) + 'px', '--c': ['#7ee8b4', '#43c98f', '#d4ffe9'][i % 3] });
+      for (let i = 0; i < 2; i++) wave(L, i % 2 ? '#9af0c6' : '#43c98f', i * 0.7, 1 + i * 0.5);
+      // cozy: leaves sway down slowly, little fireflies float up
+      for (let i = 0; i < N(big ? 22 : 16); i++) bit(L, 'sof-petal', { '--x': rand(0, W()) + 'px', '--size': rand(10, 18) + 'px', '--delay': rand(0, 2.6) + 's', '--dur': rand(4.5, 7) + 's', '--sway': rand(-70, 70) + 'px', '--c': ['#5fcf9a', '#2fb67f', '#9ce6b4', '#7fd36b'][i % 4] });
+      for (let i = 0; i < N(big ? 18 : 12); i++) bit(L, 'sof-orb', { '--x': rand(0, W()) + 'px', '--size': rand(5, 9) + 'px', '--delay': rand(0, 2.8) + 's', '--dur': rand(4, 6) + 's', '--sway': rand(-40, 40) + 'px', '--c': ['#e6ffd0', '#8df0b8'][i % 2] });
       for (let i = 0; i < N(8); i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(14, 26) + 'px', '--delay': rand(0.4, 2.4) + 's', '--c': '#d4ffe9' }, '✦');
     },
     // diamond: luxury. Beams of white light, falling crystals, a white flash
@@ -150,11 +152,11 @@
       for (let i = 0; i < N(14); i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(16, 30) + 'px', '--delay': rand(0.8, 2.4) + 's', '--c': ['#ff8fa8', '#ffffff', '#ff3b6b'][i % 3] }, '✦');
       wave(L, '#ff3b6b', 0.5, 1.4);
     },
-    // dragon: the godly one. Bright, colourful and hopeful, like a sunrise with a rainbow
+    // dragon: the godly one. Rays of golden light, like a sunrise
     dragon(L, big) {
       flash(L, 'rgba(255,255,255,.6)', 900);
       bit(L, 'sof-ray', {}); bit(L, 'sof-arch', { '--delay': '0.3s' });
-      const hues = ['#ff9db8', '#ffcf8a', '#f6f08a', '#9df0b8', '#8ad8f5', '#b9a8ff', '#f0a8f8'];
+      const hues = ['#ffe08a', '#fff4c4', '#ffc24d', '#ffffff', '#ffd34d', '#fff0b3', '#ffcf5a'];
       for (let i = 0; i < 4; i++) wave(L, hues[i * 2 % 7], 0.15 + i * 0.3, 1 + i * 0.4);
       for (let i = 0; i < N(big ? 34 : 26); i++) bit(L, 'sof-orb', { '--x': rand(0, W()) + 'px', '--size': rand(7, 15) + 'px', '--delay': rand(0.2, 3) + 's', '--dur': rand(3.4, 5.4) + 's', '--sway': rand(-60, 60) + 'px', '--c': hues[i % 7] });
       for (let i = 0; i < N(16); i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(16, 34) + 'px', '--delay': rand(0.4, 3) + 's', '--c': hues[(i + 2) % 7] }, '✦');

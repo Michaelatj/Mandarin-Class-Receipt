@@ -379,7 +379,7 @@
     if (S.finished) return;
     if (!auto) {
       const left = unanswered();
-      if (left > 0 && !confirm(T('You still have unanswered questions. Submit anyway?'))) return;
+      if (left > 0 && !(await UI.confirm(T('You still have unanswered questions. Submit anyway?'), { ok: 'Submit' }))) return;
     }
     S.finished = true;
     clearInterval(S.timerId);
@@ -514,8 +514,8 @@
       render();
     } else if (act === 'lamp') {
       if (!S.hint[q.id] && !a.checked) {
-        if (!confirm(T('Showing the meaning halves the points for this question. Show it anyway?'))) return;
-        S.usedHint[q.id] = true;
+        UI.confirm(T('Showing the meaning halves the points for this question. Show it anyway?'), { ok: 'Show it' }).then((y) => { if (y) { S.usedHint[q.id] = true; S.hint[q.id] = true; render(); } });
+        return;
       }
       S.hint[q.id] = !S.hint[q.id];
       render();
@@ -527,10 +527,7 @@
     else if (act === 'submit-now') submit(false);
     else if (act === 'retry-submit') submit(true);
     else if (act === 'quit') {
-      if (confirm(T('Leave this quiz? Your answers will not be saved.'))) {
-        clearInterval(S.timerId);
-        location.href = root.dataset.home;
-      }
+      UI.confirm(T('Leave this quiz? Your answers will not be saved.'), { ok: 'Leave', danger: true }).then((y) => { if (y) { clearInterval(S.timerId); location.href = root.dataset.home; } });
     }
   });
   box.addEventListener('input', (e) => {

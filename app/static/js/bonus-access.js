@@ -35,7 +35,7 @@
     const b = e.target.closest('.bonus-all');
     if (!b) return;
     const on = b.dataset.on === '1', level = b.dataset.level;
-    if (!on && !confirm('Lock HSK ' + level + ' for ALL students?')) return;
+    if (!on && !(await UI.confirm('Lock HSK ' + level + ' for ALL students?', { ok: 'Lock', danger: true }))) return;
     try {
       await save('all', level, on);
       table.querySelectorAll('.bonus-chk[data-level="' + level + '"]').forEach((x) => { x.checked = on; });

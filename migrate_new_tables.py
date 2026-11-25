@@ -1,5 +1,5 @@
 """One-off, safe to run more than once: creates the tables added by the Bonus Courses / quiz updates
-(bonus_access, hsk_known, hsk_activity, hsk_game, quiz_story). Existing tables and data are not touched.
+(bonus_access, hsk_known, hsk_activity, hsk_game, quiz_story, notification). Existing tables and data are not touched.
 
     python migrate_new_tables.py
 

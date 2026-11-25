@@ -132,6 +132,9 @@ def register():
             username=uname, password=hash_password(pw),
             display_name=dname, phone=phone, role=role,
         ))
+        if role == "student":
+            from ..services.notify import notify, teacher_ids
+            notify(teacher_ids(), "student", "New student: " + (dname or uname), "Just registered.", "/")
         db.session.commit()
         logger.info("New user registered: %s (%s)", uname, role)
         flash(tr("ok_created"), "ok")
@@ -188,6 +191,8 @@ def delete_account():
     HskKnown.query.filter_by(user_id=user.id).delete(synchronize_session=False)
     HskActivity.query.filter_by(user_id=user.id).delete(synchronize_session=False)
     HskGame.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    from ..models import Notification
+    Notification.query.filter_by(user_id=user.id).delete(synchronize_session=False)
     ScheduleInvite.query.filter_by(student_id=user.id).delete(synchronize_session=False)
     from ..models import StreakEntry
     StreakEntry.query.filter_by(student_id=user.id).delete(synchronize_session=False)

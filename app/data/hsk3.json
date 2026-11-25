@@ -7,13 +7,6 @@
   "theme": "orang",
   "parts": "阿 (ā, awalan akrab) + 姨 (yí, adik/kakak perempuan ibu)",
   "trick": "Bunyinya 'ā-yí' mudah diingat: bayangkan memanggil 'Tante Yi' dengan ramah. Ada 女 (perempuan) di 姨, jadi pasti anggota keluarga perempuan.",
-  "words": [
-   [
-    "阿姨",
-    "āyí",
-    "tante"
-   ]
-  ],
   "sentence": [
    "阿姨在做饭。",
    "Āyí zài zuò fàn.",
@@ -28,7 +21,7 @@
   "arti": "pendek (tinggi badan)",
   "theme": "sifat",
   "parts": "矢 (shǐ, anak panah) + 委 (wěi, menyerahkan; memberi bunyi)",
-  "trick": "Anak panah (矢) itu pendek dibanding tombak, jadi orang yang 'sependek anak panah' = 矮.",
+  "trick": "Cara mengingat saja: bayangkan orang yang tingginya 'hanya sepanjang anak panah' (矢), jadi pendek. 委 hanya memberi bunyi.",
   "words": [
    [
     "矮个子",
@@ -75,11 +68,6 @@
   "trick": "安 = perempuan (女) di bawah atap (宀): rasa aman dan tenteram. Ditambah 静 (diam) = suasana sunyi.",
   "words": [
    [
-    "安静",
-    "ānjìng",
-    "tenang"
-   ],
-   [
     "请安静",
     "qǐng ānjìng",
     "mohon tenang"
@@ -100,13 +88,6 @@
   "theme": "sifat",
   "parts": "安 (tenang) + 全 (utuh)",
   "trick": "Tenang (安) dan utuh (全) = tidak ada yang rusak = aman.",
-  "words": [
-   [
-    "安全",
-    "ānquán",
-    "aman; keselamatan"
-   ]
-  ],
   "sentence": [
    "这里很安全。",
    "Zhèlǐ hěn ānquán.",
@@ -138,7 +119,7 @@
    "Qǐng bǎ mén guānshàng.",
    "Tolong tutup pintunya."
   ],
-  "note": "Pola 把: Subjek + 把 + objek + kata kerja + hasil/arah (我把书放在桌子上). Objek biasanya sudah jelas/tertentu, dan kata kerja tidak boleh berdiri sendiri, harus ada hasil atau akhiran seperti 完, 好, 上, 了. 把 juga penghitung untuk benda bergagang: 一把椅子, 一把伞."
+  "note": "Pola 把: Subjek + 把 + objek + kata kerja + hasil/arah (我把书放在桌子上). Objek biasanya sudah jelas/tertentu, dan kata kerja tidak boleh berdiri sendiri, harus ada hasil atau akhiran seperti 完, 好, 上, 了. 把 juga penghitung untuk benda bergagang: 一把椅子, 一把伞. Bandingkan dengan 被: 我把杯子打破了 (aku memecahkan gelas; pelaku di depan) vs 杯子被我打破了 (gelas dipecahkan olehku; yang dikenai di depan)."
  },
  {
   "n": 7,
@@ -217,7 +198,7 @@
   "arti": "mengerjakan; mengurus",
   "theme": "kerja",
   "parts": "Karakter dasar: 力 (lì, tenaga) dengan dua titik di kiri dan kanan; tidak dipecah lebih lanjut (bentuk sederhana dari 辦)",
-  "trick": "Mengerjakan urusan butuh tenaga (力); dua titik di samping seperti keringat yang menetes. 办 = 'urus'.",
+  "trick": "Cara mengingat saja: 办 tampak seperti 力 (tenaga) dengan dua titik di sisinya. Mengurus sesuatu memang butuh tenaga.",
   "words": [
    [
     "办事",
@@ -316,11 +297,6 @@
   "parts": "帮 (membantu) + 助 (menolong)",
   "trick": "Dua kata yang sama-sama berarti 'bantu' digabung supaya lebih sopan dan formal.",
   "words": [
-   [
-    "帮助",
-    "bāngzhù",
-    "membantu"
-   ],
    [
     "谢谢你的帮助",
     "xièxie nǐ de bāngzhù",
@@ -457,7 +433,7 @@
    "Wǒ de shǒujī bèi péngyou jièzǒu le.",
    "Ponselku dipinjam teman."
   ],
-  "note": "Pola pasif: yang dikenai + 被 + pelaku + kata kerja + hasil (杯子被他打破了). Pelaku boleh dihilangkan (杯子被打破了). 被 sering menyiratkan hal yang tidak menyenangkan, tetapi kini juga dipakai netral. Seperti 把, kata kerja harus diikuti hasil atau 了."
+  "note": "Pola pasif: yang dikenai + 被 + pelaku + kata kerja + hasil (杯子被他打破了). Pelaku boleh dihilangkan (杯子被打破了). 被 sering menyiratkan hal yang tidak menyenangkan, tetapi kini juga dipakai netral. Seperti 把, kata kerja harus diikuti hasil atau 了. Bandingkan dengan 把: 他把我的手机借走了 (dia meminjam ponselku; pelaku jadi subjek) vs 我的手机被他借走了 (ponselku dipinjam olehnya; benda jadi subjek)."
  },
  {
   "n": 20,
@@ -658,13 +634,6 @@
   "theme": "kerja",
   "parts": "变 (berubah) + 成 (jadi)",
   "trick": "Berubah (变) sampai jadi (成) sesuatu.",
-  "words": [
-   [
-    "变成",
-    "biànchéng",
-    "berubah jadi"
-   ]
-  ],
   "sentence": [
    "水变成冰了。",
    "Shuǐ biànchéng bīng le.",
@@ -702,13 +671,6 @@
   "theme": "hobi",
   "parts": "表 (menyatakan) + 演 (memperagakan)",
   "trick": "Menyatakan (表) sambil memperagakan (演) = tampil di panggung.",
-  "words": [
-   [
-    "表演",
-    "biǎoyǎn",
-    "pertunjukan"
-   ]
-  ],
   "sentence": [
    "孩子们在学校表演。",
    "Háizimen zài xuéxiào biǎoyǎn.",
@@ -746,13 +708,6 @@
   "theme": "tatabahasa",
   "parts": "别 (lain) + 人 (orang)",
   "trick": "Lain (别) + orang (人) = orang lain.",
-  "words": [
-   [
-    "别人",
-    "biérén",
-    "orang lain"
-   ]
-  ],
   "sentence": [
    "别人都走了，你怎么还不走？",
    "Biérén dōu zǒu le, nǐ zěnme hái bù zǒu?",
@@ -991,13 +946,6 @@
   "theme": "sifat",
   "parts": "不 (tidak) + 行 (bisa)",
   "trick": "Tidak (不) bisa (行) = tidak boleh atau tidak bagus.",
-  "words": [
-   [
-    "不行",
-    "bùxíng",
-    "tidak boleh / tidak bisa"
-   ]
-  ],
   "sentence": [
    "这样不行。",
    "Zhèyàng bùxíng.",
@@ -1124,7 +1072,7 @@
   "arti": "lantai; lapisan (penghitung)",
   "theme": "tatabahasa",
   "parts": "尸 (shī, bentuk atap/bangunan) + 云 (yún, awan)",
-  "trick": "Bayangkan awan berlapis-lapis (云) di bawah atap (尸) = tingkat atau lapisan.",
+  "trick": "Cara mengingat saja: bayangkan atap (尸) yang ditumpuk bertingkat-tingkat seperti lantai gedung atau lapisan awan (云).",
   "words": [
    [
     "二层",
@@ -1151,7 +1099,7 @@
   "arti": "memeriksa; mencari tahu",
   "theme": "kerja",
   "parts": "木 (mù, kayu) + 且 (qiě)",
-  "trick": "Bayangkan memeriksa (查) tumpukan kayu (木) satu per satu untuk mencari yang kita perlukan.",
+  "trick": "Cara mengingat saja: bayangkan memeriksa batang kayu (木) satu per satu untuk mencari yang dibutuhkan. 且 hanya membantu bunyi.",
   "words": [
    [
     "查词典",
@@ -1201,13 +1149,6 @@
   "theme": "sifat",
   "parts": "差 (selisih) + 不 (tidak) + 多 (banyak)",
   "trick": "Selisih (差) tidak (不) banyak (多) = hampir sama.",
-  "words": [
-   [
-    "差不多",
-    "chàbuduō",
-    "hampir sama"
-   ]
-  ],
   "sentence": [
    "我们差不多大。",
    "Wǒmen chàbuduō dà.",
@@ -1244,7 +1185,7 @@
   "arti": "sering",
   "theme": "tatabahasa",
   "parts": "尚 (shàng, bagian atas; memberi bunyi) + 巾 (jīn, kain)",
-  "trick": "Kain (巾) yang selalu dipakai = sering terlihat.",
+  "trick": "Cara mengingat saja: kain (巾) yang selalu dipakai berarti sering terlihat. 尚 hanya membantu bunyi.",
   "words": [
    [
     "常来",
@@ -1310,13 +1251,6 @@
   "theme": "tatabahasa",
   "parts": "常 (sering) + 常 (sering)",
   "trick": "Pengulangan 常 untuk menegaskan: sering sekali.",
-  "words": [
-   [
-    "常常",
-    "chángcháng",
-    "sering"
-   ]
-  ],
   "sentence": [
    "他常常迟到。",
    "Tā chángcháng chídào.",
@@ -1398,13 +1332,6 @@
   "theme": "kerja",
   "parts": "迟 (lambat) + 到 (tiba)",
   "trick": "Lambat (迟) tiba (到) = terlambat.",
-  "words": [
-   [
-    "迟到",
-    "chídào",
-    "terlambat"
-   ]
-  ],
   "sentence": [
    "对不起，我迟到了。",
    "Duìbuqǐ, wǒ chídào le.",
@@ -1420,13 +1347,6 @@
   "theme": "kerja",
   "parts": "出 (keluar) + 发 (berangkat)",
   "trick": "Keluar (出) dan memulai (发) perjalanan = berangkat.",
-  "words": [
-   [
-    "出发",
-    "chūfā",
-    "berangkat"
-   ]
-  ],
   "sentence": [
    "我们八点出发。",
    "Wǒmen bā diǎn chūfā.",
@@ -1443,11 +1363,6 @@
   "parts": "出 (keluar) + 生 (hidup)",
   "trick": "Keluar (出) menuju hidup (生) = lahir.",
   "words": [
-   [
-    "出生",
-    "chūshēng",
-    "lahir"
-   ],
    [
     "出生日期",
     "chūshēng rìqī",
@@ -1469,13 +1384,6 @@
   "theme": "tubuh",
   "parts": "出 (keluar) + 院 (rumah sakit)",
   "trick": "Keluar (出) dari rumah sakit (院).",
-  "words": [
-   [
-    "出院",
-    "chūyuàn",
-    "pulang dari rumah sakit"
-   ]
-  ],
   "sentence": [
    "爷爷明天出院。",
    "Yéye míngtiān chūyuàn.",
@@ -1598,13 +1506,6 @@
   "theme": "sifat",
   "parts": "聪 (cōng, tajam pendengaran; ada 耳 telinga) + 明 (míng, terang)",
   "trick": "Telinga tajam (聪) dan pikiran terang (明) = pintar.",
-  "words": [
-   [
-    "聪明",
-    "cōngmíng",
-    "pintar"
-   ]
-  ],
   "sentence": [
    "他是一个聪明的孩子。",
    "Tā shì yí ge cōngmíng de háizi.",
@@ -1618,8 +1519,8 @@
   "pinyin": "dǎsǎo",
   "arti": "membersihkan",
   "theme": "kerja",
-  "parts": "打 (memukul) + 扫 (menyapu)",
-  "trick": "打 + 扫 = menyapu dan membersihkan.",
+  "parts": "打 (dǎ, awalan kata kerja umum) + 扫 (sǎo, menyapu)",
+  "trick": "打 di sini hanya awalan kata kerja umum (bukan 'memukul'), 扫 = menyapu. Jadi 打扫 = menyapu dan membersihkan.",
   "words": [
    [
     "打扫房间",
@@ -1640,14 +1541,9 @@
   "pinyin": "dǎsuàn",
   "arti": "berencana; rencana",
   "theme": "kerja",
-  "parts": "打 (memukul) + 算 (menghitung)",
+  "parts": "打 (dǎ, awalan kata kerja umum) + 算 (suàn, menghitung)",
   "trick": "Menghitung (算) dulu sebelum bertindak = merencanakan.",
   "words": [
-   [
-    "打算",
-    "dǎsuàn",
-    "berencana"
-   ],
    [
     "你的打算",
     "nǐ de dǎsuàn",
@@ -1669,13 +1565,6 @@
   "theme": "tatabahasa",
   "parts": "大 (besar) + 概 (garis besar)",
   "trick": "Besar (大) garis (概) = gambaran umum, 'kira-kira'.",
-  "words": [
-   [
-    "大概",
-    "dàgài",
-    "kira-kira"
-   ]
-  ],
   "sentence": [
    "他大概十点到。",
    "Tā dàgài shí diǎn dào.",
@@ -1691,13 +1580,6 @@
   "theme": "orang",
   "parts": "大 (besar) + 人 (orang)",
   "trick": "Orang (人) yang sudah besar (大) = dewasa.",
-  "words": [
-   [
-    "大人",
-    "dàren",
-    "orang dewasa"
-   ]
-  ],
   "sentence": [
    "大人和孩子都可以去。",
    "Dàren hé háizi dōu kěyǐ qù.",
@@ -1713,13 +1595,6 @@
   "theme": "benda",
   "parts": "大 (besar) + 小 (kecil)",
   "trick": "Besar (大) dan kecil (小) = ukuran.",
-  "words": [
-   [
-    "大小",
-    "dàxiǎo",
-    "ukuran"
-   ]
-  ],
   "sentence": [
    "这个房间的大小正好。",
    "Zhège fángjiān de dàxiǎo zhènghǎo.",
@@ -1940,17 +1815,10 @@
   "theme": "hobi",
   "parts": "得 (memperoleh) + 分 (poin)",
   "trick": "Memperoleh (得) poin (分) = mencetak skor.",
-  "words": [
-   [
-    "得分",
-    "défēn",
-    "skor"
-   ]
-  ],
   "sentence": [
-   "他得了十分。",
-   "Tā dé le shí fēn.",
-   "Dia mendapat sepuluh poin."
+   "他今天得分最高。",
+   "Tā jīntiān défēn zuì gāo.",
+   "Hari ini skornya paling tinggi."
   ],
   "note": "得分 bisa kata kerja (他得分了) atau kata benda (得分很高). Jangan tertukar dengan 分 (menit/poin/membagi)."
  },
@@ -2241,13 +2109,6 @@
   "theme": "tempat",
   "parts": "东 (timur) + 北 (utara)",
   "trick": "Timur (东) + utara (北) = timur laut.",
-  "words": [
-   [
-    "东北",
-    "dōngběi",
-    "timur laut"
-   ]
-  ],
   "sentence": [
    "东北的冬天很冷。",
    "Dōngběi de dōngtiān hěn lěng.",
@@ -2522,11 +2383,6 @@
     "谈话",
     "tánhuà",
     "berbincang; percakapan"
-   ],
-   [
-    "回答",
-    "huídá",
-    "menjawab"
    ]
   ],
   "sentence": [
@@ -2676,11 +2532,6 @@
   "trick": "Tubuh mengeluarkan (发) panas yang membakar (烧) = demam.",
   "words": [
    [
-    "发烧",
-    "fāshāo",
-    "demam"
-   ],
-   [
     "感冒",
     "gǎnmào",
     "masuk angin"
@@ -2702,11 +2553,6 @@
   "parts": "发 (fā, muncul) + 生 (shēng, lahir)",
   "trick": "Sesuatu muncul (发) dan lahir (生) = terjadi.",
   "words": [
-   [
-    "发生",
-    "fāshēng",
-    "terjadi"
-   ],
    [
     "发生了什么事",
     "fāshēngle shénme shì",
@@ -2730,11 +2576,6 @@
   "trick": "Sesuatu yang awalnya tersembunyi lalu tampak (现) dan muncul (发) = ditemukan.",
   "words": [
    [
-    "发现",
-    "fāxiàn",
-    "menemukan"
-   ],
-   [
     "发现问题",
     "fāxiàn wèntí",
     "menemukan masalah"
@@ -2756,11 +2597,6 @@
   "parts": "发 (fā, muncul) + 展 (zhǎn, membentang)",
   "trick": "Muncul (发) lalu membentang (展) = berkembang.",
   "words": [
-   [
-    "发展",
-    "fāzhǎn",
-    "perkembangan; berkembang"
-   ],
    [
     "发展得很快",
     "fāzhǎn de hěn kuài",
@@ -2860,18 +2696,6 @@
   "theme": "tempat",
   "parts": "方 (fāng, sisi; arah) + 向 (xiàng, menghadap)",
   "trick": "Sisi (方) yang dihadapi (向) = arah.",
-  "words": [
-   [
-    "方向",
-    "fāngxiàng",
-    "arah"
-   ],
-   [
-    "东",
-    "dōng",
-    "timur"
-   ]
-  ],
   "sentence": [
    "我走错方向了。",
    "Wǒ zǒucuò fāngxiàng le.",
@@ -2942,11 +2766,6 @@
   "trick": "Melepas (放) tugas dan mengambil cuti (假) = libur.",
   "words": [
    [
-    "放假",
-    "fàngjià",
-    "libur"
-   ],
-   [
     "假期",
     "jiàqī",
     "masa liburan"
@@ -2996,11 +2815,6 @@
   "trick": "Melepas (放) pelajaran (学) = pulang sekolah.",
   "words": [
    [
-    "放学",
-    "fàngxué",
-    "pulang sekolah"
-   ],
-   [
     "上学",
     "shàngxué",
     "berangkat sekolah"
@@ -3021,11 +2835,6 @@
   "parts": "分 (fēn, membagi; terdiri dari 八 bā + 刀 dāo) + 开 (kāi, membuka)",
   "trick": "Membagi (分) sampai terbuka (开) = terpisah.",
   "words": [
-   [
-    "分开",
-    "fēnkāi",
-    "berpisah"
-   ],
    [
     "分",
     "fēn",
@@ -3079,11 +2888,6 @@
     "一封信",
     "yì fēng xìn",
     "sebuah surat"
-   ],
-   [
-    "封",
-    "fēng",
-    "menyegel"
    ]
   ],
   "sentence": [
@@ -3102,11 +2906,6 @@
   "parts": "夫 (fū, suami) + 妻 (qī, istri)",
   "trick": "夫 (suami) + 妻 (istri) = pasangan suami istri yang disebut sekaligus sebagai satu kesatuan.",
   "words": [
-   [
-    "夫妻",
-    "fūqī",
-    "suami istri"
-   ],
    [
     "夫妻俩",
     "fūqī liǎ",
@@ -3133,11 +2932,6 @@
     "服务员",
     "fúwùyuán",
     "pelayan"
-   ],
-   [
-    "服务",
-    "fúwù",
-    "pelayanan"
    ]
   ],
   "sentence": [
@@ -3156,11 +2950,6 @@
   "parts": "附 (fù, menempel; terdiri dari 阝 + 付 fù) + 近 (jìn, dekat; terdiri dari 辶 + 斤 jīn)",
   "trick": "Menempel (附) pada yang dekat (近) = di sekitar sini.",
   "words": [
-   [
-    "附近",
-    "fùjìn",
-    "sekitar sini"
-   ],
    [
     "附近的",
     "fùjìn de",
@@ -3184,11 +2973,6 @@
   "trick": "Berlatih (习) berulang-ulang (复) = mengulang pelajaran.",
   "words": [
    [
-    "复习",
-    "fùxí",
-    "mengulang pelajaran"
-   ],
-   [
     "预习",
     "yùxí",
     "membaca sebelum pelajaran"
@@ -3207,7 +2991,7 @@
   "arti": "seharusnya; harus",
   "theme": "tatabahasa",
   "parts": "讠 (yán, ucapan) + 亥 (hài, memberi bunyi)",
-  "trick": "该 = 'seharusnya' atau 'sudah giliran'. Bayangkan guru berkata (讠): 'Sudah waktunya kamu!'. Mirip 'harus' dalam bahasa Indonesia.",
+  "trick": "Cara mengingat saja: ucapan (讠) 'sekarang giliranmu' atau 'sudah seharusnya begitu'. 亥 hanya memberi bunyi.",
   "words": [
    [
     "应该",
@@ -3236,11 +3020,6 @@
   "parts": "干 (gān, kering) + 净 (jìng, bersih)",
   "trick": "Kering (干) dan bersih (净): pakaian yang kering dan bersih itu 干净.",
   "words": [
-   [
-    "干净",
-    "gānjìng",
-    "bersih"
-   ],
    [
     "不干净",
     "bù gānjìng",
@@ -3291,11 +3070,6 @@
   "trick": "Rasa (感) yang sampai (到) = merasa.",
   "words": [
    [
-    "感到",
-    "gǎndào",
-    "merasa"
-   ],
-   [
     "感到高兴",
     "gǎndào gāoxìng",
     "merasa senang"
@@ -3315,13 +3089,8 @@
   "arti": "flu; masuk angin",
   "theme": "tubuh",
   "parts": "感 (gǎn, merasa) + 冒 (mào, menyembul; keluar)",
-  "trick": "Rasa tidak enak (感) yang 'menyembul' (冒) = masuk angin atau flu.",
+  "trick": "感 (merasa; terkena) + 冒 (menyembul, keluar): terkena angin dingin lalu gejalanya muncul = flu atau masuk angin.",
   "words": [
-   [
-    "感冒",
-    "gǎnmào",
-    "flu; kena flu"
-   ],
    [
     "感冒药",
     "gǎnmàoyào",
@@ -3387,7 +3156,7 @@
    "Wǒ gāng dào jiā, māma jiù lái le.",
    "Aku baru sampai di rumah, ibu langsung datang."
   ],
-  "note": "刚 adalah kata keterangan yang ditaruh sebelum kata kerja: 刚到 (baru tiba). Bedakan dari 刚才 (no. 142), kata keterangan waktu yang boleh diletakkan di depan subjek."
+  "note": "刚 adalah kata keterangan yang ditaruh sebelum kata kerja: 刚到 (baru tiba). Bedakan dari 刚才 (no. 142), kata keterangan waktu yang boleh diletakkan di depan subjek. Contoh: 他刚走 (dia baru pergi) vs 刚才他在这儿 (tadi dia di sini)."
  },
  {
   "n": 142,
@@ -3398,11 +3167,6 @@
   "parts": "刚 (gāng, baru) + 才 (cái, baru saja)",
   "trick": "Dua kata 'baru': 刚 + 才 = 'tadi'. Menunjuk waktu yang baru saja lewat.",
   "words": [
-   [
-    "刚才",
-    "gāngcái",
-    "tadi"
-   ],
    [
     "刚才的话",
     "gāngcái de huà",
@@ -3425,11 +3189,6 @@
   "parts": "刚 (gāng, baru) + 刚 (gāng, baru)",
   "trick": "Dua kali 刚 = benar-benar baru saja!",
   "words": [
-   [
-    "刚刚",
-    "gānggāng",
-    "baru saja"
-   ],
    [
     "刚刚好",
     "gānggāng hǎo",
@@ -3480,11 +3239,6 @@
   "trick": "Akar (根) dan bukti (据) = dasar. 根据 itu 'berdasarkan'.",
   "words": [
    [
-    "根据",
-    "gēnjù",
-    "berdasarkan"
-   ],
-   [
     "根据…来看",
     "gēnjù…láikàn",
     "berdasarkan…"
@@ -3531,7 +3285,7 @@
   "arti": "kilogram",
   "theme": "tatabahasa",
   "parts": "公 (gōng, umum) + 斤 (jīn, setengah kilogram; bentuk asalnya gambar kapak)",
-  "trick": "公斤 = kilogram (kg). 一公斤 = 2 斤.",
+  "trick": "公 (umum, internasional) + 斤 (jin). 公斤 = kilogram, satuan berat standar internasional; 1 公斤 = 2 斤.",
   "words": [
    [
     "斤",
@@ -3560,11 +3314,6 @@
   "parts": "公 (gōng, umum) + 园 (yuán, kebun; taman)",
   "trick": "Kebun (园) umum (公) = taman. Cocok untuk jalan pagi.",
   "words": [
-   [
-    "公园",
-    "gōngyuán",
-    "taman"
-   ],
    [
     "去公园",
     "qù gōngyuán",
@@ -3695,11 +3444,6 @@
   "trick": "Mematikan (关) mesin (机). Lawan: 开机 (menyalakan).",
   "words": [
    [
-    "关机",
-    "guānjī",
-    "mematikan perangkat"
-   ],
-   [
     "开机",
     "kāijī",
     "menyalakan perangkat"
@@ -3748,11 +3492,6 @@
   "trick": "Hati (心) yang terkait (关) dengan seseorang = peduli.",
   "words": [
    [
-    "关心",
-    "guānxīn",
-    "peduli"
-   ],
-   [
     "关心别人",
     "guānxīn biéren",
     "peduli pada orang lain"
@@ -3774,11 +3513,6 @@
   "parts": "关 (guān, berkaitan) + 于 (yú, pada)",
   "trick": "Berkaitan (关) dengan (于) = mengenai.",
   "words": [
-   [
-    "关于",
-    "guānyú",
-    "tentang"
-   ],
    [
     "关于这件事",
     "guānyú zhè jiàn shì",
@@ -3802,11 +3536,6 @@
   "trick": "Menuangkan (注) perhatian (关). Di media sosial: mengikuti akun seseorang.",
   "words": [
    [
-    "关注",
-    "guānzhù",
-    "memperhatikan"
-   ],
-   [
     "关注新闻",
     "guānzhù xīnwén",
     "mengikuti berita"
@@ -3828,11 +3557,6 @@
   "parts": "国 (guó, negara; 囗 'batas' + 玉 yù) + 家 (jiā, rumah; keluarga)",
   "trick": "Negara (国) dan rumah (家) = bangsa sebagai rumah besar. Kata 'tanah air' mirip artinya.",
   "words": [
-   [
-    "国家",
-    "guójiā",
-    "negara"
-   ],
    [
     "外国",
     "wàiguó",
@@ -3882,11 +3606,6 @@
   "trick": "Yang sudah lewat (过) dan pergi (去) = masa lalu.",
   "words": [
    [
-    "过去",
-    "guòqù",
-    "masa lalu"
-   ],
-   [
     "现在",
     "xiànzài",
     "sekarang"
@@ -3897,7 +3616,7 @@
    "Tā guòqù zhù zài Běijīng.",
    "Dulu dia tinggal di Beijing."
   ],
-  "note": "过去 sebagai kata benda waktu berarti 'masa lalu'. Sebagai kata kerja (guòqu) berarti 'pergi ke sana/melewati'."
+  "note": "过去 sebagai kata benda waktu = 'masa lalu' (过去我住在北京), setara 以前. Sebagai kata kerja (guòqu, 去 dibaca ringan) = 'pergi ke sana/menyeberang ke sana': 你过去吧. Lawan 过来 (guòlai, ke sini)."
  },
  {
   "n": 161,
@@ -3992,11 +3711,6 @@
     "好久不见",
     "hǎojiǔ bú jiàn",
     "lama tidak bertemu"
-   ],
-   [
-    "好久",
-    "hǎojiǔ",
-    "lama sekali"
    ]
   ],
   "sentence": [
@@ -4097,11 +3811,6 @@
   "trick": "合 (cocok) dan 适 (sesuai) = cocok/pas. Dipakai untuk ukuran, orang, atau waktu.",
   "words": [
    [
-    "合适",
-    "héshì",
-    "cocok"
-   ],
-   [
     "不合适",
     "bù héshì",
     "tidak cocok"
@@ -4124,11 +3833,6 @@
   "trick": "Papan (板) yang hitam (黑) = papan tulis. Sekarang banyak yang putih, tapi namanya tetap 黑板.",
   "words": [
    [
-    "黑板",
-    "hēibǎn",
-    "papan tulis"
-   ],
-   [
     "黑色",
     "hēisè",
     "warna hitam"
@@ -4143,7 +3847,7 @@
  {
   "n": 170,
   "hanzi": "红绿灯",
-  "pinyin": "hóng-lǜdēng",
+  "pinyin": "hónglǜdēng",
   "arti": "lampu lalu lintas",
   "theme": "tempat",
   "parts": "红 (hóng, merah) + 绿 (lǜ, hijau) + 灯 (dēng, lampu)",
@@ -4161,9 +3865,9 @@
    ]
   ],
   "sentence": [
-   "红灯的时候，不要过马路。",
-   "Hóngdēng de shíhou, búyào guò mǎlù.",
-   "Saat lampu merah, jangan menyeberang jalan."
+   "前面有一个红绿灯，我们在那儿等。",
+   "Qiánmiàn yǒu yí ge hónglǜdēng, wǒmen zài nàr děng.",
+   "Di depan ada lampu lalu lintas, kita menunggu di sana."
   ],
   "note": "红灯 = lampu merah, 绿灯 = lampu hijau. Saat 红灯, jangan menyeberang."
  },
@@ -4176,11 +3880,6 @@
   "parts": "后 (hòu, belakang) + 来 (lái, datang)",
   "trick": "Yang datang (来) di belakang (后) = kemudian. Dipakai untuk bercerita tentang masa lalu.",
   "words": [
-   [
-    "后来",
-    "hòulái",
-    "kemudian (masa lalu)"
-   ],
    [
     "以后",
     "yǐhòu",
@@ -4257,11 +3956,6 @@
   "trick": "Surat izin (照) yang melindungi (护) kita saat ke luar negeri = paspor.",
   "words": [
    [
-    "护照",
-    "hùzhào",
-    "paspor"
-   ],
-   [
     "办护照",
     "bàn hùzhào",
     "mengurus paspor"
@@ -4336,11 +4030,6 @@
   "trick": "Menyambut (迎) dengan senang (欢) = selamat datang!",
   "words": [
    [
-    "欢迎",
-    "huānyíng",
-    "selamat datang"
-   ],
-   [
     "欢迎你",
     "huānyíng nǐ",
     "selamat datang"
@@ -4378,7 +4067,7 @@
    "Wǒ míngtiān bǎ shū huán gěi nǐ.",
    "Besok aku kembalikan bukunya padamu."
   ],
-  "note": "还 dibaca huán (mengembalikan), beda dari hái (masih; juga). Pola: 把 + benda + 还给 + orang. Bandingkan dengan 借 (meminjam)."
+  "note": "还 dibaca huán (mengembalikan), beda dari hái (masih; juga). Pola: 把 + benda + 还给 + orang. Bandingkan dengan 借 (meminjam). Awas: 我还没吃 (hái, aku masih belum makan) vs 我还你钱 (huán, aku kembalikan uangmu). Untuk 'lagi' di masa depan pakai 再 (zài), bukan 还."
  },
  {
   "n": 179,
@@ -4389,11 +4078,6 @@
   "parts": "环 (huán, cincin; melingkar) + 境 (jìng, wilayah)",
   "trick": "Wilayah (境) yang melingkari (环) kita = lingkungan.",
   "words": [
-   [
-    "环境",
-    "huánjìng",
-    "lingkungan"
-   ],
    [
     "环境好",
     "huánjìng hǎo",
@@ -4473,11 +4157,6 @@
     "回答问题",
     "huídá wèntí",
     "menjawab pertanyaan"
-   ],
-   [
-    "回答",
-    "huídá",
-    "jawaban"
    ]
   ],
   "sentence": [
@@ -4578,11 +4257,6 @@
   "trick": "Versi lisan dari 或. Dipakai di kalimat pernyataan.",
   "words": [
    [
-    "或者",
-    "huòzhě",
-    "atau"
-   ],
-   [
     "还是",
     "háishi",
     "atau (pertanyaan)"
@@ -4631,11 +4305,6 @@
   "parts": "几 (jī, hampir; juga 'beberapa') + 乎 (hū, partikel; akhiran)",
   "trick": "几乎 = 'hampir'. Menunjukkan sesuatu hampir tercapai atau hampir terjadi.",
   "words": [
-   [
-    "几乎",
-    "jīhū",
-    "hampir"
-   ],
    [
     "几乎没有",
     "jīhū méiyǒu",
@@ -4875,11 +4544,6 @@
   "trick": "Memegang (持) dengan kokoh (坚) = bertahan. Kata ini bisa dipakai untuk memberi semangat.",
   "words": [
    [
-    "坚持",
-    "jiānchí",
-    "bertahan"
-   ],
-   [
     "坚持下去",
     "jiānchí xiàqù",
     "terus bertahan"
@@ -4929,11 +4593,6 @@
   "trick": "Ringkas (简) dan tunggal (单) = sederhana. Kebalikan dari 复杂.",
   "words": [
    [
-    "简单",
-    "jiǎndān",
-    "sederhana"
-   ],
-   [
     "不简单",
     "bù jiǎndān",
     "tidak sederhana"
@@ -4980,7 +4639,7 @@
   "arti": "sehat",
   "theme": "tubuh",
   "parts": "健 (jiàn, kuat, sehat) + 康 (kāng, sehat; tenteram)",
-  "trick": "Badan kuat (健) dan tenteram (康) = sehat. Ingat 'Jian-kang' seperti 'kang' yang kuat angkat galon.",
+  "trick": "健 (kuat, bugar) + 康 (sehat, tenteram). Dua kata baik digabung menjadi 'badan yang sehat'.",
   "words": [
    [
     "身体健康",
@@ -5023,7 +4682,7 @@
   "arti": "berbicara; menceritakan",
   "theme": "kerja",
   "parts": "讠 (yán, ucapan) + 井 (jǐng, sumur). Ini bentuk sederhana dari 講 (jiǎng), bagian kanannya diganti 井",
-  "trick": "Ucapan (讠) yang mengalir seperti air dari sumur (井) = berbicara panjang.",
+  "trick": "Cara mengingat saja: ucapan (讠) yang terus mengalir seperti air dari sumur (井): berbicara atau bercerita panjang.",
   "words": [
    [
     "讲话",
@@ -5176,13 +4835,6 @@
   "theme": "orang",
   "parts": "结 (jié, mengikat) + 婚 (hūn, pernikahan)",
   "trick": "Mengikat (结) janji pernikahan (婚) = menikah.",
-  "words": [
-   [
-    "结婚",
-    "jiéhūn",
-    "menikah"
-   ]
-  ],
   "sentence": [
    "他们去年结婚了。",
    "Tāmen qùnián jiéhūn le.",
@@ -5240,13 +4892,6 @@
   "theme": "kerja",
   "parts": "结 (jié, menyimpul) + 束 (shù, mengikat)",
   "trick": "Diikat (束) dan disimpul (结) = urusan selesai.",
-  "words": [
-   [
-    "结束",
-    "jiéshù",
-    "berakhir"
-   ]
-  ],
   "sentence": [
    "电影几点结束？",
    "Diànyǐng jǐ diǎn jiéshù?",
@@ -5349,13 +4994,6 @@
   "theme": "kerja",
   "parts": "经 (jīng, melalui) + 过 (guò, lewat)",
   "trick": "Melalui (经) lalu lewat (过) = melewati sebuah tempat.",
-  "words": [
-   [
-    "经过",
-    "jīngguò",
-    "melewati"
-   ]
-  ],
   "sentence": [
    "我每天上班都经过这条街。",
    "Wǒ měitiān shàngbān dōu jīngguò zhè tiáo jiē.",
@@ -5391,7 +5029,7 @@
   "arti": "lama (waktu)",
   "theme": "waktu",
   "parts": "Karakter dasar, tidak dipecah",
-  "trick": "Satu bunyi, tiga arti: 久 (jiǔ, lama), 九 (jiǔ, sembilan), 酒 (jiǔ, arak). Ketiganya dibaca persis sama, jadi tebak dari konteks kalimat.",
+  "trick": "Cara mengingat saja: bayangkan orang tua bertongkat yang sudah menunggu lama. Awas, bunyi jiǔ sama dengan 九 (sembilan) dan 酒 (arak); tebak dari konteks.",
   "words": [
    [
     "好久",
@@ -5489,13 +5127,6 @@
   "theme": "sekolah",
   "parts": "句 (jù, kalimat) + 子 (zi, akhiran benda)",
   "trick": "句 sudah berarti kalimat; 子 hanya akhiran benda.",
-  "words": [
-   [
-    "句子",
-    "jùzi",
-    "kalimat"
-   ]
-  ],
   "sentence": [
    "请用这个词写一个句子。",
    "Qǐng yòng zhège cí xiě yí ge jùzi.",
@@ -5511,13 +5142,6 @@
   "theme": "kerja",
   "parts": "决 (jué, memutuskan) + 定 (dìng, menetapkan)",
   "trick": "Memutuskan (决) lalu menetapkan (定) = memutuskan.",
-  "words": [
-   [
-    "决定",
-    "juédìng",
-    "memutuskan"
-   ]
-  ],
   "sentence": [
    "我决定明年去中国学习。",
    "Wǒ juédìng míngnián qù Zhōngguó xuéxí.",
@@ -5559,13 +5183,6 @@
   "theme": "alam",
   "parts": "开 (kāi, membuka; mekar) + 花 (huā, bunga)",
   "trick": "Bunga (花) yang membuka (开) = mekar.",
-  "words": [
-   [
-    "开花",
-    "kāihuā",
-    "berbunga"
-   ]
-  ],
   "sentence": [
    "这种花什么时候开花？",
    "Zhè zhǒng huā shénme shíhou kāihuā?",
@@ -5581,13 +5198,6 @@
   "theme": "kantor",
   "parts": "开 (kāi, membuka; mengadakan) + 会 (huì, pertemuan)",
   "trick": "Membuka (开) sebuah pertemuan (会) = rapat.",
-  "words": [
-   [
-    "开会",
-    "kāihuì",
-    "rapat"
-   ]
-  ],
   "sentence": [
    "经理下午要开会。",
    "Jīnglǐ xiàwǔ yào kāihuì.",
@@ -5625,13 +5235,6 @@
   "theme": "sifat",
   "parts": "开 (kāi, terbuka) + 心 (xīn, hati)",
   "trick": "Hati (心) yang terbuka (开) = gembira.",
-  "words": [
-   [
-    "开心",
-    "kāixīn",
-    "senang"
-   ]
-  ],
   "sentence": [
    "今天我很开心。",
    "Jīntiān wǒ hěn kāixīn.",
@@ -5647,7 +5250,6 @@
   "theme": "tatabahasa",
   "parts": "看 (kàn, melihat) + 来 (lái, datang)",
   "trick": "Dilihat (看) dari tanda-tanda, lalu muncul (来) sebuah kesimpulan = tampaknya.",
-  "words": [],
   "sentence": [
    "看来明天要下雨。",
    "Kànlái míngtiān yào xià yǔ.",
@@ -5711,13 +5313,6 @@
   "theme": "sifat",
   "parts": "可 (kě, boleh, patut) + 爱 (ài, cinta)",
   "trick": "Patut (可) dicintai (爱) = menggemaskan.",
-  "words": [
-   [
-    "可爱",
-    "kě’ài",
-    "menggemaskan"
-   ]
-  ],
   "sentence": [
    "这只小狗真可爱。",
    "Zhè zhī xiǎo gǒu zhēn kě’ài.",
@@ -5777,13 +5372,6 @@
   "theme": "sekolah",
   "parts": "课 (kè, pelajaran) + 本 (běn, buku)",
   "trick": "Buku (本) untuk pelajaran (课) = buku pelajaran.",
-  "words": [
-   [
-    "课本",
-    "kèběn",
-    "buku pelajaran"
-   ]
-  ],
   "sentence": [
    "请打开课本。",
    "Qǐng dǎkāi kèběn.",
@@ -5819,13 +5407,6 @@
   "theme": "sekolah",
   "parts": "课 (kè, pelajaran) + 文 (wén, tulisan)",
   "trick": "Tulisan (文) dalam pelajaran (课) = teks bacaan.",
-  "words": [
-   [
-    "课文",
-    "kèwén",
-    "teks pelajaran"
-   ]
-  ],
   "sentence": [
    "请大家读课文。",
    "Qǐng dàjiā dú kèwén.",
@@ -5861,13 +5442,6 @@
   "theme": "kerja",
   "parts": "口 (kǒu, mulut) + 口 (kǒu, mulut) + 犬 (quǎn, anjing)",
   "trick": "Dua mulut dan seekor anjing yang melolong: suara sedih = menangis.",
-  "words": [
-   [
-    "哭",
-    "kū",
-    "menangis"
-   ]
-  ],
   "sentence": [
    "别哭了。",
    "Bié kū le.",
@@ -5905,13 +5479,6 @@
   "theme": "makanan",
   "parts": "矿 (kuàng, tambang, mineral) + 泉 (quán, mata air) + 水 (shuǐ, air)",
   "trick": "Air (水) dari mata air (泉) yang mengandung mineral (矿) = air mineral.",
-  "words": [
-   [
-    "矿泉水",
-    "kuàngquánshuǐ",
-    "air mineral"
-   ]
-  ],
   "sentence": [
    "请给我一瓶矿泉水。",
    "Qǐng gěi wǒ yì píng kuàngquánshuǐ.",
@@ -5926,13 +5493,6 @@
   "theme": "tempat",
   "parts": "来 (lái, datang) + 自 (zì, dari)",
   "trick": "Datang (来) dari (自) sebuah tempat.",
-  "words": [
-   [
-    "来自",
-    "láizì",
-    "berasal dari"
-   ]
-  ],
   "sentence": [
    "她来自中国。",
    "Tā láizì Zhōngguó.",
@@ -6001,13 +5561,6 @@
   "theme": "orang",
   "parts": "老 (lǎo, tua) + 人 (rén, orang)",
   "trick": "Orang (人) yang sudah tua (老) = lansia.",
-  "words": [
-   [
-    "老人",
-    "lǎorén",
-    "lansia"
-   ]
-  ],
   "sentence": [
    "我们要帮助老人。",
    "Wǒmen yào bāngzhù lǎorén.",
@@ -6023,13 +5576,6 @@
   "theme": "kerja",
   "parts": "离 (lí, berpisah) + 开 (kāi, membuka; menjauh)",
   "trick": "Berpisah (离) dan menjauh (开) dari suatu tempat = meninggalkan.",
-  "words": [
-   [
-    "离开",
-    "líkāi",
-    "meninggalkan"
-   ]
-  ],
   "sentence": [
    "他昨天离开学校了。",
    "Tā zuótiān líkāi xuéxiào le.",
@@ -6066,13 +5612,6 @@
   "theme": "sekolah",
   "parts": "历 (lì, melewati) + 史 (shǐ, sejarah, catatan)",
   "trick": "Catatan (史) tentang yang telah dilewati (历) = sejarah.",
-  "words": [
-   [
-    "历史",
-    "lìshǐ",
-    "sejarah"
-   ]
-  ],
   "sentence": [
    "我喜欢学历史。",
    "Wǒ xǐhuan xué lìshǐ.",
@@ -6133,11 +5672,6 @@
   "trick": "Berlatih (练) dan mempelajari (习) berulang = latihan.",
   "words": [
    [
-    "练习",
-    "liànxí",
-    "latihan"
-   ],
-   [
     "做练习",
     "zuò liànxí",
     "mengerjakan latihan"
@@ -6158,13 +5692,6 @@
   "theme": "sifat",
   "parts": "凉 (liáng, sejuk, dingin) + 快 (kuài, cepat; di sini hanya pelengkap kata)",
   "trick": "Hawa dingin (凉) yang bikin segar dan enak = sejuk.",
-  "words": [
-   [
-    "凉快",
-    "liángkuai",
-    "sejuk"
-   ]
-  ],
   "sentence": [
    "下雨以后天气很凉快。",
    "Xià yǔ yǐhòu tiānqì hěn liángkuai.",
@@ -6179,7 +5706,7 @@
   "arti": "buah (penghitung kendaraan)",
   "theme": "tatabahasa",
   "parts": "车 (chē, kendaraan) + 两 (liǎng, dua; bagian bunyi)",
-  "trick": "Kendaraan (车) yang dihitung dengan 辆. Bunyi 'liàng' mirip 两 (liǎng, dua), jadi ingat 'dua roda, dua-dua'.",
+  "trick": "车 (kendaraan) + 两 (liǎng, dua; memberi bunyi). Bunyi liàng mirip liǎng, jadi 辆 = penghitung kendaraan.",
   "words": [
    [
     "一辆车",
@@ -6246,13 +5773,6 @@
   "theme": "kerja",
   "parts": "了 (liǎo, tuntas) + 解 (jiě, menguraikan)",
   "trick": "Menguraikan (解) sampai tuntas (了) = paham betul.",
-  "words": [
-   [
-    "了解",
-    "liǎojiě",
-    "memahami"
-   ]
-  ],
   "sentence": [
    "我不太了解他。",
    "Wǒ bú tài liǎojiě tā.",
@@ -6268,13 +5788,6 @@
   "theme": "orang",
   "parts": "邻 (lín, bertetangga) + 居 (jū, tinggal)",
   "trick": "Yang tinggal (居) dekat (邻) = tetangga.",
-  "words": [
-   [
-    "邻居",
-    "línjū",
-    "tetangga"
-   ]
-  ],
   "sentence": [
    "我的邻居很好。",
    "Wǒ de línjū hěn hǎo.",
@@ -6289,13 +5802,6 @@
   "theme": "sekolah",
   "parts": "留 (liú, tinggal) + 学 (xué, belajar)",
   "trick": "Tinggal (留) di sana untuk belajar (学).",
-  "words": [
-   [
-    "留学",
-    "liúxué",
-    "belajar di luar negeri"
-   ]
-  ],
   "sentence": [
    "她想去中国留学。",
    "Tā xiǎng qù Zhōngguó liúxué.",
@@ -6311,13 +5817,6 @@
   "theme": "sekolah",
   "parts": "留学 (liúxué, belajar di luar negeri) + 生 (shēng, murid)",
   "trick": "Murid (生) yang belajar (留学) di luar negeri.",
-  "words": [
-   [
-    "留学生",
-    "liúxuéshēng",
-    "pelajar asing"
-   ]
-  ],
   "sentence": [
    "我们班有很多留学生。",
    "Wǒmen bān yǒu hěn duō liúxuéshēng.",
@@ -6332,13 +5831,6 @@
   "theme": "benda",
   "parts": "楼 (lóu, gedung bertingkat) + 梯 (tī, tangga)",
   "trick": "Tangga (梯) di dalam gedung (楼).",
-  "words": [
-   [
-    "楼梯",
-    "lóutī",
-    "tangga"
-   ]
-  ],
   "sentence": [
    "请走楼梯。",
    "Qǐng zǒu lóutī.",
@@ -6353,13 +5845,6 @@
   "theme": "tempat",
   "parts": "路 (lù, jalan) + 边 (biān, tepi)",
   "trick": "Tepi (边) jalan (路).",
-  "words": [
-   [
-    "路边",
-    "lùbiān",
-    "pinggir jalan"
-   ]
-  ],
   "sentence": [
    "路边有一家商店。",
    "Lùbiān yǒu yì jiā shāngdiàn.",
@@ -6438,7 +5923,6 @@
   "theme": "tatabahasa",
   "parts": "马 (mǎ, kuda) + 上 (shàng, di atas, naik)",
   "trick": "Mnemonik: langsung naik (上) kuda (马) lalu berangkat = segera.",
-  "words": [],
   "sentence": [
    "请等一下，我马上来。",
    "Qǐng děng yíxià, wǒ mǎshàng lái.",
@@ -6454,13 +5938,6 @@
   "theme": "sifat",
   "parts": "满 (mǎn, penuh) + 意 (yì, hati, maksud)",
   "trick": "Hati (意) terasa penuh (满) = puas.",
-  "words": [
-   [
-    "满意",
-    "mǎnyì",
-    "puas"
-   ]
-  ],
   "sentence": [
    "我对这里很满意。",
    "Wǒ duì zhèlǐ hěn mǎnyì.",
@@ -6568,13 +6045,6 @@
   "theme": "kantor",
   "parts": "名 (míng, nama) + 单 (dān, daftar)",
   "trick": "Daftar (单) nama (名).",
-  "words": [
-   [
-    "名单",
-    "míngdān",
-    "daftar nama"
-   ]
-  ],
   "sentence": [
    "名单上有你的名字。",
    "Míngdān shang yǒu nǐ de míngzi.",
@@ -6589,13 +6059,6 @@
   "theme": "orang",
   "parts": "名 (míng, nama) + 人 (rén, orang)",
   "trick": "Orang (人) yang namanya (名) dikenal.",
-  "words": [
-   [
-    "名人",
-    "míngrén",
-    "orang terkenal"
-   ]
-  ],
   "sentence": [
    "他是一个名人。",
    "Tā shì yí ge míngrén.",
@@ -6675,13 +6138,6 @@
   "theme": "sifat",
   "parts": "难 (nán, sulit) + 过 (guò, melewati)",
   "trick": "Sulit (难) untuk dilewati (过) = sedih.",
-  "words": [
-   [
-    "难过",
-    "nánguò",
-    "sedih"
-   ]
-  ],
   "sentence": [
    "朋友走了，我很难过。",
    "Péngyou zǒu le, wǒ hěn nánguò.",
@@ -6718,13 +6174,6 @@
   "theme": "orang",
   "parts": "男 (nán, laki-laki) + 人 (rén, orang)",
   "trick": "Orang (人) laki-laki (男).",
-  "words": [
-   [
-    "男人",
-    "nánrén",
-    "laki-laki dewasa"
-   ]
-  ],
   "sentence": [
    "那个男人是我爸爸的朋友。",
    "Nà ge nánrén shì wǒ bàba de péngyou.",
@@ -6739,13 +6188,6 @@
   "theme": "sekolah",
   "parts": "男 (nán, laki-laki) + 生 (shēng, murid)",
   "trick": "Murid (生) laki-laki (男).",
-  "words": [
-   [
-    "男生",
-    "nánshēng",
-    "murid laki-laki"
-   ]
-  ],
   "sentence": [
    "我们班有十个男生。",
    "Wǒmen bān yǒu shí ge nánshēng.",
@@ -6760,13 +6202,6 @@
   "theme": "sekolah",
   "parts": "难 (nán, sulit) + 题 (tí, soal)",
   "trick": "Soal (题) yang sulit (难).",
-  "words": [
-   [
-    "难题",
-    "nántí",
-    "soal sulit"
-   ]
-  ],
   "sentence": [
    "这是一个大难题。",
    "Zhè shì yí ge dà nántí.",
@@ -6888,13 +6323,6 @@
   "theme": "orang",
   "parts": "女 (nǚ, perempuan) + 人 (rén, orang)",
   "trick": "Orang (人) perempuan (女).",
-  "words": [
-   [
-    "女人",
-    "nǚrén",
-    "perempuan"
-   ]
-  ],
   "sentence": [
    "那个女人是我的老师。",
    "Nà ge nǚrén shì wǒ de lǎoshī.",
@@ -6909,13 +6337,6 @@
   "theme": "sekolah",
   "parts": "女 (nǚ, perempuan) + 生 (shēng, murid)",
   "trick": "Murid (生) perempuan (女).",
-  "words": [
-   [
-    "女生",
-    "nǚshēng",
-    "murid perempuan"
-   ]
-  ],
   "sentence": [
    "我们班女生比男生多。",
    "Wǒmen bān nǚshēng bǐ nánshēng duō.",
@@ -6973,13 +6394,6 @@
   "theme": "kerja",
   "parts": "拍 (pāi, menepuk) + 照 (zhào, menyinari; foto)",
   "trick": "Menepuk (拍) tombol dan menghasilkan foto (照).",
-  "words": [
-   [
-    "拍照",
-    "pāizhào",
-    "memotret"
-   ]
-  ],
   "sentence": [
    "请帮我们拍照。",
    "Qǐng bāng wǒmen pāizhào.",
@@ -6995,13 +6409,6 @@
   "theme": "benda",
   "parts": "盘 (pán, piring) + 子 (zi, akhiran benda)",
   "trick": "盘 sudah berarti piring; 子 akhiran benda.",
-  "words": [
-   [
-    "盘子",
-    "pánzi",
-    "piring"
-   ]
-  ],
   "sentence": [
    "桌子上有两个盘子。",
    "Zhuōzi shang yǒu liǎng ge pánzi.",
@@ -7038,13 +6445,6 @@
   "theme": "makanan",
   "parts": "啤 (pí, bir; huruf khusus untuk menirukan bunyi 'beer') + 酒 (jiǔ, minuman keras)",
   "trick": "啤 dibuat untuk menirukan bunyi 'beer'. Pí-jiǔ mirip 'bir', jadi bir = 'pijiu'.",
-  "words": [
-   [
-    "啤酒",
-    "píjiǔ",
-    "bir"
-   ]
-  ],
   "sentence": [
    "他喜欢喝啤酒。",
    "Tā xǐhuan hē píjiǔ.",
@@ -7059,13 +6459,6 @@
   "theme": "waktu",
   "parts": "平 (píng, biasa, datar) + 时 (shí, waktu)",
   "trick": "Waktu (时) yang biasa (平) = biasanya.",
-  "words": [
-   [
-    "平时",
-    "píngshí",
-    "biasanya"
-   ]
-  ],
   "sentence": [
    "我平时六点起床。",
    "Wǒ píngshí liù diǎn qǐchuáng.",
@@ -7129,13 +6522,6 @@
   "theme": "sifat",
   "parts": "奇 (qí, aneh) + 怪 (guài, aneh)",
   "trick": "Dua kata 'aneh' digabung: aneh banget.",
-  "words": [
-   [
-    "奇怪",
-    "qíguài",
-    "aneh"
-   ]
-  ],
   "sentence": [
    "这件事很奇怪。",
    "Zhè jiàn shì hěn qíguài.",
@@ -7150,7 +6536,6 @@
   "theme": "tatabahasa",
   "parts": "其 (qí, itu) + 实 (shí, nyata)",
   "trick": "Hal yang nyata (实) tentang itu (其) = sebenarnya.",
-  "words": [],
   "sentence": [
    "其实我也不知道。",
    "Qíshí wǒ yě bù zhīdào.",
@@ -7510,7 +6895,7 @@
   "arti": "mengenali; kenal (huruf/orang)",
   "theme": "sekolah",
   "parts": "认 (rèn, mengenali) + 得 (dé, mendapat)",
-  "trick": "Mengenali (认) lalu 'mendapat' (得) kesan di ingatan: kenal.",
+  "trick": "Cara mengingat saja: 认 (mengenali) + 得 (bisa): kamu 'bisa' mengenali huruf atau orang itu.",
   "words": [
    [
     "认得字",
@@ -8334,7 +7719,7 @@
   "arti": "matahari",
   "theme": "alam",
   "parts": "太 (tài, sangat) + 阳 (yáng, matahari; terang)",
-  "trick": "Yang 'sangat' (太) terang (阳): matahari.",
+  "trick": "Cara mengingat saja: 太 (paling besar) + 阳 (terang, sinar): benda paling besar dan terang di langit.",
   "words": [
    [
     "太阳光",
@@ -8343,9 +7728,9 @@
    ]
   ],
   "sentence": [
-   "太阳从东边出来。",
-   "Tàiyáng cóng dōngbian chūlai.",
-   "Matahari terbit dari timur."
+   "太阳出来了，天气很热。",
+   "Tàiyáng chūlai le, tiānqì hěn rè.",
+   "Matahari sudah keluar, cuaca panas sekali."
   ],
   "note": "Untuk 'cerah' dipakai 晴 (qíng). Jangan tertukar dengan 太 (tài, terlalu) dalam 太好了 (tài hǎo le)."
  },
@@ -8689,7 +8074,7 @@
   "arti": "kaki (tungkai)",
   "theme": "tubuh",
   "parts": "月 (radikal daging/badan) + 退 (tuì, mundur; memberi bunyi)",
-  "trick": "Anggota badan (月) yang bunyinya mirip 退 (tuì): kaki.",
+  "trick": "Cara mengingat saja: 月 (daging/badan) menunjukkan bagian tubuh; 退 (tuì) memberi bunyi mirip tuǐ.",
   "words": [
    [
     "大腿",
@@ -9189,13 +8574,6 @@
   "theme": "sifat",
   "parts": "喜 (xǐ, suka) + 爱 (ài, cinta)",
   "trick": "Dua kata 'suka' dan 'cinta' digabung: sangat suka.",
-  "words": [
-   [
-    "喜爱",
-    "xǐ'ài",
-    "menyukai"
-   ]
-  ],
   "sentence": [
    "孩子们都喜爱这只小狗。",
    "Háizimen dōu xǐ'ài zhè zhī xiǎo gǒu.",
@@ -9342,7 +8720,7 @@
   "arti": "kotak; koper",
   "theme": "benda",
   "parts": "箱 (xiāng, kotak; berradikal 竹 zhú, bambu + 相 xiāng, memberi bunyi) + 子 (zi, akhiran benda)",
-  "trick": "Kotak yang dulu terkait bahan seperti bambu (竹) dan berbunyi sama dengan 相 (xiāng).",
+  "trick": "Cara mengingat saja: 箱 berunsur 竹 (bambu); kotak dan keranjang dulu dianyam dari bambu. 相 hanya memberi bunyi.",
   "words": [
    [
     "行李箱",
@@ -9471,9 +8849,9 @@
    ]
   ],
   "sentence": [
-   "过马路要小心。",
-   "Guò mǎlù yào xiǎoxīn.",
-   "Hati-hati saat menyeberang jalan."
+   "路很滑，你要小心。",
+   "Lù hěn huá, nǐ yào xiǎoxīn.",
+   "Jalannya licin, kamu harus hati-hati."
   ],
   "note": "小心 bisa kata kerja (小心!) atau sifat. Pola 小心 + hal untuk memperingatkan."
  },
@@ -9605,13 +8983,6 @@
   "theme": "kantor",
   "parts": "新 (xīn, baru) + 闻 (wén, mendengar; kabar)",
   "trick": "Hal baru (新) yang kamu dengar (闻) = berita.",
-  "words": [
-   [
-    "新闻",
-    "xīnwén",
-    "berita"
-   ]
-  ],
   "sentence": [
    "我每天看新闻。",
    "Wǒ měi tiān kàn xīnwén.",
@@ -9663,9 +9034,9 @@
    ]
   ],
   "sentence": [
-   "我相信你说的话。",
-   "Wǒ xiāngxìn nǐ shuō de huà.",
-   "Aku percaya pada ucapanmu."
+   "我给朋友写了一封信。",
+   "Wǒ gěi péngyou xiěle yì fēng xìn.",
+   "Aku menulis sebuah surat untuk temanku."
   ],
   "note": "信 bisa berdiri sendiri sebagai kata kerja: 我信你 (wǒ xìn nǐ, aku percaya padamu). Dalam kata 相信 (xiāngxìn) artinya juga percaya. Sebagai kata benda 信 berarti surat atau kabar: 写信 (xiě xìn, menulis surat)."
  },
@@ -9705,11 +9076,6 @@
     "不行",
     "bù xíng",
     "tidak boleh"
-   ],
-   [
-    "可以",
-    "kěyǐ",
-    "boleh"
    ]
   ],
   "sentence": [
@@ -10457,7 +9823,7 @@
   "arti": "memakai; menggunakan",
   "theme": "kerja",
   "parts": "Karakter dasar, tidak dipecah",
-  "trick": "Sekadar pengingat: bayangkan 用 sebagai wadah atau kotak perkakas yang selalu dipakai.",
+  "trick": "Cara mengingat saja: bentuknya seperti ember bergaris tengah yang selalu dipakai sehari-hari.",
   "words": [
    [
     "有用",
@@ -10507,13 +9873,6 @@
   "theme": "orang",
   "parts": "游 (yóu, berwisata) + 客 (kè, tamu)",
   "trick": "Tamu (客) yang berwisata (游) = turis.",
-  "words": [
-   [
-    "游客",
-    "yóukè",
-    "turis"
-   ]
-  ],
   "sentence": [
    "这里有很多游客。",
    "Zhèlǐ yǒu hěn duō yóukè.",
@@ -10656,7 +10015,7 @@
    "Tā jīntiān yòu chídào le.",
    "Hari ini dia terlambat lagi."
   ],
-  "note": "又 untuk pengulangan yang SUDAH terjadi; 再 untuk pengulangan yang AKAN terjadi. Pola 又……又……: 又大又好 (besar dan bagus)."
+  "note": "又 untuk pengulangan yang SUDAH terjadi; 再 untuk pengulangan yang AKAN terjadi. Pola 又……又……: 又大又好 (besar dan bagus). Contoh: 他昨天迟到了，今天又迟到了 (kemarin terlambat, hari ini terlambat lagi) vs 明天请再来 (silakan datang lagi besok)."
  },
  {
   "n": 450,
@@ -10807,7 +10166,7 @@
   "arti": "-wan; -wati (akhiran orang)",
   "theme": "orang",
   "parts": "口 (kǒu, mulut) + 贝 (bèi, kerang; zaman dulu dipakai sebagai uang)",
-  "trick": "Sekadar pengingat: anggota tim adalah orang yang mulutnya (口) diberi makan dari gaji (贝, uang).",
+  "trick": "Cara mengingat saja: 贝 (kerang, dulu dipakai sebagai uang) menandakan orang yang digaji; 员 = anggota atau pegawai.",
   "words": [
    [
     "服务员",
@@ -10881,14 +10240,9 @@
   "trick": "Bulan (月) yang terang (亮): rembulan.",
   "words": [
    [
-    "月",
-    "yuè",
-    "bulan"
-   ],
-   [
-    "太阳",
-    "tàiyáng",
-    "matahari"
+    "月光",
+    "yuèguāng",
+    "sinar bulan"
    ]
   ],
   "sentence": [
@@ -10969,8 +10323,8 @@
   "pinyin": "zāng",
   "arti": "kotor",
   "theme": "sifat",
-  "parts": "月 (yuè, bulan; di sini berfungsi sebagai 'daging/tubuh') + 庄 (zhuāng, penanda bunyi)",
-  "trick": "Ingat 脏 dengan 月 (tubuh) yang butuh dibersihkan.",
+  "parts": "月 (daging/tubuh) + 庄 (zhuāng, memberi bunyi); bentuk sederhana yang mewakili dua karakter lama: 髒 (kotor, zāng) dan 臟 (organ, zàng)",
+  "trick": "Cara mengingat saja: tubuh (月) yang tidak dirawat menjadi kotor.",
   "words": [
    [
     "干净",
@@ -11241,9 +10595,9 @@
    ]
   ],
   "sentence": [
-   "我一直等到十点。",
-   "Wǒ yìzhí děngdào shí diǎn.",
-   "Aku menunggu sampai jam sepuluh."
+   "直到十点，他才回家。",
+   "Zhídào shí diǎn, tā cái huíjiā.",
+   "Baru pada pukul sepuluh dia pulang."
   ],
   "note": "直到 dipakai untuk menyebut batas waktu: 直到现在 (zhídào xiànzài, sampai sekarang). Pola 直到……才: 他直到晚上才回来 (tā zhídào wǎnshang cái huílái, dia baru kembali malam hari)."
  },
@@ -11299,7 +10653,7 @@
  {
   "n": 477,
   "hanzi": "只能",
-  "pinyin": "zhǐ néng",
+  "pinyin": "zhǐnéng",
   "arti": "hanya bisa",
   "theme": "tatabahasa",
   "parts": "只 (zhǐ, hanya) + 能 (néng, bisa)",
@@ -11446,13 +10800,6 @@
   "theme": "tatabahasa",
   "parts": "终 (zhōng, akhir) + 于 (yú, pada)",
   "trick": "Pada (于) akhirnya (终): setelah lama menunggu.",
-  "words": [
-   [
-    "最后",
-    "zuìhòu",
-    "terakhir"
-   ]
-  ],
   "sentence": [
    "我终于看完了这本书。",
    "Wǒ zhōngyú kànwánle zhè běn shū.",
@@ -11495,13 +10842,6 @@
   "theme": "sifat",
   "parts": "重 (zhòng, berat) + 要 (yào, perlu)",
   "trick": "Berat (重) dan perlu (要): sangat penting.",
-  "words": [
-   [
-    "重要",
-    "zhòngyào",
-    "penting"
-   ]
-  ],
   "sentence": [
    "这件事很重要。",
    "Zhè jiàn shì hěn zhòngyào.",
@@ -11517,13 +10857,6 @@
   "theme": "waktu",
   "parts": "周 (zhōu, pekan) + 末 (mò, ujung)",
   "trick": "Ujung (末) pekan (周): Sabtu dan Minggu.",
-  "words": [
-   [
-    "周末",
-    "zhōumò",
-    "akhir pekan"
-   ]
-  ],
   "sentence": [
    "周末你想做什么？",
    "Zhōumò nǐ xiǎng zuò shénme?",
@@ -11539,13 +10872,6 @@
   "theme": "sifat",
   "parts": "主 (zhǔ, utama) + 要 (yào, perlu)",
   "trick": "Hal utama (主) yang diperlukan (要).",
-  "words": [
-   [
-    "主要",
-    "zhǔyào",
-    "utama"
-   ]
-  ],
   "sentence": [
    "这是我们的主要问题。",
    "Zhè shì wǒmen de zhǔyào wèntí.",
@@ -11584,11 +10910,6 @@
   "parts": "住 (zhù, tinggal) + 院 (yuàn, lembaga; di sini rumah sakit)",
   "trick": "Tinggal (住) di rumah sakit (院): opname.",
   "words": [
-   [
-    "住院",
-    "zhùyuàn",
-    "dirawat inap"
-   ],
    [
     "医院",
     "yīyuàn",
@@ -11713,13 +11034,6 @@
   "theme": "tatabahasa",
   "parts": "总 (zǒng, selalu) + 是 (shì, adalah)",
   "trick": "Selalu (总) begitu adanya (是).",
-  "words": [
-   [
-    "常常",
-    "chángcháng",
-    "sering"
-   ]
-  ],
   "sentence": [
    "他总是很早到学校。",
    "Tā zǒngshì hěn zǎo dào xuéxiào.",
@@ -11824,11 +11138,6 @@
   "parts": "做 (zuò, melakukan; menjadi) + 客 (kè, tamu)",
   "trick": "Menjadi (做) tamu (客): bertamu.",
   "words": [
-   [
-    "做客",
-    "zuòkè",
-    "bertamu"
-   ],
    [
     "客人",
     "kèrén",

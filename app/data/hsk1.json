@@ -6,7 +6,7 @@
     "arti": "cinta; mencintai",
     "theme": "kerja",
     "parts": "爫 (zhǎo, cakar/tangan) + 冖 (mì, penutup/atap) + 友 (yǒu, teman)",
-    "trick": "Cinta zaman sekarang: seorang teman (友) di bawah satu atap (冖).",
+    "trick": "Cara mengingat saja: seorang teman (友) di bawah satu atap (冖) saling mencintai. Bentuk lama 愛 masih punya hati (心).",
     "history": "Bentuk tradisional 愛 punya 心 (xīn, hati) di tengah. Pada 爱, bagian hati dihilangkan dan bagian bawah menjadi 友 (yǒu, teman).",
     "words": [
       [
@@ -257,8 +257,8 @@
     "pinyin": "biān",
     "arti": "sisi; pinggir",
     "theme": "tempat",
-    "parts": "辶 (chuò, berjalan) + 力 (lì, tenaga)",
-    "trick": "Pakai tenaga (力) berjalan (辶) sampai ke pinggir.",
+    "parts": "辶 (chuò, berjalan) + 力 (lì, tenaga); 力 hanya pengganti bentuk pada versi sederhana",
+    "trick": "Cara mengingat saja: 辶 (berjalan) + 力 (tenaga): berjalan terus sampai ke pinggir.",
     "history": "Bentuk tradisional 邊 = 辶 + 臱 + 方 (fāng). Pada versi sederhana, 力 hanyalah pengganti bentuk; tidak bermakna 'tenaga'.",
     "words": [
       [
@@ -354,14 +354,7 @@
     "arti": "tidak mau; jangan",
     "theme": "tatabahasa",
     "parts": "不 (bù, tidak) + 要 (yào, mau)",
-    "trick": "Tidak (不) mau (要) = tidak mau atau jangan.",
-    "words": [
-      [
-        "要不要",
-        "yào bu yào",
-        "mau atau tidak?"
-      ]
-    ],
+    "trick": "Gabungan 不 (tidak) + 要 (mau): 'tidak mau'; untuk melarang jadi 'jangan'.",
     "sentence": [
       "我不要喝茶。",
       "Wǒ búyào hē chá.",
@@ -760,7 +753,7 @@
     "arti": "adik laki-laki",
     "theme": "keluarga",
     "parts": "弟 (dì, adik laki-laki) ditulis dua kali. Karakter 弟 mengandung 弓 (gōng, busur) dan tidak dipecah lebih jauh",
-    "trick": "Adik laki-laki yang suka bermain busur (弓).",
+    "trick": "Cara mengingat saja: bunyi 'dì' mirip 'adik'. Diulang dua kali seperti panggilan akrab.",
     "history": "Menurut kamus kuno Shuowen, 弟 awalnya menggambarkan tali kulit yang dililitkan pada tongkat secara berurutan, lalu bermakna 'urutan', dan akhirnya dipakai untuk adik laki-laki.",
     "words": [
       [
@@ -925,9 +918,9 @@
     "trick": "Gedung (院) tempat memutar film (电影).",
     "words": [
       [
-        "医院",
-        "yīyuàn",
-        "rumah sakit (juga pakai 院)"
+        "电影票",
+        "diànyǐngpiào",
+        "tiket film"
       ]
     ],
     "sentence": [
@@ -988,7 +981,7 @@
     "arti": "membaca (keras); mempelajari",
     "theme": "sekolah",
     "parts": "讠 (yán, ucapan) + 卖 (mài, menjual; memberi bunyi)",
-    "trick": "Kalau kamu 'menjual' (卖) ucapan (讠) dengan lantang, itulah membaca keras.",
+    "trick": "Cara mengingat saja: 讠 (ucapan) memberi makna, 卖 (mài) hanya petunjuk bunyi 'dú'. Membaca keras = mengucapkan tulisan.",
     "history": "Bentuk tradisional 讀 = 言 (yán, ucapan) + 賣 (mài). Di sini 卖 hanyalah petunjuk bunyi, bukan makna 'menjual'.",
     "words": [
       [
@@ -1030,8 +1023,8 @@
     "pinyin": "duì",
     "arti": "benar; terhadap; ke arah",
     "theme": "sifat",
-    "parts": "又 (yòu, tangan) + 寸 (cùn, ukuran; juga tangan)",
-    "trick": "Dua tangan yang mengukur dan hasilnya pas = benar.",
+    "parts": "又 (yòu, tangan) + 寸 (cùn, tangan/ukuran); 又 menggantikan bagian kiri bentuk tradisional 對",
+    "trick": "Cara mengingat saja: dua pihak saling berhadapan (对) dan cocok = benar.",
     "words": [
       [
         "不对",
@@ -1810,7 +1803,7 @@
     "arti": "sangat; (penghubung sebelum kata sifat)",
     "theme": "tatabahasa",
     "parts": "彳 (chì, melangkah) + 艮 (gèn, memberi bunyi)",
-    "trick": "Melangkah (彳) dengan keras kepala (艮) = sangat tekun.",
+    "trick": "Cara mengingat saja: 彳 (melangkah) + 艮 (gèn, keras kepala); sesuatu yang 'keras' = sangat.",
     "history": "Awalnya bermakna 'membandel, keras kepala', lalu dipakai sebagai kata keterangan 'sangat'.",
     "words": [
       [
@@ -1838,7 +1831,7 @@
     "arti": "belakang; sesudah",
     "theme": "tempat",
     "parts": "Karakter dasar, tidak dipecah (bagian bawahnya 口, kǒu, mulut)",
-    "trick": "Anggap 后 sebagai dua karakter yang bergabung: yang satu berarti 'ratu', satunya 'belakang'. Jadi 后 dipakai untuk dua makna.",
+    "trick": "Cara mengingat saja: 后 asalnya 'ratu/penguasa', lalu lewat penyederhanaan juga dipakai untuk 'belakang, sesudah'.",
     "history": "后 awalnya berarti 'penguasa/ratu'. Pada penyederhanaan, 后 juga dipakai menggantikan 後 (hòu, 'belakang, sesudah') yang punya 彳 (chì) + 幺 (yāo) + 夂 (zhǐ). Maka satu karakter sederhana menggabungkan dua karakter tradisional.",
     "words": [
       [
@@ -1943,9 +1936,9 @@
     "trick": "Telur (蛋) ayam (鸡). Dalam bahasa Mandarin, jenis telur biasanya disebut dengan nama hewannya.",
     "words": [
       [
-        "鸭蛋",
-        "yādàn",
-        "telur bebek"
+        "炒鸡蛋",
+        "chǎo jīdàn",
+        "telur orak-arik"
       ]
     ],
     "sentence": [
@@ -3002,7 +2995,7 @@
     "arti": "tahun depan",
     "theme": "waktu",
     "parts": "明 (míng, terang; berikutnya) + 年 (nián, tahun)",
-    "trick": "'Tahun yang terang' = tahun berikutnya. Sama seperti 明天 (míngtiān) = besok.",
+    "trick": "Cara mengingat saja: 明 (berikutnya) + 年 (tahun). Sama seperti 明天 (míngtiān) = besok.",
     "words": [
       [
         "今年",
@@ -3159,7 +3152,7 @@
     "pinyin": "nà",
     "arti": "itu",
     "theme": "tanya",
-    "parts": "Sisi kanan: 阝 (radikal kota, yì). Sisi kiri tidak dipecah di sini.",
+    "parts": "阝 (yì, penanda kota) di kanan + 冄 (rǎn) di kiri; tidak perlu dihafal terpisah",
     "trick": "Tunjuk ke arah yang jauh: itu!",
     "words": [
       [
@@ -3652,7 +3645,7 @@
     "arti": "tujuh",
     "theme": "angka",
     "parts": "Karakter dasar: satu garis datar dengan kait yang menekuk, tidak dipecah",
-    "trick": "Mirip angka 7 yang digambar dengan garis datar di atasnya.",
+    "trick": "Bentuknya mirip angka 7 yang agak miring.",
     "words": [
       [
         "七月",
@@ -3719,7 +3712,7 @@
     "arti": "depan; sebelum",
     "theme": "tempat",
     "parts": "䒑 (bagian atas, tidak dipecah) + 月 (yuè, bulan) + 刂 (radikal 刀 dāo, pisau)",
-    "trick": "Bayangkan sesuatu bergerak maju ke depan.",
+    "trick": "Dulu bentuknya kaki (止) di atas perahu (舟) yang bergerak maju = depan. Di 前, perahu berubah menjadi 月.",
     "history": "Bentuk kuno 歬 menggambar kaki (止 zhǐ) di atas perahu (舟 zhōu), artinya maju ke depan.",
     "words": [
       [
@@ -4765,7 +4758,7 @@
     "arti": "mendengarkan",
     "theme": "kerja",
     "parts": "口 (kǒu, mulut) + 斤 (jīn, kapak; juga satuan berat)",
-    "trick": "Mulut (口) orang berbicara dan kamu 'menimbang' (斤, satuan berat) tiap katanya dengan cermat: itu mendengarkan.",
+    "trick": "Cara mengingat saja: ada mulut (口) yang berbicara dan kamu menyimak baik-baik.",
     "words": [
       [
         "好听",
@@ -4782,7 +4775,8 @@
       "我在听老师说话。",
       "Wǒ zài tīng lǎoshī shuōhuà.",
       "Aku sedang mendengarkan guru berbicara."
-    ]
+    ],
+    "history": "Bentuk tradisional 聽 memuat 耳 (ěr, telinga). 听 awalnya karakter lain (tertawa, dibaca yǐn) yang dipinjam sebagai bentuk sederhana."
   },
   {
     "n": 210,
@@ -5675,7 +5669,7 @@
     "arti": "juga",
     "theme": "tatabahasa",
     "parts": "Karakter dasar, tidak dipecah.",
-    "trick": "Dipakai untuk 'aku juga': letakkan sesudah subjek dan sebelum kata kerja atau sifat.",
+    "trick": "Cara mengingat saja: 也 = 'juga', selalu diletakkan sesudah subjek: 我也 = aku juga.",
     "words": [],
     "sentence": [
       "我也是学生。",
@@ -5787,13 +5781,6 @@
     "theme": "angka",
     "parts": "一 (yī, satu) + 半 (bàn, setengah; terdiri dari 丷 dan 牛 niú, sapi)",
     "trick": "半: sapi (牛 niú) yang dibelah (丷) dua menjadi setengah.",
-    "words": [
-      [
-        "两点半",
-        "liǎng diǎn bàn",
-        "jam dua setengah"
-      ]
-    ],
     "sentence": [
       "我吃了一半。",
       "Wǒ chī le yíbàn.",

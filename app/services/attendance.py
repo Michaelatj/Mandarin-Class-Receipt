@@ -113,6 +113,8 @@ def generate_receipts(student_id: int, teacher_id: int, force: bool = False) -> 
             custom_qty=len(unbilled),
         )
         db.session.add(receipt)
+        from .notify import notify
+        notify([student_id], "receipt", "New receipt", f"Rp {int(total_fee):,}".replace(",", "."), "/")
         for cls in unbilled:
             cls.billed = True
         db.session.commit()
