@@ -34,11 +34,6 @@
         {% set up_count = schedules | selectattr('cancelled','equalto',false) | list | length %}
         {% if show_classes_pip %}<span class="snav-pip gold" data-tab="classes" data-count="{{ up_count }}">{{ up_count }}</span>{% endif %}
       </button>
-      <button class="snav-btn" data-page="attendance">
-        <span class="snav-icon">✅</span>
-        <span class="snav-label">{{ tr('nav_attendance') }}</span>
-        {% if show_attendance_pip %}<span class="snav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
-      </button>
       <button class="snav-btn" data-page="students">
         <span class="snav-icon">👥</span>
         <span class="snav-label">{{ tr('nav_students') }}</span>
@@ -80,7 +75,12 @@
 
       {% include 'partials/flashes.html' %}
 
-      {# ═══ CLASSES ═══ #}
+      {# ═══ CLASSES + ATTENDANCE: one place. Wide screens show them side by side, phones switch with the two buttons ═══ #}
+      <div class="cls-combo" id="clsCombo" data-seg="cls">
+      <div class="cls-seg seg" role="tablist" aria-label="Classes or attendance">
+        <button type="button" class="seg-btn on" data-seg="cls">📆 {{ tr('nav_classes') }}</button>
+        <button type="button" class="seg-btn" data-seg="att">✅ {{ tr('nav_attend_short') }}</button>
+      </div>
       <div class="app-page" id="page-classes">
         <div class="page-header">
           <div>
@@ -97,9 +97,8 @@
                 <label>Title</label>
                 <input type="text" name="title" placeholder="e.g. HSK 2 Chapter 5" required>
                 <label>Date &amp; Time</label>
-                <div style="display:flex;gap:8px;align-items:center">
+                <div>
                   <input type="datetime-local" name="scheduled_at" id="scheduleAt" value="{{ now }}" required style="flex:1">
-                  <button type="button" class="x-btn" id="clearScheduleDate" title="Reset to now" aria-label="Reset date to now"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
                 </div>
                 <label>Class type</label>
                 <div class="seg" id="modeSeg" role="group" aria-label="Class type">
@@ -269,6 +268,7 @@
         </div>
 
       </div>
+      </div>{# /cls-combo #}
 
       {# ═══ STUDENTS ═══ #}
       <div class="app-page" id="page-students">
@@ -513,12 +513,6 @@
         {% if show_classes_pip %}<span class="bnav-pip" data-tab="classes" data-count="{{ up_count }}">{{ up_count }}</span>{% endif %}
       </div>
       <span>{{ tr('nav_classes') }}</span>
-    </button>
-    <button class="bnav-btn" data-page="attendance">
-      <div class="bnav-icon">✅
-        {% if show_attendance_pip %}<span class="bnav-pip" data-tab="attendance" data-count="{{ attn_count }}">{{ attn_count }}</span>{% endif %}
-      </div>
-      <span>{{ tr('nav_attend_short') }}</span>
     </button>
     <button class="bnav-btn" data-page="students">
       <div class="bnav-icon">👥</div>
@@ -842,8 +836,8 @@
 }|tojson }}{{ "," if not loop.last }}{% endfor %}
 }</script>
 <script id="stuTierData" type="application/json">{{ streak_tiers|tojson }}</script>
-<script src="{{ url_for('static', filename='js/badge-fx.js') }}?v=6"></script>
-<script src="{{ url_for('static', filename='js/streak-overlay.js') }}?v=6"></script>
+<script src="{{ url_for('static', filename='js/badge-fx.js') }}?v=7"></script>
+<script src="{{ url_for('static', filename='js/streak-overlay.js') }}?v=7"></script>
 <script src="{{ url_for('static', filename='js/badge-gallery.js') }}?v=1"></script>
 <script src="{{ url_for('static', filename='js/student-badge.js') }}?v=3"></script>
 <script src="{{ url_for('static', filename='js/bonus-access.js') }}?v=2"></script>
@@ -1115,11 +1109,21 @@ const NAV = (function(){
   }
   document.addEventListener('click', (e) => { if (e.target.closest('#insightsRefresh')) loadInsights(true); });
 
+  function setSeg(v) {
+    const cc = document.getElementById('clsCombo'); if (!cc) return;
+    cc.dataset.seg = v;
+    cc.querySelectorAll('.cls-seg .seg-btn').forEach((b) => b.classList.toggle('on', b.dataset.seg === v));
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest('.cls-seg .seg-btn'); if (b) setSeg(b.dataset.seg); });
   function show(id) {
     if (!document.getElementById('page-' + id)) id = DEFAULT;
-    sideBtn.forEach(b => b.classList.toggle('active', b.dataset.page === id));
-    botBtn.forEach(b  => b.classList.toggle('active', b.dataset.page === id));
-    pages.forEach(p => p.style.display = p.id === 'page-' + id ? 'block' : 'none');
+    const navId = id === 'attendance' ? 'classes' : id;
+    sideBtn.forEach(b => b.classList.toggle('active', b.dataset.page === navId));
+    botBtn.forEach(b  => b.classList.toggle('active', b.dataset.page === navId));
+    const combo = id === 'classes' || id === 'attendance';
+    pages.forEach(p => p.style.display = (p.id === 'page-' + id || (combo && (p.id === 'page-classes' || p.id === 'page-attendance'))) ? 'block' : 'none');
+    const cc = document.getElementById('clsCombo');
+    if (cc && combo) setSeg(id === 'attendance' ? 'att' : cc.dataset.seg);
     if (id === 'insights') loadInsights();
     if (!visited.has(id) && id !== 'insights') {
     clearPip(id);
@@ -1180,18 +1184,6 @@ const NAV = (function(){
 /* ════════════════════════════════════════════════════
    SCHEDULE — CREATE
    ════════════════════════════════════════════════════ */
-const clearSchedBtn = document.getElementById('clearScheduleDate');
-const schedAtInput = document.getElementById('scheduleAt');
-if (clearSchedBtn && schedAtInput) {
-  clearSchedBtn.addEventListener('click', function() {
-    const now = new Date();
-    const offset = now.getTimezoneOffset();
-    const local = new Date(now - offset * 60000);
-    schedAtInput.value = local.toISOString().slice(0, 16);
-    showToast('Date reset to now');
-  });
-}
-
 ajaxForm(document.getElementById('scheduleForm'), function(data){
   let list = document.getElementById('scheduleList');
   document.getElementById('scheduleEmpty')?.remove();

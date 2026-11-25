@@ -156,7 +156,7 @@
     dragon(L, big) {
       flash(L, 'rgba(255,255,255,.6)', 900);
       bit(L, 'sof-ray', {}); bit(L, 'sof-arch', { '--delay': '0.3s' });
-      const hues = ['#ffe08a', '#fff4c4', '#ffc24d', '#ffffff', '#ffd34d', '#fff0b3', '#ffcf5a'];
+      const hues = ['#ffffff', '#f4f0ff', '#e6e0ff', '#ffffff', '#fbf8ff', '#ece6ff', '#ffffff'];
       for (let i = 0; i < 4; i++) wave(L, hues[i * 2 % 7], 0.15 + i * 0.3, 1 + i * 0.4);
       for (let i = 0; i < N(big ? 34 : 26); i++) bit(L, 'sof-orb', { '--x': rand(0, W()) + 'px', '--size': rand(7, 15) + 'px', '--delay': rand(0.2, 3) + 's', '--dur': rand(3.4, 5.4) + 's', '--sway': rand(-60, 60) + 'px', '--c': hues[i % 7] });
       for (let i = 0; i < N(16); i++) bit(L, 'sof-twinkle', { '--x': rand(0, W()) + 'px', '--y': rand(0, H()) + 'px', '--size': rand(16, 34) + 'px', '--delay': rand(0.4, 3) + 's', '--c': hues[(i + 2) % 7] }, '✦');
@@ -245,5 +245,5 @@
   }
 
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && current && !current.querySelector('[data-act="go"]')) close(); });
-  window.StreakOverlay = { show, close, burst };
+  window.StreakOverlay = { show, close, burst, sound: (key) => { try { (SOUND[TIERS.includes(key) ? key : 'bronze'])(); } catch (e) { /* no audio on this device */ } } };
 })();

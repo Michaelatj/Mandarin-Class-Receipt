@@ -274,6 +274,19 @@ def games(user, level):
                  total=len(entries), best=best, badge_key=(badge or {}).get("key", "gold"))
 
 
+@hsk_bp.route("/hsk<int:level>/leaderboard/<game>")
+@guard(json_response=True)
+def leaderboard(user, level, game):
+    """Top 10 best scores of one game in one level, students only (the teacher is not ranked)."""
+    if game not in GAMES:
+        return jsonify(ok=False, msg="bad request"), 400
+    rows = (db.session.query(HskGame.best, HskGame.plays, User)
+            .join(User, User.id == HskGame.user_id)
+            .filter(HskGame.level == level, HskGame.game == game, HskGame.best > 0, User.role == "student")
+            .order_by(HskGame.best.desc(), HskGame.last_at.asc()).limit(10).all())
+    return jsonify(ok=True, rows=[{"name": u.name(), "best": b, "plays": p, "me": u.id == user.id} for b, p, u in rows])
+
+
 @hsk_bp.route("/hsk<int:level>/game_score", methods=["POST"])
 @guard(json_response=True)
 def game_score(user, level):
