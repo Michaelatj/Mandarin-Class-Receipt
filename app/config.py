@@ -26,8 +26,16 @@ def _secret_key():
         return hashlib.sha256(("class-receipt:" + db_url).encode()).hexdigest()
     return secrets.token_hex(32)  # local development only
 
+def _database_url():
+    url = os.environ.get("DATABASE_URL", "sqlite:///attendance.db")
+    # beberapa penyedia memberi awalan lama atau khusus driver, samakan ke psycopg2
+    for prefix in ("postgres://", "postgresql+psycopg://"):
+        if url.startswith(prefix):
+            url = "postgresql://" + url[len(prefix):]
+    return url
 
 class Config:
+    SQLALCHEMY_DATABASE_URI = _database_url()
     SECRET_KEY = _secret_key()
     WTF_CSRF_SECRET_KEY = SECRET_KEY
     WTF_CSRF_TIME_LIMIT = None   # 1 hour token validity
@@ -50,6 +58,18 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     SESSION_COOKIE_SECURE = True
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,   # tes koneksi sebelum dipakai, ganti otomatis kalau mati
+        "pool_recycle": 240,     # buang koneksi yang sudah lebih dari 4 menit
+        "pool_size": 1,
+        "max_overflow": 2,
+        "connect_args": {
+            "keepalives": 1,
+            "keepalives_idle": 30,
+            "keepalives_interval": 10,
+            "keepalives_count": 5,
+        },
+    }
 
 
 config_map = {
@@ -58,10 +78,4 @@ config_map = {
     "default":     DevelopmentConfig,
 }
 
-def _database_url():
-    url = os.environ.get("DATABASE_URL", "sqlite:///attendance.db")
-    # beberapa penyedia memberi awalan lama atau khusus driver, samakan ke psycopg2
-    for prefix in ("postgres://", "postgresql+psycopg://"):
-        if url.startswith(prefix):
-            url = "postgresql://" + url[len(prefix):]
-    return url
+
