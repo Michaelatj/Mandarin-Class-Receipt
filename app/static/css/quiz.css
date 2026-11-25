@@ -406,3 +406,11 @@ body:has(#hsk-app) .qz-content .qz-shell, body:has(#gm-app) .qz-content .qz-shel
 .qz-story-title { font-size: 1.35rem; }
 .qz-story-sub { font-size: 1.1rem; line-height: 1.7; }
 .qz-story-tools .btn { font-size: .95rem; }
+
+
+/* ═══ v25: the timer floats with the screen ═══ */
+.qz-timer-wrap { position: sticky; top: calc(var(--topbar-h, 56px) + 8px); z-index: 35; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 8px 14px 10px; margin-bottom: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+.qz-timer-wrap .qz-timer-row { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.qz-timer-wrap #qz-timer-text { font-variant-numeric: tabular-nums; font-size: 1.15rem; }
+.qz-timer-wrap .qz-timer-track { margin-bottom: 0; height: 7px; }
+.qz-verdict { font-weight: 700; margin: 10px 0 0; } .qz-verdict.ok { color: var(--green); } .qz-verdict.bad { color: var(--red); }

@@ -6,7 +6,7 @@
      jade    bloom    - a calm breathing glow, soft green light and leaves drifting around it
      diamond facet    - flips like a cut stone, white flashes and crystal glints
      ruby    quake    - drops in hard and the whole card shakes like an earthquake, cracks and debris
-     dragon  radiance - rises while rays of golden light sweep out from behind it
+     dragon  radiance - rises while rays of white light flash out from behind it
    The seal does the motion (CSS class fx-<tier>); this file adds the particles around it.
    With "reduce motion" on, only a quiet pulse is played. */
 (function () {
@@ -114,8 +114,8 @@
       return 1700;
     },
     dragon(layer) {
-      // rays of golden light turn out from behind the badge, with a warm flash and a few sparks
-      const gold = ['#ffe08a', '#fff4c4', '#ffc24d', '#ffffff'];
+      // rays of white light flash out from behind the badge, with a bright halo and a few sparks
+      const gold = ['#ffffff', '#f4f0ff', '#e6e0ff', '#ffffff'];
       particle(layer, 'bfx-rays', {});
       particle(layer, 'bfx-rays bfx-rays2', {});
       particle(layer, 'bfx-halo bfx-halo-gold', {});
@@ -139,6 +139,7 @@
     seal.classList.add('fx-on', 'fx-' + tier);
     if (celebrate) stage.classList.add('fx-celebrate');
 
+    if (!reduce() && window.StreakOverlay && StreakOverlay.sound) StreakOverlay.sound(tier);   // every badge has its own little tune
     let ms = 700;
     if (reduce()) {
       seal.classList.add('fx-reduced');

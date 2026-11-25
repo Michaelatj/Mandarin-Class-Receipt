@@ -114,7 +114,23 @@
       later(() => window.StreakOverlay.burst(BADGE, great), 250);
     }
   }
-  function backToMenu() { stopTimers(); stage.hidden = true; stage.innerHTML = ''; menu.hidden = false; window.scrollTo({ top: 0 }); }
+  /* ---------- leaderboard (top 10 of one game; one tiny request when the menu opens or the game is changed) ---------- */
+  const boardSel = $('gm-board-game'), boardList = $('gm-board-list');
+  async function loadBoard() {
+    if (!boardSel || !boardList) return;
+    boardList.innerHTML = '<li class="gm-board-empty">Loading…</li>';
+    try {
+      const r = await fetch(app.dataset.boardUrl.replace('GAME', boardSel.value), { credentials: 'same-origin' }), j = await r.json();
+      boardList.innerHTML = j.ok && j.rows.length
+        ? j.rows.map((x, i) => `<li class="${x.me ? 'me' : ''}"><span class="gm-board-rank">${['🥇', '🥈', '🥉'][i] || i + 1}</span><span class="gm-board-name">${esc(x.name)}</span><b>${x.best}</b></li>`).join('')
+        : '<li class="gm-board-empty">Nobody has played this one yet. Be the first!</li>';
+    } catch (e) { boardList.innerHTML = '<li class="gm-board-empty">Could not load the leaderboard.</li>'; }
+  }
+  if (boardSel) { boardSel.addEventListener('change', loadBoard); loadBoard(); }
+
+  function backToMenu() { stopTimers(); stage.hidden = true; stage.innerHTML = ''; menu.hidden = false; if (boardSel) loadBoard(); window.scrollTo({ top: 0 }); }
+
+
 
   /* ---------- memory match ---------- */
   function memory(list) {
@@ -360,18 +376,26 @@
       reveal: `<b lang="zh">${esc(w.hanzi)}</b> <span class="py">${esc(w.pinyin)} · </span>${esc(w.arti)}` }));
   }
 
-  /* ---------- racing: 60 seconds, right answer = faster, wrong answer = the car breaks down ---------- */
+  /* ---------- racing: 60 seconds, first to the finish line. Right answer = faster, wrong answer = breakdown, and three bots keep driving ---------- */
   function race(list) {
-    const next = deckOf(list), TIME = 60, MAXV = 200;
+    const next = deckOf(list), TIME = 60, MAXV = 200, TARGET = 1500;
     const FAULTS = ['💥 Flat tire!', '🔥 Engine overheating!', '⛽ Fuel leak!', '🔧 Gearbox stuck!'];
-    let left = TIME, v = 40, dist = 0, off = 0, right = 0, total = 0, combo = 0, bestCombo = 0, trouble = 0, over = false, cur = null, locked = false;
+    const cars = [
+      { name: 'You', me: true, icon: '🏎️', d: 0, v: 40 },
+      { name: 'Bot Ming', icon: '🚙', d: 0, v: 90, base: 100 },
+      { name: 'Bot Lan', icon: '🚕', d: 0, v: 100, base: 112 },
+      { name: 'Bot Hu', icon: '🚓', d: 0, v: 110, base: 124 },
+    ];
+    const me = cars[0];
+    let left = TIME, right = 0, total = 0, combo = 0, bestCombo = 0, trouble = 0, over = false, cur = null, locked = false, clock = 0;
     const wrong = [];
-    stage.innerHTML = `<div class="gm-bar"><span class="gm-stat">⏱ <b id="r-t">${TIME}</b>s</span><span class="gm-stat">Speed <b id="r-v">40</b> km/h</span><span class="gm-stat">Distance <b id="r-d">0</b> m</span><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Quit</button></div>
+    stage.innerHTML = `<div class="gm-bar"><span class="gm-stat">⏱ <b id="r-t">${TIME}</b>s</span><span class="gm-stat">Speed <b id="r-v">40</b> km/h</span><span class="gm-stat">Place <b id="r-p">1</b>/4</span><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Quit</button></div>
       <div class="gm-time" id="r-bar"><i style="width:100%"></i></div>
-      <div class="rc-road" id="r-road"><div class="rc-lines" id="r-lines"></div><div class="rc-car" id="r-car"><span class="rc-body">🏎️</span><span class="rc-smoke" id="r-smoke">💨</span></div><div class="rc-flag" id="r-flag"></div></div>
+      <div class="rc-track">${cars.map((c, i) => `<div class="rc-lane${c.me ? ' me' : ''}"><span class="rc-name">${esc(c.name)}</span><div class="rc-run"><div class="rc-car" id="r-c${i}"><span class="rc-body">${c.icon}</span>${c.me ? '<span class="rc-smoke">💨</span>' : ''}</div></div><span class="rc-finish">🏁</span></div>`).join('')}</div>
+      <div class="rc-flag" id="r-flag"></div>
       <div id="r-q"></div>`;
     $('gm-quit').onclick = backToMenu;
-    const lines = $('r-lines'), car = $('r-car'), flag = $('r-flag');
+    const flag = $('r-flag'), meEl = $('r-c0');
     function ask() {
       if (over) return;
       cur = { w: next(), mode: Math.random() < 0.6 ? 'zh' : 'id' }; locked = false;
@@ -383,32 +407,43 @@
       document.querySelectorAll('#r-q .gm-opt').forEach((x) => { x.disabled = true; if (x.dataset.n === String(cur.w.n)) x.classList.add('right'); });
       if (b.dataset.n === String(cur.w.n)) {
         right++; combo++; bestCombo = Math.max(bestCombo, combo);
-        v = Math.min(MAXV, v + (trouble > 0 ? 12 : 22) + Math.min(combo, 5) * 2);
+        me.v = Math.min(MAXV, me.v + (trouble > 0 ? 12 : 24) + Math.min(combo, 5) * 2);
       } else {
         b.classList.add('wrong'); combo = 0;
-        trouble = 4; v = Math.max(15, v * 0.35);
+        trouble = 4; me.v = Math.max(15, me.v * 0.35);
         flag.textContent = FAULTS[Math.floor(Math.random() * FAULTS.length)];
-        car.classList.add('hurt');
+        meEl.classList.add('hurt');
         if (!wrong.find((x) => x.n === cur.w.n) && wrong.length < 8) wrong.push(cur.w);
       }
       later(ask, 400);
     });
+    const place = () => 1 + cars.filter((c) => c !== me && ((c.at != null && (me.at == null || c.at < me.at)) || (c.at == null && me.at == null && c.d > me.d))).length;
     const DT = 0.05;
     every(() => {
       if (over) return;
-      left -= DT; if (trouble > 0) { trouble -= DT; if (trouble <= 0) { car.classList.remove('hurt'); flag.textContent = ''; } }
-      v = Math.max(trouble > 0 ? 10 : 25, v - (trouble > 0 ? 1.2 : 0.5) * DT * 10);   // the car slowly loses speed if you stop answering
-      dist += v / 3.6 * DT; off = (off + v * DT * 1.2) % 80;
-      lines.style.transform = `translate3d(${-off}px,0,0)`;
-      car.style.transform = `translate3d(${Math.min(60, v / MAXV * 60)}%,0,0)`;
+      left -= DT; clock += DT;
+      if (trouble > 0) { trouble -= DT; if (trouble <= 0) { meEl.classList.remove('hurt'); flag.textContent = ''; } }
+      me.v = Math.max(trouble > 0 ? 10 : 25, me.v - (trouble > 0 ? 1.2 : 0.5) * DT * 10);   // the car slowly loses speed if you stop answering
+      cars.forEach((c, i) => {
+        if (!c.me && c.at == null) {                      // bots: a steady pace with a little random wobble
+          c.v += (c.base - c.v) * 0.04 + (Math.random() - 0.5) * 7;
+          c.v = Math.max(60, Math.min(150, c.v));
+        }
+        if (c.at == null) { c.d += c.v / 3.6 * DT; if (c.d >= TARGET) { c.d = TARGET; c.at = clock; } }
+        $('r-c' + i).style.left = Math.min(100, c.d / TARGET * 100) + '%';
+      });
       const sec = Math.ceil(Math.max(0, left));
       if (sec !== +$('r-t').textContent) { $('r-t').textContent = sec; $('r-bar').classList.toggle('low', sec <= 10); }
-      $('r-v').textContent = Math.round(v); $('r-d').textContent = Math.round(dist);
+      $('r-v').textContent = Math.round(me.v); $('r-p').textContent = place();
       $('r-bar').firstChild.style.width = Math.max(0, left) / TIME * 100 + '%';
-      if (left <= 0) {
+      if (left <= 0 || me.at != null) {
         over = true;
-        const score = Math.min(5000, Math.round(dist)), acc = total ? Math.round(right / total * 100) : 0;
-        finish('race', score, [`${Math.round(dist)} metres in ${TIME} seconds`, `${right} of ${total} correct (${acc}%) · best combo ${bestCombo}`], acc >= 80 && right >= 12, wrong);
+        const pos = place(), won = pos === 1 && me.at != null;
+        const bonus = me.at != null ? [800, 400, 150, 0][pos - 1] : 0;
+        const score = Math.min(5000, Math.round(me.d) + bonus), acc = total ? Math.round(right / total * 100) : 0;
+        const lines = [won ? '🏆 You crossed the finish line first!' : me.at != null ? `🏁 You finished in place ${pos} of 4` : `⏱ Time is up. You were in place ${pos} of 4 (${Math.round(me.d)} of ${TARGET} m)`,
+          `${right} of ${total} correct (${acc}%) · best combo ${bestCombo}`];
+        finish('race', score, lines, won || (acc >= 80 && right >= 12), wrong);
       }
     }, DT * 1000);
     ask();

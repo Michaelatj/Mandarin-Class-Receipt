@@ -231,8 +231,8 @@
     }
 
     const timer = quiz.timeLimitSeconds > 0
-      ? `<div class="qz-timer-row"><span>${T('Time left')}</span><span id="qz-timer-text"></span></div>
-         <div class="qz-timer-track"><div class="qz-timer-fill" id="qz-timer-fill"></div></div>` : '';
+      ? `<div class="qz-timer-wrap"><div class="qz-timer-row"><span>⏱ ${T('Time left')}</span><span id="qz-timer-text"></span></div>
+         <div class="qz-timer-track"><div class="qz-timer-fill" id="qz-timer-fill"></div></div></div>` : '';
 
     paint(`
       <div class="qz-progress"><div style="width:${Math.round(checkedCount / n * 100)}%"></div></div>
@@ -277,17 +277,19 @@
     const quiz = S.quiz, st = quiz.story, n = quiz.questions.length;
     const answered = quiz.questions.filter(ready).length;
     const timer = quiz.timeLimitSeconds > 0
-      ? `<div class="qz-timer-row"><span>${T('Time left')}</span><span id="qz-timer-text"></span></div>
-         <div class="qz-timer-track"><div class="qz-timer-fill" id="qz-timer-fill"></div></div>` : '';
+      ? `<div class="qz-timer-wrap"><div class="qz-timer-row"><span>⏱ ${T('Time left')}</span><span id="qz-timer-text"></span></div>
+         <div class="qz-timer-track"><div class="qz-timer-fill" id="qz-timer-fill"></div></div></div>` : '';
     const paras = String(st.text).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join('');
     const pinyin = st.pinyin ? String(st.pinyin).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join('') : '';
     const meaning = st.meaning ? String(st.meaning).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join('') : '';
     const block = (q, idx) => {
       const a = S.answers[q.id] || {};
+      const lock = !!(a.checked || a.checking);
+      const verdict = a.checked ? (a.correct === true ? `<p class="qz-verdict ok">${T('Correct!')}</p>` : a.correct === false ? `<p class="qz-verdict bad">${T('Not quite.')}</p>` : '') : '';
       return `<div class="qz-qblock qz-story-q ${ready(q) ? 'filled' : ''}" id="sq-${idx}">
         <div class="qz-qhead"><span class="qz-qindex">${T('Question')} ${idx + 1} / ${n}</span></div>
         <div class="qz-qtext" data-no-i18n>${esc(q.question)}</div>
-        ${bodyHtml(q, a, false, false)}
+        ${bodyHtml(q, a, lock, false)}${verdict}
       </div>`;
     };
     // questions about the story come first; the others (if the teacher made any) sit under their own heading
@@ -318,8 +320,8 @@
   }
 
   /* ---------------- actions ---------------- */
-  async function check() {
-    const q = cur();
+  async function check(qid) {
+    const q = qid ? S.quiz.questions.find((x) => x.id === qid) : cur();
     if (!ready(q)) return;
     const prev = S.answers[q.id] || {};
     if (prev.checked || prev.checking) return;
@@ -498,6 +500,9 @@
         S.answers[q.id] = { value: now, usedMeaning: !!S.usedHint[q.id], answeredAtMs: Date.now() - S.startedAt };
       } else {
         S.answers[q.id] = { value: picked, usedMeaning: !!S.usedHint[q.id], answeredAtMs: Date.now() - S.startedAt };
+        // Duolingo style: a single-choice question is checked the moment you tap an answer
+        // (in a story quiz that is only for the questions that are not about the story)
+        if (q.type !== 'multiple_select' && (!S.quiz.story || (S.quiz.questions.some((x) => x.aboutStory) && !q.aboutStory))) { check(q.id); return; }
       }
       render();
     } else if (act === 'place') {

@@ -5,11 +5,11 @@
 {% block head_extra %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=7' }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=5' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=7' }}">
 {% endblock %}
 
 {% block qz_body %}
-<div id="gm-app" data-level="{{ level }}" data-badge="{{ badge_key }}" data-best='{{ best|tojson }}' data-score-url="{{ url_for('hsk.game_score', level=level) }}" data-data-url="{{ url_for('hsk.data', level=level) }}">
+<div id="gm-app" data-level="{{ level }}" data-badge="{{ badge_key }}" data-best='{{ best|tojson }}' data-board-url="{{ url_for('hsk.leaderboard', level=level, game='GAME') }}" data-score-url="{{ url_for('hsk.game_score', level=level) }}" data-data-url="{{ url_for('hsk.data', level=level) }}">
   <div class="qz-head"><div>
     <h1 class="qz-h1">🎮 {{ level_name }} Games</h1>
     <p class="qz-sub">Play with the words of this level. A great score plays your badge's celebration.</p>
@@ -32,11 +32,20 @@
     <button type="button" class="gm-tile" data-game="match"><span class="gm-ico">🔗</span><b>Draw the lines</b><small>Drag a line from each word to its meaning. 3 rounds of 5.</small><em data-best="match"></em></button>
     <button type="button" class="gm-tile" data-game="fill"><span class="gm-ico">✏️</span><b>Fill the blank</b><small>Choose the word that completes the sentence. 10 sentences.</small><em data-best="fill"></em></button>
     <button type="button" class="gm-tile" data-game="riddle"><span class="gm-ico">🧩</span><b>Riddles</b><small>Read a riddle in Indonesian and pick the word that is the answer.</small><em data-best="riddle"></em></button>
-    <button type="button" class="gm-tile" data-game="race"><span class="gm-ico">🏎️</span><b>Racing</b><small>60 seconds. Right answers speed the car up, a wrong one breaks it down.</small><em data-best="race"></em></button>
+    <button type="button" class="gm-tile" data-game="race"><span class="gm-ico">🏎️</span><b>Racing</b><small>60 seconds. Race three bots to the finish. Right answers speed the car up, a wrong one breaks it down.</small><em data-best="race"></em></button>
+  </div>
+
+  <div class="card gm-board" id="gm-board">
+    <div class="gm-board-head"><b>🏆 Leaderboard</b>
+      <select id="gm-board-game" aria-label="Game">
+        <option value="race">🏎️ Racing</option><option value="speed">⚡ Speed round</option><option value="ladder">🪜 Level ladder</option>
+        <option value="memory">🃏 Memory match</option><option value="match">🔗 Draw the lines</option><option value="fill">✏️ Fill the blank</option><option value="riddle">🧩 Riddles</option>
+      </select></div>
+    <ol id="gm-board-list" class="gm-board-list"><li class="gm-board-empty">Loading…</li></ol>
   </div>
 
   <div id="gm-stage" hidden></div>
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=6' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=4' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=7' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=6' }}"></script>{% endblock %}
