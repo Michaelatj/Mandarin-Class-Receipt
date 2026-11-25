@@ -272,6 +272,9 @@ def api_update(user, quiz_id):
     if "allow_retakes" in data:
         quiz.allow_retakes = bool(data["allow_retakes"])
     if "assign_all" in data:
+        if bool(data["assign_all"]) and not quiz.assign_all:
+            from ..services.notify import notify, student_ids
+            notify(student_ids(), "quiz", "New quiz: " + quiz.title, "Open Quiz to start it.", url_for("quiz.index"))
         quiz.assign_all = bool(data["assign_all"])
     if "time_limit_seconds" in data:
         try:
@@ -290,6 +293,9 @@ def api_update(user, quiz_id):
                 db.session.delete(row)
         for sid in valid - set(existing):
             db.session.add(QuizAssign(quiz_id=quiz.id, student_id=sid))
+        if valid - set(existing) and not quiz.assign_all:
+            from ..services.notify import notify
+            notify(valid - set(existing), "quiz", "New quiz: " + quiz.title, "Open Quiz to start it.", "/quiz")
 
     db.session.commit()
     return jsonify(ok=True, msg="Saved")
@@ -489,5 +495,8 @@ def api_submit(user, attempt_id):
     attempt.longest_streak = scored["longest_streak"]
     attempt.title = title["name"]
     attempt.submitted_at = datetime.utcnow()
+    from ..services.notify import notify
+    notify([quiz.teacher_id], "quiz", f"{user.name()} finished {quiz.title}", f"Score {round(scored['accuracy'])}%",
+           url_for("quiz.detail", quiz_id=quiz.id))
     db.session.commit()
     return jsonify(_with_badge(_result_payload(quiz.questions, attempt), user))

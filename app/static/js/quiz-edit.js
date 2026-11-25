@@ -205,12 +205,11 @@
       if (m.type === 'multiple_select') m.options.find((o) => o.k === k).correct = e.target.checked;
       else m.options.forEach((o) => { o.correct = o.k === k; });
     } else if (f === 'type') {
-      if (!convert(m, e.target.value)) { render(); return; }
-      render();
+      convert(m, e.target.value).then(() => render());
     }
   });
 
-  function convert(m, to) {
+  async function convert(m, to) {
     const optionBased = (t) => t !== 'sentence_reorder' && t !== 'type_answer';
     if (optionBased(m.type) && optionBased(to)) {
       if (to === 'multiple_choice') {
@@ -220,7 +219,7 @@
       m.type = to;
       return true;
     }
-    if (!confirm(T('Changing to this type clears the answer options. Continue?'))) return false;
+    if (!(await UI.confirm(T('Changing to this type clears the answer options. Continue?'), { ok: 'Change' }))) return false;
     delete m.accepted;
     if (to === 'type_answer') { delete m.options; delete m.chunks; delete m.alts; m.accepted = ''; }
     else if (to === 'sentence_reorder') { delete m.options; m.chunks = blankChunks(4); m.alts = []; }
@@ -240,8 +239,8 @@
     if (a === 'q-up' && i > 0) { Q.splice(i - 1, 0, Q.splice(i, 1)[0]); }
     else if (a === 'q-down' && i < Q.length - 1) { Q.splice(i + 1, 0, Q.splice(i, 1)[0]); }
     else if (a === 'q-del') {
-      if (!confirm(T('Delete this question?'))) return;
-      Q.splice(i, 1);
+      UI.confirm(T('Delete this question?'), { danger: true }).then((y) => { if (y) { Q.splice(i, 1); render(); } });
+      return;
     }
     else if (a === 'add-opt') { m.options.push({ k: nid(), text: '', meaning: '', correct: false }); }
     else if (a === 'rm-opt') { m.options = m.options.filter((o) => o.k !== btn.closest('.qe-opt').dataset.k); }

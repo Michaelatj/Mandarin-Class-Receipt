@@ -6,11 +6,12 @@
     const btn = e.target.closest('.del-student-btn');
     if (!btn) return;
     const name = btn.dataset.name || 'this student';
-    const typed = window.prompt(
-      'Delete "' + name + '"?\n\nThis permanently erases the account with all attendance, receipts, streak history and quiz results. It cannot be undone.\n\nType the student\'s name to confirm:'
+    const typed = await UI.prompt(
+      'Delete "' + name + '"?\n\nThis permanently erases the account with all attendance, receipts, streak history and quiz results. It cannot be undone.\n\nType the student\'s name to confirm:',
+      { ok: 'Delete', placeholder: name, danger: true }
     );
     if (typed === null) return;
-    if (typed.trim().toLowerCase() !== name.trim().toLowerCase()) { alert('The name did not match, so nothing was deleted.'); return; }
+    if (typed.trim().toLowerCase() !== name.trim().toLowerCase()) { UI.alert('The name did not match, so nothing was deleted.'); return; }
     btn.disabled = true;
     try {
       const r = await fetch('/teacher/delete_student/' + encodeURIComponent(btn.dataset.id), {

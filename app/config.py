@@ -78,4 +78,3 @@ config_map = {
     "default":     DevelopmentConfig,
 }
 
-

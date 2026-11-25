@@ -190,6 +190,8 @@ def bonus_access():
     for sid in targets:
         if on and sid not in have:
             db.session.add(BonusAccess(student_id=sid, level=level))
+            from ..services.notify import notify
+            notify([sid], "hsk", f"HSK {level} is open for you", "Open Bonus Courses to start.", f"/hsk{level}")
         elif not on and sid in have:
             db.session.delete(have[sid])
     try:

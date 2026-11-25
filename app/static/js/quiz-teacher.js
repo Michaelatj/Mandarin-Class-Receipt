@@ -316,7 +316,7 @@ FINAL REMINDER: your entire reply must be the raw JSON object and nothing else. 
     document.getElementById('qz-time').addEventListener('change', (e) => save({ time_limit_seconds: e.target.value }));
 
     document.getElementById('qz-delete').addEventListener('click', async () => {
-      if (!confirm(T('Delete this quiz and all its results?'))) return;
+      if (!(await UI.confirm(T('Delete this quiz and all its results?'), { danger: true }))) return;
       try {
         const res = await post(root.dataset.deleteUrl);
         if (res.ok) { location.href = res.data.url; return; }

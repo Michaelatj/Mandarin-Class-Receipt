@@ -1,15 +1,11 @@
-# Update v22 (includes v15 to v21)
+# Update v24 (includes v15 to v23)
 
-Extract and replace the files. Deleted from the project: app/templates/quiz/cards.html and app/static/js/flashcards.js (preview cards are gone; you can delete both files by hand, leaving them does no harm).
-Database: table `hsk_game` (Vercel creates it; local SQLite: `python migrate_new_tables.py`).
+1. Extract and replace the files.
+2. NEW TABLE `notification` (the bell). On Vercel, api/index.py creates it by itself on the next start. Locally run once: `python migrate_new_tables.py`.
 
-- Games: switches for pinyin (all games) and for meaning + clue (Character riddle).
-- Quiz and Bonus Courses pages are centred. Preview cards removed.
-- Story quiz: teacher chooses how many questions are about the story; the rest are separate. Teacher review shows the story and every question with its options.
-- 7 badges: Bronze 0, Silver 5, Gold 10, Jade 15, Diamond 20, Ruby 25, Dragon 30+ (white rainbow). New effects and music, lighter on weak phones.
-- Titles and badge names show hanzi, pinyin and meaning on hover or tap. Nameplate colours follow the badge.
-- New theme: Forest and Forest (dark).
-- Insights: new Bonus Courses activity card.
-- data.json is cached by the browser for one hour (fewer Vercel function calls).
-
-- v22: Forest theme readable (dark green sidebar, softer trees). Bonus Courses fills the screen width; quiz pages are wide. Bigger text for questions, story and teacher review. Fixed example words of 对不起 (HSK 1 data).
+What is new
+- Notification bell (top bar, students and teachers): new class / class moved / class cancelled, new quiz, new receipt, HSK unlocked (students); a student finished a quiz, a new student registered (teachers). Opening the bell marks them read. No polling, so almost no Vercel usage.
+- Our own dialogs everywhere instead of the browser's alert/confirm/prompt, and our own date and time picker (calendar + time lists, bottom sheet on phones). Old scripts keep working.
+- Riddles for HSK 1 (137), HSK 2 (107) and HSK 3 (209).
+- HSK 1, 2 and 3 content audited: wrong or strange memory tricks rewritten, forced example words removed, a few wrong component notes fixed, more notes for confusing words.
+- Badges: Ruby click = earthquake (the card shakes, cracks, debris). Dragon = deep violet and gold, no rainbow; clicking it sends out rays of golden light. Jade = calmer and cozier (breathing glow, soft lights, leaves).

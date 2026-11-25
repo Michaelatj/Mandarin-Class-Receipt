@@ -223,7 +223,38 @@
     item.append(row, det);
     return item;
   }
-  const items = entries.map(buildItem);
+  /* "All words" shows plain tiles of hanzi; a tap opens the details in a popup (same content as a list row) */
+  const TILES = root.dataset.tiles === '1';
+  let dlg = null;
+  function openWord(e, tile) {
+    closeWord();
+    const src = buildItem(e), det = src.querySelector('.hk-detail'), row = src.querySelector('.hk-row');
+    det.hidden = false;
+    dlg = el('div', 'hk-modal'); dlg.setAttribute('role', 'dialog'); dlg.setAttribute('aria-modal', 'true');
+    const card = el('div', 'hk-modal-card');
+    const x = el('button', 'hk-modal-x'); x.type = 'button'; x.setAttribute('aria-label', 'Close'); x.appendChild(icon('x'));
+    const head = el('div', 'hk-modal-head');
+    const big = el('div', 'hk-modal-zh', e.hanzi); big.lang = 'zh';
+    head.append(big, el('div', 'hk-modal-py', e.pinyin), el('div', 'hk-modal-id', e.arti));
+    card.append(x, head, det); dlg.appendChild(card); document.body.appendChild(dlg);
+    document.body.classList.add('hk-lock');
+    x.addEventListener('click', closeWord);
+    dlg.addEventListener('click', (ev) => { if (ev.target === dlg) closeWord(); if (ev.target.closest('.hk-pill-main')) setTimeout(() => tile && tile._sync && tile._sync(), 0); });
+    x.focus();
+  }
+  function closeWord() { if (dlg) { dlg.remove(); dlg = null; document.body.classList.remove('hk-lock'); } }
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closeWord(); });
+  function buildTile(e) {
+    const t = el('button', 'hk-tile'); t.type = 'button'; t.id = 'w' + e.n;
+    const z = el('span', 'hk-tile-zh', e.hanzi); z.lang = 'zh';
+    t.append(z, el('span', 'hk-tile-py', e.pinyin));
+    t._sync = () => t.classList.toggle('known', known.has(e.n));
+    t._paint = t._sync; t._sync();
+    t.addEventListener('click', () => openWord(e, t));
+    return t;
+  }
+  if (TILES) listEl.classList.add('hk-tiles');
+  const items = entries.map(TILES ? buildTile : buildItem);
   items.forEach((i) => listEl.appendChild(i));
 
   const filterEl = $('hk-filter'), onlyUnknown = $('hk-only-unknown');
@@ -244,7 +275,7 @@
 
   if (location.hash === '#flashcards' && tabPrac) showTab('practice');     // the "Flashcards" button on the level page
   if (location.hash && /^#w\d+$/.test(location.hash)) {      // open the word a search result pointed at
-    const t = document.querySelector(location.hash + ' .hk-row');
+    const t = document.querySelector(location.hash + (TILES ? '' : ' .hk-row'));
     if (t) { t.click(); t.scrollIntoView({ block: 'center' }); }
   }
 

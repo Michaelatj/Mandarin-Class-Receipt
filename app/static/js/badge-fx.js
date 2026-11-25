@@ -3,10 +3,10 @@
      bronze  stamp    - presses down with a thud, dust and a copper ring
      silver  gleam    - a light sweeps across it and stars twinkle
      gold    coin     - spins like a coin and gold confetti bursts and falls
-     jade    bloom    - glows and floats while green rings and orbs drift up
+     jade    bloom    - a calm breathing glow, soft green light and leaves drifting around it
      diamond facet    - flips like a cut stone, white flashes and crystal glints
-     ruby    slam     - drops in hard, red shock rings and ruby glints
-     dragon  ascend   - floats up while the colours of the rainbow flow through it
+     ruby    quake    - drops in hard and the whole card shakes like an earthquake, cracks and debris
+     dragon  radiance - rises while rays of golden light sweep out from behind it
    The seal does the motion (CSS class fx-<tier>); this file adds the particles around it.
    With "reduce motion" on, only a quiet pulse is played. */
 (function () {
@@ -63,16 +63,25 @@
       return 1900;
     },
     jade(layer) {
-      ring(layer, '#43c98f', 0.0);
-      ring(layer, '#43c98f', 0.35, 1.2);
-      ring(layer, '#9af0c6', 0.7, 1.4);
-      for (let i = 0; i < 16; i++) {
+      // cozy: a slow pale halo, big soft glows, small fireflies and a few leaves that sway down
+      ring(layer, '#9af0c6', 0.0, 1.1);
+      particle(layer, 'bfx-halo', {});
+      for (let i = 0; i < 4; i++) {
+        particle(layer, 'bfx-bokeh', { '--x': rand(-110, 110) + 'px', '--y': rand(-90, 90) + 'px', '--size': rand(46, 80) + 'px', '--delay': rand(0, 1.2) + 's' });
+      }
+      for (let i = 0; i < 10; i++) {
         particle(layer, 'bfx-orb', {
-          '--x': rand(-120, 120) + 'px', '--rise': -rand(140, 230) + 'px', '--sway': rand(-30, 30) + 'px',
-          '--size': rand(8, 18) + 'px', '--delay': rand(0, 0.9) + 's', '--c': i % 2 ? '#7bf0b8' : '#2fb67f',
+          '--x': rand(-130, 130) + 'px', '--rise': -rand(90, 180) + 'px', '--sway': rand(-26, 26) + 'px',
+          '--size': rand(5, 9) + 'px', '--delay': rand(0, 1.6) + 's', '--c': i % 2 ? '#e6ffd0' : '#8df0b8',
         });
       }
-      return 2400;
+      for (let i = 0; i < 7; i++) {
+        particle(layer, 'bfx-leaf', {
+          '--x': rand(-130, 130) + 'px', '--y': -rand(110, 150) + 'px', '--fall': rand(220, 290) + 'px', '--sway': rand(-50, 50) + 'px',
+          '--size': rand(11, 18) + 'px', '--delay': rand(0.1, 1.5) + 's', '--c': ['#5fcf9a', '#2fb67f', '#9ce6b4', '#7fd36b'][i % 4],
+        });
+      }
+      return 3600;
     },
     diamond(layer) {
       ring(layer, '#ffffff', 0.15); ring(layer, '#78d6ff', 0.4, 1.3);
@@ -85,8 +94,19 @@
       }
       return 1900;
     },
-    ruby(layer) {
-      ring(layer, '#ff3b6b', 0.05); ring(layer, '#ffffff', 0.25, 1.3);
+    ruby(layer, stage) {
+      const hero = stage && stage.closest('.badge-hero');
+      if (hero) { hero.classList.add('fx-quake'); setTimeout(() => hero.classList.remove('fx-quake'), 1100); }
+      ring(layer, '#ff3b6b', 0.05); ring(layer, '#ffffff', 0.25, 1.3); ring(layer, '#8e0f2e', 0.4, 1.7);
+      for (let i = 0; i < 9; i++) {
+        particle(layer, 'bfx-crack', { '--a': (i * 40 + rand(-12, 12)) + 'deg', '--len': rand(60, 130) + 'px', '--delay': rand(0.1, 0.3) + 's' });
+      }
+      for (let i = 0; i < 14; i++) {
+        particle(layer, 'bfx-debris', {
+          '--dx': rand(-150, 150) + 'px', '--up': -rand(30, 90) + 'px', '--fall': rand(110, 170) + 'px', '--rot': rand(-300, 300) + 'deg',
+          '--size': rand(6, 13) + 'px', '--delay': rand(0.12, 0.35) + 's', '--c': ['#8e0f2e', '#e0264f', '#ff8fa8', '#4a0a18'][i % 4],
+        });
+      }
       for (let i = 0; i < 12; i++) {
         const a = rand(0, Math.PI * 2), r = rand(80, 150);
         particle(layer, 'bfx-star', { '--x': Math.cos(a) * r + 'px', '--y': Math.sin(a) * r + 'px', '--size': rand(12, 24) + 'px', '--delay': rand(0.1, 0.9) + 's', '--c': ['#ff3b6b', '#ff8fa8', '#ffffff'][i % 3] }, i % 2 ? '◆' : '✦');
@@ -94,19 +114,17 @@
       return 1700;
     },
     dragon(layer) {
-      const hues = ['#ff9db8', '#ffcf8a', '#f6f08a', '#9df0b8', '#8ad8f5', '#b9a8ff', '#f0a8f8'];
-      [0, 2, 4, 6].forEach((i, k) => ring(layer, hues[i], 0.1 + k * 0.25, 1 + k * 0.2));
-      for (let i = 0; i < 12; i++) {
-        particle(layer, 'bfx-orb', {
-          '--x': rand(-130, 130) + 'px', '--rise': -rand(120, 230) + 'px', '--sway': rand(-40, 40) + 'px',
-          '--size': rand(8, 14) + 'px', '--delay': rand(0.2, 1.6) + 's', '--c': hues[i % 7],
-        });
+      // rays of golden light turn out from behind the badge, with a warm flash and a few sparks
+      const gold = ['#ffe08a', '#fff4c4', '#ffc24d', '#ffffff'];
+      particle(layer, 'bfx-rays', {});
+      particle(layer, 'bfx-rays bfx-rays2', {});
+      particle(layer, 'bfx-halo bfx-halo-gold', {});
+      [0, 1, 2].forEach((k) => ring(layer, gold[k], 0.15 + k * 0.3, 1 + k * 0.3));
+      for (let i = 0; i < 10; i++) {
+        const a = rand(0, Math.PI * 2), r = rand(80, 160);
+        particle(layer, 'bfx-star', { '--x': Math.cos(a) * r + 'px', '--y': Math.sin(a) * r + 'px', '--size': rand(14, 26) + 'px', '--delay': rand(0.3, 1.9) + 's', '--c': gold[i % 4] }, '✦');
       }
-      for (let i = 0; i < 6; i++) {
-        const a = rand(0, Math.PI * 2), r = rand(80, 150);
-        particle(layer, 'bfx-star', { '--x': Math.cos(a) * r + 'px', '--y': Math.sin(a) * r + 'px', '--size': rand(14, 24) + 'px', '--delay': rand(0.3, 1.8) + 's', '--c': hues[(i + 3) % 7] }, '✦');
-      }
-      return 2800;
+      return 3200;
     },
   };
 
@@ -125,7 +143,7 @@
     if (reduce()) {
       seal.classList.add('fx-reduced');
     } else if (EFFECTS[tier]) {
-      ms = EFFECTS[tier](layer);
+      ms = EFFECTS[tier](layer, stage);
       if (celebrate) ms += 600;
     }
     setTimeout(() => {
