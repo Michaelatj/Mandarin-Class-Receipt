@@ -202,6 +202,20 @@ def bonus_access():
     return jsonify(ok=True, level=level, on=on, count=len(targets))
 
 
+@teacher_bp.route("/teacher/announce", methods=["POST"])
+@teacher_required
+def announce():
+    """A short message from the teacher to every student's notification bell."""
+    from ..services.notify import notify, student_ids
+    msg = ((request.get_json(silent=True) or {}).get("message") or "").strip()
+    if not msg:
+        return jsonify(ok=False, msg="Write a message first."), 400
+    ids = student_ids()
+    notify(ids, "info", "Message from your teacher", msg[:280])
+    db.session.commit()
+    return jsonify(ok=True, sent=len(ids))
+
+
 @teacher_bp.route("/teacher/update_settings", methods=["POST"])
 @teacher_required
 def update_settings():

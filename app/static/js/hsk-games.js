@@ -128,7 +128,15 @@
   }
   if (boardSel) { boardSel.addEventListener('change', loadBoard); loadBoard(); }
 
-  function backToMenu() { stopTimers(); stage.hidden = true; stage.innerHTML = ''; menu.hidden = false; if (boardSel) loadBoard(); window.scrollTo({ top: 0 }); }
+  /* the browser's back button and the page's "back" link return to the games menu while a game is open */
+  const backLabel = document.getElementById('gm-backlabel'), backText = backLabel ? backLabel.textContent : '';
+  function showMenu() { stopTimers(); stage.hidden = true; stage.innerHTML = ''; menu.hidden = false; if (backLabel) backLabel.textContent = backText; if (boardSel) loadBoard(); window.scrollTo({ top: 0 }); }
+  function backToMenu() { if (history.state && history.state.gm) history.back(); else showMenu(); }
+  window.addEventListener('popstate', () => { if (!stage.hidden) showMenu(); });
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a.qz-back');
+    if (a && !stage.hidden) { e.preventDefault(); backToMenu(); }
+  });
 
 
 
@@ -378,18 +386,28 @@
 
   /* ---------- racing: 60 seconds, first to the finish line. Right answer = faster, wrong answer = breakdown, and three bots keep driving ---------- */
   function race(list) {
-    const next = deckOf(list), TIME = 60, MAXV = 200, TARGET = 1500;
+    const LV = { easy: { name: 'Easy', icon: '🐢', note: 'Slow bots. Relax and learn.', bots: [58, 68, 78], mult: 0.7 },
+      normal: { name: 'Normal', icon: '🚗', note: 'Bots drive at a steady pace.', bots: [74, 86, 98], mult: 1 },
+      hard: { name: 'Hard', icon: '🚀', note: 'Fast bots. No room for mistakes.', bots: [88, 102, 116], mult: 1.3 } };
+    stage.innerHTML = `<div class="gm-bar"><b>🏎️ Racing</b><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Back</button></div>
+      <div class="gm-pick"><h2>Choose your difficulty</h2><p>Race three bots over 1,200 m. Harder levels give a higher score.</p></div>
+      <div class="gm-levels">${Object.keys(LV).map((k) => `<button type="button" class="gm-lvl" data-lv="${k}"><span>${LV[k].icon}</span><b>${LV[k].name}</b><small>${LV[k].note}</small></button>`).join('')}</div>`;
+    $('gm-quit').onclick = backToMenu;
+    stage.querySelector('.gm-levels').onclick = (e) => { const b = e.target.closest('.gm-lvl'); if (b) raceRun(list, LV[b.dataset.lv], b.dataset.lv); };
+  }
+  function raceRun(list, lv, lvKey) {
+    const next = deckOf(list), TIME = 60, MAXV = 200, TARGET = 1200;
     const FAULTS = ['💥 Flat tire!', '🔥 Engine overheating!', '⛽ Fuel leak!', '🔧 Gearbox stuck!'];
     const cars = [
-      { name: 'You', me: true, icon: '🏎️', d: 0, v: 40 },
-      { name: 'Bot Ming', icon: '🚙', d: 0, v: 90, base: 100 },
-      { name: 'Bot Lan', icon: '🚕', d: 0, v: 100, base: 112 },
-      { name: 'Bot Hu', icon: '🚓', d: 0, v: 110, base: 124 },
+      { name: 'You', me: true, icon: '🏎️', d: 0, v: 50 },
+      { name: 'Bot Ming', icon: '🚙', d: 0, v: lv.bots[0] * .8, base: lv.bots[0] },
+      { name: 'Bot Lan', icon: '🚕', d: 0, v: lv.bots[1] * .8, base: lv.bots[1] },
+      { name: 'Bot Hu', icon: '🚓', d: 0, v: lv.bots[2] * .8, base: lv.bots[2] },
     ];
     const me = cars[0];
     let left = TIME, right = 0, total = 0, combo = 0, bestCombo = 0, trouble = 0, over = false, cur = null, locked = false, clock = 0;
     const wrong = [];
-    stage.innerHTML = `<div class="gm-bar"><span class="gm-stat">⏱ <b id="r-t">${TIME}</b>s</span><span class="gm-stat">Speed <b id="r-v">40</b> km/h</span><span class="gm-stat">Place <b id="r-p">1</b>/4</span><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Quit</button></div>
+    stage.innerHTML = `<div class="gm-bar"><span class="gm-stat">⏱ <b id="r-t">${TIME}</b>s</span><span class="gm-stat">Speed <b id="r-v">50</b> km/h</span><span class="gm-stat">Place <b id="r-p">1</b>/4</span><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Quit</button></div>
       <div class="gm-time" id="r-bar"><i style="width:100%"></i></div>
       <div class="rc-track">${cars.map((c, i) => `<div class="rc-lane${c.me ? ' me' : ''}"><span class="rc-name">${esc(c.name)}</span><div class="rc-run"><div class="rc-car" id="r-c${i}"><span class="rc-body">${c.icon}</span>${c.me ? '<span class="rc-smoke">💨</span>' : ''}</div></div><span class="rc-finish">🏁</span></div>`).join('')}</div>
       <div class="rc-flag" id="r-flag"></div>
@@ -407,10 +425,10 @@
       document.querySelectorAll('#r-q .gm-opt').forEach((x) => { x.disabled = true; if (x.dataset.n === String(cur.w.n)) x.classList.add('right'); });
       if (b.dataset.n === String(cur.w.n)) {
         right++; combo++; bestCombo = Math.max(bestCombo, combo);
-        me.v = Math.min(MAXV, me.v + (trouble > 0 ? 12 : 24) + Math.min(combo, 5) * 2);
+        me.v = Math.min(MAXV, me.v + (trouble > 0 ? 16 : 30) + Math.min(combo, 5) * 3);
       } else {
         b.classList.add('wrong'); combo = 0;
-        trouble = 4; me.v = Math.max(15, me.v * 0.35);
+        trouble = 2.5; me.v = Math.max(30, me.v * 0.55);
         flag.textContent = FAULTS[Math.floor(Math.random() * FAULTS.length)];
         meEl.classList.add('hurt');
         if (!wrong.find((x) => x.n === cur.w.n) && wrong.length < 8) wrong.push(cur.w);
@@ -423,11 +441,11 @@
       if (over) return;
       left -= DT; clock += DT;
       if (trouble > 0) { trouble -= DT; if (trouble <= 0) { meEl.classList.remove('hurt'); flag.textContent = ''; } }
-      me.v = Math.max(trouble > 0 ? 10 : 25, me.v - (trouble > 0 ? 1.2 : 0.5) * DT * 10);   // the car slowly loses speed if you stop answering
+      me.v = Math.max(trouble > 0 ? 20 : 35, me.v - (trouble > 0 ? 6 : 3) * DT);   // the car slowly loses speed if you stop answering
       cars.forEach((c, i) => {
         if (!c.me && c.at == null) {                      // bots: a steady pace with a little random wobble
           c.v += (c.base - c.v) * 0.04 + (Math.random() - 0.5) * 7;
-          c.v = Math.max(60, Math.min(150, c.v));
+          c.v = Math.max(lv.bots[0] * .7, Math.min(c.base + 14, c.v));
         }
         if (c.at == null) { c.d += c.v / 3.6 * DT; if (c.d >= TARGET) { c.d = TARGET; c.at = clock; } }
         $('r-c' + i).style.left = Math.min(100, c.d / TARGET * 100) + '%';
@@ -440,13 +458,90 @@
         over = true;
         const pos = place(), won = pos === 1 && me.at != null;
         const bonus = me.at != null ? [800, 400, 150, 0][pos - 1] : 0;
-        const score = Math.min(5000, Math.round(me.d) + bonus), acc = total ? Math.round(right / total * 100) : 0;
+        const score = Math.min(5000, Math.round((Math.round(me.d) + bonus) * lv.mult)), acc = total ? Math.round(right / total * 100) : 0;
         const lines = [won ? '🏆 You crossed the finish line first!' : me.at != null ? `🏁 You finished in place ${pos} of 4` : `⏱ Time is up. You were in place ${pos} of 4 (${Math.round(me.d)} of ${TARGET} m)`,
-          `${right} of ${total} correct (${acc}%) · best combo ${bestCombo}`];
+          `${lv.icon} ${lv.name} level · ${right} of ${total} correct (${acc}%) · best combo ${bestCombo}`];
         finish('race', score, lines, won || (acc >= 80 && right >= 12), wrong);
       }
     }, DT * 1000);
     ask();
+  }
+
+
+  /* ---------- story time (HSK 1 only): a short branching story, four endings, one message to take home ---------- */
+  const STORIES = [
+    { icon: '🍞', title: 'The bread', sub: 'Roti & teman', start: 'a',
+      intro: 'Jam istirahat. Kamu punya sebuah roti. Teman sebangkumu, Mei, tidak membawa uang dan perutnya keroncongan.',
+      nodes: {
+        a: { say: { zh: '我没有钱，我很饿。', py: 'Wǒ méiyǒu qián, wǒ hěn è.', id: 'Aku tidak punya uang, aku lapar sekali.' },
+          opts: [{ zh: '我们一起吃。', py: 'Wǒmen yìqǐ chī.', id: 'Ayo kita makan bersama.', to: 'b' }, { zh: '我不想给你。', py: 'Wǒ bù xiǎng gěi nǐ.', id: 'Aku tidak mau memberimu.', to: 'c' }] },
+        b: { narr: 'Mei tersenyum lebar dan mengambil separuh roti itu.', say: { zh: '谢谢你！我明天给你钱。', py: 'Xièxie nǐ! Wǒ míngtiān gěi nǐ qián.', id: 'Terima kasih! Besok kukasih kamu uang.' },
+          opts: [{ zh: '不用，我们是朋友。', py: 'Búyòng, wǒmen shì péngyou.', id: 'Tidak usah, kita kan teman.', to: 'e1' }, { zh: '好，明天你给我钱。', py: 'Hǎo, míngtiān nǐ gěi wǒ qián.', id: 'Oke, besok kamu bayar ya.', to: 'e2' }] },
+        c: { narr: 'Mei menunduk dan diam. Kamu mulai merasa tidak enak hati.', say: { zh: '没关系。', py: 'Méi guānxi.', id: 'Tidak apa-apa.' },
+          opts: [{ zh: '对不起，给你。', py: 'Duìbuqǐ, gěi nǐ.', id: 'Maaf, ini untukmu.', to: 'e3' }, { zh: '你去问别人吧。', py: 'Nǐ qù wèn biéren ba.', id: 'Tanya orang lain saja.', to: 'e4' }] },
+        e1: { end: 'good', title: 'A real friend', msg: 'Berbagi tanpa menghitung untung-rugi membuat persahabatan tumbuh. Kebaikan kecil sering dikenang paling lama.' },
+        e2: { end: 'ok', title: 'Sharing with a bill', msg: 'Memberi itu baik, tetapi kalau langsung ditagih, rasanya jadi jual-beli. Beri dengan tulus, dan kebaikan itu akan kembali dengan sendirinya.' },
+        e3: { end: 'ok', title: 'A second chance', msg: 'Tidak apa-apa salah di awal. Meminta maaf dan memperbaiki dengan tindakan nyata membuat hubungan pulih lagi.' },
+        e4: { end: 'bad', title: 'Eating alone', msg: 'Rotimu utuh, tetapi hatimu terasa berat. Mengabaikan orang yang sedang butuh sering membuat kita sendiri yang kesepian.' } } },
+    { icon: '⏰', title: 'The morning', sub: 'Pagi hari', start: 'a',
+      intro: 'Alarm berbunyi jam enam. Kelas mulai jam tujuh setengah. Matamu masih sangat berat.',
+      nodes: {
+        a: { say: { zh: '现在六点。我很累。', py: 'Xiànzài liù diǎn. Wǒ hěn lèi.', id: 'Sekarang jam enam. Aku capek.' },
+          opts: [{ zh: '我现在起床。', py: 'Wǒ xiànzài qǐchuáng.', id: 'Aku bangun sekarang.', to: 'b' }, { zh: '我再睡五分钟。', py: 'Wǒ zài shuì wǔ fēnzhōng.', id: 'Aku tidur lima menit lagi.', to: 'c' }] },
+        b: { narr: 'Kamu bangun dan mandi. Ibu sudah menyiapkan sarapan di meja.', say: { zh: '你吃早饭吗？', py: 'Nǐ chī zǎofàn ma?', id: 'Kamu mau sarapan?' },
+          opts: [{ zh: '吃，谢谢妈妈。', py: 'Chī, xièxie māma.', id: 'Mau, terima kasih, Bu.', to: 'e1' }, { zh: '我没有时间。', py: 'Wǒ méiyǒu shíjiān.', id: 'Aku tidak sempat.', to: 'e2' }] },
+        c: { narr: 'Kamu terbangun lagi... dan jam di dinding sudah menunjukkan pukul tujuh!', say: { zh: '现在七点了！', py: 'Xiànzài qī diǎn le!', id: 'Sekarang sudah jam tujuh!' },
+          opts: [{ zh: '老师，对不起，我来晚了。', py: 'Lǎoshī, duìbuqǐ, wǒ lái wǎn le.', id: 'Bu guru, maaf, saya terlambat.', to: 'e3' }, { zh: '我说路上有事。', py: 'Wǒ shuō lùshang yǒu shì.', id: 'Aku bilang ada urusan di jalan.', to: 'e4' }] },
+        e1: { end: 'good', title: 'A strong start', msg: 'Bangun tepat waktu dan sarapan bukan sekadar rajin. Itu caramu menghargai waktu dan tubuhmu sendiri, dan harimu terasa lebih ringan.' },
+        e2: { end: 'ok', title: 'An empty stomach', msg: 'Waktu yang kamu hemat dengan melewatkan sarapan sering dibayar mahal dengan konsentrasi yang hilang di jam pertama.' },
+        e3: { end: 'ok', title: 'Honest and late', msg: 'Terlambat itu masalah kecil. Berkata jujur membuatnya tetap kecil, dan orang lebih mudah memaafkanmu.' },
+        e4: { end: 'bad', title: 'A small lie', msg: 'Satu kebohongan kecil butuh kebohongan lain untuk menutupinya. Akhirnya kamu sibuk menjaga cerita, bukan menyelesaikan masalah.' } } },
+    { icon: '🧑‍🎓', title: 'The new classmate', sub: 'Teman baru', start: 'a',
+      intro: 'Hari ini ada murid baru bernama David. Dia duduk sendirian di pojok kelas dan tidak berbicara dengan siapa pun.',
+      nodes: {
+        a: { say: { zh: '他是新同学，他没有朋友。', py: 'Tā shì xīn tóngxué, tā méiyǒu péngyou.', id: 'Dia murid baru, dia belum punya teman.' },
+          opts: [{ zh: '你好！你叫什么名字？', py: 'Nǐ hǎo! Nǐ jiào shénme míngzi?', id: 'Halo! Siapa namamu?', to: 'b' }, { zh: '我不认识他。', py: 'Wǒ bú rènshi tā.', id: 'Aku tidak kenal dia.', to: 'c' }] },
+        b: { narr: 'David tersenyum malu. Bahasa Mandarinnya masih belum lancar.', say: { zh: '我的中文不好。', py: 'Wǒ de Zhōngwén bù hǎo.', id: 'Bahasa Mandarinku belum bagus.' },
+          opts: [{ zh: '没关系，我教你。', py: 'Méi guānxi, wǒ jiāo nǐ.', id: 'Tidak apa-apa, aku ajari.', to: 'e1' }, { zh: '哈哈，你的中文真不好！', py: 'Hāhā, nǐ de Zhōngwén zhēn bù hǎo!', id: 'Haha, Mandarinmu jelek banget!', to: 'e2' }] },
+        c: { narr: 'Saat pulang sekolah, teman-temanmu mengajak bermain bola. David hanya melihat dari jauh.', say: { zh: '我们去玩吧。', py: 'Wǒmen qù wán ba.', id: 'Ayo kita main.' },
+          opts: [{ zh: '你也来吧！', py: 'Nǐ yě lái ba!', id: 'Kamu juga ikut, yuk!', to: 'e3' }, { zh: '好，我们走。', py: 'Hǎo, wǒmen zǒu.', id: 'Oke, kita berangkat.', to: 'e4' }] },
+        e1: { end: 'good', title: 'A new friendship', msg: 'Orang yang belum bisa butuh teman yang sabar, bukan penilai. Mengajari dengan ramah mengubah rasa malu menjadi rasa percaya diri.' },
+        e2: { end: 'bad', title: 'A joke that hurts', msg: 'Ejekan yang kamu anggap lucu bisa diingat orang bertahun-tahun. Sebelum bercanda, tanyakan: apakah ini membuat dia ikut tertawa?' },
+        e3: { end: 'ok', title: 'Never too late', msg: 'Kamu sempat melewatkan kesempatan, tetapi tidak pernah terlambat untuk mengajak. Satu kalimat sederhana bisa mengakhiri kesepian seseorang.' },
+        e4: { end: 'bad', title: 'The invisible wall', msg: 'Tidak menyakiti bukan berarti peduli. Diam saja ketika ada yang tersisih membuat dinding yang tidak terlihat makin tinggi.' } } },
+  ];
+  const PTS = { good: 100, ok: 60, bad: 20 };
+  function story() {
+    let seen = {}; try { seen = JSON.parse(localStorage.getItem('hskStory1') || '{}'); } catch (e) { seen = {}; }
+    const found = (i) => (seen[i] || []).length;
+    stage.innerHTML = `<div class="gm-bar"><b>📖 Story time</b><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Back</button></div>
+      <div class="gm-pick"><h2>Choose a story</h2><p>Every choice changes what happens. Find all 4 endings.</p></div>
+      <div class="st-list">${STORIES.map((s, i) => `<button type="button" class="st-book" data-i="${i}"><span>${s.icon}</span><div><b>${esc(s.title)}</b><small>${esc(s.sub)}</small></div><em>${found(i)}/4 endings</em></button>`).join('')}</div>`;
+    $('gm-quit').onclick = backToMenu;
+    stage.querySelector('.st-list').onclick = (e) => { const b = e.target.closest('.st-book'); if (b) play(+b.dataset.i); };
+    function play(i) {
+      const S = STORIES[i]; let step = 0;
+      function show(id) {
+        const n = S.nodes[id];
+        if (n.end) return ending(id, n);
+        step++;
+        stage.innerHTML = `<div class="gm-bar"><b>${S.icon} ${esc(S.title)}</b><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Back</button></div>
+          <div class="st-dots"><i class="on"></i><i class="${step > 1 ? 'on' : ''}"></i><i class="${step > 2 ? 'on' : ''}"></i></div>
+          <div class="st-card">${step === 1 ? `<p class="st-narr">${esc(S.intro)}</p>` : ''}${n.narr ? `<p class="st-narr">${esc(n.narr)}</p>` : ''}
+            <div class="st-say"><span class="zh" lang="zh">${esc(n.say.zh)}</span><span class="py">${esc(n.say.py)}</span><span class="id">${esc(n.say.id)}</span></div>
+            <div class="st-pick">${n.opts.map((o, k) => `<button type="button" class="st-opt" data-to="${o.to}"><span class="zh" lang="zh">${esc(o.zh)}</span><span class="py">${esc(o.py)}</span><span class="id">${esc(o.id)}</span></button>`).join('')}</div></div>`;
+        $('gm-quit').onclick = story;
+        stage.querySelector('.st-pick').onclick = (e) => { const b = e.target.closest('.st-opt'); if (b) show(b.dataset.to); };
+        window.scrollTo({ top: 0 });
+      }
+      function ending(id, n) {
+        (seen[i] = seen[i] || []); if (!seen[i].includes(id)) seen[i].push(id);
+        try { localStorage.setItem('hskStory1', JSON.stringify(seen)); } catch (e) { /* optional */ }
+        const icon = { good: '🌟', ok: '🙂', bad: '🌧️' }[n.end];
+        finish('story', PTS[n.end], [`${icon} <b>${esc(n.title)}</b> (ending ${found(i)} of 4 found)`, `<span class="st-msg" style="display:block"><b>💡 Message to take home</b>${esc(n.msg)}</span>`], n.end === 'good', []);
+      }
+      show(S.start);
+    }
   }
 
   async function start(game) {
@@ -454,7 +549,9 @@
     const list = pool();
     if (list.length < 4) { alert('Choose more words: this selection has fewer than 4 words. Try "All words".'); return; }
     stopTimers(); menu.hidden = true; stage.hidden = false;
-    ({ memory, speed, ladder, match, fill, riddle, race })[game](list);
+    if (!(history.state && history.state.gm)) { try { history.pushState({ gm: 1 }, ''); } catch (err) { /* optional */ } }
+    if (backLabel) backLabel.textContent = 'All games';
+    ({ memory, speed, ladder, match, fill, riddle, race, story })[game](list);
     window.scrollTo({ top: 0 });
   }
   menu.addEventListener('click', (e) => { const t = e.target.closest('[data-game]'); if (t) start(t.dataset.game); });

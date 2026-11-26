@@ -257,7 +257,7 @@ def progress(user, level):
     return jsonify(ok=True)
 
 
-GAMES = ("memory", "speed", "ladder", "match", "fill", "riddle", "race")
+GAMES = ("memory", "speed", "ladder", "match", "fill", "riddle", "race", "story")
 
 
 @hsk_bp.route("/hsk<int:level>/games")

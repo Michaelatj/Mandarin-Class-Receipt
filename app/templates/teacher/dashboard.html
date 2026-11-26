@@ -278,6 +278,7 @@
             <p class="page-sub">{{ (tr('student_count_one') if student_count == 1 else tr('student_count_many')).format(n=student_count) }}</p>
             </div>
             <div class="page-actions">
+              <button type="button" class="btn bgh bsm" id="announceBtn">📣 Announce to students</button>
               <button type="button" class="btn bgh bsm" id="badgeGalleryBtn">🎬 Preview badges</button>
               <button type="button" class="btn bgh bsm" id="addStudentBtn">+ Student without account</button>
               <button type="button" class="btn br bsm open-prepay">Record upfront payment</button>
@@ -1745,6 +1746,19 @@ function attachForceRcBtn(form) {
     }
   });
 }
+
+// Send a short announcement to every student's notification bell
+document.getElementById('announceBtn')?.addEventListener('click', async () => {
+  const msg = await UI.prompt('Write a short message for all your students. It appears in their notification bell.', { placeholder: 'e.g. New quiz tomorrow, please practise HSK 1', ok: 'Send' });
+  if (!msg || !msg.trim()) return;
+  try {
+    const r = await fetch('{{ url_for("teacher.announce") }}', { method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name=csrf-token]').content },
+      body: JSON.stringify({ message: msg.trim() }) });
+    const j = await r.json();
+    UI.alert(j.ok ? `Sent to ${j.sent} student${j.sent === 1 ? '' : 's'}.` : (j.msg || 'Could not send.'));
+  } catch (e) { UI.alert('Could not send. Check your connection.'); }
+});
 
 // Attach to all force receipt forms on load
 document.querySelectorAll('.force-rc-form').forEach(attachForceRcBtn);
