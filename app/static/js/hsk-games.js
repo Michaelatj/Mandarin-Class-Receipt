@@ -108,7 +108,7 @@
       ${lines.map((l) => `<p>${l}</p>`).join('')}
       <div class="gm-acts"><button type="button" class="btn bg" id="gm-again">Play again</button><button type="button" class="btn bgh" id="gm-back">All games</button></div>
       ${review}</div>`;
-    $('gm-again').onclick = () => start(game);
+    $('gm-again').onclick = () => start(game, true);
     $('gm-back').onclick = backToMenu;
     if (window.StreakOverlay && (great || score > 0)) {
       later(() => window.StreakOverlay.burst(BADGE, great), 250);
@@ -544,14 +544,21 @@
     }
   }
 
-  async function start(game) {
+  async function start(game, skipIntro) {
     await ready;
     const list = pool();
     if (list.length < 4) { alert('Choose more words: this selection has fewer than 4 words. Try "All words".'); return; }
     stopTimers(); menu.hidden = true; stage.hidden = false;
     if (!(history.state && history.state.gm)) { try { history.pushState({ gm: 1 }, ''); } catch (err) { /* optional */ } }
     if (backLabel) backLabel.textContent = 'All games';
-    ({ memory, speed, ladder, match, fill, riddle, race, story })[game](list);
+    const run = () => ({ memory, speed, ladder, match, fill, riddle, race, story })[game](list);
+    const tile = menu.querySelector(`[data-game="${game}"]`);
+    if (game === 'race' || game === 'story' || !tile || skipIntro) run();
+    else {                                   // a small "how it works" screen inside the frame
+      stage.innerHTML = `<div class="gm-bar"><b>${esc(tile.querySelector('b').textContent)}</b><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Back</button></div>
+        <div class="gm-intro"><span class="gm-ico">${tile.querySelector('.gm-ico').textContent}</span><h2>${esc(tile.querySelector('b').textContent)}</h2><p>${esc(tile.querySelector('small').textContent)}</p><button type="button" class="btn bg" id="gm-go">▶ Start</button></div>`;
+      $('gm-quit').onclick = backToMenu; $('gm-go').onclick = run;
+    }
     window.scrollTo({ top: 0 });
   }
   menu.addEventListener('click', (e) => { const t = e.target.closest('[data-game]'); if (t) start(t.dataset.game); });
