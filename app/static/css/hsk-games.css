@@ -221,3 +221,14 @@
 .gm-intro p { margin: 0; max-width: 460px; color: var(--text2, var(--text)); line-height: 1.55; }
 .gm-intro .btn { min-width: 180px; font-size: 1.05rem; padding: 12px 22px; }
 .gm-lobby .gm-scope { margin-bottom: 14px; background: rgba(128,128,128,.10); box-shadow: none; }
+
+/* v11: lobby without a frame, a bigger game screen, clearer story dialogue */
+.gm-screen { max-width: 1000px; min-height: 560px; padding: 18px 26px 26px; }
+.gm-screen.gm-lobby { max-width: 980px; min-height: 0; padding: 0; border: 0; background: none; box-shadow: none; border-radius: 0; }
+.gm-lobby .gm-scope { background: var(--surface, #fff); box-shadow: none; }
+.gm-lobby .gm-lb { background: var(--surface, rgba(128,128,128,.10)); }
+@media (max-width: 520px) { .gm-screen { padding: 14px 12px 18px; min-height: 420px; } }
+.st-say { position: relative; margin-left: 6px; background: var(--surface2, rgba(128,128,128,.12)); border: 0; border-left: 5px solid var(--gold); border-radius: 4px 16px 16px 4px; }
+.st-who { font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--gold); }
+.st-ask { margin: 16px 0 -2px; font-size: .8rem; font-weight: 800; color: var(--text3); }
+.st-pick { margin-top: 8px; }

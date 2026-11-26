@@ -473,11 +473,11 @@
     { icon: '🍞', title: 'The bread', sub: 'Roti & teman', start: 'a',
       intro: 'Jam istirahat. Kamu punya sebuah roti. Teman sebangkumu, Mei, tidak membawa uang dan perutnya keroncongan.',
       nodes: {
-        a: { say: { zh: '我没有钱，我很饿。', py: 'Wǒ méiyǒu qián, wǒ hěn è.', id: 'Aku tidak punya uang, aku lapar sekali.' },
+        a: { say: { who: 'Mei', zh: '我没有钱，我很饿。', py: 'Wǒ méiyǒu qián, wǒ hěn è.', id: 'Aku tidak punya uang, aku lapar sekali.' },
           opts: [{ zh: '我们一起吃。', py: 'Wǒmen yìqǐ chī.', id: 'Ayo kita makan bersama.', to: 'b' }, { zh: '我不想给你。', py: 'Wǒ bù xiǎng gěi nǐ.', id: 'Aku tidak mau memberimu.', to: 'c' }] },
-        b: { narr: 'Mei tersenyum lebar dan mengambil separuh roti itu.', say: { zh: '谢谢你！我明天给你钱。', py: 'Xièxie nǐ! Wǒ míngtiān gěi nǐ qián.', id: 'Terima kasih! Besok kukasih kamu uang.' },
+        b: { narr: 'Mei tersenyum lebar dan mengambil separuh roti itu.', say: { who: 'Mei', zh: '谢谢你！我明天给你钱。', py: 'Xièxie nǐ! Wǒ míngtiān gěi nǐ qián.', id: 'Terima kasih! Besok kukasih kamu uang.' },
           opts: [{ zh: '不用，我们是朋友。', py: 'Búyòng, wǒmen shì péngyou.', id: 'Tidak usah, kita kan teman.', to: 'e1' }, { zh: '好，明天你给我钱。', py: 'Hǎo, míngtiān nǐ gěi wǒ qián.', id: 'Oke, besok kamu bayar ya.', to: 'e2' }] },
-        c: { narr: 'Mei menunduk dan diam. Kamu mulai merasa tidak enak hati.', say: { zh: '没关系。', py: 'Méi guānxi.', id: 'Tidak apa-apa.' },
+        c: { narr: 'Mei menunduk dan diam. Kamu mulai merasa tidak enak hati.', say: { who: 'Mei', zh: '没关系。', py: 'Méi guānxi.', id: 'Tidak apa-apa.' },
           opts: [{ zh: '对不起，给你。', py: 'Duìbuqǐ, gěi nǐ.', id: 'Maaf, ini untukmu.', to: 'e3' }, { zh: '你去问别人吧。', py: 'Nǐ qù wèn biéren ba.', id: 'Tanya orang lain saja.', to: 'e4' }] },
         e1: { end: 'good', title: 'A real friend', msg: 'Berbagi tanpa menghitung untung-rugi membuat persahabatan tumbuh. Kebaikan kecil sering dikenang paling lama.' },
         e2: { end: 'ok', title: 'Sharing with a bill', msg: 'Memberi itu baik, tetapi kalau langsung ditagih, rasanya jadi jual-beli. Beri dengan tulus, dan kebaikan itu akan kembali dengan sendirinya.' },
@@ -486,11 +486,11 @@
     { icon: '⏰', title: 'The morning', sub: 'Pagi hari', start: 'a',
       intro: 'Alarm berbunyi jam enam. Kelas mulai jam tujuh setengah. Matamu masih sangat berat.',
       nodes: {
-        a: { say: { zh: '现在六点。我很累。', py: 'Xiànzài liù diǎn. Wǒ hěn lèi.', id: 'Sekarang jam enam. Aku capek.' },
+        a: { say: { who: 'Pikiranmu', zh: '现在六点。我很累。', py: 'Xiànzài liù diǎn. Wǒ hěn lèi.', id: 'Sekarang jam enam. Aku capek.' },
           opts: [{ zh: '我现在起床。', py: 'Wǒ xiànzài qǐchuáng.', id: 'Aku bangun sekarang.', to: 'b' }, { zh: '我再睡五分钟。', py: 'Wǒ zài shuì wǔ fēnzhōng.', id: 'Aku tidur lima menit lagi.', to: 'c' }] },
-        b: { narr: 'Kamu bangun dan mandi. Ibu sudah menyiapkan sarapan di meja.', say: { zh: '你吃早饭吗？', py: 'Nǐ chī zǎofàn ma?', id: 'Kamu mau sarapan?' },
+        b: { narr: 'Kamu bangun dan mandi. Ibu sudah menyiapkan sarapan di meja.', say: { who: 'Ibu', zh: '你吃早饭吗？', py: 'Nǐ chī zǎofàn ma?', id: 'Kamu mau sarapan?' },
           opts: [{ zh: '吃，谢谢妈妈。', py: 'Chī, xièxie māma.', id: 'Mau, terima kasih, Bu.', to: 'e1' }, { zh: '我没有时间。', py: 'Wǒ méiyǒu shíjiān.', id: 'Aku tidak sempat.', to: 'e2' }] },
-        c: { narr: 'Kamu terbangun lagi... dan jam di dinding sudah menunjukkan pukul tujuh!', say: { zh: '现在七点了！', py: 'Xiànzài qī diǎn le!', id: 'Sekarang sudah jam tujuh!' },
+        c: { narr: 'Kamu terbangun lagi... dan jam di dinding sudah menunjukkan pukul tujuh!', say: { who: 'Pikiranmu', zh: '现在七点了！', py: 'Xiànzài qī diǎn le!', id: 'Sekarang sudah jam tujuh!' },
           opts: [{ zh: '老师，对不起，我来晚了。', py: 'Lǎoshī, duìbuqǐ, wǒ lái wǎn le.', id: 'Bu guru, maaf, saya terlambat.', to: 'e3' }, { zh: '我说路上有事。', py: 'Wǒ shuō lùshang yǒu shì.', id: 'Aku bilang ada urusan di jalan.', to: 'e4' }] },
         e1: { end: 'good', title: 'A strong start', msg: 'Bangun tepat waktu dan sarapan bukan sekadar rajin. Itu caramu menghargai waktu dan tubuhmu sendiri, dan harimu terasa lebih ringan.' },
         e2: { end: 'ok', title: 'An empty stomach', msg: 'Waktu yang kamu hemat dengan melewatkan sarapan sering dibayar mahal dengan konsentrasi yang hilang di jam pertama.' },
@@ -499,11 +499,11 @@
     { icon: '🧑‍🎓', title: 'The new classmate', sub: 'Teman baru', start: 'a',
       intro: 'Hari ini ada murid baru bernama David. Dia duduk sendirian di pojok kelas dan tidak berbicara dengan siapa pun.',
       nodes: {
-        a: { say: { zh: '他是新同学，他没有朋友。', py: 'Tā shì xīn tóngxué, tā méiyǒu péngyou.', id: 'Dia murid baru, dia belum punya teman.' },
+        a: { say: { who: 'Pikiranmu', zh: '他是新同学，他没有朋友。', py: 'Tā shì xīn tóngxué, tā méiyǒu péngyou.', id: 'Dia murid baru, dia belum punya teman.' },
           opts: [{ zh: '你好！你叫什么名字？', py: 'Nǐ hǎo! Nǐ jiào shénme míngzi?', id: 'Halo! Siapa namamu?', to: 'b' }, { zh: '我不认识他。', py: 'Wǒ bú rènshi tā.', id: 'Aku tidak kenal dia.', to: 'c' }] },
-        b: { narr: 'David tersenyum malu. Bahasa Mandarinnya masih belum lancar.', say: { zh: '我的中文不好。', py: 'Wǒ de Zhōngwén bù hǎo.', id: 'Bahasa Mandarinku belum bagus.' },
+        b: { narr: 'David tersenyum malu. Bahasa Mandarinnya masih belum lancar.', say: { who: 'David', zh: '我的中文不好。', py: 'Wǒ de Zhōngwén bù hǎo.', id: 'Bahasa Mandarinku belum bagus.' },
           opts: [{ zh: '没关系，我教你。', py: 'Méi guānxi, wǒ jiāo nǐ.', id: 'Tidak apa-apa, aku ajari.', to: 'e1' }, { zh: '哈哈，你的中文真不好！', py: 'Hāhā, nǐ de Zhōngwén zhēn bù hǎo!', id: 'Haha, Mandarinmu jelek banget!', to: 'e2' }] },
-        c: { narr: 'Saat pulang sekolah, teman-temanmu mengajak bermain bola. David hanya melihat dari jauh.', say: { zh: '我们去玩吧。', py: 'Wǒmen qù wán ba.', id: 'Ayo kita main.' },
+        c: { narr: 'Saat pulang sekolah, teman-temanmu mengajak bermain bola. David hanya melihat dari jauh.', say: { who: 'Temanmu', zh: '我们去玩吧。', py: 'Wǒmen qù wán ba.', id: 'Ayo kita main.' },
           opts: [{ zh: '你也来吧！', py: 'Nǐ yě lái ba!', id: 'Kamu juga ikut, yuk!', to: 'e3' }, { zh: '好，我们走。', py: 'Hǎo, wǒmen zǒu.', id: 'Oke, kita berangkat.', to: 'e4' }] },
         e1: { end: 'good', title: 'A new friendship', msg: 'Orang yang belum bisa butuh teman yang sabar, bukan penilai. Mengajari dengan ramah mengubah rasa malu menjadi rasa percaya diri.' },
         e2: { end: 'bad', title: 'A joke that hurts', msg: 'Ejekan yang kamu anggap lucu bisa diingat orang bertahun-tahun. Sebelum bercanda, tanyakan: apakah ini membuat dia ikut tertawa?' },
@@ -528,8 +528,8 @@
         stage.innerHTML = `<div class="gm-bar"><b>${S.icon} ${esc(S.title)}</b><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Back</button></div>
           <div class="st-dots"><i class="on"></i><i class="${step > 1 ? 'on' : ''}"></i><i class="${step > 2 ? 'on' : ''}"></i></div>
           <div class="st-card">${step === 1 ? `<p class="st-narr">${esc(S.intro)}</p>` : ''}${n.narr ? `<p class="st-narr">${esc(n.narr)}</p>` : ''}
-            <div class="st-say"><span class="zh" lang="zh">${esc(n.say.zh)}</span><span class="py">${esc(n.say.py)}</span><span class="id">${esc(n.say.id)}</span></div>
-            <div class="st-pick">${n.opts.map((o, k) => `<button type="button" class="st-opt" data-to="${o.to}"><span class="zh" lang="zh">${esc(o.zh)}</span><span class="py">${esc(o.py)}</span><span class="id">${esc(o.id)}</span></button>`).join('')}</div></div>`;
+            <div class="st-say"><span class="st-who">💬 ${esc(n.say.who)}</span><span class="zh" lang="zh">${esc(n.say.zh)}</span><span class="py">${esc(n.say.py)}</span><span class="id">${esc(n.say.id)}</span></div>
+            <div class="st-ask">👇 What do you do?</div><div class="st-pick">${n.opts.map((o, k) => `<button type="button" class="st-opt" data-to="${o.to}"><span class="zh" lang="zh">${esc(o.zh)}</span><span class="py">${esc(o.py)}</span><span class="id">${esc(o.id)}</span></button>`).join('')}</div></div>`;
         $('gm-quit').onclick = story;
         stage.querySelector('.st-pick').onclick = (e) => { const b = e.target.closest('.st-opt'); if (b) show(b.dataset.to); };
         window.scrollTo({ top: 0 });
