@@ -29,7 +29,7 @@
 
   <h2 class="gm-h2">🎮 Pick your game</h2>
   <div class="gm-menu">
-    {% if level == 1 %}<button type="button" class="gm-tile t-story wide" data-game="story"><span class="gm-ico">📖</span><span class="gm-tag">New · 3 stories</span><b>Story time</b><small>Make choices, meet 4 different endings, and take a message home. Little stories in simple Chinese.</small><em data-best="story"></em></button>{% endif %}
+    <button type="button" class="gm-tile t-story wide" data-game="story"><span class="gm-ico">📖</span><span class="gm-tag">3 stories · branching</span><b>Story time</b><small>Make choices, find the different endings, and take a message home. Longer stories in Chinese at your level.</small><em data-best="story"></em></button>
     <button type="button" class="gm-tile t-race" data-game="race"><span class="gm-ico">🏎️</span><span class="gm-tag">Easy · Normal · Hard</span><b>Racing</b><small>Race three bots. Right answers speed you up, a wrong one breaks the car down.</small><em data-best="race"></em></button>
     <button type="button" class="gm-tile t-speed" data-game="speed"><span class="gm-ico">⚡</span><span class="gm-tag">60 seconds</span><b>Speed round</b><small>Pick the right meaning fast and build a combo.</small><em data-best="speed"></em></button>
     <button type="button" class="gm-tile t-ladder" data-game="ladder"><span class="gm-ico">🪜</span><span class="gm-tag">10 floors</span><b>Level ladder</b><small>Climb to the top. A wrong answer drops you one floor.</small><em data-best="ladder"></em></button>
@@ -43,7 +43,7 @@
     <div class="gm-board-head"><b>🏆 Leaderboard</b>
       <select id="gm-board-game" aria-label="Game">
         <option value="race">🏎️ Racing</option><option value="speed">⚡ Speed round</option><option value="ladder">🪜 Level ladder</option>
-        <option value="memory">🃏 Memory match</option><option value="match">🔗 Draw the lines</option><option value="fill">✏️ Fill the blank</option><option value="riddle">🧩 Riddles</option>{% if level == 1 %}<option value="story">📖 Story time</option>{% endif %}
+        <option value="memory">🃏 Memory match</option><option value="match">🔗 Draw the lines</option><option value="fill">✏️ Fill the blank</option><option value="riddle">🧩 Riddles</option><option value="story">📖 Story time</option>
       </select></div>
     <ol id="gm-board-list" class="gm-board-list"><li class="gm-board-empty">Loading…</li></ol>
   </div>
@@ -54,4 +54,4 @@
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=7' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=9' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=7' }}"></script><script src="{{ url_for('static', filename='js/hsk-stories' ~ level ~ '.js') + '?v=1' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=10' }}"></script>{% endblock %}
