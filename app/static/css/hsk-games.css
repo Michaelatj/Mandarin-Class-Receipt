@@ -232,3 +232,8 @@
 .st-who { font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--gold); }
 .st-ask { margin: 16px 0 -2px; font-size: .8rem; font-weight: 800; color: var(--text3); }
 .st-pick { margin-top: 8px; }
+
+/* story: scene counter next to the progress bars (v12) */
+.st-dots { align-items: center; }
+.st-step { font-size: .72rem; font-weight: 800; color: var(--text3); margin-right: 4px; }
+.st-dots i { width: 22px; }
