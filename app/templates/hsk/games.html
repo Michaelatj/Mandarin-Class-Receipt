@@ -1,11 +1,11 @@
 {% extends "quiz/layout.html" %}
 {% block qz_title %}{{ level_name }} · Games{% endblock %}
-{% block qz_back %}Back to {{ level_name }}{% endblock %}
+{% block qz_back %}<span id="gm-backlabel">Back to {{ level_name }}</span>{% endblock %}
 {% block qz_attrs %}data-page="hsk-games"{% endblock %}
 {% block head_extra %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/hsk.css') + '?v=7' }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=7' }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hsk-games.css') + '?v=11' }}">
 {% endblock %}
 
 {% block qz_body %}
@@ -15,6 +15,8 @@
     <p class="qz-sub">Play with the words of this level. A great score plays your badge's celebration.</p>
   </div></div>
 
+  <div id="gm-menu">
+  <div class="gm-screen gm-lobby">
   <div class="card gm-scope">
     <label for="gm-theme">Words to play with</label>
     <select id="gm-theme">
@@ -25,27 +27,31 @@
     <label class="gm-check"><input type="checkbox" id="gm-showpy" checked> Show pinyin</label>
   </div>
 
-  <div id="gm-menu" class="gm-menu">
-    <button type="button" class="gm-tile" data-game="memory"><span class="gm-ico">🃏</span><b>Memory match</b><small>Flip cards and match each word with its meaning.</small><em data-best="memory"></em></button>
-    <button type="button" class="gm-tile" data-game="speed"><span class="gm-ico">⚡</span><b>Speed round</b><small>60 seconds. Pick the right meaning, build a combo.</small><em data-best="speed"></em></button>
-    <button type="button" class="gm-tile" data-game="ladder"><span class="gm-ico">🪜</span><b>Level ladder</b><small>Climb 10 floors. A wrong answer drops you one floor.</small><em data-best="ladder"></em></button>
-    <button type="button" class="gm-tile" data-game="match"><span class="gm-ico">🔗</span><b>Draw the lines</b><small>Drag a line from each word to its meaning. 3 rounds of 5.</small><em data-best="match"></em></button>
-    <button type="button" class="gm-tile" data-game="fill"><span class="gm-ico">✏️</span><b>Fill the blank</b><small>Choose the word that completes the sentence. 10 sentences.</small><em data-best="fill"></em></button>
-    <button type="button" class="gm-tile" data-game="riddle"><span class="gm-ico">🧩</span><b>Riddles</b><small>Read a riddle in Indonesian and pick the word that is the answer.</small><em data-best="riddle"></em></button>
-    <button type="button" class="gm-tile" data-game="race"><span class="gm-ico">🏎️</span><b>Racing</b><small>60 seconds. Race three bots to the finish. Right answers speed the car up, a wrong one breaks it down.</small><em data-best="race"></em></button>
+  <h2 class="gm-h2">🎮 Pick your game</h2>
+  <div class="gm-menu">
+    {% if level == 1 %}<button type="button" class="gm-tile t-story wide" data-game="story"><span class="gm-ico">📖</span><span class="gm-tag">New · 3 stories</span><b>Story time</b><small>Make choices, meet 4 different endings, and take a message home. Little stories in simple Chinese.</small><em data-best="story"></em></button>{% endif %}
+    <button type="button" class="gm-tile t-race" data-game="race"><span class="gm-ico">🏎️</span><span class="gm-tag">Easy · Normal · Hard</span><b>Racing</b><small>Race three bots. Right answers speed you up, a wrong one breaks the car down.</small><em data-best="race"></em></button>
+    <button type="button" class="gm-tile t-speed" data-game="speed"><span class="gm-ico">⚡</span><span class="gm-tag">60 seconds</span><b>Speed round</b><small>Pick the right meaning fast and build a combo.</small><em data-best="speed"></em></button>
+    <button type="button" class="gm-tile t-ladder" data-game="ladder"><span class="gm-ico">🪜</span><span class="gm-tag">10 floors</span><b>Level ladder</b><small>Climb to the top. A wrong answer drops you one floor.</small><em data-best="ladder"></em></button>
+    <button type="button" class="gm-tile t-memory" data-game="memory"><span class="gm-ico">🃏</span><span class="gm-tag">Relaxed</span><b>Memory match</b><small>Flip the cards and match each word with its meaning.</small><em data-best="memory"></em></button>
+    <button type="button" class="gm-tile t-match" data-game="match"><span class="gm-ico">🔗</span><span class="gm-tag">3 rounds</span><b>Draw the lines</b><small>Drag a line from each word to its meaning.</small><em data-best="match"></em></button>
+    <button type="button" class="gm-tile t-fill" data-game="fill"><span class="gm-ico">✏️</span><span class="gm-tag">10 sentences</span><b>Fill the blank</b><small>Choose the word that completes the sentence.</small><em data-best="fill"></em></button>
+    <button type="button" class="gm-tile t-riddle" data-game="riddle"><span class="gm-ico">🧩</span><span class="gm-tag">Brain teaser</span><b>Riddles</b><small>Read a riddle in Indonesian, pick the word that answers it.</small><em data-best="riddle"></em></button>
   </div>
 
-  <div class="card gm-board" id="gm-board">
+  <div class="gm-lb" id="gm-board">
     <div class="gm-board-head"><b>🏆 Leaderboard</b>
       <select id="gm-board-game" aria-label="Game">
         <option value="race">🏎️ Racing</option><option value="speed">⚡ Speed round</option><option value="ladder">🪜 Level ladder</option>
-        <option value="memory">🃏 Memory match</option><option value="match">🔗 Draw the lines</option><option value="fill">✏️ Fill the blank</option><option value="riddle">🧩 Riddles</option>
+        <option value="memory">🃏 Memory match</option><option value="match">🔗 Draw the lines</option><option value="fill">✏️ Fill the blank</option><option value="riddle">🧩 Riddles</option>{% if level == 1 %}<option value="story">📖 Story time</option>{% endif %}
       </select></div>
     <ol id="gm-board-list" class="gm-board-list"><li class="gm-board-empty">Loading…</li></ol>
   </div>
+  </div>
+  </div>
 
-  <div id="gm-stage" hidden></div>
+  <div id="gm-stage" class="gm-screen" hidden></div>
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=7' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=6' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=7' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=9' }}"></script>{% endblock %}
