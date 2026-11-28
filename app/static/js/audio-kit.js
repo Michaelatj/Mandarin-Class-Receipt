@@ -10,8 +10,37 @@
   const AC = window.AudioContext || window.webkitAudioContext;
   let ac = null, unlocked = false;
 
+  /* mute switch: saved on this device, one switch for every game, quiz and celebration */
+  let off = false;
+  try { off = localStorage.getItem('soundOff') === '1'; } catch (e) { /* private mode */ }
+  const muted = () => off;
+  function setMuted(v) {
+    off = !!v;
+    try { localStorage.setItem('soundOff', off ? '1' : '0'); } catch (e) { /* optional */ }
+    if (off && 'speechSynthesis' in window) { try { speechSynthesis.cancel(); } catch (e) { /* optional */ } }
+    document.querySelectorAll('[data-sound-toggle]').forEach(paintToggle);
+    const box = document.getElementById('gm-sound'); if (box) box.checked = !off;
+  }
+  function paintToggle(b) {
+    b.textContent = off ? '🔇' : '🔊';
+    b.setAttribute('aria-pressed', off ? 'true' : 'false');
+    b.setAttribute('aria-label', off ? 'Sound is off. Tap to turn it on.' : 'Sound is on. Tap to turn it off.');
+    b.title = off ? 'Sound off' : 'Sound on';
+  }
+  // a small button in the menu, next to "Log out", on every page that has the menu
+  function addToggle() {
+    const out = document.querySelector('.app-sidebar .sidebar-logout');
+    if (!out || document.querySelector('.app-sidebar [data-sound-toggle]')) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'sound-toggle'; b.setAttribute('data-sound-toggle', '');
+    b.onclick = () => setMuted(!off);
+    paintToggle(b);
+    out.parentNode.insertBefore(b, out);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addToggle); else addToggle();
+
   function ctx() {
-    if (!AC) return null;
+    if (!AC || off) return null;
     try {
       ac = ac || new AC();
       if (ac.state !== 'running' && ac.resume) ac.resume();
@@ -52,6 +81,7 @@
 
   function speak(text, fail) {
     const bad = (m) => { if (typeof fail === 'function') fail(m); else if (typeof showToast === 'function') showToast(m, 'err'); };
+    if (off) { bad('Sound is off. Turn it on with the 🔇 button in the menu.'); return; }
     if (!ss) { bad('This browser cannot read aloud. Try Chrome or Safari.'); return; }
     unlock();
     loadVoices();
@@ -79,5 +109,5 @@
     if (ss.speaking || ss.pending) { try { ss.cancel(); } catch (e) { /* optional */ } setTimeout(run, 150); } else run();
   }
 
-  window.AudioKit = { ctx, speak, unlock };
+  window.AudioKit = { ctx, speak, unlock, muted, setMuted };
 })();

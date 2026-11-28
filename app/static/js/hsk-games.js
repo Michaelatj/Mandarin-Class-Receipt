@@ -31,6 +31,8 @@
     if (a) a.checked = SET.py !== false; if (b) b.checked = SET.mean !== false;
     try { localStorage.setItem('hskGameSet', JSON.stringify(SET)); } catch (e) { /* optional */ }
   }
+  const soundBox = document.getElementById('gm-sound');
+  if (soundBox && window.AudioKit) { soundBox.checked = !window.AudioKit.muted(); soundBox.addEventListener('change', () => window.AudioKit.setMuted(!soundBox.checked)); }
   document.addEventListener('change', (e) => {
     if (e.target.id === 'gm-showpy') { SET.py = e.target.checked; applySet(); }
     if (e.target.id === 'gm-showmean') { SET.mean = e.target.checked; applySet(); }
@@ -474,7 +476,15 @@
   const PTS = { good: 100, ok: 60, bad: 20 };
   function story() {
     const STORIES = (window.HSK_STORIES || {})[LEVEL] || [], KEY = 'hskStory' + LEVEL;
+    // endings found: saved on the account (follows the student to any phone); this device's old list is merged in once
     let seen = {}; try { seen = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { seen = {}; }
+    let mine = {}; try { mine = JSON.parse(app.dataset.storySeen || '{}'); } catch (e) { mine = {}; }
+    const saveEnding = (i, id) => {
+      if (!app.dataset.storyUrl) return;
+      fetch(app.dataset.storyUrl, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf }, body: JSON.stringify({ story: i, ending: id }) }).catch(() => {});
+    };
+    Object.keys(mine).forEach((i) => { seen[i] = Array.from(new Set((seen[i] || []).concat(mine[i]))); });
+    Object.keys(seen).forEach((i) => { (seen[i] || []).forEach((id) => { if (!(mine[i] || []).includes(id)) { saveEnding(+i, id); (mine[i] = mine[i] || []).push(id); } }); });
     const total = (S) => Object.values(S.nodes).filter((n) => n.end).length;
     const found = (i) => (seen[i] || []).filter((id) => STORIES[i].nodes[id]).length;
     stage.innerHTML = `<div class="gm-bar"><b>📖 Story time</b><span class="gm-spacer"></span><button type="button" class="btn bgh bsm" id="gm-quit">Back</button></div>
@@ -503,6 +513,7 @@
       function ending(id, n) {
         (seen[i] = seen[i] || []); if (!seen[i].includes(id)) seen[i].push(id);
         try { localStorage.setItem(KEY, JSON.stringify(seen)); } catch (e) { /* optional */ }
+        saveEnding(i, id);
         const icon = { good: '🌟', ok: '🙂', bad: '🌧️' }[n.end], f = found(i);
         const all = f >= N ? `<span class="st-msg" style="display:block"><b>🏅 All ${N} endings found!</b>You have seen every way this story can end.</span>` : '';
         finish('story', PTS[n.end], [`${icon} <b>${esc(n.title)}</b> (ending ${f} of ${N} found · ${trail.length} scenes)`, `<span class="st-msg" style="display:block"><b>💡 Message to take home</b>${esc(n.msg)}</span>`, all], n.end === 'good', []);

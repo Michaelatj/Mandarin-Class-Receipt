@@ -49,6 +49,7 @@
   /* ---------------- small sound + particle effects ---------------- */
   let audio = null;
   function tone(freq, dur, type, delay) {
+    if (window.AudioKit && window.AudioKit.muted()) return;
     try {
       audio = (window.AudioKit && window.AudioKit.ctx()) || audio || new (window.AudioContext || window.webkitAudioContext)();
       if (audio.state !== 'running' && audio.resume) audio.resume();

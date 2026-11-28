@@ -3,7 +3,7 @@
    Professional SaaS · Sidebar desktop · Bottom tab mobile
    Font: DM Sans (body) + Fraunces (display) + Noto Serif SC (Chinese)
    ═══════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,400&family=Noto+Serif+SC:wght@400;600;700&display=swap');
+/* fonts are loaded from base.html (preconnect + link), not with @import, so they do not block the first paint */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1877,7 +1877,10 @@ button.lb { cursor: pointer; font-size: .85rem; padding: 7px 14px; }
 }
 
 /* faint coin-ring pattern behind everything */
-[data-skin="china"] body,
+[data-skin="china"] {
+  --page-bg: radial-gradient(circle at 0 0, transparent 0 13px, rgba(184,137,43,.14) 13px 14px, transparent 14px) 0 0 / 44px 44px,
+             radial-gradient(circle at 22px 22px, transparent 0 13px, rgba(184,137,43,.14) 13px 14px, transparent 14px) 0 0 / 44px 44px;
+}
 [data-skin="china"] .auth-shell {
   background-image:
     radial-gradient(circle at 0 0,       transparent 0 13px, rgba(184,137,43,.14) 13px 14px, transparent 14px),
@@ -2261,9 +2264,7 @@ body:has(.app-shell) .orn-lanterns { width: 160px; height: 160px; }
   --shadow-md: 0 8px 30px rgba(5,10,30,.4);
   --accent: #9db8ff; --on-accent: #0f1b3d;
 }
-[data-skin="night"] body {
-  background: linear-gradient(180deg, #2d467f 0%, #22385f 48%, #182549 100%); background-attachment: fixed;
-}
+[data-skin="night"] { --page-bg: linear-gradient(180deg, #2d467f 0%, #22385f 48%, #182549 100%); --page-edge: #22385f; }
 [data-skin="night"] .auth-shell { background: transparent; }
 [data-skin="night"] .app-content, [data-skin="night"] .auth-col { position: relative; z-index: 1; }
 
@@ -2852,8 +2853,8 @@ body.so-open { overflow: hidden; }
   --shadow-md: 0 8px 30px rgba(0,0,0,.45);
   --accent: #a9d58a; --on-accent: #10200f;
 }
-[data-skin="forest"] body { background: linear-gradient(180deg, #f3f7e8 0%, #e6efd7 60%, #d7e6c4 100%); background-attachment: fixed; }
-[data-theme="dark"][data-skin="forest"] body { background: linear-gradient(180deg, #34553f 0%, #2a4733 60%, #213a29 100%); background-attachment: fixed; }
+[data-skin="forest"] { --page-bg: linear-gradient(180deg, #f3f7e8 0%, #e6efd7 60%, #d7e6c4 100%); --page-edge: #e6efd7; }
+[data-theme="dark"][data-skin="forest"] { --page-bg: linear-gradient(180deg, #34553f 0%, #2a4733 60%, #213a29 100%); --page-edge: #2a4733; }
 [data-skin="forest"] .auth-shell { background: transparent; }
 [data-skin="forest"] .app-content, [data-skin="forest"] .auth-col { position: relative; z-index: 1; }
 .orn-forest { display: none; }
@@ -2966,3 +2967,31 @@ body:has(.app-shell) .f-trees { left: var(--sidebar-w); height: 16vh; opacity: .
 .sof-ray { background: repeating-conic-gradient(from 0deg, rgba(255,255,255,.7) 0 6deg, rgba(255,255,255,0) 6deg 22deg); }
 @keyframes so-dragon { 0%, 100% { box-shadow: 0 0 0 5px rgba(255,255,255,.5), 0 0 70px rgba(255,255,255,.8); } 50% { box-shadow: 0 0 0 6px rgba(235,228,255,.6), 0 0 100px rgba(255,255,255,1); } }
 form .ui-dt { display: flex; width: 100%; margin-bottom: 12px; }
+
+
+/* ═══ v24: seamless page background + one scene in the menu for every theme ═══
+   The page picture used to be the body background (with background-attachment: fixed). iPhones do not support
+   "fixed", and pulling the page down stretched or repeated it. Now the colour sits on <html> (what shows when the
+   page is pulled), the picture is its own fixed layer behind the page, and the page no longer bounces. */
+html { background-color: var(--page-edge, var(--bg)); overscroll-behavior-y: none; }
+body { background: transparent; min-height: 100vh; min-height: 100dvh; overscroll-behavior-y: none; }
+body::before {
+  content: ""; position: fixed; left: 0; right: 0; top: 0; height: 100vh; height: 100lvh; z-index: -1; pointer-events: none;
+  background: var(--page-bg, none); transform: translateZ(0);
+}
+
+/* the menu scene: night and Chinese already had one, now Forest and Light / Dark have one too */
+.app-sidebar { overflow: hidden; }
+:root:not([data-skin]) .app-sidebar::after,
+[data-skin="forest"] .app-sidebar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 84px; height: 190px; pointer-events: none;
+  background: center bottom / contain no-repeat;
+}
+:root:not([data-skin]) .app-sidebar::after { background-image: url('/static/img/default/hills-side.svg'); }
+[data-skin="forest"] .app-sidebar::after { background-image: url('/static/img/forest/forest-side.svg'); }
+@media (max-height: 640px) { :root:not([data-skin]) .app-sidebar::after, [data-skin="forest"] .app-sidebar::after { display: none; } }
+
+/* sound on/off button in the menu (v24) */
+.sound-toggle { margin: 0 8px 0 auto; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: .95rem; line-height: 1; cursor: pointer;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.28); color: #fff; flex-shrink: 0; }
+.sound-toggle:hover { background: rgba(255,255,255,.2); }
