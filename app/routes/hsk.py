@@ -9,6 +9,7 @@ URLs: /bonus/ (start page) - /hsk1/, /hsk2/, /hsk3/ (theme list) - /hsk<level>/<
 """
 import json
 import logging
+import re
 from functools import lru_cache, wraps
 from pathlib import Path
 
@@ -18,7 +19,7 @@ from flask import (Blueprint, abort, jsonify, make_response, redirect, request,
 from .. import db
 from datetime import datetime
 
-from ..models import BonusAccess, HskActivity, HskGame, HskKnown, User
+from ..models import BonusAccess, HskActivity, HskGame, HskKnown, HskStoryEnding, User
 
 logger = logging.getLogger(__name__)
 hsk_bp = Blueprint("hsk", __name__)
@@ -270,8 +271,11 @@ def games(user, level):
             for g in HskGame.query.filter_by(user_id=user.id, level=level).all()}
     from .schedule import streak_view
     badge = streak_view(user.id) if user.role == "student" else None
+    story_seen = {}
+    for r in HskStoryEnding.query.filter_by(user_id=user.id, level=level).all():
+        story_seen.setdefault(str(r.story), []).append(r.ending)
     return _page("hsk/games.html", user, level, back=url_for("hsk.index", level=level), themes=themes,
-                 total=len(entries), best=best, badge_key=(badge or {}).get("key", "gold"))
+                 total=len(entries), best=best, badge_key=(badge or {}).get("key", "gold"), story_seen=story_seen)
 
 
 @hsk_bp.route("/hsk<int:level>/leaderboard/<game>")
@@ -311,6 +315,24 @@ def game_score(user, level):
         logger.exception("hsk game score failed")
         return jsonify(ok=False, msg="could not save"), 500
     return jsonify(ok=True, best=row.best, record=record, plays=row.plays)
+
+
+@hsk_bp.route("/hsk<int:level>/story_ending", methods=["POST"])
+@guard(json_response=True)
+def story_ending(user, level):
+    """Remember that this account found one ending of a Story time story (saved once, safe to send twice)."""
+    body = request.get_json(silent=True) or {}
+    story, ending = body.get("story"), body.get("ending")
+    if (not isinstance(story, int) or isinstance(story, bool) or not 0 <= story < 50
+            or not isinstance(ending, str) or not re.fullmatch(r"[A-Za-z0-9_]{1,20}", ending)):
+        return jsonify(ok=False, msg="bad request"), 400
+    if not HskStoryEnding.query.filter_by(user_id=user.id, level=level, story=story, ending=ending).first():
+        db.session.add(HskStoryEnding(user_id=user.id, level=level, story=story, ending=ending))
+        try:
+            db.session.commit()
+        except Exception:                      # two taps at once can race on the unique key: the ending is saved anyway
+            db.session.rollback()
+    return jsonify(ok=True)
 
 
 @hsk_bp.route("/hsk<int:level>/data.json")

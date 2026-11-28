@@ -1,7 +1,7 @@
 /* Service worker: lets the site be installed and shows an offline page.
    Only static files are cached. Pages and API responses always come from the network,
    so nobody ever sees another user's data or a stale dashboard. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const STATIC_CACHE = 'mcr-static-' + VERSION;
 const PRECACHE = [
   '/offline',
@@ -25,6 +25,18 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // Google Fonts (the stylesheet and the font files): the cached copy is used first, so text is styled at once, even offline
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    event.respondWith(
+      caches.open(STATIC_CACHE).then((cache) =>
+        cache.match(req).then((hit) => hit || fetch(req).then((res) => {
+          if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
+          return res;
+        }))
+      )
+    );
+    return;
+  }
   if (url.origin !== self.location.origin) return;
 
   // page navigations: network only, offline page if the network is gone

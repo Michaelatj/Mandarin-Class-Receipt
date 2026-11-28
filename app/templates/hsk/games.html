@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block qz_body %}
-<div id="gm-app" data-level="{{ level }}" data-badge="{{ badge_key }}" data-best='{{ best|tojson }}' data-board-url="{{ url_for('hsk.leaderboard', level=level, game='GAME') }}" data-score-url="{{ url_for('hsk.game_score', level=level) }}" data-data-url="{{ url_for('hsk.data', level=level) }}">
+<div id="gm-app" data-level="{{ level }}" data-badge="{{ badge_key }}" data-best='{{ best|tojson }}' data-story-seen='{{ (story_seen|default({}))|tojson }}' data-story-url="/hsk{{ level }}/story_ending" data-board-url="{{ url_for('hsk.leaderboard', level=level, game='GAME') }}" data-score-url="{{ url_for('hsk.game_score', level=level) }}" data-data-url="{{ url_for('hsk.data', level=level) }}">
   <div class="qz-head"><div>
     <h1 class="qz-h1">🎮 {{ level_name }} Games</h1>
     <p class="qz-sub">Play with the words of this level. A great score plays your badge's celebration.</p>
@@ -25,6 +25,7 @@
     </select>
     <label class="gm-check"><input type="checkbox" id="gm-unknown"> Only words I have not mastered</label>
     <label class="gm-check"><input type="checkbox" id="gm-showpy" checked> Show pinyin</label>
+    <label class="gm-check"><input type="checkbox" id="gm-sound" checked> Sound</label>
   </div>
 
   <h2 class="gm-h2">🎮 Pick your game</h2>
@@ -54,4 +55,4 @@
 </div>
 {% endblock %}
 
-{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=7' }}"></script><script src="{{ url_for('static', filename='js/hsk-stories' ~ level ~ '.js') + '?v=1' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=10' }}"></script>{% endblock %}
+{% block page_scripts %}<script src="{{ url_for('static', filename='js/streak-overlay.js') + '?v=8' }}"></script><script src="{{ url_for('static', filename='js/hsk-stories' ~ level ~ '.js') + '?v=1' }}"></script><script src="{{ url_for('static', filename='js/hsk-games.js') + '?v=11' }}"></script>{% endblock %}
