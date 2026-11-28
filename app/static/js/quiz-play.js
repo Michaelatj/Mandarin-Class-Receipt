@@ -18,6 +18,8 @@
     usedHint: {},     // qid -> meaning was shown before the answer was checked
     order: [],        // qids in the order they were checked
     streak: 0, best: 0, startedAt: 0, timerId: null, finished: false,
+    phase: 'story',   // story quiz: 'story' = the story page, 'rest' = the other questions, one by one
+    busy: false,      // a Next press is checking the answer
   };
 
   /* ---------------- helpers ---------------- */
@@ -35,14 +37,21 @@
     box.innerHTML = html;
     if (window.I18N) window.I18N.apply(box);
   }
-  const cur = () => S.quiz.questions[S.i];
+  // a story quiz has two separate parts: the story page (questions about the story) and the other questions
+  const flaggedStory = () => !!(S.quiz.story && S.quiz.questions.some((q) => q.aboutStory));
+  const isStoryQ = (q) => !!S.quiz.story && (!flaggedStory() || !!q.aboutStory);
+  const storyList = () => S.quiz.questions.filter(isStoryQ);
+  const restList = () => (S.quiz.story ? S.quiz.questions.filter((q) => !isStoryQ(q)) : S.quiz.questions);
+  const cur = () => restList()[S.i];
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const attemptUrl = (tail) => root.dataset.attemptBase + S.attemptId + '/' + tail;
 
   /* ---------------- small sound + particle effects ---------------- */
   let audio = null;
   function tone(freq, dur, type, delay) {
     try {
-      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      audio = (window.AudioKit && window.AudioKit.ctx()) || audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state !== 'running' && audio.resume) audio.resume();
       const t0 = audio.currentTime + (delay || 0);
       const osc = audio.createOscillator();
       const gain = audio.createGain();
@@ -195,19 +204,19 @@
   }
 
   function render() {
-    if (S.quiz.story) { renderStory(); return; }
-    const quiz = S.quiz, n = quiz.questions.length, q = cur();
+    if (S.quiz.story && S.phase === 'story') { renderStory(); return; }
+    const quiz = S.quiz, list = restList(), n = list.length, q = cur();
     const a = S.answers[q.id] || {};
     const locked = !!(a.checked || a.checking);
     const showHint = !!S.hint[q.id];
 
-    const nav = quiz.questions.map((x, idx) => {
+    const nav = list.map((x, idx) => {
       const st = stateOf(x);
       const cls = [idx === S.i ? 'current' : '', st === 'right' ? 'right' : st === 'wrong' ? 'wrong' : st === 'pending' ? 'pending' : ''].join(' ').trim();
       return `<button type="button" class="${cls}" data-a="jump" data-i="${idx}" aria-label="${T('Question')} ${idx + 1}">${idx + 1}</button>`;
     }).join('');
 
-    const checkedCount = quiz.questions.filter((x) => (S.answers[x.id] || {}).checked).length;
+    const checkedCount = list.filter((x) => (S.answers[x.id] || {}).checked).length;
 
     const body = bodyHtml(q, a, locked, showHint);
 
@@ -220,15 +229,9 @@
           : `<p style="color:var(--text3);margin:12px 0 0">${T('Answer saved. The score appears at the end.')}</p>`;
     }
 
-    const isLast = S.i === n - 1;
-    let primary;
-    if (!a.checked) {
-      primary = `<button type="button" class="btn qz-btn-gold" data-a="check" ${ready(q) && !a.checking ? '' : 'disabled'}>${T('Check answer')}</button>`;
-    } else if (!isLast) {
-      primary = `<button type="button" class="btn qz-btn-gold" data-a="next">${T('Next')}</button>`;
-    } else {
-      primary = `<button type="button" class="btn qz-btn-gold" data-a="finish">${T('Finish quiz')}</button>`;
-    }
+    // one button: it checks the answer by itself (so the streak counts), shows the result for a moment, then moves on
+    const lastQ = S.i === n - 1;
+    const primary = `<button type="button" class="btn qz-btn-gold" data-a="advance" ${(a.checked || ready(q)) && !a.checking && !S.busy ? '' : 'disabled'}>${lastQ ? T('Finish quiz') : T('Next')}</button>`;
 
     const timer = quiz.timeLimitSeconds > 0
       ? `<div class="qz-timer-wrap"><div class="qz-timer-row"><span>⏱ ${T('Time left')}</span><span id="qz-timer-text"></span></div>
@@ -250,7 +253,7 @@
         ${verdictLine}
       </div>
       <div class="qz-nav">
-        <button type="button" class="btn bgh" data-a="back" ${S.i === 0 ? 'disabled' : ''}>${T('Back')}</button>
+        <button type="button" class="btn bgh" data-a="back" ${S.i === 0 && !quiz.story ? 'disabled' : ''}>${T('Back')}</button>
         <div class="qz-nav-right">${primary}</div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:12px">
@@ -260,22 +263,11 @@
   }
 
   /* ---------------- story mode: one page, story on top, every question below ---------------- */
-  function speak(text) {
-    if (!('speechSynthesis' in window)) { showToast('This browser cannot read aloud. Try Chrome or Safari.', 'err'); return; }
-    const voices = window.speechSynthesis.getVoices() || [];
-    const zh = voices.filter((x) => /^zh/i.test(x.lang) || /chinese|mandarin|中文|普通话/i.test(x.name));
-    if (voices.length && !zh.length) { showToast('No Chinese voice on this device. Install one in Settings > Text-to-speech.', 'err'); return; }
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'zh-CN'; u.rate = 0.85;
-    if (zh.length) u.voice = zh.find((x) => /zh[-_]cn/i.test(x.lang)) || zh[0];
-    u.onerror = () => showToast('Could not play the sound. Check the volume and silent mode.', 'err');
-    try { window.speechSynthesis.cancel(); } catch (e) {}
-    setTimeout(() => { try { window.speechSynthesis.speak(u); } catch (e) { showToast('Could not play the sound.', 'err'); } }, 60);
-  }
+  function speak(text) { if (window.AudioKit) window.AudioKit.speak(text); else showToast('This browser cannot read aloud. Try Chrome or Safari.', 'err'); }
 
   function renderStory() {
-    const quiz = S.quiz, st = quiz.story, n = quiz.questions.length;
-    const answered = quiz.questions.filter(ready).length;
+    const quiz = S.quiz, st = quiz.story, mine = storyList(), n = mine.length, hasRest = restList().length > 0;
+    const answered = mine.filter(ready).length;
     const timer = quiz.timeLimitSeconds > 0
       ? `<div class="qz-timer-wrap"><div class="qz-timer-row"><span>⏱ ${T('Time left')}</span><span id="qz-timer-text"></span></div>
          <div class="qz-timer-track"><div class="qz-timer-fill" id="qz-timer-fill"></div></div></div>` : '';
@@ -292,12 +284,7 @@
         ${bodyHtml(q, a, lock, false)}${verdict}
       </div>`;
     };
-    // questions about the story come first; the others (if the teacher made any) sit under their own heading
-    const flagged = quiz.questions.some((q) => q.aboutStory);
-    const about = (q) => !flagged || q.aboutStory;
-    const aboutHtml = quiz.questions.map((q, i) => (about(q) ? block(q, i) : '')).join('');
-    const otherHtml = quiz.questions.map((q, i) => (about(q) ? '' : block(q, i))).join('');
-    const qs = aboutHtml + (otherHtml ? `<h3 class="qz-other-title">${T('Other questions')}<small>${T('These are not about the story')}</small></h3>` + otherHtml : '');
+    const qs = mine.map((q, i) => block(q, i)).join('');   // only the story questions: the other types come after, on their own pages
     paint(`
       ${timer}
       <div class="qz-story-card">
@@ -314,7 +301,7 @@
       <div class="qz-story-bar"><span>${answered} / ${n} ${T('answered')}</span><div class="qz-progress"><div style="width:${Math.round(answered / n * 100)}%"></div></div></div>
       ${qs}
       <div class="qz-story-submit">
-        <button type="button" class="btn qz-btn-gold" data-a="story-submit">${T('Submit answers')}</button>
+        <button type="button" class="btn qz-btn-gold" data-a="${hasRest ? 'story-next' : 'story-submit'}">${hasRest ? T('Next') : T('Submit answers')}</button>
         <button type="button" class="qz-quit" data-a="quit">${T('Quit quiz')}</button>
       </div>`);
   }
@@ -367,14 +354,35 @@
   }
 
   function go(idx) {
-    if (idx < 0 || idx >= S.quiz.questions.length) return;
+    const list = restList();
+    if (idx < 0) { if (S.quiz.story) { S.phase = 'story'; renderStory(); window.scrollTo({ top: 0 }); } return; }   // back to the story page
+    if (idx >= list.length) return;
     S.i = idx;
     render();
   }
 
+  // Next: check the answer, let the student see the result for a moment, then go on (the last one finishes the quiz)
+  async function advance() {
+    if (S.busy) return;
+    const list = restList(), q = cur();
+    if (!q) return;
+    const first = S.answers[q.id] || {};
+    if (first.checking) return;
+    S.busy = true;
+    try {
+      if (!first.checked) {
+        if (!ready(q)) return;
+        await check(q.id);
+        await sleep((S.answers[q.id] || {}).correct === false ? 1500 : 1000);
+      }
+    } finally { S.busy = false; }
+    if (S.finished || cur() !== q) return;
+    if (S.i >= list.length - 1) submit(false); else go(S.i + 1);
+  }
+
   function unanswered() {
-    if (S.quiz.story) return S.quiz.questions.filter((q) => !ready(q)).length;
-    return S.quiz.questions.filter((q) => !(S.answers[q.id] && S.answers[q.id].checked)).length;
+    // the story questions only need an answer (they are graded together); every other question must have been checked
+    return S.quiz.questions.filter((q) => (isStoryQ(q) ? !ready(q) : !(S.answers[q.id] && S.answers[q.id].checked))).length;
   }
 
   async function submit(auto) {
@@ -388,12 +396,12 @@
     paint(`<div class="qz-start"><p>${T('Submitting your answers...')}</p></div>`);
 
     const answers = {};
-    if (S.quiz.story) {                // story mode: nothing was checked one by one, so build the answers now
-      S.order = [];
-      S.quiz.questions.forEach((q) => {
+    if (S.quiz.story) {                // the story questions are not checked one by one, so build their answers now
+      const mine = storyList(), ids = mine.filter(ready).map((q) => q.id);
+      mine.forEach((q) => {
         if (q.type === 'sentence_reorder' && ready(q)) S.answers[q.id] = { value: (S.reorder[q.id] || []).slice(), usedMeaning: false, answeredAtMs: Date.now() - S.startedAt };
-        if (ready(q)) S.order.push(q.id);
       });
+      S.order = ids.concat(S.order.filter((id) => !ids.includes(id)));
     }
     S.quiz.questions.forEach((q) => {
       const a = S.answers[q.id];
@@ -484,8 +492,15 @@
       if (act === 'toggle-pinyin') { S.showPinyin = !S.showPinyin; renderStory(); return; }
       if (act === 'toggle-meaning') { S.showMeaning = !S.showMeaning; renderStory(); return; }
       if (act === 'story-submit') { submit(false); return; }
+      if (act === 'story-next' && S.phase === 'story') {
+        const left = storyList().filter((x) => !ready(x)).length;
+        const go2 = () => { S.phase = 'rest'; S.i = 0; render(); window.scrollTo({ top: 0 }); };
+        if (left > 0) UI.confirm(T('You still have unanswered questions. Continue anyway?'), { ok: 'Next' }).then((y) => { if (y) go2(); });
+        else go2();
+        return;
+      }
     }
-    const q = el.dataset.q ? S.quiz.questions.find((x) => x.id === el.dataset.q) : S.quiz.questions[S.i];
+    const q = el.dataset.q ? S.quiz.questions.find((x) => x.id === el.dataset.q) : cur();
     if (!q) return;
     const a = S.answers[q.id] || {};
     const locked = !!(a.checked || a.checking);
@@ -500,9 +515,7 @@
         S.answers[q.id] = { value: now, usedMeaning: !!S.usedHint[q.id], answeredAtMs: Date.now() - S.startedAt };
       } else {
         S.answers[q.id] = { value: picked, usedMeaning: !!S.usedHint[q.id], answeredAtMs: Date.now() - S.startedAt };
-        // Duolingo style: a single-choice question is checked the moment you tap an answer
-        // (in a story quiz that is only for the questions that are not about the story)
-        if (q.type !== 'multiple_select' && (!S.quiz.story || (S.quiz.questions.some((x) => x.aboutStory) && !q.aboutStory))) { check(q.id); return; }
+        // no instant check: the student taps an answer, then presses Next, and Next checks it
       }
       render();
     } else if (act === 'place') {
@@ -525,6 +538,7 @@
       S.hint[q.id] = !S.hint[q.id];
       render();
     } else if (act === 'check') check();
+    else if (act === 'advance') advance();
     else if (act === 'next') go(S.i + 1);
     else if (act === 'back') go(S.i - 1);
     else if (act === 'jump') go(Number(el.dataset.i));
@@ -540,11 +554,11 @@
     const q = S.quiz.questions.find((x) => x.id === el.dataset.q); if (!q) return;
     const val = el.value;
     S.answers[q.id] = { value: val.trim() ? val : null, usedMeaning: !!S.usedHint[q.id], answeredAtMs: Date.now() - S.startedAt };
-    const b = box.querySelector('[data-a="check"]'); if (b) b.disabled = !val.trim();
+    const b = box.querySelector('[data-a="advance"]'); if (b) b.disabled = !val.trim() || S.busy;
   });
   box.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && e.target.matches('[data-a="typed"]')) {
-      e.preventDefault(); const b = box.querySelector('[data-a="check"]'); if (b && !b.disabled) b.click(); return;
+      e.preventDefault(); const b = box.querySelector('[data-a="advance"]'); if (b && !b.disabled) b.click(); return;
     }
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-a="opt"]')) {
       e.preventDefault();

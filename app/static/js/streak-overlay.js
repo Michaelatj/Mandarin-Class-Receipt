@@ -22,8 +22,9 @@
   /* ---------- sound kit (WebAudio, no files). Every tier has its own little piece of music ---------- */
   let ac = null;
   function ctx() {
+    if (window.AudioKit) { const k = window.AudioKit.ctx(); if (k) return k; }   // the context unlocked by the first tap (phones)
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-    if (ac.state === 'suspended' && ac.resume) ac.resume();
+    if (ac.state !== 'running' && ac.resume) ac.resume();
     return ac;
   }
   // one note: type, start offset, length, volume, attack, optional low-pass
