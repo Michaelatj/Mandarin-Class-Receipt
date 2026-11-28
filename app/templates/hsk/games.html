@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block qz_body %}
-<div id="gm-app" data-level="{{ level }}" data-badge="{{ badge_key }}" data-best='{{ best|tojson }}' data-story-seen='{{ story_seen|tojson }}' data-story-url="{{ url_for('hsk.story_ending', level=level) }}" data-board-url="{{ url_for('hsk.leaderboard', level=level, game='GAME') }}" data-score-url="{{ url_for('hsk.game_score', level=level) }}" data-data-url="{{ url_for('hsk.data', level=level) }}">
+<div id="gm-app" data-level="{{ level }}" data-badge="{{ badge_key }}" data-best='{{ best|tojson }}' data-story-seen='{{ (story_seen|default({}))|tojson }}' data-story-url="{{ url_for('hsk.story_ending', level=level) }}" data-board-url="{{ url_for('hsk.leaderboard', level=level, game='GAME') }}" data-score-url="{{ url_for('hsk.game_score', level=level) }}" data-data-url="{{ url_for('hsk.data', level=level) }}">
   <div class="qz-head"><div>
     <h1 class="qz-h1">🎮 {{ level_name }} Games</h1>
     <p class="qz-sub">Play with the words of this level. A great score plays your badge's celebration.</p>
