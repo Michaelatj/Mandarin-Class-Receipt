@@ -296,6 +296,20 @@ class HskGame(db.Model):
     __table_args__ = (db.UniqueConstraint("user_id", "level", "game", name="uq_hsk_game"),)
 
 
+class HskStoryEnding(db.Model):
+    """One ending of a Story time story that an account has found (so progress follows the student to any phone)."""
+    __tablename__ = "hsk_story_ending"
+
+    id        = db.Column(db.Integer, primary_key=True)
+    user_id   = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
+    level     = db.Column(db.Integer, nullable=False)
+    story     = db.Column(db.Integer, nullable=False)          # position of the story in the level's list
+    ending    = db.Column(db.String(20), nullable=False)       # node id of the ending, e.g. "e3"
+    found_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint("user_id", "level", "story", "ending", name="uq_hsk_story_ending"),)
+
+
 class QuizStory(db.Model):
     """Optional reading passage for a quiz. When it exists the quiz is shown on ONE page: the story
     on top and every question below it. Separate table so no column migration is needed."""
